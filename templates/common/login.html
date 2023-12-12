@@ -1,0 +1,100 @@
+{% load static %}
+{% load crispy_forms_tags %}
+{% load widget_tweaks %}
+
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{% static 'register/fonts/icomoon/style.css'%}">
+
+  <link rel="stylesheet" href="{% static 'register/css/owl.carousel.min.css'%}">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="{% static 'register/css/bootstrap.min.css'%}">
+
+  <!-- Style -->
+  <link rel="stylesheet" href="{% static 'register/css/style.css'%}">
+
+  <title>RaptureTech Login </title>
+</head>
+
+<body>
+
+  <div class="content">
+
+    <div class="box">
+
+      <div class="square" style="--i:0;"></div>
+      <div class="square" style="--i:1;"></div>
+      <div class="square" style="--i:2;"></div>
+      <div class="square" style="--i:3;"></div>
+      <div class="square" style="--i:4;"></div>
+      <div class="square" style="--i:5;"></div>
+
+    </div>
+    <div class="container">
+      <div class="row align-items-center ">
+        <div class="col-md-6 contents order-2 order-lg-1 order-md-1 order-sm-2 px-5">
+          <div class="form-block">
+            <div class="mb-5 text-center">
+              <h3 class="fw-bold mt-3">Welcome</h3>
+            </div>
+            <form action="#" method="post">
+              {%csrf_token%}
+              <div class="form-group last mb-4">
+                
+                <label for="password">Username</label>
+                <input type="input" class="form-control" name="username" id="inputEmail" required >
+                {{ user.form.username.errors }}
+
+              </div>
+              <div class="form-group last mb-4">
+                
+                <label for="password">Password</label>
+                <input type="password" class="form-control" name="password" id="inputPass" required>         
+                {{ user.form.password.errors }}
+              </div>
+              
+         
+              <div class="d-flex mb-5 align-items-center">
+
+                <span class="ml-auto"><a href="{%url 'password_reset'%}" class="forgot-pass">Forgot Password ?</a></span>
+              </div>
+              <button type="submit" style="opacity: 1 !important;" class="btn btn-pill text-white btn-block btn-primary">Login</button>
+
+
+              <div class="d-flex mt-5 align-items-center justify-content-center">
+
+                <span class="text-center"><a href="{% url 'register' %}" class="forgot-pass">Sign Up</a></span>
+              </div>
+
+
+            </form>
+          </div>
+        </div>
+
+
+        <div class="col-md-6 order-1 order-lg-2 order-md-2 order-sm-1">
+          <div class="social-login text-center">
+            <img src="{% static 'register/images/logo1.png'%}" alt="Nature" class="responsive">
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="{% static 'register/js/jquery-3.3.1.min.js'%}"></script>
+  <script src="{% static 'register/js/popper.min.js'%}"></script>
+  <script src="{% static 'register/js/bootstrap.min.js'%}"></script>
+  <script src="{% static 'register/js/main.js'%}"></script>
+  <script src="{% static 'register/js/main.js'%}"></script>
+</body>
+
+</html>
