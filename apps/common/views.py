@@ -35,6 +35,9 @@ from django.contrib.auth import get_user_model
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.decorators import login_required
 from .models import DPU
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 
 
 class HomeView(TemplateView):
@@ -70,26 +73,19 @@ class UserRegistrationView(generics.CreateAPIView):
         # Render the registration template after a successful registration
         return render(request, 'common/register.html', {'message': 'Registration successful!'})
 
-class UserLoginView(ObtainAuthToken):
+class UserLoginView(APIView):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         token = Token.objects.get(key=response.data['token'])
         # Render the login template after a successful login
         return render(request, 'common/login.html', {'token': token.key, 'user_id': token.user_id})
     
-    def post(self, request, *args, **kwargs):
-        # Use the built-in ObtainAuthToken view to validate the username and password
-        obtain_token_view = ObtainAuthToken.as_view()
-        response = obtain_token_view(request._request)
-        
-        # If authentication was successful, include the token in the response
-        if response.status_code == 200:
-            user = response.data['user']
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key})
-        
-        # If authentication failed, return the original response
-        return response
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        # Your view logic here
+        return Response({"message": "Authenticated successfully"})
     
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
