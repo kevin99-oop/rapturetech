@@ -27,6 +27,8 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework import permissions, authentication
 
 from apps.common.forms import DPUForm
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
@@ -35,10 +37,13 @@ from django.contrib.auth import get_user_model
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.decorators import login_required
 from .models import DPU
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
 
+from rest_framework.views import APIView
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
 
 class HomeView(TemplateView):
     template_name = 'common/index.html'
@@ -79,6 +84,20 @@ class UserLoginView(APIView):
         token = Token.objects.get(key=response.data['token'])
         # Render the login template after a successful login
         return render(request, 'common/login.html', {'token': token.key, 'user_id': token.user_id})
+    
+    def post(self, request, *args, **kwargs):
+        # Use the built-in ObtainAuthToken view to validate the username and password
+        obtain_token_view = ObtainAuthToken.as_view()
+        response = obtain_token_view(request._request)
+
+        # If authentication was successful, include the token in the response
+        if response.status_code == status.HTTP_200_OK:
+            user = response.data['user']
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key, 'message': 'Authenticated successfully'})
+
+        # If authentication failed, return the original response
+        return response
     
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
