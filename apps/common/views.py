@@ -24,6 +24,7 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from apps.common.serializers import UserSerializer
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework import permissions, authentication
 
 from apps.common.forms import DPUForm
 
@@ -76,8 +77,10 @@ class UserLoginView(ObtainAuthToken):
         # Render the login template after a successful login
         return render(request, 'common/login.html', {'token': token.key, 'user_id': token.user_id})
     
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = [permissions.IsAuthenticated]  # Only authenticated users can access this view
+    authentication_classes = [authentication.TokenAuthentication]  # Use TokenAuthentication for authentication
     http_method_names = ['get', 'head']
+
     def get(self, request, format=None):
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
