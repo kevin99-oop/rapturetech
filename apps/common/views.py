@@ -22,7 +22,7 @@ from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
-from apps.common.serializers import UserSerializer
+from apps.common.serializers import UserSerializer, LoginSerializer
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework import permissions, authentication
 
@@ -86,9 +86,24 @@ class UserLoginView(APIView):
         return render(request, 'common/login.html', {'token': token.key, 'user_id': token.user_id})
     
     def post(self, request, *args, **kwargs):
-        user = UserSerializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key})
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            password = serializer.validated_data['password']
+
+            # Add your authentication logic here (e.g., using Django's built-in authentication)
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None:
+                # Authentication successful, create or retrieve a token
+                token, created = Token.objects.get_or_create(user=user)
+                return Response({"token": token.key}, status=status.HTTP_200_OK)
+            else:
+                # Authentication failed
+                return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            # Invalid input data
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     
 class ProfileView(LoginRequiredMixin, TemplateView):
