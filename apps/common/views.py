@@ -77,14 +77,12 @@ class UserLoginView(ObtainAuthToken):
         # Render the login template after a successful login
         return render(request, 'common/login.html', {'token': token.key, 'user_id': token.user_id})
     
-    permission_classes = [permissions.IsAuthenticated]  # Only authenticated users can access this view
-    authentication_classes = [authentication.TokenAuthentication]  # Use TokenAuthentication for authentication
-    http_method_names = ['get', 'head']
-
-    def get(self, request, format=None):
-        users = User.objects.all()
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data)
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key})
     
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
