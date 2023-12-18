@@ -108,6 +108,10 @@ class UserLoginView(APIView):
             # Invalid input data
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        token = Token.objects.get(key=response.data['token'])
+        return Response({'token': token.key})
     
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
@@ -126,32 +130,30 @@ class ProfileUpdateView(LoginRequiredMixin, TemplateView):
     profile_form = ProfileForm
     
     template_name = 'common/profile-update.html'
-    def api_login(request):
-        # Your login logic
-        response_data = {'message': 'Login successful'}
-        response = JsonResponse(response_data)
-        response["Access-Control-Allow-Origin"] = "*"  # Adjust as needed
-        response["Access-Control-Allow-Methods"] = "POST"
-        response["Access-Control-Allow-Headers"] = "Content-Type"
-        return response
-    def post(self, request, *args, **kwargs):
-        serializer = LoginSerializer(data=request.data)
-        if serializer.is_valid():
-            username = serializer.validated_data['username']
-            password = serializer.validated_data['password']
 
-            # Add your authentication logic here
-            user = authenticate(request, username=username, password=password)
+    def post(self, request):
 
-            if user is not None:
-                # Authentication successful
-                return Response({"message": "Login successful"}, status=status.HTTP_200_OK)
-            else:
-                # Authentication failed
-                return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-        else:
-            # Invalid input data
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        post_data = request.POST or None
+        file_data = request.FILES or None
+
+        user_form = UserForm(post_data, instance=request.user)
+        profile_form = ProfileForm(post_data, file_data, instance=request.user.profile)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile was successfully updated!')
+            return HttpResponseRedirect(reverse_lazy('profile'))
+
+        context = self.get_context_data(
+                                        user_form=user_form,
+                                        profile_form=profile_form
+                                    )
+
+        return self.render_to_response(context)     
+
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
     
 class ShiftreportView(LoginRequiredMixin, TemplateView):
     template_name = 'common/shift_report.html'
