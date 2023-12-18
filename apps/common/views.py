@@ -16,7 +16,8 @@ from apps.userprofile.models import Profile
 from rest_framework.decorators import api_view
 from rest_framework.response import Response 
 from rest_framework.authtoken.serializers import AuthTokenSerializer
-
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
@@ -139,3 +140,8 @@ def add_dpu(request):
 def active_dpu(request):
     active_dpu_list = DPU.objects.filter(user=request.user)
     return render(request, 'common/active_dpu.html', {'active_dpu_list': active_dpu_list})
+
+def custom_logout(request):
+    logout(request)
+    # Additional logout logic if needed
+    return redirect('home')  # Redirect to the home page or another URL

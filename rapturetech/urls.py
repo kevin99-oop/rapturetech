@@ -28,7 +28,7 @@ from apps.common import views
 from django.urls import path
 from django.urls import path, include
 from apps.common import views
-
+from rest_framework.authtoken.views import obtain_auth_token
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -36,7 +36,7 @@ urlpatterns = [
     path('register/', SignUpView.as_view(), name="register"),
 
     path('api-register/', UserRegistrationView.as_view(), name='user-registration'),
-    path('api-login/', UserLoginView.as_view(), name='user-login'),
+    path('api-login/', obtain_auth_token, name='user-login'),
 
 
     path('login/', auth_views.LoginView.as_view(
@@ -45,7 +45,7 @@ urlpatterns = [
 
   
     path('logout/', auth_views.LogoutView.as_view(
-        next_page='dashboard'
+        
     ), name="logout"),
 
     path('dashboard/', DashboardView.as_view(), name="dashboard"),
