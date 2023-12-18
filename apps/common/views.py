@@ -78,11 +78,18 @@ class UserLoginView(ObtainAuthToken):
         return render(request, 'common/login.html', {'token': token.key, 'user_id': token.user_id})
     
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key})
+        # Use the built-in ObtainAuthToken view to validate the username and password
+        obtain_token_view = ObtainAuthToken.as_view()
+        response = obtain_token_view(request._request)
+        
+        # If authentication was successful, include the token in the response
+        if response.status_code == 200:
+            user = response.data['user']
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key})
+        
+        # If authentication failed, return the original response
+        return response
     
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
