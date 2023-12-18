@@ -75,8 +75,13 @@ class UserLoginView(ObtainAuthToken):
         token = Token.objects.get(key=response.data['token'])
         # Render the login template after a successful login
         return render(request, 'common/login.html', {'token': token.key, 'user_id': token.user_id})
-
     
+    permission_classes = (permissions.AllowAny,)
+    http_method_names = ['get', 'head']
+    def get(self, request, format=None):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
     
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'

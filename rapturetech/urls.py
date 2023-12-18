@@ -35,8 +35,8 @@ urlpatterns = [
     path('', HomeView.as_view(), name='home'),
     path('register/', SignUpView.as_view(), name="register"),
 
-    path('api-register/', UserRegistrationView.as_view(), name='user-registration'),
-    path('api-login/', obtain_auth_token, name='user-login'),
+    path('api/api_register/', UserRegistrationView.as_view(), name='user-registration'),
+    path('api/api_login/', UserLoginView.as_view(), name='user-login'),
 
 
     path('login/', auth_views.LoginView.as_view(
