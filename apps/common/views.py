@@ -86,25 +86,22 @@ class UserLoginView(APIView):
         return render(request, 'common/login.html', {'token': token.key, 'user_id': token.user_id})
     
     def post(self, request, *args, **kwargs):
-        # Use the built-in ObtainAuthToken view to validate the username and password
-        obtain_token_view = ObtainAuthToken.as_view()
-        response = obtain_token_view(request._request)
+        username = request.data.get('username')
+        password = request.data.get('password')
 
-        # If authentication was successful, include the token in the response
-        if response.status_code == status.HTTP_200_OK:
-            user = response.data['user']
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key, 'message': 'Authenticated successfully'})
+        if username and password:
+            # Validate the username and password (you may use Django's built-in authentication)
+            # For simplicity, assuming you have a User model with a check_password method
+            try:
+                user = User.objects.get(username=username)
+                if user.check_password(password):
+                    # If authentication is successful, generate a token
+                    token, created = Token.objects.get_or_create(user=user)
+                    return Response({'token': token.key}, status=status.HTTP_200_OK)
+            except User.DoesNotExist:
+                pass  # Handle the case where the user does not exist
 
-        # If authentication failed, return the original response
-        return response
-    
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, format=None):
-        # Your view logic here
-        return Response({"message": "Authenticated successfully"})
+        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
