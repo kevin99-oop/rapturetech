@@ -26,7 +26,6 @@ from apps.common.serializers import UserSerializer, LoginSerializer
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework import permissions, authentication
 from django.contrib.auth import authenticate
-from django.http import JsonResponse
 
 
 from apps.common.forms import DPUForm
@@ -109,10 +108,19 @@ class UserLoginView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
-        token = Token.objects.get(key=response.data['token'])
-        return Response({'token': token.key})
-    
+            username = request.data.get('username')
+            password = request.data.get('password')
+
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None:
+                # Authentication successful, generate or retrieve the token
+                token, created = Token.objects.get_or_create(user=user)
+                return Response({'token': token.key}, status=status.HTTP_200_OK)
+            else:
+                # Authentication failed
+                return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
     def get_context_data(self, **kwargs):
@@ -180,6 +188,4 @@ def custom_logout(request):
     logout(request)
     # Additional logout logic if needed
     return redirect('home')  # Redirect to the home page or another URL
-
-
 

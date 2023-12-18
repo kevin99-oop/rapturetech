@@ -41,8 +41,7 @@ DEFAULT_APPS = [
     'apps',
     'rest_framework',
     'rest_framework.authtoken', 
-    'corsheaders',
-
+   
 
 ]
 
