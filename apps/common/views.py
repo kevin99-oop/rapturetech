@@ -86,22 +86,10 @@ class UserLoginView(APIView):
         return render(request, 'common/login.html', {'token': token.key, 'user_id': token.user_id})
     
     def post(self, request, *args, **kwargs):
-        username = request.data.get('username')
-        password = request.data.get('password')
+        user = UserSerializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key})
 
-        if username and password:
-            # Validate the username and password (you may use Django's built-in authentication)
-            # For simplicity, assuming you have a User model with a check_password method
-            try:
-                user = User.objects.get(username=username)
-                if user.check_password(password):
-                    # If authentication is successful, generate a token
-                    token, created = Token.objects.get_or_create(user=user)
-                    return Response({'token': token.key}, status=status.HTTP_200_OK)
-            except User.DoesNotExist:
-                pass  # Handle the case where the user does not exist
-
-        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
