@@ -53,6 +53,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
+from rest_framework.parsers import JSONParser
 
 
 class HomeView(TemplateView):
@@ -96,6 +97,8 @@ class UserLoginView(APIView):
         return render(request, 'common/login.html', {'token': token.key, 'user_id': token.user_id})
     
     def post(self, request, *args, **kwargs):
+        parser_classes = [JSONParser]
+
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.validated_data['username']
