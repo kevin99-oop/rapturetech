@@ -46,6 +46,15 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django.contrib.auth import authenticate
 
+
+from django.contrib.auth import authenticate
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.parsers import JSONParser
+from rest_framework.decorators import parser_classes
+from rest_framework.authtoken.models import Token
+
 class HomeView(TemplateView):
     template_name = 'common/index.html'
     def get_context_data(self, **kwargs):
@@ -98,26 +107,6 @@ class UserLoginView(APIView):
             if user is not None:
                 # Authentication successful, create or retrieve a token
                 token, created = Token.objects.get_or_create(user=user)
-                return Response({"token": token.key}, status=status.HTTP_200_OK, content_type='application/json')
-            else:
-                # Authentication failed
-                return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED, content_type='application/json')
-        else:
-            # Invalid input data
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
-     
-    def post(self, request, *args, **kwargs):
-        serializer = LoginSerializer(data=request.data)
-        if serializer.is_valid():
-            username = serializer.validated_data['username']
-            password = serializer.validated_data['password']
-
-            # Add your authentication logic here (e.g., using Django's built-in authentication)
-            user = authenticate(request, username=username, password=password)
-
-            if user is not None:
-                # Authentication successful, create or retrieve a token
-                token, created = Token.objects.get_or_create(user=user)
                 return Response({"token": token.key}, status=status.HTTP_200_OK)
             else:
                 # Authentication failed
@@ -125,6 +114,35 @@ class UserLoginView(APIView):
         else:
             # Invalid input data
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+     
+    def post(self, request, *args, **kwargs):
+        try:
+            # Parse request data as JSON if content type is "text/plain"
+            if request.content_type == 'text/plain':
+                request.data = JSONParser().parse(request)
+
+            # Deserialize JSON data using your serializer
+            serializer = LoginSerializer(data=request.data)
+            if serializer.is_valid():
+                username = serializer.validated_data['username']
+                password = serializer.validated_data['password']
+
+                # Add your authentication logic here (e.g., using Django's built-in authentication)
+                user = authenticate(request, username=username, password=password)
+
+                if user is not None:
+                    # Authentication successful, create or retrieve a token
+                    token, created = Token.objects.get_or_create(user=user)
+                    return Response({"token": token.key}, status=status.HTTP_200_OK, content_type='application/json')
+                else:
+                    # Authentication failed
+                    return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED, content_type='application/json')
+            else:
+                # Invalid input data
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
+        except Exception as e:
+            # Handle other exceptions
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR, content_type='application/json')
 
     
 class ProfileView(LoginRequiredMixin, TemplateView):
