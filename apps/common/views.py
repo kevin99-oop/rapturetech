@@ -98,13 +98,13 @@ class UserLoginView(APIView):
             if user is not None:
                 # Authentication successful, create or retrieve a token
                 token, created = Token.objects.get_or_create(user=user)
-                return Response({"token": token.key}, status=status.HTTP_200_OK)
+                return Response({"token": token.key}, status=status.HTTP_200_OK, content_type='application/json')
             else:
                 # Authentication failed
-                return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED, content_type='application/json')
         else:
             # Invalid input data
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
      
     def post(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
