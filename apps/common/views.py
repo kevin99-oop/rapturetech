@@ -86,39 +86,23 @@ class UserLoginView(APIView):
         token = Token.objects.get(key=response.data['token'])
         # Render the login template after a successful login
         return render(request, 'common/login.html', {'token': token.key, 'user_id': token.user_id})
-    
-    def get(self, request, *args, **kwargs):
-        username = request.data.get('username')
-        password = request.data.get('password')
-
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None:
-            # Authentication successful, generate or retrieve the token
-            token, created = Token.objects.get_or_create(user=user)
-            print(f"Token: {token.key}")
-            return Response({'token': token.key, 'message': 'Login successful'}, status=status.HTTP_200_OK)
-        else:
-            # Authentication failed
-            print("Authentication failed")
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-
+    @api_view(['POST'])
     def post(self, request, *args, **kwargs):
         username = request.data.get('username')
         password = request.data.get('password')
 
         user = authenticate(request, username=username, password=password)
 
-        if user is not None:
+        if request.method == 'POST':
             # Authentication successful, generate or retrieve the token
             token, created = Token.objects.get_or_create(user=user)
             print(f"Token: {token.key}")
-            return Response({'token': token.key, 'message': 'Login successful'}, status=status.HTTP_200_OK)
+            return Response({'token': 'your_generated_token'}, status=status.HTTP_200_OK)
         else:
             # Authentication failed
             print("Authentication failed")
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-        
+       
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
     def get_context_data(self, **kwargs):
