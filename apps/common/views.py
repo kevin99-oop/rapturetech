@@ -104,20 +104,18 @@ class UserLoginView(APIView):
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def post(self, request, *args, **kwargs):
-        username = request.data.get('username')
-        password = request.data.get('password')
+        # Call Django REST Framework's ObtainAuthToken post method
+        response = super(UserLoginView, self).post(request, *args, **kwargs)
 
-        user = authenticate(request, username=username, password=password)
+        # Check if authentication was successful
+        if response.status_code == status.HTTP_200_OK:
+            # Retrieve the token
+            token = Token.objects.get(user=request.user)
+            # Return the token in JSON format
+            return Response({'token': token.key}, status=status.HTTP_200_OK)
 
-        if user is not None:
-            # Authentication successful, generate or retrieve the token
-            token, created = Token.objects.get_or_create(user=user)
-            print(f"Token: {token.key}")
-            return Response({'token': 'your_generated_token'}, status=status.HTTP_200_OK)
-        else:
-            # Authentication failed
-            print("Authentication failed")
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        # If authentication failed, return the error response
+        return response
         
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
