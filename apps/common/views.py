@@ -97,7 +97,7 @@ class UserLoginView(APIView):
     
     def get(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid() == 'text/plain' :
             username = serializer.validated_data['username']
             password = serializer.validated_data['password']
 
@@ -119,10 +119,12 @@ class UserLoginView(APIView):
         try:
             # Parse request data as JSON if content type is "text/plain"
             if request.content_type == 'text/plain':
-                request.data = JSONParser().parse(request)
+                request_data = JSONParser().parse(request)
+            else:
+                request_data = request.data
 
             # Deserialize JSON data using your serializer
-            serializer = LoginSerializer(data=request.data)
+            serializer = LoginSerializer(data=request_data)
             if serializer.is_valid():
                 username = serializer.validated_data['username']
                 password = serializer.validated_data['password']
