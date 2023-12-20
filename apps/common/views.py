@@ -93,42 +93,29 @@ class UserLoginView(APIView):
         # Render the login template after a successful login
         return render(request, 'common/login.html', {'token': token.key, 'user_id': token.user_id})
     
-    def post(self, request, *args, **kwargs):
-        serializer = LoginSerializer(data=request.data)
-        if serializer.is_valid():
-            username = serializer.validated_data['username']
-            password = serializer.validated_data['password']
-
-            # Add your authentication logic here (e.g., using Django's built-in authentication)
-            user = authenticate(request, username=username, password=password)
-
-            if user is not None:
-                # Authentication successful, create or retrieve a token
-                token, created = Token.objects.get_or_create(user=user)
-                return Response({"token": token.key}, status=status.HTTP_200_OK)
-            else:
-                # Authentication failed
-                return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-        else:
-            # Invalid input data
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def api_login(request):
     if request.method == 'POST':
-            # Your logic for handling the login request
         try:
-            data = request.data
             # Your authentication and token generation logic here
-            return Response({'token': 'your_generated_token'}, status=status.HTTP_200_OK)
+            # Assuming you have a function generate_token(username, password)
+            # that generates and returns the token
+            username = request.data.get('username')
+            password = request.data.get('password')
+            token = Token.objects.get(username, password)
+
+            # Return the token in JSON format
+            return Response({'token': token}, status=status.HTTP_200_OK)
         except Exception as e:
+            # Return an error response in JSON format
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # If the request method is not POST, return an error response
     return Response({'error': 'Unsupported method'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-def api_login(request):
-    print(request.headers)
-    print(request.data)
+
+
+
 
 
 
