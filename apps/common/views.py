@@ -87,39 +87,28 @@ class UserLoginView(APIView):
         # Render the login template after a successful login
         return render(request, 'common/login.html', {'token': token.key, 'user_id': token.user_id})
     
-    def get(self, request, *args, **kwargs):
-        username = request.data.get('username')
-        password = request.data.get('password')
-
-        user = authenticate(request, username=username, password=password)
-
-        # Call Django REST Framework's ObtainAuthToken post method
-        response = super(UserLoginView, self).get(request, *args, **kwargs)
-
-        # Check if authentication was successful
-        if response.status_code == status.HTTP_200_OK:
-            # Retrieve the token
-            token = Token.objects.get(user=request.user)
-            # Return the token in JSON format
-            return Response({'token': token.key}, status=status.HTTP_200_OK)
-
-        # If authentication failed, return the error response
-        return response
-
     def post(self, request, *args, **kwargs):
-        # Call Django REST Framework's ObtainAuthToken post method
-        response = super(UserLoginView, self).post(request, *args, **kwargs)
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            password = serializer.validated_data['password']
 
-        # Check if authentication was successful
-        if response.status_code == status.HTTP_200_OK:
-            # Retrieve the token
-            token = Token.objects.get(user=request.user)
-            # Return the token in JSON format
-            return Response({'token': token.key}, status=status.HTTP_200_OK)
+            # Add your authentication logic here (e.g., using Django's built-in authentication)
+            user = authenticate(request, username=username, password=password)
 
-        # If authentication failed, return the error response
-        return response
-        
+            if user is not None:
+                # Authentication successful, create or retrieve a token
+                token, created = Token.objects.get_or_create(user=user)
+                return Response({"token": token.key}, status=status.HTTP_200_OK)
+            else:
+                # Authentication failed
+                return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            # Invalid input data
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
     def get_context_data(self, **kwargs):
