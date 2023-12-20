@@ -87,39 +87,37 @@ class UserLoginView(APIView):
         # Render the login template after a successful login
         return render(request, 'common/login.html', {'token': token.key, 'user_id': token.user_id})
     
-    def post(self, request, *args, **kwargs):
-        serializer = LoginSerializer(data=request.data)
-        if serializer.is_valid():
-            username = serializer.validated_data['username']
-            password = serializer.validated_data['password']
+    def get(self, request, *args, **kwargs):
+        username = request.data.get('username')
+        password = request.data.get('password')
 
-            # Add your authentication logic here (e.g., using Django's built-in authentication)
-            user = authenticate(request, username=username, password=password)
+        user = authenticate(request, username=username, password=password)
 
-            if user is not None:
-                # Authentication successful, create or retrieve a token
-                token, created = Token.objects.get_or_create(user=user)
-                return Response({"token": token.key}, status=status.HTTP_200_OK)
-            else:
-                # Authentication failed
-                return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        if user is not None:
+            # Authentication successful, generate or retrieve the token
+            token, created = Token.objects.get_or_create(user=user)
+            print(f"Token: {token.key}")
+            return Response({'token': token.key, 'message': 'Login successful'}, status=status.HTTP_200_OK)
         else:
-            # Invalid input data
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Authentication failed
+            print("Authentication failed")
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def post(self, request, *args, **kwargs):
-            username = request.data.get('username')
-            password = request.data.get('password')
+        username = request.data.get('username')
+        password = request.data.get('password')
 
-            user = authenticate(request, username=username, password=password)
+        user = authenticate(request, username=username, password=password)
 
-            if user is not None:
-                # Authentication successful, generate or retrieve the token
-                token, created = Token.objects.get_or_create(user=user)
-                return Response({'token': token.key}, status=status.HTTP_200_OK)
-            else:
-                # Authentication failed
-                return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        if user is not None:
+            # Authentication successful, generate or retrieve the token
+            token, created = Token.objects.get_or_create(user=user)
+            print(f"Token: {token.key}")
+            return Response({'token': token.key, 'message': 'Login successful'}, status=status.HTTP_200_OK)
+        else:
+            # Authentication failed
+            print("Authentication failed")
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
