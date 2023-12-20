@@ -25,8 +25,6 @@ from django.contrib.auth.models import User
 from apps.common.serializers import UserSerializer, LoginSerializer
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework import permissions, authentication
-from django.contrib.auth import authenticate
-
 
 from apps.common.forms import DPUForm
 from rest_framework.authentication import TokenAuthentication
@@ -46,15 +44,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-
 from django.contrib.auth import authenticate
-from django.shortcuts import render
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.authtoken.models import Token
-from rest_framework.parsers import JSONParser
-
 
 class HomeView(TemplateView):
     template_name = 'common/index.html'
@@ -96,9 +86,8 @@ class UserLoginView(APIView):
         # Render the login template after a successful login
         return render(request, 'common/login.html', {'token': token.key, 'user_id': token.user_id})
     
+     
     def post(self, request, *args, **kwargs):
-        parser_classes = [JSONParser]
-
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.validated_data['username']
@@ -110,16 +99,15 @@ class UserLoginView(APIView):
             if user is not None:
                 # Authentication successful, create or retrieve a token
                 token, created = Token.objects.get_or_create(user=user)
-                return Response({"token": token.key}, status=status.HTTP_200_OK,content_type='application/json')
+                return Response({"token": token.key}, status=status.HTTP_200_OK)
             else:
                 # Authentication failed
-                return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED,content_type='application/json')
+                return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             # Invalid input data
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-
+    
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
     def get_context_data(self, **kwargs):
@@ -187,4 +175,3 @@ def custom_logout(request):
     logout(request)
     # Additional logout logic if needed
     return redirect('home')  # Redirect to the home page or another URL
-
