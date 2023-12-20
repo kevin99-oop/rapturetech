@@ -47,6 +47,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import AllowAny
+
+
 class HomeView(TemplateView):
     template_name = 'common/index.html'
     def get_context_data(self, **kwargs):
@@ -108,7 +114,24 @@ class UserLoginView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-    
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def api_login(request):
+    if request.method == 'POST':
+            # Your logic for handling the login request
+        try:
+            data = request.data
+            # Your authentication and token generation logic here
+            return Response({'token': 'your_generated_token'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    return Response({'error': 'Unsupported method'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+def api_login(request):
+    print(request.headers)
+    print(request.data)
+
+
+
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
     def get_context_data(self, **kwargs):
