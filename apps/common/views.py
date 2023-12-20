@@ -47,10 +47,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
-from rest_framework.decorators import api_view, permission_classes
+from django.contrib.auth import authenticate
+from django.shortcuts import render
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.authtoken.models import Token
 
 
 class HomeView(TemplateView):
@@ -93,31 +95,25 @@ class UserLoginView(APIView):
         # Render the login template after a successful login
         return render(request, 'common/login.html', {'token': token.key, 'user_id': token.user_id})
     
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def api_login(request):
-    if request.method == 'POST':
-        try:
-            # Your authentication and token generation logic here
-            # Assuming you have a function generate_token(username, password)
-            # that generates and returns the token
-            username = request.data.get('username')
-            password = request.data.get('password')
-            token = Token.objects.get(username, password)
+    def post(self, request, *args, **kwargs):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            password = serializer.validated_data['password']
 
-            # Return the token in JSON format
-            return Response({'token': token}, status=status.HTTP_200_OK)
-        except Exception as e:
-            # Return an error response in JSON format
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            # Add your authentication logic here (e.g., using Django's built-in authentication)
+            user = authenticate(request, username=username, password=password)
 
-    # If the request method is not POST, return an error response
-    return Response({'error': 'Unsupported method'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-
-
-
+            if user is not None:
+                # Authentication successful, create or retrieve a token
+                token, created = Token.objects.get_or_create(user=user)
+                return Response({"token": token.key}, status=status.HTTP_200_OK)
+            else:
+                # Authentication failed
+                return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            # Invalid input data
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
