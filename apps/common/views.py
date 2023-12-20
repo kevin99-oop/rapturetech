@@ -93,15 +93,18 @@ class UserLoginView(APIView):
 
         user = authenticate(request, username=username, password=password)
 
-        if user is not None:
-            # Authentication successful, generate or retrieve the token
-            token, created = Token.objects.get_or_create(user=user)
-            print(f"Token: {token.key}")
-            return Response({'token': 'your_generated_token'}, status=status.HTTP_200_OK)
-        else:
-            # Authentication failed
-            print("Authentication failed")
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        # Call Django REST Framework's ObtainAuthToken post method
+        response = super(UserLoginView, self).get(request, *args, **kwargs)
+
+        # Check if authentication was successful
+        if response.status_code == status.HTTP_200_OK:
+            # Retrieve the token
+            token = Token.objects.get(user=request.user)
+            # Return the token in JSON format
+            return Response({'token': token.key}, status=status.HTTP_200_OK)
+
+        # If authentication failed, return the error response
+        return response
 
     def post(self, request, *args, **kwargs):
         # Call Django REST Framework's ObtainAuthToken post method
