@@ -118,6 +118,10 @@ class UserLoginView(APIView):
             # Invalid input data
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def post(self, request, *args, **kwargs):
+        print(request.headers)
+        # Your view logic here
+        return Response({"message": "Success"}, status=status.HTTP_200_OK)
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
     def get_context_data(self, **kwargs):
