@@ -135,16 +135,16 @@ class UserLoginView(APIView):
                 if user is not None:
                     # Authentication successful, create or retrieve a token
                     token, created = Token.objects.get_or_create(user=user)
-                    return Response({"token": token.key}, status=status.HTTP_200_OK, content_type='application/json')
+                    return Response({"token": token.key}, status=status.HTTP_200_OK, content_type='application/text')
                 else:
                     # Authentication failed
-                    return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED, content_type='application/json')
+                    return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED, content_type='application/text')
             else:
                 # Invalid input data
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST, content_type='application/text')
         except Exception as e:
             # Handle other exceptions
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR, content_type='application/json')
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR, content_type='application/text')
 
     
 class ProfileView(LoginRequiredMixin, TemplateView):
