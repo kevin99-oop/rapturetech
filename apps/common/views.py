@@ -110,38 +110,15 @@ class UserLoginView(APIView):
             if user is not None:
                 # Authentication successful, create or retrieve a token
                 token, created = Token.objects.get_or_create(user=user)
-                return Response({"token": token.key}, status=status.HTTP_200_OK)
+                return Response({"token": token.key}, status=status.HTTP_200_OK,content_type='application/json')
             else:
                 # Authentication failed
-                return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED,content_type='application/json')
         else:
             # Invalid input data
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def post(self, request, *args, **kwargs):
-        try:
-            # Deserialize JSON data using your serializer
-            serializer = LoginSerializer(data=request.data)
-            if serializer.is_valid():
-                username = serializer.validated_data['username']
-                password = serializer.validated_data['password']
 
-                # Add your authentication logic here (e.g., using Django's built-in authentication)
-                user = authenticate(request, username=username, password=password)
-
-                if user is not None:
-                    # Authentication successful, create or retrieve a token
-                    token, created = Token.objects.get_or_create(user=user)
-                    return Response({"token": token.key}, status=status.HTTP_200_OK, content_type='application/json')
-                else:
-                    # Authentication failed
-                    return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED, content_type='application/json')
-            else:
-                # Invalid input data
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
-        except Exception as e:
-            # Handle other exceptions
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR, content_type='application/json')
 
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
