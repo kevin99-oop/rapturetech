@@ -121,7 +121,15 @@ class UserLoginView(APIView):
     def post(self, request, *args, **kwargs):
         print(request.headers)
         # Your view logic here
-        return Response({"message": "Success"}, status=status.HTTP_200_OK)
+        serializer = LoginSerializer(data=request.data)
+
+        username = serializer.validated_data['username']
+        password = serializer.validated_data['password']
+        user = authenticate(request, username=username, password=password)
+
+        token, created = Token.objects.get_or_create(user=user)
+
+        return Response({"token": token.key}, status=status.HTTP_200_OK)
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
     def get_context_data(self, **kwargs):
