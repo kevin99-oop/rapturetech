@@ -54,10 +54,6 @@ from rest_framework import status
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import parser_classes
 from rest_framework.authtoken.models import Token
-from .serializers import DpuDataSerializer
-from datetime import datetime
-from .models import DateTimeRecord
-from .serializers import DateTimeRecordSerializer
 class HomeView(TemplateView):
     template_name = 'common/index.html'
     def get_context_data(self, **kwargs):
@@ -218,26 +214,3 @@ def custom_logout(request):
     # Additional logout logic if needed
     return redirect('home')  # Redirect to the home page or another URL
 
-
-class DpuDataAPIView(APIView):
-    def post(self, request, format=None):
-        serializer = DpuDataSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class NtpDateTimeAPIView(APIView):
-    def get(self, request, format=None):
-        current_datetime = datetime.utcnow()
-
-        # If you have a model, you can save the timestamp
-        # record = DateTimeRecord(timestamp=current_datetime)
-        # record.save()
-
-        serializer = DateTimeRecordSerializer(data={'timestamp': current_datetime})
-        if serializer.is_valid():
-            serializer.save()
-
-        return Response({'datetime': current_datetime}, status=status.HTTP_200_OK)

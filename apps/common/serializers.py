@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from .models import DpuData
-from .models import DateTimeRecord
 
 class UserSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only=True, required=True, validators=[validate_password])
@@ -40,7 +39,3 @@ class DpuDataSerializer(serializers.ModelSerializer):
         model = DpuData
         fields = '__all__'
 
-class DateTimeRecordSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DateTimeRecord
-        fields = '__all__'
