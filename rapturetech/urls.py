@@ -20,7 +20,7 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import path,include
 from apps.common import views
-from apps.common.views import HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView, ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu, DpuDataAPIView
+from apps.common.views import HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView, ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu, DpuDataAPIView, NtpDateTimeAPIView
 
 from django.contrib.auth import views as auth_views
 from django.urls import path,include
@@ -93,6 +93,7 @@ urlpatterns = [
     path('add_dpu/', add_dpu, name='add_dpu'),
     path('active_dpu/', active_dpu, name='active_dpu'),
     path('api/drec/', DpuDataAPIView.as_view(), name='dpu-data-api'),
+    path('api/ntpdatetime/', NtpDateTimeAPIView.as_view(), name='ntp-datetime-api'),
 
    
 ]
