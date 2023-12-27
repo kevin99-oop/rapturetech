@@ -214,37 +214,3 @@ def custom_logout(request):
     logout(request)
     # Additional logout logic if needed
     return redirect('home')  # Redirect to the home page or another URL
-# common/views.py
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .models import DPU, DREC
-from .serializers import DPUSerializer, DRECSerializer
-from django.shortcuts import render
-
-
-class DPUListView(APIView):
-    def get(self, request, *args, **kwargs):
-        dpus = DPU.objects.all()
-        serializer = DPUSerializer(dpus, many=True)
-        return render(request, 'common/active_dpu.html', {'dpus': serializer.data})
-
-class DRECCreateView(APIView):
-    def post(self, request, *args, **kwargs):
-        data = request.data
-        dpuid = data.get('dpuid', None)
-
-        try:
-            dpu = DPU.objects.get(dpu_id=dpuid)
-        except DPU.DoesNotExist:
-            return Response({"error": f"DPU with dpuid {dpuid} does not exist."}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = DRECSerializer(data=data)
-
-        if serializer.is_valid():
-            serializer.validated_data['dpu'] = dpu
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        return Response({"error": "Invalid data provided."}, status=status.HTTP_400_BAD_REQUEST)

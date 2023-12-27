@@ -94,7 +94,8 @@ urlpatterns = [
     path('active_dpu/', active_dpu, name='active_dpu'),
     path('dpus_list/', DPUListView.as_view(), name='dpus-list'),
     path('api/drec/', DRECCreateView.as_view(), name='drec-create'),
-   
+    path('api/drec/', DRECCreateView.as_view(), name='drec-create'),  # Make sure this line is present
+
 ]
 
 if settings.DEBUG:
