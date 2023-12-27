@@ -26,6 +26,7 @@ class DPU(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s DPU - {self.dpu_id}"
+
 class Drec(models.Model):
     REC_TYPE = models.CharField(max_length=1)
     SLIP_TYPE = models.CharField(max_length=1)
@@ -52,7 +53,7 @@ class Drec(models.Model):
     CSR_NO = models.IntegerField()
     CREV = models.IntegerField()
     END_TAG = models.CharField(max_length=1)
-    dpuid = models.AutoField(primary_key=True)
+    dpuid = models.CharField(max_length=255)
 
     def __str__(self):
-        return self.ST_ID
+        return f"{self.REC_TYPE} - {self.ST_ID} - {self.CUST_ID}"

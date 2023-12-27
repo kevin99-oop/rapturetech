@@ -243,9 +243,12 @@ from .serializers import DrecSerializer
 
 class DrecAPIView(APIView):
     def post(self, request, *args, **kwargs):
+        # Assuming 'dpuid' is present in your request data
+        dpuid_value = request.data.get('dpuid')
+
         # Assuming 'id' is present in the request data, remove it
         request_data = request.data.copy()
-        dpuid_value = request_data.pop('dpuid', None)  # Assuming 'dpuid' is present in your request data
+        request_data.pop('id', None)
 
         # Explicitly set 'id' to None during creation
         serializer = DrecSerializer(data=request_data)
