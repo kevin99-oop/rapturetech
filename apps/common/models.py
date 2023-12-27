@@ -52,7 +52,7 @@ class Drec(models.Model):
     CSR_NO = models.IntegerField()
     CREV = models.IntegerField()
     END_TAG = models.CharField(max_length=1)
-    dpuid = models.CharField(max_length=255)
+    dpuid = models.AutoField(primary_key=True)
 
     def __str__(self):
         return self.ST_ID

@@ -34,43 +34,13 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField()
 # serializers.py
 from rest_framework import serializers
-from .models import DPU
+from .models import DPU, Drec
 
 class DPUSerializer(serializers.ModelSerializer):
     class Meta:
         model = DPU
         fields = '__all__'
 
-
-
-
-class DrecSerializer(serializers.Serializer):
-    REC_TYPE = serializers.CharField(max_length=1)
-    SLIP_TYPE = serializers.CharField(max_length=1)
-    ST_ID = serializers.CharField(max_length=255)
-    CUST_ID = serializers.IntegerField()
-    TotalFileRecord = serializers.IntegerField()
-    FlagEdited = serializers.CharField(max_length=1)
-    MType = serializers.CharField(max_length=1)
-    RecordingDate = serializers.DateField()
-    SHIFT = serializers.CharField(max_length=1)
-    FAT = serializers.FloatField()
-    FAT_UNIT = serializers.CharField(max_length=1)
-    SNF = serializers.FloatField()
-    SNF_UNIT = serializers.CharField(max_length=1)
-    CLR = serializers.FloatField()
-    CLR_UNIT = serializers.CharField(max_length=1)
-    WATER = serializers.FloatField()
-    WATER_UNIT = serializers.CharField(max_length=1)
-    QT = serializers.FloatField()
-    QT_UNIT = serializers.CharField(max_length=1)
-    RATE = serializers.FloatField()
-    Amount = serializers.FloatField()
-    CAmount = serializers.FloatField()
-    CSR_NO = serializers.IntegerField()
-    CREV = serializers.IntegerField()
-    END_TAG = serializers.CharField(max_length=1)
-    dpuid = serializers.CharField(max_length=255)
 
 class DrecSerializer(serializers.ModelSerializer):
     class Meta:
