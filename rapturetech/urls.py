@@ -20,7 +20,7 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import path,include
 from apps.common import views
-from apps.common.views import HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView, ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu
+from apps.common.views import HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView, ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,DPUListView, DRECCreateView
 
 from django.contrib.auth import views as auth_views
 from django.urls import path,include
@@ -92,7 +92,8 @@ urlpatterns = [
 
     path('add_dpu/', add_dpu, name='add_dpu'),
     path('active_dpu/', active_dpu, name='active_dpu'),
-
+    path('dpus_list/', DPUListView.as_view(), name='dpus-list'),
+    path('api/drec/', DRECCreateView.as_view(), name='drec-create'),
    
 ]
 

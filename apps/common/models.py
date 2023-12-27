@@ -26,3 +26,26 @@ class DPU(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s DPU - {self.dpu_id}"
+
+class DREC(models.Model):
+    dpu = models.ForeignKey(DPU, on_delete=models.CASCADE)
+    st_id = models.CharField(max_length=50)
+    recording_date = models.DateField()
+    shift = models.CharField(max_length=1)
+    fat = models.FloatField()
+    fat_unit = models.CharField(max_length=1)
+    snf = models.FloatField()
+    snf_unit = models.CharField(max_length=1)
+    clr = models.FloatField()
+    clr_unit = models.CharField(max_length=1)
+    water = models.FloatField()
+    water_unit = models.CharField(max_length=1)
+    qt = models.FloatField()
+    qt_unit = models.CharField(max_length=1)
+    rate = models.FloatField()
+    amount = models.FloatField()
+    camount = models.FloatField()
+    csr_no = models.IntegerField()
+    crev = models.IntegerField()
+    end_tag = models.CharField(max_length=1)
+    dpuid = models.CharField(max_length=6)

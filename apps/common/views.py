@@ -214,3 +214,33 @@ def custom_logout(request):
     logout(request)
     # Additional logout logic if needed
     return redirect('home')  # Redirect to the home page or another URL
+# common/views.py
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import DPU, DREC
+from .serializers import DPUSerializer, DRECSerializer
+from django.shortcuts import render
+
+class DPUListView(APIView):
+    def get(self, request, *args, **kwargs):
+        dpus = DPU.objects.all()
+        serializer = DPUSerializer(dpus, many=True)
+        return render(request, 'common/dpus_list.html', {'dpus': serializer.data})
+
+class DRECCreateView(APIView):
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        dpuid = data.get('dpuid', None)
+
+        if dpuid:
+            dpu = DPU.objects.get(dpu_id=dpuid)
+            serializer = DRECSerializer(data=data)
+
+            if serializer.is_valid():
+                serializer.validated_data['dpu'] = dpu
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response({"error": "Invalid dpuid"}, status=status.HTTP_400_BAD_REQUEST)
