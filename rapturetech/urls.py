@@ -34,6 +34,7 @@ from apps.common.views import DPUListCreateView, DPUDetailView
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from apps.common.views import DrecViewSet
+from apps.common.views import display_drec_data
 
 router = DefaultRouter()
 router.register(r'drec', DrecViewSet, basename='drec')
@@ -105,6 +106,7 @@ urlpatterns = [
     path('api/dpus/', DPUListCreateView.as_view(), name='dpu-list-create'),
     path('api/dpus/<int:pk>/', DPUDetailView.as_view(), name='dpu-detail'),
     path('api/', include(router.urls)),
+    path('drec-data/', display_drec_data, name='drec_data'),
 
 ]
 

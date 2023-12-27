@@ -242,3 +242,7 @@ from .serializers import DrecSerializer
 class DrecViewSet(viewsets.ModelViewSet):
     queryset = Drec.objects.all()
     serializer_class = DrecSerializer
+
+def display_drec_data(request):
+    drec_list = Drec.objects.all()
+    return render(request, 'common/example2.html', {'drec_list': drec_list})
