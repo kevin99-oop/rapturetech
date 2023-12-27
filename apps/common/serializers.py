@@ -47,5 +47,10 @@ class DrecSerializer(serializers.ModelSerializer):
         model = Drec
         exclude = ['id']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Exclude 'id' field by default
+        self.fields.pop('id', None)
+
     def create(self, validated_data):
         return Drec.objects.create(**validated_data)
