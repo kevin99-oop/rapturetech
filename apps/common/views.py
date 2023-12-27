@@ -223,24 +223,28 @@ from .models import DPU, DREC
 from .serializers import DPUSerializer, DRECSerializer
 from django.shortcuts import render
 
+
 class DPUListView(APIView):
     def get(self, request, *args, **kwargs):
         dpus = DPU.objects.all()
         serializer = DPUSerializer(dpus, many=True)
-        return render(request, 'common/dpus_list.html', {'dpus': serializer.data})
+        return render(request, 'common/active_dpu.html', {'dpus': serializer.data})
 
 class DRECCreateView(APIView):
     def post(self, request, *args, **kwargs):
         data = request.data
         dpuid = data.get('dpuid', None)
 
-        if dpuid:
+        try:
             dpu = DPU.objects.get(dpu_id=dpuid)
-            serializer = DRECSerializer(data=data)
+        except DPU.DoesNotExist:
+            return Response({"error": f"DPU with dpuid {dpuid} does not exist."}, status=status.HTTP_404_NOT_FOUND)
 
-            if serializer.is_valid():
-                serializer.validated_data['dpu'] = dpu
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        serializer = DRECSerializer(data=data)
 
-        return Response({"error": "Invalid dpuid"}, status=status.HTTP_400_BAD_REQUEST)
+        if serializer.is_valid():
+            serializer.validated_data['dpu'] = dpu
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response({"error": "Invalid data provided."}, status=status.HTTP_400_BAD_REQUEST)
