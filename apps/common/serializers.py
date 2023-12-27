@@ -46,9 +46,3 @@ class DrecSerializer(serializers.ModelSerializer):
     class Meta:
         model = Drec
         fields = '__all__'
-        read_only_fields = ['id']  # Add this line
-
-    def create(self, validated_data):
-        # Explicitly set 'id' to None during creation
-        validated_data['id'] = None
-        return super().create(validated_data)

@@ -497,14 +497,19 @@
                 <div class="card-header pb-0 p-3">
                     <div class="d-flex justify-content-between">
                         <h6 class="mb-2">Latest Records</h6>
+
+                        <h1>Drec Data</h1>
+    <ul>
+        {% for drec in drec_list %}
+            <li>{{ drec.ST_ID }} - {{ drec.RecordingDate }}</li>
+        {% endfor %}
+    </ul>
                     </div>
                 </div>
                 <div class="table-responsive">
                     <table class="table align-items-center ">
                         <tbody>
-                            {% for drec in drecs %}
-            <li>{{ drec.ST_ID }} - {{ drec.RecordingDate }} - {{ drec.FAT }} - {{ drec.SNF }}</li>
-        {% endfor %}
+                            
                             <!--Hedading for table-->
                             <tr>
                                 <td class="align-middle text-sm">

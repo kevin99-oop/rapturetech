@@ -29,10 +29,14 @@ from django.urls import path
 from django.urls import path, include
 from apps.common import views
 from rest_framework.authtoken.views import obtain_auth_token
-from apps.common.views import DPUListCreateView, DPUDetailView, DrecAPIView
+from apps.common.views import DPUListCreateView, DPUDetailView
+# urls.py
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from apps.common.views import DrecViewSet
 
-
-from apps.common.views import DrecAPIView, dashboard_view
+router = DefaultRouter()
+router.register(r'drec', DrecViewSet, basename='drec')
 
 
 urlpatterns = [
@@ -100,9 +104,8 @@ urlpatterns = [
     path('active_dpu/', active_dpu, name='active_dpu'),
     path('api/dpus/', DPUListCreateView.as_view(), name='dpu-list-create'),
     path('api/dpus/<int:pk>/', DPUDetailView.as_view(), name='dpu-detail'),
-    path('api/drec/', DrecAPIView.as_view(), name='drec-api'),
-    path('api/drec/', DrecAPIView.as_view(), name='drec-api'),
-    path('dashboard/', dashboard_view, name='dashboard'),
+    path('api/', include(router.urls)),
+
 ]
 
 if settings.DEBUG:

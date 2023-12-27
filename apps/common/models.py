@@ -28,15 +28,15 @@ class DPU(models.Model):
         return f"{self.user.username}'s DPU - {self.dpu_id}"
 
 class Drec(models.Model):
-    REC_TYPE = models.CharField(max_length=1)
-    SLIP_TYPE = models.CharField(max_length=1)
-    ST_ID = models.CharField(max_length=255)
+    REC_TYPE = models.CharField(max_length=10)
+    SLIP_TYPE = models.CharField(max_length=10)
+    ST_ID = models.CharField(max_length=50)
     CUST_ID = models.IntegerField()
     TotalFileRecord = models.IntegerField()
     FlagEdited = models.CharField(max_length=1)
-    MType = models.CharField(max_length=1)
+    MType = models.CharField(max_length=10)
     RecordingDate = models.DateField()
-    SHIFT = models.CharField(max_length=1)
+    SHIFT = models.CharField(max_length=10)
     FAT = models.FloatField()
     FAT_UNIT = models.CharField(max_length=1)
     SNF = models.FloatField()
@@ -52,8 +52,8 @@ class Drec(models.Model):
     CAmount = models.FloatField()
     CSR_NO = models.IntegerField()
     CREV = models.IntegerField()
-    END_TAG = models.CharField(max_length=1)
-    dpuid = models.CharField(max_length=255)
+    END_TAG = models.CharField(max_length=10)
+    dpuid = models.CharField(max_length=10)
 
     def __str__(self):
-        return f"{self.REC_TYPE} - {self.ST_ID} - {self.CUST_ID}"
+        return f"Drec - {self.ST_ID}"

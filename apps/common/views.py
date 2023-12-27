@@ -234,36 +234,11 @@ class DPUDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
 
 
-
-    # views.py
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
+# views.py
+from rest_framework import viewsets
+from .models import Drec
 from .serializers import DrecSerializer
 
-class DrecAPIView(APIView):
-    def post(self, request, *args, **kwargs):
-        # Assuming 'dpuid' is present in your request data
-        dpuid_value = request.data.get('dpuid')
-
-        # Assuming 'id' is present in the request data, remove it
-        request_data = request.data.copy()
-        request_data.pop('id', None)
-
-        # Explicitly set 'id' to None during creation
-        serializer = DrecSerializer(data=request_data)
-        
-        if serializer.is_valid():
-            # Set 'id' to None before saving
-            serializer.validated_data['id'] = None
-            serializer.save(dpuid=dpuid_value)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-# views.py
-from django.shortcuts import render
-from .models import Drec
-
-def dashboard_view(request):
-    drecs = Drec.objects.all()
-    return render(request, 'common/example.html', {'drecs': drecs})
+class DrecViewSet(viewsets.ModelViewSet):
+    queryset = Drec.objects.all()
+    serializer_class = DrecSerializer
