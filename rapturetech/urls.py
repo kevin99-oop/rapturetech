@@ -29,16 +29,6 @@ from django.urls import path
 from django.urls import path, include
 from apps.common import views
 from rest_framework.authtoken.views import obtain_auth_token
-# common/urls.py
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from apps.common.views import DPUCompactViewSet, DrecViewSet, DisplayDPUandDrecData
-
-router = DefaultRouter()
-router.register(r'dpu-compact', DPUCompactViewSet, basename='dpu-compact')
-router.register(r'drec', DrecViewSet, basename='drec')
-
-
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -103,9 +93,7 @@ urlpatterns = [
     path('add_dpu/', add_dpu, name='add_dpu'),
     path('active_dpu/', active_dpu, name='active_dpu'),
 
-    path('', include(router.urls)),
-    path('display-dpu-drec-data/<str:dpuid>/', DisplayDPUandDrecData.as_view(), name='display-dpu-drec-data'),
-
+   
 ]
 
 if settings.DEBUG:
