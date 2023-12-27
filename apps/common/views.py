@@ -243,14 +243,11 @@ from .serializers import DrecSerializer
 
 class DrecAPIView(APIView):
     def post(self, request, *args, **kwargs):
-        dpuid_value = request.data.get("dpuid")
-        
-        try:
-            dpu_instance = DPU.objects.get(pk=dpuid_value)
-        except DPU.DoesNotExist:
-            return Response({"error": "DPU not found"}, status=status.HTTP_404_NOT_FOUND)
+        # Assuming 'id' is present in the request data, remove it
+        request_data = request.data.copy()
+        request_data.pop('id', None)
 
-        serializer = DrecSerializer(data={**request.data, "dpuid": dpuid_value})
+        serializer = DrecSerializer(data=request_data)
         
         if serializer.is_valid():
             serializer.save()

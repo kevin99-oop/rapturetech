@@ -45,7 +45,7 @@ class DPUSerializer(serializers.ModelSerializer):
 class DrecSerializer(serializers.ModelSerializer):
     class Meta:
         model = Drec
-        fields = '__all__'
+        exclude = ['id']
 
     def create(self, validated_data):
         return Drec.objects.create(**validated_data)
