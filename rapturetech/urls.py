@@ -98,7 +98,7 @@ urlpatterns = [
     path('add_dpu/', add_dpu, name='add_dpu'),
     path('active_dpu/', active_dpu, name='active_dpu'),
 
-    path('api/drec/', DRECCreateView.as_view(), name='drec-create'),
+    #path('api/drec/', DRECCreateView.as_view(), name='drec-create'),
     path('active_dpu/', DRECListView.as_view(), name='drec-list'),  # Add this line
 
     path('api/drec/', create_drec_api, name='create_drec_api'),
