@@ -32,17 +32,18 @@ class UserSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
-# serializers.py
+# common/serializers.py
 from rest_framework import serializers
 from .models import DPU, Drec
 
-class DPUSerializer(serializers.ModelSerializer):
+class DPUCompactSerializer(serializers.ModelSerializer):
     class Meta:
         model = DPU
-        fields = '__all__'
-
+        fields = ['location', 'dpu_id', 'society', 'mobile_number', 'owner', 'status']
 
 class DrecSerializer(serializers.ModelSerializer):
+    dpuid_details = DPUCompactSerializer(source='dpuid', read_only=True)
+
     class Meta:
         model = Drec
         fields = '__all__'

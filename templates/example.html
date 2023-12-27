@@ -498,10 +498,7 @@
                     <div class="d-flex justify-content-between">
                         <h6 class="mb-2">Latest Records</h6>
 1111
-                        <ul>
-                            {% for drec in drec_list %}
-                                <li>{{ drec.ST_ID }} - {{ drec.RecordingDate }}</li>
-                            {% endfor %}
+                       
                     </div>
                 </div>
                 <div class="table-responsive">
@@ -757,6 +754,37 @@
 
                         </tbody>
                     </table>
+                    <h1>DPU Details</h1>
+  <ul>
+    <li><strong>Location:</strong> {{ dpu_details.location }}</li>
+    <li><strong>DPU ID:</strong> {{ dpu_details.dpu_id }}</li>
+    <li><strong>Society:</strong> {{ dpu_details.society }}</li>
+    <li><strong>Mobile Number:</strong> {{ dpu_details.mobile_number }}</li>
+    <li><strong>Owner:</strong> {{ dpu_details.owner }}</li>
+    <li><strong>Status:</strong> {{ dpu_details.status }}</li>
+  </ul>
+
+  <h1>DREC List</h1>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>ST ID</th>
+        <th>Recording Date</th>
+        <th>FAT</th>
+        <th>SNF</th>
+        <!-- Add more fields as needed -->
+      </tr>
+    </thead>
+    <tbody>
+      {% for drec in drec_list %}
+        <tr>
+          <td>{{ drec.ST_ID }}</td>
+          <td>{{ drec.RecordingDate }}</td>
+          <td>{{ drec.FAT }}</td>
+          <td>{{ drec.SNF }}</td>
+          <!-- Add more fields as needed -->
+        </tr>
+      {% endfor %}
                 </div>
             </div>
         </div>

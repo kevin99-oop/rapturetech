@@ -217,32 +217,59 @@ def custom_logout(request):
 
 
 
-# views.py
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
-from .models import DPU
-from .serializers import DPUSerializer
 
-class DPUListCreateView(generics.ListCreateAPIView):
-    queryset = DPU.objects.all()
-    serializer_class = DPUSerializer
-    permission_classes = [IsAuthenticated]
-
-class DPUDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = DPU.objects.all()
-    serializer_class = DPUSerializer
-    permission_classes = [IsAuthenticated]
 
 
 # views.py
+# common/views.py
 from rest_framework import viewsets
-from .models import Drec
-from .serializers import DrecSerializer
+from apps.common.models import DPU, Drec
+from apps.common.serializers import DPUCompactSerializer, DrecSerializer
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+class DPUCompactViewSet(viewsets.ModelViewSet):
+    queryset = DPU.objects.all()
+    serializer_class = DPUCompactSerializer
 
 class DrecViewSet(viewsets.ModelViewSet):
     queryset = Drec.objects.all()
     serializer_class = DrecSerializer
 
-def display_drec_data(request):
-    drec_list = Drec.objects.all()
-    return render(request, 'common/example2.html', {'drec_list': drec_list})
+class DisplayDPUandDrecData(APIView):
+    def get(self, request, dpuid):
+        try:
+            dpu = DPU.objects.get(dpu_id=dpuid)
+            drec_list = Drec.objects.filter(dpuid=dpu)
+
+            dpu_serializer = DPUCompactSerializer(dpu)
+            drec_serializer = DrecSerializer(drec_list, many=True)
+
+            response_data = {
+                'dpu_details': dpu_serializer.data,
+                'drec_list': drec_serializer.data,
+            }
+
+            return Response(response_data, status=status.HTTP_200_OK)
+        except DPU.DoesNotExist:
+            return Response({'error': 'DPU not found'}, status=status.HTTP_404_NOT_FOUND)
+from django.shortcuts import render
+
+class DisplayDPUandDrecData(APIView):
+    def get(self, request, dpuid):
+        try:
+            dpu = DPU.objects.get(dpu_id=dpuid)
+            drec_list = Drec.objects.filter(dpuid=dpu)
+
+            dpu_serializer = DPUCompactSerializer(dpu)
+            drec_serializer = DrecSerializer(drec_list, many=True)
+
+            response_data = {
+                'dpu_details': dpu_serializer.data,
+                'drec_list': drec_serializer.data,
+            }
+
+            return render(request, 'common/display_dpu_drec_data.html', context=response_data)
+        except DPU.DoesNotExist:
+            return render(request, 'common/display_dpu_drec_data.html', context={'error': 'DPU not found'})

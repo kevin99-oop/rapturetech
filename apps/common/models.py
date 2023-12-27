@@ -10,7 +10,6 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token. objects.create(user=instance)
 
-
 class DPU(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     location = models.CharField(max_length=255)
@@ -53,7 +52,7 @@ class Drec(models.Model):
     CSR_NO = models.IntegerField()
     CREV = models.IntegerField()
     END_TAG = models.CharField(max_length=10)
-    dpuid = models.CharField(max_length=10)
+    dpuid = models.ForeignKey(DPU, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"Drec - {self.ST_ID}"
