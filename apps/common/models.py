@@ -26,16 +26,3 @@ class DPU(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s DPU - {self.dpu_id}"
-
-class DpuData(models.Model):
-    REC_TYPE = models.CharField(max_length=1)
-    SLIP_TYPE = models.CharField(max_length=1)
-    ST_ID = models.CharField(max_length=10)
-    CUST_ID = models.IntegerField()
-    TotalFileRecord = models.IntegerField()
-    FlagEdited = models.CharField(max_length=1)
-    # Add other fields as needed
-
-    def __str__(self):
-        return f"DpuData - {self.ST_ID}"
-    

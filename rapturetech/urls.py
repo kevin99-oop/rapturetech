@@ -29,9 +29,6 @@ from django.urls import path
 from django.urls import path, include
 from apps.common import views
 from rest_framework.authtoken.views import obtain_auth_token
-
-from django.urls import path, include
-
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -95,9 +92,8 @@ urlpatterns = [
 
     path('add_dpu/', add_dpu, name='add_dpu'),
     path('active_dpu/', active_dpu, name='active_dpu'),
-    
-    path('api/', include('apps.api.urls')),
 
+   
 ]
 
 if settings.DEBUG:

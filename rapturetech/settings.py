@@ -41,6 +41,7 @@ DEFAULT_APPS = [
     'apps',
     'rest_framework',
     'rest_framework.authtoken', 
+   
 
 ]
 
@@ -56,7 +57,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 LOCAL_APPS = [
  'apps.common',
  'apps.userprofile',
- 'apps.api',
+
 ]
 
 

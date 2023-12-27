@@ -54,6 +54,7 @@ from rest_framework import status
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import parser_classes
 from rest_framework.authtoken.models import Token
+
 class HomeView(TemplateView):
     template_name = 'common/index.html'
     def get_context_data(self, **kwargs):
@@ -213,4 +214,3 @@ def custom_logout(request):
     logout(request)
     # Additional logout logic if needed
     return redirect('home')  # Redirect to the home page or another URL
-
