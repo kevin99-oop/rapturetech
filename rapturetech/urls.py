@@ -29,6 +29,12 @@ from django.urls import path
 from django.urls import path, include
 from apps.common import views
 from rest_framework.authtoken.views import obtain_auth_token
+from apps.common.views import DPUListCreateView, DPUDetailView, DrecAPIView
+
+
+from apps.common.views import DrecAPIView, dashboard_view
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -92,8 +98,11 @@ urlpatterns = [
 
     path('add_dpu/', add_dpu, name='add_dpu'),
     path('active_dpu/', active_dpu, name='active_dpu'),
-
-   
+    path('api/dpus/', DPUListCreateView.as_view(), name='dpu-list-create'),
+    path('api/dpus/<int:pk>/', DPUDetailView.as_view(), name='dpu-detail'),
+    path('api/drec/', DrecAPIView.as_view(), name='drec-api'),
+    path('api/drec/', DrecAPIView.as_view(), name='drec-api'),
+    path('dashboard/', dashboard_view, name='dashboard'),
 ]
 
 if settings.DEBUG:

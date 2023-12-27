@@ -214,3 +214,44 @@ def custom_logout(request):
     logout(request)
     # Additional logout logic if needed
     return redirect('home')  # Redirect to the home page or another URL
+
+
+
+# views.py
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
+from .models import DPU
+from .serializers import DPUSerializer
+
+class DPUListCreateView(generics.ListCreateAPIView):
+    queryset = DPU.objects.all()
+    serializer_class = DPUSerializer
+    permission_classes = [IsAuthenticated]
+
+class DPUDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = DPU.objects.all()
+    serializer_class = DPUSerializer
+    permission_classes = [IsAuthenticated]
+
+
+
+    # views.py
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from .serializers import DrecSerializer
+
+class DrecAPIView(APIView):
+    def post(self, request, format=None):
+        serializer = DrecSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# views.py
+from django.shortcuts import render
+from .models import Drec
+
+def dashboard_view(request):
+    drecs = Drec.objects.all()
+    return render(request, 'common/example.html', {'drecs': drecs})

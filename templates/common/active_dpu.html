@@ -185,19 +185,13 @@
                         <td>{{ dpu.owner }}</td>
                         <td class="{% if dpu.status == 'active' %}text-success{% else %}text-danger{% endif %}">
                             {{ dpu.status }}
-                        </td>                    
-                    </tr>
+                        </td>                    </tr>
+           
                 </tbody>
                 {% endfor %}       
 
               </table>
-              <h1>DRecord List</h1>
-              <ul>
-                  {% for drecord in drecords %}
-                      <li>{{ drecord.field_name }}</li>
-                      <!-- Replace 'field_name' with the actual field you want to display -->
-                  {% endfor %}
-              </ul>
+
             </div>
           </div>
      

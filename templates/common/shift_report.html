@@ -198,25 +198,10 @@
         
         <div class="row ">
             <div class="col-lg-3 my-5">
-              
-                {% if data %}
-                    <ul>
-                        {% for entry in data %}
-                            <li>{{ entry }}</li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>No data found for the specified input.</p>
-                {% endif %}
+                
             </div>
             <div class="col-lg-9 my-5">
-              
-                <form method="post" action="">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    {{ form.errors }}
-                    <input type="submit" value="Submit">
-                </form>
+        
             </div>
         </div>
 

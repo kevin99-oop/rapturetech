@@ -502,6 +502,9 @@
                 <div class="table-responsive">
                     <table class="table align-items-center ">
                         <tbody>
+                            {% for drec in drecs %}
+            <li>{{ drec.ST_ID }} - {{ drec.RecordingDate }} - {{ drec.FAT }} - {{ drec.SNF }}</li>
+        {% endfor %}
                             <!--Hedading for table-->
                             <tr>
                                 <td class="align-middle text-sm">
