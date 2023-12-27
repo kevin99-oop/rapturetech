@@ -3,6 +3,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from .models import Drec
 
 class UserSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only=True, required=True, validators=[validate_password])
@@ -70,3 +71,11 @@ class DrecSerializer(serializers.Serializer):
     CREV = serializers.IntegerField()
     END_TAG = serializers.CharField(max_length=1)
     dpuid = serializers.CharField(max_length=255)
+
+class DrecSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Drec
+        fields = '__all__'
+
+    def create(self, validated_data):
+        return Drec.objects.create(**validated_data)
