@@ -242,11 +242,20 @@ from rest_framework.views import APIView
 from .serializers import DrecSerializer
 
 class DrecAPIView(APIView):
-    def post(self, request, format=None):
-        serializer = DrecSerializer(data=request.data)
+    def post(self, request, *args, **kwargs):
+        dpuid_value = request.data.get("dpuid")
+        
+        try:
+            dpu_instance = DPU.objects.get(pk=dpuid_value)
+        except DPU.DoesNotExist:
+            return Response({"error": "DPU not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = DrecSerializer(data={**request.data, "dpuid": dpuid_value})
+        
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 # views.py
 from django.shortcuts import render
