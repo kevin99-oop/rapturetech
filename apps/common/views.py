@@ -55,6 +55,22 @@ from rest_framework.parsers import JSONParser
 from rest_framework.decorators import parser_classes
 from rest_framework.authtoken.models import Token
 
+
+
+from django.views.generic import ListView
+from django.shortcuts import render
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import DPU, DREC
+from apps.common.serializers import  DRECSerializer
+
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from apps.common.models import DPU, DREC
+from apps.common.serializers import DRECDetailSerializer
+
 class HomeView(TemplateView):
     template_name = 'common/index.html'
     def get_context_data(self, **kwargs):
@@ -214,3 +230,47 @@ def custom_logout(request):
     logout(request)
     # Additional logout logic if needed
     return redirect('home')  # Redirect to the home page or another URL
+
+class DRECListView(ListView):
+    model = DREC
+    template_name = 'common/active_dpu.html'
+    context_object_name = 'drec_list'
+
+class DRECCreateView(APIView):
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        dpuid = data.get('dpuid', None)
+
+        try:
+            dpu = DPU.objects.get(dpu_id=dpuid)
+        except DPU.DoesNotExist:
+            return Response({"error": f"DPU with dpuid {dpuid} does not exist."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = DRECSerializer(data=data)
+
+        if serializer.is_valid():
+            serializer.validated_data['dpu'] = dpu
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response({"error": "Invalid data provided."}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['POST'])
+def create_drec_api(request):
+    try:
+        json_data = request.data
+        dpuid = json_data.get('dpuid')
+        dpu = DPU.objects.get(dpu_id=dpuid)
+        
+        serializer = DRECDetailSerializer(data=json_data)
+        if serializer.is_valid():
+            serializer.save(dpu=dpu)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except DPU.DoesNotExist:
+        return Response({'error': 'DPU not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

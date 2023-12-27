@@ -20,7 +20,7 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import path,include
 from apps.common import views
-from apps.common.views import HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView, ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,DPUListView, DRECCreateView
+from apps.common.views import HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView, ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu
 
 from django.contrib.auth import views as auth_views
 from django.urls import path,include
@@ -29,6 +29,11 @@ from django.urls import path
 from django.urls import path, include
 from apps.common import views
 from rest_framework.authtoken.views import obtain_auth_token
+
+from apps.common.views import  DRECCreateView, DRECListView  # Import DRECListView
+
+from apps.common.views import create_drec_api
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -92,9 +97,11 @@ urlpatterns = [
 
     path('add_dpu/', add_dpu, name='add_dpu'),
     path('active_dpu/', active_dpu, name='active_dpu'),
-    path('dpus_list/', DPUListView.as_view(), name='dpus-list'),
+
     path('api/drec/', DRECCreateView.as_view(), name='drec-create'),
-    path('api/drec/', DRECCreateView.as_view(), name='drec-create'),  # Make sure this line is present
+    path('active_dpu/', DRECListView.as_view(), name='drec-list'),  # Add this line
+
+    path('api/drec/', create_drec_api, name='create_drec_api'),
 
 ]
 

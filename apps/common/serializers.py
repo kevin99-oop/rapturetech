@@ -31,3 +31,24 @@ class UserSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
+
+# common/serializers.py
+
+from rest_framework import serializers
+from .models import DPU, DREC
+
+class DPUSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DPU
+        fields = '__all__'
+
+class DRECSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DREC
+        fields = '__all__'
+
+
+class DRECDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DREC
+        fields = '__all__'

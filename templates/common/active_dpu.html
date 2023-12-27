@@ -175,7 +175,6 @@
                   </tr>
                 </thead>
                 {% for dpu in active_dpu_list %}
-
                 <tbody>
                   <tr class="align-items-center text-align-center rounded">
                         <td>{{ dpu.location }}</td>
@@ -185,13 +184,49 @@
                         <td>{{ dpu.owner }}</td>
                         <td class="{% if dpu.status == 'active' %}text-success{% else %}text-danger{% endif %}">
                             {{ dpu.status }}
-                        </td>                    </tr>
+                        </td>                   
+                    </tr>
            
                 </tbody>
                 {% endfor %}       
 
               </table>
+              <H1>DREC</H1>
 
+              <table class="table table-striped table-hover rounded table-responsive">
+                <thead>
+                    <tr>
+                        <th>ST ID</th>
+                        <th>Recording Date</th>
+                        <th>Shift</th>
+                        <th>Amount</th>
+                        <th>CSR No</th>
+                    </tr>
+                </thead>
+                <tbody>
+                  <!-- active_dpu.html -->
+{% for dpu in active_dpu_list %}
+<tr class="align-items-center text-align-center rounded">
+    <td>{{ dpu.drec.st_id }}</td>
+    <!-- other DPU fields -->
+</tr>
+{% for drec in dpu.drecs.all %}
+    <tr class="align-items-center text-align-center rounded">
+        <td colspan="6"></td> <!-- Empty cells to align with the DPU data -->
+        <td>{{ drec.st_id }}</td>
+        <td>{{ drec.recording_date }}</td>
+        <td>{{ drec.shift }}</td>  <!-- Accessing the 'shift' attribute of the DREC model -->
+        <td>{{ drec.amount }}</td>
+        <td>{{ drec.csr_no }}</td>
+    </tr>
+{% endfor %}
+{% endfor %}
+                </tbody>
+            </table>
+        
+        
+        
+        
             </div>
           </div>
      
