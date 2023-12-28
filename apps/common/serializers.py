@@ -48,6 +48,31 @@ from rest_framework import serializers
 from apps.common.models import DREC
 
 class DRECCreateSerializer(serializers.ModelSerializer):
+    # ... other fields ...
+
     class Meta:
         model = DREC
         fields = '__all__'
+        extra_kwargs = {
+            'st_id': {'required': False},
+            'recording_date': {'required': False},
+            'shift': {'required': False},
+            'fat': {'required': False},
+            'fat_unit': {'required': False},
+            'snf': {'required': False},
+            'snf_unit': {'required': False},
+            'clr': {'required': False},
+            'clr_unit': {'required': False},
+            'water': {'required': False},
+            'water_unit': {'required': False},
+            'qt': {'required': False},
+            'qt_unit': {'required': False},
+            'rate': {'required': False},
+            'amount': {'required': False},
+            'camount': {'required': False},
+            'csr_no': {'required': False},
+            'crev': {'required': False},
+            'end_tag': {'required': False},
+            'data': {'required': False},
+            'dpu': {'required': False},
+        }
