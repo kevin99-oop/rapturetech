@@ -47,6 +47,18 @@ class DPUSerializer(serializers.ModelSerializer):
 from rest_framework import serializers
 from apps.common.models import DREC
 
+
+class DPUListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DPU
+        fields = '__all__'
+
+# Your existing serializers...
+
+class DRECSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DREC
+        fields = '__all__'
 class DRECCreateSerializer(serializers.ModelSerializer):
     # ... other fields ...
 
@@ -76,3 +88,14 @@ class DRECCreateSerializer(serializers.ModelSerializer):
             'data': {'required': False},
             'dpu': {'required': False},
         }
+class DPUListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DPU
+        fields = '__all__'
+
+# Your existing serializers...
+
+class DRECSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DREC
+        fields = '__all__'
