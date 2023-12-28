@@ -30,9 +30,8 @@ from django.urls import path, include
 from apps.common import views
 from rest_framework.authtoken.views import obtain_auth_token
 
-from apps.common.views import  DRECCreateView, DRECListView  # Import DRECListView
 
-from apps.common.views import create_drec_api
+from apps.common.views import create_drec, list_drec,DRECCreateAPIView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -98,11 +97,13 @@ urlpatterns = [
     path('add_dpu/', add_dpu, name='add_dpu'),
     path('active_dpu/', active_dpu, name='active_dpu'),
 
-    #path('api/drec/', DRECCreateView.as_view(), name='drec-create'),
-    path('active_dpu/', DRECListView.as_view(), name='drec-list'),  # Add this line
+    path('api/drec/', DRECCreateAPIView.as_view(), name='api_drec_create'),
 
-    path('api/drec/', create_drec_api, name='create_drec_api'),
-
+    
+    
+    
+    path('drec/create/', create_drec, name='create_drec'),
+    path('drec/list/', list_drec, name='list_drec'),
 ]
 
 if settings.DEBUG:

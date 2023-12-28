@@ -35,20 +35,19 @@ class LoginSerializer(serializers.Serializer):
 # common/serializers.py
 
 from rest_framework import serializers
-from .models import DPU, DREC
+from apps.common.models import DPU, DREC
 
 class DPUSerializer(serializers.ModelSerializer):
     class Meta:
         model = DPU
         fields = '__all__'
 
-class DRECSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DREC
-        fields = '__all__'
+# serializers.py
 
+from rest_framework import serializers
+from apps.common.models import DREC
 
-class DRECDetailSerializer(serializers.ModelSerializer):
+class DRECCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = DREC
         fields = '__all__'

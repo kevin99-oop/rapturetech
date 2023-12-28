@@ -5,56 +5,64 @@
 
 {% block content %}
 <style>
- .table-wrapper {
+    .table-wrapper {
         background: #fff;
         padding: 20px 25px;
         margin: 30px 0;
-		border-radius: 3px;
-        box-shadow: 0 1px 1px rgba(0,0,0,.05);
+        border-radius: 3px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
     }
-	.table-title {        
-		padding-bottom: 1px;
-		background: #002d86;
-		color: #fff!important;
-		padding: 16px 30px;
-		margin: -20px -25px 10px;
-		border-radius: 3px 3px 0 0;
+
+    .table-title {
+        padding-bottom: 1px;
+        background: #002d86;
+        color: #fff !important;
+        padding: 16px 30px;
+        margin: -20px -25px 10px;
+        border-radius: 3px 3px 0 0;
     }
+
     .table-title h2 {
-		margin: 5px 0 0;
-		font-size: 24px;
-	}
-	.table-title .btn-group {
-		float: right;
-	}
-	.table-title .btn {
-		color: #fff;
-		float: right;
-		font-size: 13px;
-		border: none;
-		min-width: 50px;
-		border-radius: 2px;
-		border: none;
-		outline: none !important;
-		margin-left: 10px;
-	}
-	.table-title .btn i {
-		float: left;
-		font-size: 21px;
-		margin-right: 5px;
-	}
-	.table-title .btn span {
-		float: left;
-		margin-top: 2px;
-	}
-    tr{
+        margin: 5px 0 0;
+        font-size: 24px;
+    }
+
+    .table-title .btn-group {
+        float: right;
+    }
+
+    .table-title .btn {
+        color: #fff;
+        float: right;
+        font-size: 13px;
+        border: none;
+        min-width: 50px;
+        border-radius: 2px;
+        border: none;
+        outline: none !important;
+        margin-left: 10px;
+    }
+
+    .table-title .btn i {
+        float: left;
+        font-size: 21px;
+        margin-right: 5px;
+    }
+
+    .table-title .btn span {
+        float: left;
+        margin-top: 2px;
+    }
+
+    tr {
         text-align: center;
 
     }
+
     td {
-            padding: 1px;
-            text-align: center;
-        }
+        padding: 1px;
+        text-align: center;
+    }
 </style>
 <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl " id="navbarBlur"
     data-scroll="false">
@@ -143,68 +151,102 @@
 <!-- Begin Page Content -->
 <div class="container-fluid mt-5">
 
-  
+
 
     <!-- Main Content Here -->
-    
+
     <div class="card o-hidden border-0 shadow-lg mt-5">
-        
+
         <div class="container">
             <div class="table-wrapper table-responsive">
-              <div class="table-title border rounded">
-                <div class="row">
-                  <div class="col-sm-6">
-                    <h5 class="text-white mt-2">Active DPU's</h5>
-                  </div>
-                  <div class="col-md-6">
-                    <a href="{% url 'add_dpu' %}" class="btn btn-success" > <span>Add New DPU</span></a>
-                  </div>
+                <div class="table-title border rounded">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h5 class="text-white mt-2"> Drec</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'create_drec' %}" class="btn btn-success"> <span>Add New Drec</span></a>
+                        </div>
+                    </div>
                 </div>
-              </div>
 
-              <table class="table table-striped table-hover rounded table-responsive">
-                <thead>
-                  <tr>
-                  
-                        <th>Location</th>
-                        <th>DPU ID</th>
-                        <th>Society</th>
-                        <th>Mobile number</th>
-                        <th>Owner</th>
-                        <th>Status</th>
-                  </tr>
-                </thead>
-                {% for dpu in active_dpu_list %}
-                <tbody>
-                  <tr class="align-items-center text-align-center rounded">
-                        <td>{{ dpu.location }}</td>
-                        <td>{{ dpu.dpu_id }}</td>
-                        <td>{{ dpu.society }}</td>
-                        <td>{{ dpu.mobile_number }}</td>
-                        <td>{{ dpu.owner }}</td>
-                        <td class="{% if dpu.status == 'active' %}text-success{% else %}text-danger{% endif %}">
-                            {{ dpu.status }}
-                        </td>                   
-                    </tr>
-           
-                </tbody>
-                {% endfor %}       
+                <h2>List of DREC Instances</h2>
 
-              </table>
-    
-        
-        
-        
+
+                <table class="table table-striped table-hover rounded table-responsive">
+                    <thead>
+                        <tr>
+
+                            <th>Dpu</th>
+                            <th>St id</th>
+                            <th>Recording date</th>
+                            <th>Shift</th>
+                            <th>Fat</th>
+                            <th>Fat unit</th>
+                            <th>Snf</th>
+                            <th>Snf unit</th>
+                            <th>Clr</th>
+                            <th>Clr unit</th>
+                            <th>Water</th>
+                            <th>Water unit</th>
+                            <th>Qt</th>
+                            <th>Qt unit</th>
+                            <th>Rate</th>
+                            <th>Amount</th>
+                            <th>Camount</th>
+                            <th>Csr no</th>
+                            <th>Crev</th>
+                            <th>End tag</th>
+                            <th>Dpuid</th>
+                        </tr>
+                    </thead>
+                    {% for drec in drecs %}
+                    <tbody>
+                        <tr class="align-items-center text-align-center rounded">
+                            <td>{{ drec.dpu }} </td>
+                            <td>{{ drec.st_id }}</td>
+                            <td>{{ drec.recording_date }}</td>
+                            <td>{{ drec.shift }}</td>
+                            <td>{{ drec.fat }}</td>
+                            <td>{{ drec.fat_unit }}</td>
+                            <td>{{ drec.snf }}</td>
+                            <td>{{ drec.snf_unit }}</td>
+                            <td>{{ drec.clr }}</td>
+                            <td>{{ drec.clr_unit }}</td>
+                            <td>{{ drec.water }}</td>
+                            <td>{{ drec.water_unit }}</td>
+                            <td>{{ drec.qt }}</td>
+                            <td>{{ drec.qt_unit }}</td>
+                            <td>{{ drec.amount }}</td>
+                            <td>{{ drec.camount }}</td>
+                            <td>{{ drec.camount }}</td>
+
+                            <td>{{ drec.csr_no }}</td>
+                            <td>{{ drec.crev }}</td>
+                            <td>{{ drec.end_tag }}</td>
+                            <td>{{ drec.dpuid }}</td>
+                            
+                            
+                            
+                            <td></td>
+                        </tr>
+
+                    </tbody>
+                    {% endfor %}
+               
+
+
+
             </div>
-          </div>
-     
+        </div>
 
-    
+
+
 
 
     </div>
 
     <!-- /.container-fluid -->
-    </div>
-    
-    {% endblock content %}
+</div>
+
+{% endblock content %}

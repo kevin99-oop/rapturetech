@@ -62,14 +62,16 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import DPU, DREC
-from apps.common.serializers import  DRECSerializer
+from apps.common.models import DPU, DREC
 
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from apps.common.models import DPU, DREC
-from apps.common.serializers import DRECDetailSerializer
+from apps.common.serializers import DRECCreateSerializer
+from apps.common.models import DPU, DREC
+from apps.common.forms import DRECForm
+
 
 class HomeView(TemplateView):
     template_name = 'common/index.html'
@@ -231,46 +233,30 @@ def custom_logout(request):
     # Additional logout logic if needed
     return redirect('home')  # Redirect to the home page or another URL
 
-class DRECListView(ListView):
-    model = DREC
-    template_name = 'common/active_dpu.html'
-    context_object_name = 'drec_list'
 
-class DRECCreateView(APIView):
+    
+class DRECCreateAPIView(APIView):
     def post(self, request, *args, **kwargs):
-        data = request.data
-        dpuid = data.get('dpuid', None)
-
-        try:
-            dpu = DPU.objects.get(dpu_id=dpuid)
-        except DPU.DoesNotExist:
-            return Response({"error": f"DPU with dpuid {dpuid} does not exist."}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = DRECSerializer(data=data)
-
+        serializer = DRECCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.validated_data['dpu'] = dpu
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        return Response({"error": "Invalid data provided."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+def create_drec(request):
+    if request.method == 'POST':
+        form = DRECForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            drec = form.save(commit=False)
+            drec.user = request.user  # Assign the current user to the DREC instance
+            drec.dpu = DPU.objects.get(user=request.user, dpu_id=form.cleaned_data['dpu'].dpu_id)
+            drec.save()
+            return redirect('list_drec')
+    else:
+        form = DRECForm(user=request.user)
 
-@api_view(['POST'])
-def create_drec_api(request):
-    try:
-        json_data = request.data
-        dpuid = json_data.get('dpuid')
-        dpu = DPU.objects.get(dpu_id=dpuid)
-        
-        serializer = DRECDetailSerializer(data=json_data)
-        if serializer.is_valid():
-            serializer.save(dpu=dpu)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return render(request, 'common/create_drec.html', {'form': form})
 
-    except DPU.DoesNotExist:
-        return Response({'error': 'DPU not found'}, status=status.HTTP_404_NOT_FOUND)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+def list_drec(request):
+    drecs = DREC.objects.all()
+    return render(request, 'common/list_drec.html', {'drecs': drecs})

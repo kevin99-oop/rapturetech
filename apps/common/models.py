@@ -50,6 +50,7 @@ class DREC(models.Model):
     crev = models.IntegerField()
     end_tag = models.CharField(max_length=50)
     dpuid = models.CharField(max_length=50)
+    data = models.JSONField()
 
     def __str__(self):
         return f"DREC for {self.dpu.user.username} - {self.st_id}"
