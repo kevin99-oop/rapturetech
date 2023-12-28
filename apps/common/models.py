@@ -54,3 +54,6 @@ class DREC(models.Model):
 
     def __str__(self):
         return f"DREC for {self.dpu.user.username} - {self.st_id}"
+    
+    def formatted_recording_date(self):
+        return self.recording_date.strftime("%Y-%m-%d")
