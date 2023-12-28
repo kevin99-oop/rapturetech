@@ -63,12 +63,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from apps.common.models import DPU, DREC
+from apps.common.serializers import DRECSerializer
 
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from apps.common.models import DPU, DREC
-from apps.common.serializers import DRECCreateSerializer
+from apps.common.serializers import DRECSerializer
 from apps.common.models import DPU, DREC
 from apps.common.forms import DRECForm
 
@@ -244,67 +245,6 @@ def custom_logout(request):
     return redirect('home')  # Redirect to the home page or another URL
 
 
-    
-class DRECCreateAPIView(APIView):
-    def post(self, request, *args, **kwargs):
-        serializer = DRECCreateSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            print(serializer.errors)  # Add this line for debugging
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class DRECCreateView(APIView):
-    # Other class attributes...
-
-    def post(self, request, *args, **kwargs):
-        # Step 1: Print or Log the Request Data
-        print(request.data)
-
-        # Step 2: Convert Date Format
-        request.data['recording_date'] = convert_date_format(request.data['recording_date'])
-
-        # Step 3: Validate and save data with the serializer
-        serializer = DRECSerializer(data=request.data)
-
-        if serializer.is_valid():
-            # Step 4: Print or Log Validation Errors (if any)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            print(serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    def post(self, request, *args, **kwargs):
-        # Step 1: Print or Log the Original Request Data
-        print("Original Request Data:", request.data)
-
-        # Step 2: Convert Date Format
-        request.data['recording_date'] = convert_date_format(request.data['recording_date'])
-
-        # Step 3: Print or Log the Modified Request Data
-        print("Modified Request Data:", request.data)
-    # Other methods...
-def convert_date_format(date_str):
-    try:
-        # Parse the date string in the provided format
-        date_object = datetime.strptime(date_str, '%b. %d, %Y')
-        # Format the date as 'YYYY-MM-DD'
-        return date_object.strftime('%Y-%m-%d')
-    except (ValueError, TypeError):
-        # Handle invalid or null date format
-        return None
-# Function to convert date format
-def convert_date_format(date_str):
-    try:
-        # Parse the date string in the provided format
-        date_object = datetime.strptime(date_str, '%b. %d, %Y')
-        # Format the date as 'YYYY-MM-DD'
-        return date_object.strftime('%Y-%m-%d')
-    except ValueError:
-        # Handle invalid date format
-        return None
-
 def create_drec(request):
     if request.method == 'POST':
         form = DRECForm(user=request.user, data=request.POST)
@@ -322,3 +262,7 @@ def create_drec(request):
 def list_drec(request):
     drecs = DREC.objects.all()
     return render(request, 'common/list_drec.html', {'drecs': drecs})
+
+class DRECListCreateView(generics.ListCreateAPIView):
+    queryset = DREC.objects.all()
+    serializer_class = DRECSerializer

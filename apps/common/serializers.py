@@ -93,8 +93,6 @@ class DPUListSerializer(serializers.ModelSerializer):
         model = DPU
         fields = '__all__'
 
-# Your existing serializers...
-
 class DRECSerializer(serializers.ModelSerializer):
     class Meta:
         model = DREC

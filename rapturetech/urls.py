@@ -31,7 +31,7 @@ from apps.common import views
 from rest_framework.authtoken.views import obtain_auth_token
 
 
-from apps.common.views import create_drec, list_drec,DRECCreateAPIView,DRECCreateView
+from apps.common.views import create_drec, list_drec,DRECListCreateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -97,11 +97,9 @@ urlpatterns = [
     path('add_dpu/', add_dpu, name='add_dpu'),
     path('active_dpu/', active_dpu, name='active_dpu'),
 
-    path('api/drec/', DRECCreateAPIView.as_view(), name='api_drec_create'),
+ 
+    path('api/drec/', DRECListCreateView.as_view(), name='drec-list-create'),
 
-    #path('api/drec/', DRECCreateView.as_view(), name='create-drec'),
-
-    
     
     path('drec/create/', create_drec, name='create_drec'),
     path('drec/list/', list_drec, name='list_drec'),
