@@ -275,12 +275,19 @@ class DRECCreateView(APIView):
         else:
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     # Other methods...
 
 # Function to convert date format
 def convert_date_format(date_str):
-    return datetime.strptime(date_str, '%b. %d, %Y').strftime('%Y-%m-%d')
+    try:
+        # Parse the date string in the provided format
+        date_object = datetime.strptime(date_str, '%b. %d, %Y')
+        # Format the date as 'YYYY-MM-DD'
+        return date_object.strftime('%Y-%m-%d')
+    except ValueError:
+        # Handle invalid date format
+        return None
+
 def create_drec(request):
     if request.method == 'POST':
         form = DRECForm(user=request.user, data=request.POST)
