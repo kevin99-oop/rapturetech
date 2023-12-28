@@ -275,8 +275,25 @@ class DRECCreateView(APIView):
         else:
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    # Other methods...
+    def post(self, request, *args, **kwargs):
+        # Step 1: Print or Log the Original Request Data
+        print("Original Request Data:", request.data)
 
+        # Step 2: Convert Date Format
+        request.data['recording_date'] = convert_date_format(request.data['recording_date'])
+
+        # Step 3: Print or Log the Modified Request Data
+        print("Modified Request Data:", request.data)
+    # Other methods...
+def convert_date_format(date_str):
+    try:
+        # Parse the date string in the provided format
+        date_object = datetime.strptime(date_str, '%b. %d, %Y')
+        # Format the date as 'YYYY-MM-DD'
+        return date_object.strftime('%Y-%m-%d')
+    except (ValueError, TypeError):
+        # Handle invalid or null date format
+        return None
 # Function to convert date format
 def convert_date_format(date_str):
     try:
