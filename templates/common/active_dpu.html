@@ -158,6 +158,8 @@
                   </div>
                   <div class="col-md-6">
                     <a href="{% url 'add_dpu' %}" class="btn btn-success" > <span>Add New DPU</span></a>
+                    <a href="{% url 'custupload' %}" class="btn btn-success" > <span>custupload</span></a>
+
                   </div>
                 </div>
               </div>
@@ -175,6 +177,7 @@
                   </tr>
                 </thead>
                 {% for dpu in active_dpu_list %}
+
                 <tbody>
                   <tr class="align-items-center text-align-center rounded">
                         <td>{{ dpu.location }}</td>
@@ -184,17 +187,13 @@
                         <td>{{ dpu.owner }}</td>
                         <td class="{% if dpu.status == 'active' %}text-success{% else %}text-danger{% endif %}">
                             {{ dpu.status }}
-                        </td>                   
-                    </tr>
+                        </td>                    </tr>
            
                 </tbody>
                 {% endfor %}       
 
               </table>
-    
-        
-        
-        
+
             </div>
           </div>
      

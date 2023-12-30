@@ -55,34 +55,22 @@ from rest_framework.parsers import JSONParser
 from rest_framework.decorators import parser_classes
 from rest_framework.authtoken.models import Token
 
-
-
-from django.views.generic import ListView
-from django.shortcuts import render
-from rest_framework.views import APIView
+# views.py
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from apps.common.models import Customer
+from apps.common.forms import CustomerForm
+# common/views.py
+from rest_framework import generics
 from rest_framework.response import Response
-from rest_framework import status
-from apps.common.models import DPU, DREC
-from apps.common.serializers import DRECSerializer
-
-from rest_framework import status
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from apps.common.models import DPU, DREC
-from apps.common.serializers import DRECSerializer
-from apps.common.models import DPU, DREC
-from apps.common.forms import DRECForm
-
-
-# apps/common/views.py
-
-# Import necessary modules
-from datetime import datetime
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework import status
-from apps.common.models import DPU, DREC
-from apps.common.serializers import DPUSerializer, DRECSerializer  # Import your serializers
+from rest_framework.parsers import FileUploadParser
+from .models import Customer
+from .serializers import CustomerSerializer
+import pandas as pd  # Assuming you use pandas for Excel processing
+import csv
+import requests
+import csv
+from io import TextIOWrapper
 
 class HomeView(TemplateView):
     template_name = 'common/index.html'
@@ -244,43 +232,41 @@ def custom_logout(request):
     # Additional logout logic if needed
     return redirect('home')  # Redirect to the home page or another URL
 
-
-def create_drec(request):
+def customer(request):
     if request.method == 'POST':
-        form = DRECForm(user=request.user, data=request.POST)
+        form = CustomerForm(request.POST, request.FILES)
         if form.is_valid():
-            drec = form.save(commit=False)
-            drec.user = request.user  # Assign the current user to the DREC instance
-            drec.dpu = DPU.objects.get(user=request.user, dpu_id=form.cleaned_data['dpu'].dpu_id)
-            drec.save()
-            return redirect('list_drec')
+            form.save()
+            excel_data = read_excel_data(form.cleaned_data['excel_file'])
+            call_api_custupload(excel_data)
+            return HttpResponse("File uploaded successfully and API called.")
     else:
-        form = DRECForm(user=request.user)
+        form = CustomerForm()
 
-    return render(request, 'common/create_drec.html', {'form': form})
+    return render(request, 'common/custupload.html', {'form': form})
 
-def list_drec(request):
-    drecs = DREC.objects.all()
-    return render(request, 'common/list_drec.html', {'drecs': drecs})
+def read_excel_data(excel_file):
+    csv_data = []
+    with TextIOWrapper(excel_file, encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            csv_data.append(row)
+    return csv_data
 
-class DRECListCreateView(generics.ListCreateAPIView):
-    queryset = DREC.objects.all()
-    serializer_class = DRECSerializer
+def call_api_custupload(csv_data):
+    api_url = 'http://3.87.129.89:8000/api/custupload'
+    headers = {'Content-Type': 'application/json'}
+    response = requests.post(api_url, json=csv_data, headers=headers)
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-    def perform_create(self, serializer):
-        serializer.save()
-def create(self, request, *args, **kwargs):
-    serializer = self.get_serializer(data=request.data)
-    if serializer.is_valid():
-        self.perform_create(serializer)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    if response.status_code == 200:
+        print("API call successful")
     else:
-        print(serializer.errors)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        print(f"API call failed with status code: {response.status_code}")
+from django.http import JsonResponse
+
+def custload(request):
+    if request.method == 'POST':
+        # Handle POST request logic here
+        return JsonResponse({'status': 'success'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)

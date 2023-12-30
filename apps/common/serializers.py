@@ -31,69 +31,11 @@ class UserSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
-
 # common/serializers.py
-
 from rest_framework import serializers
-from apps.common.models import DPU, DREC
+from apps.common.models import Customer
 
-class DPUSerializer(serializers.ModelSerializer):
+class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = DPU
-        fields = '__all__'
-
-# serializers.py
-
-from rest_framework import serializers
-from apps.common.models import DREC
-
-
-class DPUListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DPU
-        fields = '__all__'
-
-# Your existing serializers...
-
-class DRECSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DREC
-        fields = '__all__'
-class DRECCreateSerializer(serializers.ModelSerializer):
-    # ... other fields ...
-
-    class Meta:
-        model = DREC
-        fields = '__all__'
-        extra_kwargs = {
-            'st_id': {'required': False},
-            'recording_date': {'required': False},
-            'shift': {'required': False},
-            'fat': {'required': False},
-            'fat_unit': {'required': False},
-            'snf': {'required': False},
-            'snf_unit': {'required': False},
-            'clr': {'required': False},
-            'clr_unit': {'required': False},
-            'water': {'required': False},
-            'water_unit': {'required': False},
-            'qt': {'required': False},
-            'qt_unit': {'required': False},
-            'rate': {'required': False},
-            'amount': {'required': False},
-            'camount': {'required': False},
-            'csr_no': {'required': False},
-            'crev': {'required': False},
-            'end_tag': {'required': False},
-            'data': {'required': False},
-            'dpu': {'required': False},
-        }
-class DPUListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DPU
-        fields = '__all__'
-
-class DRECSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DREC
-        fields = '__all__'
+        model = Customer
+        fields = ['excel_file']

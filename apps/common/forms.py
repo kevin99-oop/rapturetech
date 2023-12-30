@@ -3,7 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from apps.userprofile.models import Profile
 from django.forms import ModelForm
-from apps.common.models import DREC
+from apps.common.models import Customer
+
 
 
 
@@ -66,15 +67,7 @@ class DPUForm(forms.ModelForm):
         
         fields = ['location', 'dpu_id', 'society', 'mobile_number', 'owner', 'status']
 
-        
-
-class DRECForm(forms.ModelForm):
+class CustomerForm(forms.ModelForm):
     class Meta:
-        model = DREC
-        fields = '__all__'
-
-    def __init__(self, user, *args, **kwargs):
-        super(DRECForm, self).__init__(*args, **kwargs)
-
-        if user:
-            self.fields['dpu'].queryset = DPU.objects.filter(user=user)
+        model = Customer
+        fields = ['excel_file']

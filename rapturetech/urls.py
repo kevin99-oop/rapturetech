@@ -20,7 +20,7 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import path,include
 from apps.common import views
-from apps.common.views import HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView, ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu
+from apps.common.views import HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView, ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,customer
 
 from django.contrib.auth import views as auth_views
 from django.urls import path,include
@@ -29,10 +29,6 @@ from django.urls import path
 from django.urls import path, include
 from apps.common import views
 from rest_framework.authtoken.views import obtain_auth_token
-
-
-from apps.common.views import create_drec, list_drec,DRECListCreateView
-
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -96,13 +92,9 @@ urlpatterns = [
 
     path('add_dpu/', add_dpu, name='add_dpu'),
     path('active_dpu/', active_dpu, name='active_dpu'),
+    path('custupload/', customer, name='custupload'),
 
- 
-    path('api/drec/', DRECListCreateView.as_view(), name='drec-list-create'),
 
-    
-    path('drec/create/', create_drec, name='create_drec'),
-    path('drec/list/', list_drec, name='list_drec'),
 ]
 
 if settings.DEBUG:
