@@ -22,7 +22,7 @@ from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
-from apps.common.serializers import UserSerializer, LoginSerializer
+from apps.common.serializers import UserSerializer, LoginSerializer,DRECSerializer
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework import permissions, authentication
 
@@ -243,7 +243,7 @@ def customer(request):
     else:
         form = CustomerForm()
 
-    return render(request, 'common/custupload.html', {'form': form})
+    return render(request, 'common/customer_list.html', {'form': form})
 
 def read_excel_data(excel_file):
     csv_data = []
@@ -270,3 +270,33 @@ def custload(request):
         return JsonResponse({'status': 'success'})
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+    
+def customer_list(request):
+    if request.method == 'POST':
+        form = CustomerForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+
+    customers = Customer.objects.all()
+    print(customers)  # Add this line to check if customers are retrieved
+    return render(request, 'common/customer_list.html', {'customers': customers})
+
+
+class DRECCreateView(APIView):
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        dpuid = data.get('dpuid', None)
+
+        try:
+            dpu = DPU.objects.get(dpu_id=dpuid)
+        except DPU.DoesNotExist:
+            return Response({"error": f"DPU with dpuid {dpuid} does not exist."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = DRECSerializer(data=data)
+
+        if serializer.is_valid():
+            serializer.validated_data['dpu'] = dpu
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response({"error": "Invalid data provided."}, status=status.HTTP_400_BAD_REQUEST)

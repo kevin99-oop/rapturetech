@@ -31,3 +31,34 @@ class Customer(models.Model):
 
     def __str__(self):
         return f"{self.excel_file.name}"
+    
+class DREC(models.Model):
+    dpu = models.ForeignKey(DPU, on_delete=models.CASCADE)
+    REC_TYPE = models.CharField(max_length=255, default="", blank=True)
+    SLIP_TYPE = models.IntegerField(null=True, default=None)
+    ST_ID = models.CharField(max_length=255, default="", blank=True)
+    CUST_ID = models.IntegerField(null=True, default=None)
+    TotalFileRecord = models.IntegerField(null=True, default=None)
+    FlagEdited = models.CharField(max_length=255, default="", blank=True)
+    MType = models.IntegerField(null=True, default=None)
+    RecordingDate = models.DateField(null=True, default=None)
+    SHIFT = models.IntegerField(null=True, default=None)
+    FAT = models.FloatField(null=True, default=None)
+    FAT_UNIT = models.CharField(max_length=255, default="", blank=True)
+    SNF = models.FloatField(null=True, default=None)
+    SNF_UNIT = models.CharField(max_length=255, default="", blank=True)
+    CLR = models.FloatField(null=True, default=None)
+    CLR_UNIT = models.CharField(max_length=255, default="", blank=True)
+    WATER = models.FloatField(null=True, default=None)
+    WATER_UNIT = models.CharField(max_length=255, default="", blank=True)
+    QT = models.FloatField(null=True, default=None)
+    QT_UNIT = models.CharField(max_length=255, default="", blank=True)
+    RATE = models.FloatField(null=True, default=None)
+    Amount = models.FloatField(null=True, default=None)
+    CAmount = models.FloatField(null=True, default=None)
+    CSR_NO = models.IntegerField(null=True, default=None)
+    CREV = models.IntegerField(null=True, default=None)
+    END_TAG = models.CharField(max_length=255, default="", blank=True)
+
+    def __str__(self):
+        return f"DREC for {self.dpu.user.username} - {self.ST_ID}"

@@ -33,9 +33,14 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField()
 # common/serializers.py
 from rest_framework import serializers
-from apps.common.models import Customer
+from apps.common.models import Customer, DREC
 
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = ['excel_file']
+
+class DRECSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DREC
+        fields = '__all__'
