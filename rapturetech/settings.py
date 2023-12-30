@@ -178,3 +178,4 @@ AUTHENTICATION_BACKENDS = [
     # Add any additional backends as needed
 ]
 
+SECURE_SSL_REDIRECT = False
