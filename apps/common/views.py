@@ -25,6 +25,7 @@ from django.contrib.auth.models import User
 from apps.common.serializers import UserSerializer, LoginSerializer,DRECSerializer
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework import permissions, authentication
+from apps.common.models import DREC
 
 from apps.common.forms import DPUForm
 from rest_framework.authentication import TokenAuthentication
@@ -283,6 +284,15 @@ def customer_list(request):
 
 
 class DRECCreateView(APIView):
+    queryset = DREC.objects.all()
+    serializer_class = DRECSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     def post(self, request, *args, **kwargs):
         data = request.data
         dpuid = data.get('dpuid', None)
