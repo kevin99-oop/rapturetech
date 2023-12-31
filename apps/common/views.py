@@ -55,7 +55,8 @@ from rest_framework.parsers import JSONParser
 from rest_framework.decorators import parser_classes
 from rest_framework.authtoken.models import Token
 from apps.common.forms import DRECForm
-
+from apps.common.models import DREC
+from apps.common.serializers import DRECSerializer
 class HomeView(TemplateView):
     template_name = 'common/index.html'
     def get_context_data(self, **kwargs):
@@ -225,3 +226,14 @@ def drec_view(request):
         form = DRECForm()
 
     return render(request, 'common/drec_form.html', {'form': form})
+
+
+class DRECListCreateView(generics.ListCreateAPIView):
+    queryset = DREC.objects.all()
+    serializer_class = DRECSerializer
+
+    def get_queryset(self):
+        return DREC.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save()
