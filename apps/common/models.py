@@ -26,37 +26,33 @@ class DPU(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s DPU - {self.dpu_id}"
-class Customer(models.Model):
-    excel_file = models.FileField(upload_to='excel_files/')
-
-    def __str__(self):
-        return f"{self.excel_file.name}"
-    
 class DREC(models.Model):
-    dpu = models.ForeignKey(DPU, on_delete=models.CASCADE)
-    st_id = models.CharField(max_length=50)
-    flag_edited = models.CharField(max_length=1)
-    m_type = models.CharField(max_length=1)
-    recording_date = models.DateField()
-    shift = models.CharField(max_length=1)
-    fat = models.FloatField()
-    fat_unit = models.CharField(max_length=1)
-    snf = models.FloatField()
-    snf_unit = models.CharField(max_length=1)
-    clr = models.FloatField()
-    clr_unit = models.CharField(max_length=1)
-    water = models.FloatField()
-    water_unit = models.CharField(max_length=1)
-    qt = models.FloatField()
-    qt_unit = models.CharField(max_length=1)
-    rate = models.FloatField()
-    amount = models.FloatField()
-    camount = models.FloatField()
-    csr_no = models.IntegerField()
-    crev = models.IntegerField()
-    end_tag = models.CharField(max_length=1)
-    dpuid = models.CharField(max_length=50)
-    data = models.JSONField()
+    REC_TYPE = models.CharField(max_length=100)
+    SLIP_TYPE = models.CharField(max_length=100)
+    ST_ID = models.CharField(max_length=100)
+    CUST_ID = models.IntegerField()
+    TotalFileRecord = models.IntegerField()
+    FlagEdited = models.CharField(max_length=100)
+    MType = models.CharField(max_length=100)
+    RecordingDate = models.DateField()
+    SHIFT = models.CharField(max_length=100)
+    FAT = models.FloatField()
+    FAT_UNIT = models.CharField(max_length=100)
+    SNF = models.FloatField()
+    SNF_UNIT = models.CharField(max_length=100)
+    CLR = models.FloatField()
+    CLR_UNIT = models.CharField(max_length=100)
+    WATER = models.FloatField()
+    WATER_UNIT = models.CharField(max_length=100)
+    QT = models.FloatField()
+    QT_UNIT = models.CharField(max_length=100)
+    RATE = models.FloatField()
+    Amount = models.FloatField()
+    CAmount = models.FloatField()
+    CSR_NO = models.IntegerField()
+    CREV = models.IntegerField()
+    END_TAG = models.CharField(max_length=100)
+    dpuid = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"DREC for {self.dpu.user.username} - {self.st_id}"
+        return f"DREC-{self.id}"

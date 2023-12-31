@@ -22,10 +22,9 @@ from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
-from apps.common.serializers import UserSerializer, LoginSerializer,DRECSerializer
+from apps.common.serializers import UserSerializer, LoginSerializer
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework import permissions, authentication
-from apps.common.models import DREC
 
 from apps.common.forms import DPUForm
 from rest_framework.authentication import TokenAuthentication
@@ -55,23 +54,7 @@ from rest_framework import status
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import parser_classes
 from rest_framework.authtoken.models import Token
-
-# views.py
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from apps.common.models import Customer
-from apps.common.forms import CustomerForm
-# common/views.py
-from rest_framework import generics
-from rest_framework.response import Response
-from rest_framework.parsers import FileUploadParser
-from .models import Customer
-from .serializers import CustomerSerializer
-import pandas as pd  # Assuming you use pandas for Excel processing
-import csv
-import requests
-import csv
-from io import TextIOWrapper
+from apps.common.forms import DRECForm
 
 class HomeView(TemplateView):
     template_name = 'common/index.html'
@@ -232,81 +215,13 @@ def custom_logout(request):
     logout(request)
     # Additional logout logic if needed
     return redirect('home')  # Redirect to the home page or another URL
-
-def customer(request):
+def drec_view(request):
     if request.method == 'POST':
-        form = CustomerForm(request.POST, request.FILES)
+        form = DRECForm(request.POST)
         if form.is_valid():
             form.save()
-            excel_data = read_excel_data(form.cleaned_data['excel_file'])
-            call_api_custupload(excel_data)
-            return HttpResponse("File uploaded successfully and API called.")
+            return redirect('success_url')  # Replace 'success_url' with the URL where you want to redirect after successful submission
     else:
-        form = CustomerForm()
+        form = DRECForm()
 
-    return render(request, 'common/customer_list.html', {'form': form})
-
-def read_excel_data(excel_file):
-    csv_data = []
-    with TextIOWrapper(excel_file, encoding='utf-8') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            csv_data.append(row)
-    return csv_data
-
-def call_api_custupload(csv_data):
-    api_url = 'http://3.87.129.89:8000/api/custupload'
-    headers = {'Content-Type': 'application/json'}
-    response = requests.post(api_url, json=csv_data, headers=headers)
-
-    if response.status_code == 200:
-        print("API call successful")
-    else:
-        print(f"API call failed with status code: {response.status_code}")
-from django.http import JsonResponse
-
-def custload(request):
-    if request.method == 'POST':
-        # Handle POST request logic here
-        return JsonResponse({'status': 'success'})
-    else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
-    
-def customer_list(request):
-    if request.method == 'POST':
-        form = CustomerForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-
-    customers = Customer.objects.all()
-    print(customers)  # Add this line to check if customers are retrieved
-    return render(request, 'common/customer_list.html', {'customers': customers})
-
-
-class DRECCreateView(APIView):
-    queryset = DREC.objects.all()
-    serializer_class = DRECSerializer
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-    def post(self, request, *args, **kwargs):
-        data = request.data
-        dpuid = data.get('dpuid', None)
-
-        try:
-            dpu = DPU.objects.get(dpu_id=dpuid)
-        except DPU.DoesNotExist:
-            return Response({"error": f"DPU with dpuid {dpuid} does not exist."}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = DRECSerializer(data=data)
-
-        if serializer.is_valid():
-            serializer.validated_data['dpu'] = dpu
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        return Response({"error": "Invalid data provided."}, status=status.HTTP_400_BAD_REQUEST)
+    return render(request, 'common/drec_form.html', {'form': form})

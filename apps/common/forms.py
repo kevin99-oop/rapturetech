@@ -3,8 +3,6 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from apps.userprofile.models import Profile
 from django.forms import ModelForm
-from apps.common.models import Customer
-
 
 
 
@@ -59,7 +57,7 @@ class ProfileForm(forms.ModelForm):
 # forms.py
 
 from django import forms
-from apps.common.models import DPU
+from apps.common.models import DPU, DREC
 
 class DPUForm(forms.ModelForm):
     class Meta:
@@ -67,7 +65,7 @@ class DPUForm(forms.ModelForm):
         
         fields = ['location', 'dpu_id', 'society', 'mobile_number', 'owner', 'status']
 
-class CustomerForm(forms.ModelForm):
+class DRECForm(forms.ModelForm):
     class Meta:
-        model = Customer
-        fields = ['excel_file']
+        model = DREC
+        fields = '__all__'
