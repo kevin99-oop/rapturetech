@@ -237,3 +237,4 @@ class DRECListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save()
+        return Response({"message": "Data successfully created"}, status=status.HTTP_200_OK)
