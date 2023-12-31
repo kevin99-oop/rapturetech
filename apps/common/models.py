@@ -52,7 +52,7 @@ class DREC(models.Model):
     CSR_NO = models.IntegerField()
     CREV = models.IntegerField()
     END_TAG = models.CharField(max_length=100)
-    dpuid = models.CharField(max_length=255)
+    dpu = models.ForeignKey(DPU, on_delete=models.CASCADE, related_name='drecs')
 
     def __str__(self):
         return f"DREC-{self.id}"

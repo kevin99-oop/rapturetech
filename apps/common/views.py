@@ -236,5 +236,16 @@ class DRECListCreateView(generics.ListCreateAPIView):
         return DREC.objects.all()
 
     def perform_create(self, serializer):
-        serializer.save()
+        # Get the user associated with the request
+        user = self.request.user
+
+        # Get the user's DPU
+        try:
+            dpu = DPU.objects.get(user=user)
+        except DPU.DoesNotExist:
+            return Response({"error": "DPU not found for the user"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Save the serializer with associated DPU
+        serializer.save(dpu=dpu)
+
         return Response({"message": "Data successfully created"}, status=status.HTTP_200_OK)

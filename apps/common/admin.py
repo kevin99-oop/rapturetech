@@ -8,5 +8,5 @@ class DPUAdmin(admin.ModelAdmin):
 
 @admin.register(DREC)
 class DRECAdmin(admin.ModelAdmin):
-    list_display = ('id', 'REC_TYPE', 'SLIP_TYPE', 'ST_ID', 'CUST_ID', 'RecordingDate', 'END_TAG', 'dpuid')
-    search_fields = ('REC_TYPE', 'SLIP_TYPE', 'ST_ID', 'CUST_ID', 'dpuid')  # Add fields you want to be searchable
+    list_display = ('id', 'REC_TYPE', 'SLIP_TYPE', 'ST_ID', 'CUST_ID', 'RecordingDate', 'END_TAG')
+    search_fields = ('REC_TYPE', 'SLIP_TYPE', 'ST_ID', 'CUST_ID', )  # Add fields you want to be searchable
