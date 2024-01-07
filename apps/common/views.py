@@ -230,12 +230,19 @@ class DRECViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def post_data(self, request):
+        # Create an instance of the serializer with the request data
         serializer = DRECSerializer(data=request.data)
+
+        # Check if the data is valid
         if serializer.is_valid():
+            # Save the instance
             serializer.save()
+
+            # Return a successful response with the serialized data
             return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
-    
+        else:
+            # If there are validation errors, return a response with the errors
+            return Response(serializer.errors, status=400)
 class DRECView(APIView):
     def get(self, request):
         # Your logic to fetch data
