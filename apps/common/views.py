@@ -59,6 +59,12 @@ from apps.common.models import DREC
 from apps.common.serializers import DRECSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+
+
 class HomeView(TemplateView):
     template_name = 'common/index.html'
     def get_context_data(self, **kwargs):
@@ -229,3 +235,22 @@ class DRECViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
+    
+class DRECView(APIView):
+    def get(self, request):
+        # Your logic to fetch data
+        data = {
+            'status': 'success',
+            'message': 'DREC data fetched successfully',
+            # Add more fields as needed
+        }
+        return Response(data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        # Your logic to handle the POST request
+        data = {
+            'status': 'success',
+            'message': 'DREC data created successfully',
+            # Add more fields as needed
+        }
+        return Response(data, status=status.HTTP_200_OK)
