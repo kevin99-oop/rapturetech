@@ -57,15 +57,10 @@ class ProfileForm(forms.ModelForm):
 # forms.py
 
 from django import forms
-from apps.common.models import DPU, DREC
+from apps.common.models import DPU
 
 class DPUForm(forms.ModelForm):
     class Meta:
         model = DPU
         
         fields = ['location', 'dpu_id', 'society', 'mobile_number', 'owner', 'status']
-
-class DRECForm(forms.ModelForm):
-    class Meta:
-        model = DREC
-        fields = '__all__'

@@ -54,9 +54,11 @@ from rest_framework import status
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import parser_classes
 from rest_framework.authtoken.models import Token
-from apps.common.forms import DRECForm
+from rest_framework import viewsets
 from apps.common.models import DREC
 from apps.common.serializers import DRECSerializer
+from rest_framework.decorators import action
+from rest_framework.response import Response
 class HomeView(TemplateView):
     template_name = 'common/index.html'
     def get_context_data(self, **kwargs):
@@ -216,25 +218,14 @@ def custom_logout(request):
     logout(request)
     # Additional logout logic if needed
     return redirect('home')  # Redirect to the home page or another URL
-def drec_view(request):
-    if request.method == 'POST':
-        form = DRECForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('success_url')  # Replace 'success_url' with the URL where you want to redirect after successful submission
-    else:
-        form = DRECForm()
-
-    return render(request, 'common/drec_form.html', {'form': form})
-
-
-class DRECListCreateView(generics.ListCreateAPIView):
+class DRECViewSet(viewsets.ModelViewSet):
     queryset = DREC.objects.all()
     serializer_class = DRECSerializer
 
-    def get_queryset(self):
-        return DREC.objects.all()
-
-    def perform_create(self, serializer):
-        serializer.save()
-        return Response({"message": "Data successfully created"}, status=status.HTTP_200_OK)
+    @action(detail=False, methods=['post'])
+    def post_data(self, request):
+        serializer = DRECSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)

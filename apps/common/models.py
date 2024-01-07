@@ -27,32 +27,32 @@ class DPU(models.Model):
     def __str__(self):
         return f"{self.user.username}'s DPU - {self.dpu_id}"
 class DREC(models.Model):
-    REC_TYPE = models.CharField(max_length=100)
-    SLIP_TYPE = models.CharField(max_length=100)
-    ST_ID = models.CharField(max_length=100)
+    REC_TYPE = models.CharField(max_length=1)
+    SLIP_TYPE = models.CharField(max_length=1)
+    ST_ID = models.CharField(max_length=50)
     CUST_ID = models.IntegerField()
     TotalFileRecord = models.IntegerField()
-    FlagEdited = models.CharField(max_length=100)
-    MType = models.CharField(max_length=100)
+    FlagEdited = models.CharField(max_length=1)
+    MType = models.CharField(max_length=1)
     RecordingDate = models.DateField()
-    SHIFT = models.CharField(max_length=100)
+    SHIFT = models.CharField(max_length=1)
     FAT = models.FloatField()
-    FAT_UNIT = models.CharField(max_length=100)
+    FAT_UNIT = models.CharField(max_length=1)
     SNF = models.FloatField()
-    SNF_UNIT = models.CharField(max_length=100)
+    SNF_UNIT = models.CharField(max_length=1)
     CLR = models.FloatField()
-    CLR_UNIT = models.CharField(max_length=100)
+    CLR_UNIT = models.CharField(max_length=1)
     WATER = models.FloatField()
-    WATER_UNIT = models.CharField(max_length=100)
+    WATER_UNIT = models.CharField(max_length=1)
     QT = models.FloatField()
-    QT_UNIT = models.CharField(max_length=100)
+    QT_UNIT = models.CharField(max_length=1)
     RATE = models.FloatField()
     Amount = models.FloatField()
     CAmount = models.FloatField()
     CSR_NO = models.IntegerField()
     CREV = models.IntegerField()
-    END_TAG = models.CharField(max_length=100)
-    dpuid = models.CharField(max_length=255)  # Use the same dpuid field
+    END_TAG = models.CharField(max_length=1)
+    dpuid = models.CharField(max_length=50)
 
     def __str__(self):
-        return f"DREC-{self.id}"
+        return f"DREC for CUST_ID: {self.CUST_ID}, Recording Date: {self.RecordingDate}"
