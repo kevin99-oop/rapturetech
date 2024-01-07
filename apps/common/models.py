@@ -56,3 +56,19 @@ class DREC(models.Model):
 
     def __str__(self):
         return f"DREC for CUST_ID: {self.CUST_ID}, Recording Date: {self.RecordingDate}"
+    
+
+class Customer(models.Model):
+    # Add your other fields here
+    csv_file = models.FileField(upload_to='customer_csv/', null=True, blank=True)
+
+    def __str__(self):
+        # Return a meaningful representation of the customer instance
+        return f"Customer #{self.pk}"
+class Customer(models.Model):
+    # Add your other fields here
+    csv_file = models.FileField(upload_to='customer_csv/', null=True, blank=True)
+
+    def __str__(self):
+        # Return a meaningful representation of the customer instance
+        return f"Customer #{self.pk}"

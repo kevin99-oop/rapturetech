@@ -63,6 +63,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+from apps.common.models import Customer
 
 
 class HomeView(TemplateView):
@@ -243,21 +244,50 @@ class DRECViewSet(viewsets.ModelViewSet):
         else:
             # If there are validation errors, return a response with the errors
             return Response(serializer.errors, status=400)
-class DRECView(APIView):
-    def get(self, request):
-        # Your logic to fetch data
-        data = {
-            'status': 'success',
-            'message': 'DREC data fetched successfully',
-            # Add more fields as needed
-        }
-        return Response(data, status=status.HTTP_200_OK)
+import requests
 
-    def post(self, request):
-        # Your logic to handle the POST request
-        data = {
-            'status': 'success',
-            'message': 'DREC data created successfully',
-            # Add more fields as needed
-        }
-        return Response(data, status=status.HTTP_200_OK)
+class DRECViewSet(viewsets.ModelViewSet):
+    queryset = DREC.objects.all()
+    serializer_class = DRECSerializer
+
+    @action(detail=False, methods=['post'])
+    def post_data(self, request):
+        serializer = DRECSerializer(data=request.data)
+        if serializer.is_valid():
+            # Serialize the data to prepare it for sending to custupload API
+            serialized_data = serializer.data
+
+            # Construct api_data based on the serialized data
+            api_data = {key: value for key, value in serialized_data.items()}
+
+            serializer.save()
+
+            # Make an API call to api/custupload/ upon successful data storage
+            api_endpoint = 'http://3.87.129.89:8000/api/drec/'  # Replace with the actual URL
+
+            response = requests.post(api_endpoint, data=api_data)
+
+            if response.status_code == 201:
+                # Return a success response
+                return Response({'message': 'Data stored and custupload API called successfully.'}, status=response.status_code)
+            else:
+                # Return an error response if the custupload API call was not successful
+                return Response({'error': 'Failed to call custupload API.'}, status=response.status_code)
+        else:
+            return Response(serializer.errors, status=400)
+
+def custupload(request):
+    if request.method == 'POST':
+        csv_file = request.FILES.get('csv_file')
+        if csv_file:
+            # Save the uploaded file to the customer instance
+            customer = Customer.objects.create(csv_file=csv_file)
+            # Process the CSV file or perform any other necessary actions
+
+            return redirect('upload_success')  # Redirect to a success page or another URL
+
+    return render(request, 'common/custupload.html')
+from django.http import HttpResponse
+
+def upload_success(request):
+    return HttpResponse("Upload successful!")
