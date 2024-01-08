@@ -25,6 +25,7 @@ from django.contrib.auth.models import User
 from apps.common.serializers import UserSerializer, LoginSerializer
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework import permissions, authentication
+import datetime
 
 from apps.common.forms import DPUForm
 from rest_framework.authentication import TokenAuthentication
@@ -64,6 +65,8 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from apps.common.models import Customer
+from django.http import JsonResponse
+from django.views import View
 
 
 class HomeView(TemplateView):
@@ -251,9 +254,16 @@ from django.http import HttpResponse
 def upload_success(request):
     return HttpResponse("Upload successful!")
 
+class NtpDatetimeView(View):
+    def get(self, request, *args, **kwargs):
+        # Get the current system date and time
+        current_datetime = datetime.datetime.now()
 
-class NtpDatetimeView(APIView):
-    def get(self, request):
-        # Your logic to fetch NTP datetime and respond
-        ntp_datetime = "2024-01-08 12:34:56"
-        return Response({'ntp_datetime': ntp_datetime})
+        # Format the date and time as a string
+        formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+
+        # Create a dictionary with the response data
+        response_data = {'datetime': formatted_datetime}
+
+        # Return the response as a JSON object
+        return JsonResponse(response_data)
