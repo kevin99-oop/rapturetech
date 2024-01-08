@@ -225,27 +225,14 @@ def custom_logout(request):
     logout(request)
     # Additional logout logic if needed
     return redirect('home')  # Redirect to the home page or another URL
+
 class DRECViewSet(viewsets.ModelViewSet):
     queryset = DREC.objects.all()
     serializer_class = DRECSerializer
 
-    @action(detail=False, methods=['post'])
-    def post_data(self, request):
-        serializer = DRECSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)  # Explicitly set status to 200
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Use standard 400 status
-    def create(self, validated_data):
-        instance = super().create(validated_data)
-        self._data = instance  # Save the created instance
-        return instance
-
-    def to_representation(self, instance):
-        response = super().to_representation(instance)
-        if hasattr(self, '_data'):
-            response = self._data  # Use the saved instance data
-            delattr(self, '_data')  # Clean up
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        response.status_code = 200  # Set the status code to 200
         return response
     
 def custupload(request):
