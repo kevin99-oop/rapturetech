@@ -20,8 +20,7 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import path,include
 from apps.common import views
-from apps.common.views import HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView, ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,DRECViewSet,custupload,upload_success
-
+from apps.common.views import HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView, ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu
 
 from django.contrib.auth import views as auth_views
 from django.urls import path,include
@@ -93,12 +92,8 @@ urlpatterns = [
 
     path('add_dpu/', add_dpu, name='add_dpu'),
     path('active_dpu/', active_dpu, name='active_dpu'),
-    path('api/drec/', DRECViewSet.as_view({'get': 'list', 'post': 'create'}), name='drec'),
-    path('custupload/', custupload, name='custupload'),
-    # Add a URL for a success page if needed
-   # path('upload-success/', upload_success, name='upload_success'),
-       path('upload_success/', upload_success, name='upload_success'),
 
+   
 ]
 
 if settings.DEBUG:
