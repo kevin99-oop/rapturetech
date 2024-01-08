@@ -1,8 +1,11 @@
 from django.contrib import admin
 
 # Register your models here.
-from apps.common.models import DREC
+from apps.common.models import DREC,DPU
 
+
+class DPUAdmin(admin.ModelAdmin):
+    list_display = ('user', 'location', 'dpu_id', 'society', 'mobile_number', 'owner', 'status',)
 @admin.register(DREC)
 class DRECAdmin(admin.ModelAdmin):
     list_display = ('REC_TYPE', 'SLIP_TYPE', 'ST_ID', 'CUST_ID', 'RecordingDate', 'SHIFT', 'QT', 'Amount', 'CAmount')
