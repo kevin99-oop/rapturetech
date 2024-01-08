@@ -236,7 +236,18 @@ class DRECViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)  # Explicitly set status to 200
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Use standard 400 status
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        self._data = instance  # Save the created instance
+        return instance
 
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        if hasattr(self, '_data'):
+            response = self._data  # Use the saved instance data
+            delattr(self, '_data')  # Clean up
+        return response
+    
 def custupload(request):
     if request.method == 'POST':
         csv_file = request.FILES.get('csv_file')
