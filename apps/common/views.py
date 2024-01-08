@@ -250,3 +250,10 @@ from django.http import HttpResponse
 
 def upload_success(request):
     return HttpResponse("Upload successful!")
+
+
+class NtpDatetimeView(APIView):
+    def get(self, request):
+        # Your logic to fetch NTP datetime and respond
+        ntp_datetime = "2024-01-08 12:34:56"
+        return Response({'ntp_datetime': ntp_datetime})

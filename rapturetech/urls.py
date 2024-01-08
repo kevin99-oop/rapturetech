@@ -20,7 +20,7 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import path,include
 from apps.common import views
-from apps.common.views import HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView, ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,DRECViewSet,custupload,upload_success
+from apps.common.views import HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView, ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,DRECViewSet,custupload,upload_success,NtpDatetimeView
 
 
 from django.contrib.auth import views as auth_views
@@ -98,6 +98,7 @@ urlpatterns = [
     # Add a URL for a success page if needed
    # path('upload-success/', upload_success, name='upload_success'),
        path('upload_success/', upload_success, name='upload_success'),
+    path('api/ntpdatetime/', NtpDatetimeView.as_view(), name='ntp_datetime_api'),
 
 ]
 
