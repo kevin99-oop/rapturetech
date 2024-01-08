@@ -231,50 +231,11 @@ class DRECViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def post_data(self, request):
-        # Create an instance of the serializer with the request data
-        serializer = DRECSerializer(data=request.data)
-
-        # Check if the data is valid
-        if serializer.is_valid():
-            # Save the instance
-            serializer.save()
-
-            # Return a successful response with the serialized data
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            # If there are validation errors, return a response with the errors
-            return Response(serializer.errors, status=400)
-import requests
-
-class DRECViewSet(viewsets.ModelViewSet):
-    queryset = DREC.objects.all()
-    serializer_class = DRECSerializer
-
-    @action(detail=False, methods=['post'])
-    def post_data(self, request):
         serializer = DRECSerializer(data=request.data)
         if serializer.is_valid():
-            # Serialize the data to prepare it for sending to custupload API
-            serialized_data = serializer.data
-
-            # Construct api_data based on the serialized data
-            api_data = {key: value for key, value in serialized_data.items()}
-
             serializer.save()
-
-            # Make an API call to api/custupload/ upon successful data storage
-            api_endpoint = 'http://3.87.129.89:8000/api/drec/'  # Replace with the actual URL
-
-            response = requests.post(api_endpoint, data=api_data)
-
-            if response.status_code == 200:
-                # Return a success response
-                return Response({'message': 'Data stored and custupload API called successfully.'}, status=response.status_code)
-            else:
-                # Return an error response if the custupload API call was not successful
-                return Response({'error': 'Failed to call custupload API.'}, status=response.status_code)
-        else:
-            return Response(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_200_OK)  # Explicitly set status to 200
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Use standard 400 status
 
 def custupload(request):
     if request.method == 'POST':
