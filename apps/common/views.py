@@ -267,7 +267,7 @@ class DRECViewSet(viewsets.ModelViewSet):
 
             response = requests.post(api_endpoint, data=api_data)
 
-            if response.status_code == 201:
+            if response.status_code == 200:
                 # Return a success response
                 return Response({'message': 'Data stored and custupload API called successfully.'}, status=response.status_code)
             else:
