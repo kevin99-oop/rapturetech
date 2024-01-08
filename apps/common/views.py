@@ -240,7 +240,7 @@ class DRECViewSet(viewsets.ModelViewSet):
             serializer.save()
 
             # Return a successful response with the serialized data
-            return Response(serializer.data, status=201)
+            return Response(serializer.data, status=200)
         else:
             # If there are validation errors, return a response with the errors
             return Response(serializer.errors, status=400)
