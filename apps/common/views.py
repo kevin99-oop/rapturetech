@@ -57,7 +57,7 @@ from rest_framework.decorators import parser_classes
 from rest_framework.authtoken.models import Token
 from rest_framework import viewsets
 from apps.common.models import DREC
-from apps.common.serializers import DRECSerializer
+from apps.common.serializers import DRECSerializer,CustomerSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -284,13 +284,14 @@ class CustomerUploadAPIView(APIView):
     parser_classes = [FileUploadParser]
 
     def post(self, request, *args, **kwargs):
-        file_serializer = CustomerUploadForm(data=request.data)
+        serializer = CustomerSerializer(data=request.data)
 
-        if file_serializer.is_valid():
-            file_serializer.save()
-            return Response(file_serializer.data, status=status.HTTP_201_CREATED)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         
 
 def show_file_data(request):
