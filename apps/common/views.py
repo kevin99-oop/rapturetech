@@ -233,6 +233,13 @@ class DRECViewSet(viewsets.ModelViewSet):
     queryset = DREC.objects.all()
     serializer_class = DRECSerializer
 
+    def perform_create(self, serializer):
+        # You can customize the save process here before calling the super method
+        instance = serializer.save()
+
+        # Additional logic, if needed
+        # For example, you can perform some actions based on the created instance
+
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
         response.status_code = 200  # Set the status code to 200
@@ -253,7 +260,6 @@ from django.http import HttpResponse
 
 def upload_success(request):
     return HttpResponse("Upload successful!")
-
 class NtpDatetimeView(View):
     def get(self, request, *args, **kwargs):
         # Get the current system date and time
