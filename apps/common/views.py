@@ -297,3 +297,16 @@ class CustomerUploadAPIView(APIView):
 def show_file_data(request):
     customers = Customer.objects.all()
     return render(request, 'common/file_data.html', {'customers': customers})
+@api_view(['GET'])
+def get_cid_range(request):
+    dpuid = request.GET.get('dpuid')
+    # Add logic to fetch and return CID range data based on dpuid
+    # ...
+
+    # Example response
+    response_data = {
+        'dpuid': dpuid,
+        'cid_range': '...',  # Replace with actual CID range data
+    }
+
+    return Response(response_data)
