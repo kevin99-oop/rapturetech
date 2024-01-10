@@ -1,0 +1,18 @@
+<h1>Customer File Data</h1>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>CSV File</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for customer in customers %}
+            <tr>
+                <td>{{ customer.id }}</td>
+                <td>{{ customer.csv_file.name }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

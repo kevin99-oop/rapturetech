@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from apps.common.models import DREC,DPU
+from apps.common.models import DREC,DPU,Customer
 
 
 class DPUAdmin(admin.ModelAdmin):
@@ -12,3 +12,6 @@ class DRECAdmin(admin.ModelAdmin):
     search_fields = ['ST_ID', 'CUST_ID']  # Add fields you want to search on
 
     # Additional configurations as needed
+admin.site.register(Customer)
+admin.site.register(DPU)
+
