@@ -98,7 +98,7 @@ urlpatterns = [
     path('api/ntpdatetime/', NtpDatetimeView.as_view(), name='ntp_datetime_api'),
 
     path('custupload/', CustomerUploadView.as_view(), name='customer_upload'),
-    path('api/custupload/', CustomerUploadAPIView.as_view(), name='api_custupload'),
+    path('api/cidrange/', CustomerUploadAPIView.as_view(), name='api_custupload'),
     path('show_file_data/', show_file_data, name='show_file_data'),
 
 ]
