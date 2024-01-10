@@ -32,7 +32,10 @@ class UserSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
+
+
 class DRECSerializer(serializers.ModelSerializer):
     class Meta:
         model = DREC
         fields = '__all__'
+

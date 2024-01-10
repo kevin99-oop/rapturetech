@@ -64,9 +64,14 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from apps.common.models import Customer
 from django.http import JsonResponse
 from django.views import View
+from .forms import CustomerUploadForm
+from apps.common.models import Customer
+from rest_framework.views import APIView
+from rest_framework.parsers import FileUploadParser
+from rest_framework.response import Response
+from rest_framework import status
 
 
 class HomeView(TemplateView):
@@ -245,21 +250,7 @@ class DRECViewSet(viewsets.ModelViewSet):
         response.status_code = 200  # Set the status code to 200
         return response
     
-def custupload(request):
-    if request.method == 'POST':
-        csv_file = request.FILES.get('csv_file')
-        if csv_file:
-            # Save the uploaded file to the customer instance
-            customer = Customer.objects.create(csv_file=csv_file)
-            # Process the CSV file or perform any other necessary actions
 
-            return redirect('upload_success')  # Redirect to a success page or another URL
-
-    return render(request, 'common/custupload.html')
-from django.http import HttpResponse
-
-def upload_success(request):
-    return HttpResponse("Upload successful!")
 class NtpDatetimeView(View):
     def get(self, request, *args, **kwargs):
         # Get the current system date and time
@@ -273,3 +264,30 @@ class NtpDatetimeView(View):
 
         # Return the response as a JSON object
         return JsonResponse(response_data)
+
+
+class CustomerUploadView(View):
+    template_name = 'common/custupload.html'
+
+    def get(self, request, *args, **kwargs):
+        form = CustomerUploadForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = CustomerUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('api_custupload')  # Assuming you have a named URL pattern for the API endpoint
+        return render(request, self.template_name, {'form': form})
+
+class CustomerUploadAPIView(APIView):
+    parser_classes = [FileUploadParser]
+
+    def post(self, request, *args, **kwargs):
+        file_serializer = CustomerUploadForm(data=request.data)
+
+        if file_serializer.is_valid():
+            file_serializer.save()
+            return Response(file_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

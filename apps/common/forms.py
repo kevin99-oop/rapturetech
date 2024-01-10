@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from apps.userprofile.models import Profile
 from django.forms import ModelForm
+from apps.common.models import Customer
 
 
 
@@ -64,3 +65,9 @@ class DPUForm(forms.ModelForm):
         model = DPU
         
         fields = ['location', 'dpu_id', 'society', 'mobile_number', 'owner', 'status']
+
+
+class CustomerUploadForm(forms.ModelForm):
+    class Meta:
+        model = Customer
+        fields = ['csv_file']
