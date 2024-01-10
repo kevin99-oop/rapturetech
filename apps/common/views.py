@@ -306,7 +306,13 @@ def get_cid_range(request):
     # Example response
     response_data = {
         'dpuid': dpuid,
-        'cid_range': '...',  # Replace with actual CID range data
+        'NAME': '...',  # Replace with actual CID range data
+        'MOBILE': '...',  # Replace with actual CID range data
+        'ADHHAR': '...',  # Replace with actual CID range data
+        'BANK': '...',  # Replace with actual CID range data
+        'AC': '...',  # Replace with actual CID range data
+        'IFSC': '...',  # Replace with actual CID range data
+
     }
 
     return Response(response_data)
