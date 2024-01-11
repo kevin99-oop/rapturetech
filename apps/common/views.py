@@ -109,32 +109,6 @@ class UserRegistrationView(generics.CreateAPIView):
 
 class UserLoginView(APIView):
     def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
-        token = Token.objects.get(key=response.data['token'])
-        # Render the login template after a successful login
-        return render(request, 'common/login.html', {'token': token.key, 'user_id': token.user_id})
-    
-    def get(self, request, *args, **kwargs):
-        serializer = LoginSerializer(data=request.data)
-        if serializer.is_valid() == 'text/plain' :
-            username = serializer.validated_data['username']
-            password = serializer.validated_data['password']
-
-            # Add your authentication logic here (e.g., using Django's built-in authentication)
-            user = authenticate(request, username=username, password=password)
-
-            if user is not None:
-                # Authentication successful, create or retrieve a token
-                token, created = Token.objects.get_or_create(user=user)
-                return Response({"token": token.key}, status=status.HTTP_200_OK)
-            else:
-                # Authentication failed
-                return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-        else:
-            # Invalid input data
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-     
-    def post(self, request, *args, **kwargs):
         try:
             # Parse request data as JSON if content type is "text/plain"
             if request.content_type == 'text/plain':
@@ -154,17 +128,18 @@ class UserLoginView(APIView):
                 if user is not None:
                     # Authentication successful, create or retrieve a token
                     token, created = Token.objects.get_or_create(user=user)
-                    return Response({"token": token.key}, status=status.HTTP_200_OK, content_type='application/text')
+                    return Response({"token": token.key}, status=status.HTTP_200_OK, content_type='application/json')
                 else:
                     # Authentication failed
-                    return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED, content_type='application/text')
+                    return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED, content_type='application/json')
             else:
                 # Invalid input data
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST, content_type='application/text')
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
         except Exception as e:
             # Handle other exceptions
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR, content_type='application/text')
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR, content_type='application/json')
 
+    
     
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
@@ -270,49 +245,91 @@ class CustomerUploadView(View):
     template_name = 'common/custupload.html'
 
     def get(self, request, *args, **kwargs):
-        form = CustomerUploadForm()
-        return render(request, self.template_name, {'form': form})
+        return render(request, self.template_name)
 
     def post(self, request, *args, **kwargs):
-        form = CustomerUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect('api_custupload')  # Assuming you have a named URL pattern for the API endpoint
-        return render(request, self.template_name, {'form': form})
+        csv_file = request.FILES.get('csv_file')
+
+        if csv_file:
+            # Assuming that the first row contains headers
+            decoded_file = csv_file.read().decode('utf-8').splitlines()
+            reader = csv.DictReader(decoded_file)
+
+            required_fields = ['NAME', 'MOBILE', 'ADHHAR', 'BANK', 'AC', 'IFSC']
+            missing_fields = set(required_fields) - set(reader.fieldnames)
+
+            if missing_fields:
+                error_message = f'Missing fields: {", ".join(missing_fields)}'
+                return render(request, self.template_name, {'error': error_message})
+
+            for row in reader:
+                dpuid = row.get('1', '')  # Replace '1' with the actual header for dpuid in your CSV
+                Customer.objects.create(
+                    dpuid=dpuid,
+                    NAME=row['NAME'],
+                    MOBILE=row['MOBILE'],
+                    ADHHAR=row['ADHHAR'],
+                    BANK=row['BANK'],
+                    AC=row['AC'],
+                    IFSC=row['IFSC'],
+                    csv_file=csv_file
+                )
+
+            return redirect('api/cidrange/')  # Replace with your actual API URL
+        else:
+            return render(request, self.template_name, {'error': 'No file uploaded'})
+
+
+import csv
+from io import TextIOWrapper
+from rest_framework.parsers import FileUploadParser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
 
 class CustomerUploadAPIView(APIView):
     parser_classes = [FileUploadParser]
 
     def post(self, request, *args, **kwargs):
-        serializer = CustomerSerializer(data=request.data)
+        file_serializer = CustomerUploadForm(data=request.data)
 
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if file_serializer.is_valid():
+            file_serializer.save()
+
+            # Extract data from the uploaded CSV file
+            uploaded_file = request.data['csv_file']
+            csv_data = self.extract_csv_data(uploaded_file)
+
+            # Save the extracted data to the database
+            for row in csv_data:
+                Customer.objects.create(**row)
+
+            return Response(file_serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def extract_csv_data(self, csv_file):
+        csv_data = []
+        text_file = TextIOWrapper(csv_file, encoding='utf-8')
+
+        # Assuming the CSV file has a header row with the specified column names
+        reader = csv.DictReader(text_file, fieldnames=['dpu_id','NAME', 'MOBILE', 'ADHHAR', 'BANK', 'AC', 'IFSC'])
+        next(reader)  # Skip the header row
+
+        for row in reader:
+            csv_data.append({
+                'NAME': row['NAME'],
+                'MOBILE': row['MOBILE'],
+                'ADHHAR': row['ADHHAR'],
+                'BANK': row['BANK'],
+                'AC': row['AC'],
+                'IFSC': row['IFSC'],
+            })
+
+        return csv_data
 
         
 
 def show_file_data(request):
     customers = Customer.objects.all()
     return render(request, 'common/file_data.html', {'customers': customers})
-@api_view(['GET'])
-def get_cid_range(request):
-    dpuid = request.GET.get('dpuid')
-    # Add logic to fetch and return CID range data based on dpuid
-    # ...
-
-    # Example response
-    response_data = {
-        'dpuid': dpuid,
-        'NAME': '...',  # Replace with actual CID range data
-        'MOBILE': '...',  # Replace with actual CID range data
-        'ADHHAR': '...',  # Replace with actual CID range data
-        'BANK': '...',  # Replace with actual CID range data
-        'AC': '...',  # Replace with actual CID range data
-        'IFSC': '...',  # Replace with actual CID range data
-
-    }
-
-    return Response(response_data)
