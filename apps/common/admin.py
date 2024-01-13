@@ -15,3 +15,6 @@ class DRECAdmin(admin.ModelAdmin):
 admin.site.register(Customer)
 admin.site.register(DPU)
 
+class CustomerAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'mobile', 'adhaar', 'bank', 'ac', 'ifsc')
+    search_fields = ('name', 'mobile', 'adhaar', 'bank', 'ac', 'ifsc')
