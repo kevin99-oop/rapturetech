@@ -252,43 +252,69 @@ from rest_framework import status
 import requests
 from apps.common.forms import CustomerCSVUploadForm
 
-class CustomerUploadView(View):
+class CustomerUploadView(APIView):
     template_name = 'common/custupload.html'
-    api_url = 'http://3.87.129.89:8000/api/cidrange/'  # Adjust the API endpoint URL
 
     def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
+        form = CustomerCSVUploadForm()
+        return render(request, self.template_name, {'form': form})
 
     def post(self, request, *args, **kwargs):
-        csv_file = request.FILES.get('csv_file')
+        form = CustomerCSVUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            csv_file = request.FILES['csv_file']
+            csv_data = csv_file.read().decode('utf-8')
 
-        if csv_file:
-            try:
-                data = self.parse_csv_file(csv_file)
-                # Process the data as needed (e.g., save to the database)
-                # Example: Customer.objects.create(**row) or other database operations
+            # Process CSV data and send it to the API
+            self.send_to_cidrange_api(csv_data)
 
-                # Send data to the api/cidrange/ endpoint
-                response = self.send_to_cidrange_api(data)
+            # Redirect to a success page or render a success message
+            return render(request, 'common/success.html')
+        return render(request, self.template_name, {'form': form})
 
-                if response.status_code == 200:
-                    return JsonResponse({'status': 'success', 'message': 'CSV file uploaded and data sent to api/cidrange/'})
-                else:
-                    return JsonResponse({'status': 'error', 'message': 'Failed to send data to api/cidrange/'})
-            except Exception as e:
-                return JsonResponse({'status': 'error', 'message': str(e)})
-        else:
-            return JsonResponse({'status': 'error', 'message': 'No CSV file provided'})
+    def send_to_cidrange_api(self, csv_data):
+        api_url = 'http://3.87.129.89:8000/api/cidrange/'
+        headers = {'Content-Type': 'application/json'}
+        csv_reader = csv.DictReader(StringIO(csv_data))
+        current_dpuid = None
+        data = {'dpuid': None, 'customers': []}
 
-    def parse_csv_file(self, csv_file):
-        # Ensure the file is opened in text mode
-        with io.TextIOWrapper(csv_file, encoding='utf-8') as file:
-            reader = csv.DictReader(file)
-            
-            data = []
-            for row in reader:
-                # Process each row and add to the data list
-                # Adjust this part based on your CSV structur
-                data.append(row)
+        for row in csv_reader:
+            dpuid = row.get('DPUID')
 
-        return data
+            if dpuid != current_dpuid:
+                if current_dpuid:
+                    # Send data to API for the previous DPUID
+                    response = requests.post(api_url, json=data, headers=headers)
+                    if response.status_code == 201:
+                        print(f"Data for DPUID {current_dpuid} successfully sent to API.")
+                    else:
+                        print(f"Failed to send data for DPUID {current_dpuid} to API. Status code: {response.status_code}")
+
+                # Update current DPUID and reset data
+                current_dpuid = dpuid
+                data = {'dpuid': dpuid, 'customers': []}
+
+            # Append customer data to the current DPUID
+            customer_data = {
+                'NAME': row.get('NAME'),
+                'MOBILE': row.get('MOBILE'),
+                'ADHHAR': row.get('ADHHAR'),
+                'BANK': row.get('BANK'),
+                'AC': row.get('AC'),
+                'IFSC': row.get('IFSC'),
+            }
+            data['customers'].append(customer_data)
+
+        # Send the last batch of data after the loop
+        if current_dpuid:
+            response = requests.post(api_url, json=data, headers=headers)
+            if response.status_code == 201:
+                print(f"Data for DPUID {current_dpuid} successfully sent to API.")
+            else:
+                print(f"Failed to send data for DPUID {current_dpuid} to API. Status code: {response.status_code}")
+
+# Usage
+# Instantiate the class and call the send_to_cidrange_api method
+# your_instance = CustomerUploadView()
+# your_instance.send_to_cidrange_api(csv_data)
