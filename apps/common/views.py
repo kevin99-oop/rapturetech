@@ -288,7 +288,7 @@ class CustomerUploadView(View):
             data = []
             for row in reader:
                 # Process each row and add to the data list
-                # Adjust this part based on your CSV structure
+                # Adjust this part based on your CSV structur
                 data.append(row)
 
         return data
