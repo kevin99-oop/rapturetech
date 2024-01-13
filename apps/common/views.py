@@ -240,13 +240,65 @@ class NtpDatetimeView(View):
         return JsonResponse(response_data)
 
 
-# views.py in your Django app
+
+
 import csv
-from rest_framework.decorators import api_view
+import io
+from io import TextIOWrapper
+from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework import status
-from .models import Customer  # Import your Customer model
-from .serializers import CustomerSerializer  # Import your CustomerSerializer
+import requests
+from apps.common.forms import CustomerCSVUploadForm
+
+class CustomerUploadView(View):
+    template_name = 'common/custupload.html'
+    api_url = 'http://3.87.129.89:8000/api/cidrange/'  # Adjust the API endpoint URL
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+
+    def post(self, request, *args, **kwargs):
+        csv_file = request.FILES.get('csv_file')
+
+        if csv_file:
+            try:
+                data = self.parse_csv_file(csv_file)
+                # Process the data as needed (e.g., save to the database)
+                # Example: Customer.objects.create(**row) or other database operations
+
+                # Send data to the api/cidrange/ endpoint
+                response = self.send_to_cidrange_api(data)
+
+                if response.status_code == 200:
+                    return JsonResponse({'status': 'success', 'message': 'CSV file uploaded and data sent to api/cidrange/'})
+                else:
+                    return JsonResponse({'status': 'error', 'message': 'Failed to send data to api/cidrange/'})
+            except Exception as e:
+                return JsonResponse({'status': 'error', 'message': str(e)})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'No CSV file provided'})
+
+    def parse_csv_file(self, csv_file):
+        # Ensure the file is opened in text mode
+        with io.TextIOWrapper(csv_file, encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            
+            data = []
+            for row in reader:
+                # Process each row and add to the data list
+                # Adjust this part based on your CSV structure
+                data.append(row)
+
+        return data
+
+    def send_to_cidrange_api(self, data):
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(self.api_url, json=data, headers=headers)
+        return response
+    
+
 
 @api_view(['POST'])
 def cidrange_upload(request):
