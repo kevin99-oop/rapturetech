@@ -66,8 +66,12 @@ class DPUForm(forms.ModelForm):
         
         fields = ['location', 'dpu_id', 'society', 'mobile_number', 'owner', 'status']
 
+class CustomerCSVUploadForm(forms.Form):
+    csv_file = forms.FileField(label='Select a CSV file')
 
-class CustomerUploadForm(forms.ModelForm):
-    class Meta:
-        model = Customer
-        fields = ['csv_file']
+    def clean_csv_file(self):
+        csv_file = self.cleaned_data['csv_file']
+        # Validate if the file is a CSV file
+        if not csv_file.name.endswith('.csv'):
+            raise forms.ValidationError('File is not a CSV file.')
+        return csv_file

@@ -66,7 +66,6 @@ from rest_framework import status
 
 from django.http import JsonResponse
 from django.views import View
-from .forms import CustomerUploadForm
 from apps.common.models import Customer
 from rest_framework.views import APIView
 from rest_framework.parsers import FileUploadParser
@@ -286,47 +285,56 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
+import requests
+from apps.common.forms import CustomerCSVUploadForm
 
-class CustomerUploadAPIView(APIView):
-    parser_classes = [FileUploadParser]
+class CustomerUploadView(View):
+    template_name = 'common/custupload.html'
+
+    def get(self, request, *args, **kwargs):
+        form = CustomerCSVUploadForm()
+        return render(request, self.template_name, {'form': form})
 
     def post(self, request, *args, **kwargs):
-        file_serializer = CustomerUploadForm(data=request.data)
+        form = CustomerCSVUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Handle CSV file upload and send data to the api/custupload/ endpoint
+            csv_file = form.cleaned_data['csv_file']
+            data = self.parse_csv_file(csv_file)
+            response = self.send_to_custupload_api(data)
 
-        if file_serializer.is_valid():
-            file_serializer.save()
+            if response.status_code == 200:
+                return redirect('upload_success')  # Assuming you have a named URL pattern for upload success
+            else:
+                return render(request, self.template_name, {'form': form, 'error_message': 'Failed to upload CSV file.'})
+        return render(request, self.template_name, {'form': form})
 
-            # Extract data from the uploaded CSV file
-            uploaded_file = request.data['csv_file']
-            csv_data = self.extract_csv_data(uploaded_file)
-
-            # Save the extracted data to the database
-            for row in csv_data:
-                Customer.objects.create(**row)
-
-            return Response(file_serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def extract_csv_data(self, csv_file):
-        csv_data = []
-        text_file = TextIOWrapper(csv_file, encoding='utf-8')
-
-        # Assuming the CSV file has a header row with the specified column names
-        reader = csv.DictReader(text_file, fieldnames=['dpu_id','NAME', 'MOBILE', 'ADHHAR', 'BANK', 'AC', 'IFSC'])
-        next(reader)  # Skip the header row
-
-        for row in reader:
-            csv_data.append({
-                'NAME': row['NAME'],
-                'MOBILE': row['MOBILE'],
-                'ADHHAR': row['ADHHAR'],
-                'BANK': row['BANK'],
-                'AC': row['AC'],
-                'IFSC': row['IFSC'],
+    def parse_csv_file(self, csv_file):
+        data = []
+        # Assuming CSV structure is consistent with your example
+        # You may need to adjust this based on the actual structure of your CSV
+        csv_reader = csv.reader(csv_file)
+        next(csv_reader)  # Skip header row if present
+        for row in csv_reader:
+            # Assuming DPU_ID is the first column, CUST_ID is the second column, and so on
+            dpu_id, cust_id, name, mobile, adhar, bank_ac, ifsc = row
+            data.append({
+                'DPU_ID': dpu_id,
+                'CUST_ID': cust_id,
+                'NAME': name,
+                'MOBILE': mobile,
+                'ADHHAR': adhar,
+                'BANK': bank_ac,
+                'IFSC': ifsc,
             })
+        return data
 
-        return csv_data
+    def send_to_custupload_api(self, data):
+        # Adjust the API endpoint URL as needed
+        api_url = 'http://http://3.87.129.89:8000/api/custupload/'
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(api_url, json=data, headers=headers)
+        return response
 
         
 
