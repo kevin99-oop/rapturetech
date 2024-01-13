@@ -243,13 +243,12 @@ class NtpDatetimeView(View):
 
 
 import csv
-import io
-from io import TextIOWrapper
-from rest_framework.parsers import FileUploadParser
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework import status
 import requests
+from io import TextIOWrapper
+from django.shortcuts import render
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from apps.common.forms import CustomerCSVUploadForm
 
 class CustomerUploadView(APIView):
@@ -274,8 +273,7 @@ class CustomerUploadView(APIView):
 
     def send_to_cidrange_api(self, csv_data):
         api_url = 'http://3.87.129.89:8000/api/cidrange/'
-        headers = {'Content-Type': 'application/json'}
-        csv_reader = csv.DictReader(StringIO(csv_data))
+        csv_reader = csv.DictReader(TextIOWrapper(StringIO(csv_data), encoding='utf-8'))
         current_dpuid = None
         data = {'dpuid': None, 'customers': []}
 
@@ -285,7 +283,7 @@ class CustomerUploadView(APIView):
             if dpuid != current_dpuid:
                 if current_dpuid:
                     # Send data to API for the previous DPUID
-                    response = requests.post(api_url, json=data, headers=headers)
+                    response = requests.post(api_url, data=data, headers={'Content-Type': 'application/x-www-form-urlencoded'})
                     if response.status_code == 201:
                         print(f"Data for DPUID {current_dpuid} successfully sent to API.")
                     else:
@@ -308,13 +306,8 @@ class CustomerUploadView(APIView):
 
         # Send the last batch of data after the loop
         if current_dpuid:
-            response = requests.post(api_url, json=data, headers=headers)
+            response = requests.post(api_url, data=data, headers={'Content-Type': 'application/x-www-form-urlencoded'})
             if response.status_code == 201:
                 print(f"Data for DPUID {current_dpuid} successfully sent to API.")
             else:
                 print(f"Failed to send data for DPUID {current_dpuid} to API. Status code: {response.status_code}")
-
-# Usage
-# Instantiate the class and call the send_to_cidrange_api method
-# your_instance = CustomerUploadView()
-# your_instance.send_to_cidrange_api(csv_data)
