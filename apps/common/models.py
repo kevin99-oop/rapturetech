@@ -58,14 +58,3 @@ class DREC(models.Model):
         return f"DREC for CUST_ID: {self.CUST_ID}, Recording Date: {self.RecordingDate}"
     
 
-class Customer(models.Model):
-    NAME = models.CharField(max_length=255, blank=True, null=True)
-    MOBILE = models.CharField(max_length=15, blank=True, null=True)
-    ADHHAR = models.CharField(max_length=20, blank=True, null=True)
-    BANK = models.CharField(max_length=255, blank=True, null=True)
-    AC = models.CharField(max_length=255, blank=True, null=True)
-    IFSC = models.CharField(max_length=20, blank=True, null=True)
-    csv_file = models.FileField(upload_to='customer_csv/', null=True, blank=True)   
-
-    def __str__(self):
-        return f"Customer #{self.pk}"

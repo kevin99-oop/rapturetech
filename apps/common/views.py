@@ -57,7 +57,7 @@ from rest_framework.decorators import parser_classes
 from rest_framework.authtoken.models import Token
 from rest_framework import viewsets
 from apps.common.models import DREC
-from apps.common.serializers import DRECSerializer,CustomerSerializer
+from apps.common.serializers import DRECSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -66,7 +66,6 @@ from rest_framework import status
 
 from django.http import JsonResponse
 from django.views import View
-from apps.common.models import Customer
 from rest_framework.views import APIView
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
@@ -240,74 +239,3 @@ class NtpDatetimeView(View):
         return JsonResponse(response_data)
 
 
-
-
-import csv
-import requests
-from io import TextIOWrapper
-from django.shortcuts import render
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from apps.common.forms import CustomerCSVUploadForm
-
-class CustomerUploadView(APIView):
-    template_name = 'common/custupload.html'
-
-    def get(self, request, *args, **kwargs):
-        form = CustomerCSVUploadForm()
-        return render(request, self.template_name, {'form': form})
-
-    def post(self, request, *args, **kwargs):
-        form = CustomerCSVUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            csv_file = request.FILES['csv_file']
-            csv_data = csv_file.read().decode('utf-8')
-
-            # Process CSV data and send it to the API
-            self.send_to_cidrange_api(csv_data)
-
-            # Redirect to a success page or render a success message
-            return render(request, 'common/success.html')
-        return render(request, self.template_name, {'form': form})
-
-    def send_to_cidrange_api(self, csv_data):
-        api_url = 'http://3.87.129.89:8000/api/cidrange/'
-        csv_reader = csv.DictReader(TextIOWrapper(StringIO(csv_data), encoding='utf-8'))
-        current_dpuid = None
-        data = {'dpuid': None, 'customers': []}
-
-        for row in csv_reader:
-            dpuid = row.get('DPUID')
-
-            if dpuid != current_dpuid:
-                if current_dpuid:
-                    # Send data to API for the previous DPUID
-                    response = requests.post(api_url, data=data, headers={'Content-Type': 'application/x-www-form-urlencoded'})
-                    if response.status_code == 201:
-                        print(f"Data for DPUID {current_dpuid} successfully sent to API.")
-                    else:
-                        print(f"Failed to send data for DPUID {current_dpuid} to API. Status code: {response.status_code}")
-
-                # Update current DPUID and reset data
-                current_dpuid = dpuid
-                data = {'dpuid': dpuid, 'customers': []}
-
-            # Append customer data to the current DPUID
-            customer_data = {
-                'NAME': row.get('NAME'),
-                'MOBILE': row.get('MOBILE'),
-                'ADHHAR': row.get('ADHHAR'),
-                'BANK': row.get('BANK'),
-                'AC': row.get('AC'),
-                'IFSC': row.get('IFSC'),
-            }
-            data['customers'].append(customer_data)
-
-        # Send the last batch of data after the loop
-        if current_dpuid:
-            response = requests.post(api_url, data=data, headers={'Content-Type': 'application/x-www-form-urlencoded'})
-            if response.status_code == 201:
-                print(f"Data for DPUID {current_dpuid} successfully sent to API.")
-            else:
-                print(f"Failed to send data for DPUID {current_dpuid} to API. Status code: {response.status_code}")
