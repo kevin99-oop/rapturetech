@@ -240,46 +240,10 @@ class NtpDatetimeView(View):
         return JsonResponse(response_data)
 
 
-class CustomerUploadView(View):
-    template_name = 'common/custupload.html'
-
-    def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
-
-    def post(self, request, *args, **kwargs):
-        csv_file = request.FILES.get('csv_file')
-
-        if csv_file:
-            # Assuming that the first row contains headers
-            decoded_file = csv_file.read().decode('utf-8').splitlines()
-            reader = csv.DictReader(decoded_file)
-
-            required_fields = ['NAME', 'MOBILE', 'ADHHAR', 'BANK', 'AC', 'IFSC']
-            missing_fields = set(required_fields) - set(reader.fieldnames)
-
-            if missing_fields:
-                error_message = f'Missing fields: {", ".join(missing_fields)}'
-                return render(request, self.template_name, {'error': error_message})
-
-            for row in reader:
-                dpuid = row.get('1', '')  # Replace '1' with the actual header for dpuid in your CSV
-                Customer.objects.create(
-                    dpuid=dpuid,
-                    NAME=row['NAME'],
-                    MOBILE=row['MOBILE'],
-                    ADHHAR=row['ADHHAR'],
-                    BANK=row['BANK'],
-                    AC=row['AC'],
-                    IFSC=row['IFSC'],
-                    csv_file=csv_file
-                )
-
-            return redirect('api/cidrange/')  # Replace with your actual API URL
-        else:
-            return render(request, self.template_name, {'error': 'No file uploaded'})
 
 
 import csv
+import io
 from io import TextIOWrapper
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
@@ -290,54 +254,46 @@ from apps.common.forms import CustomerCSVUploadForm
 
 class CustomerUploadView(View):
     template_name = 'common/custupload.html'
+    api_url = 'http://3.87.129.89:8000/api/cidrange/'  # Adjust the API endpoint URL
 
     def get(self, request, *args, **kwargs):
-        form = CustomerCSVUploadForm()
-        return render(request, self.template_name, {'form': form})
+        return render(request, self.template_name)
 
     def post(self, request, *args, **kwargs):
-        form = CustomerCSVUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            # Handle CSV file upload and send data to the api/custupload/ endpoint
-            csv_file = form.cleaned_data['csv_file']
-            data = self.parse_csv_file(csv_file)
-            response = self.send_to_custupload_api(data)
+        csv_file = request.FILES.get('csv_file')
 
-            if response.status_code == 200:
-                return redirect('upload_success')  # Assuming you have a named URL pattern for upload success
-            else:
-                return render(request, self.template_name, {'form': form, 'error_message': 'Failed to upload CSV file.'})
-        return render(request, self.template_name, {'form': form})
+        if csv_file:
+            try:
+                data = self.parse_csv_file(csv_file)
+                # Process the data as needed (e.g., save to the database)
+                # Example: Customer.objects.create(**row) or other database operations
+
+                # Send data to the api/cidrange/ endpoint
+                response = self.send_to_cidrange_api(data)
+
+                if response.status_code == 200:
+                    return JsonResponse({'status': 'success', 'message': 'CSV file uploaded and data sent to api/cidrange/'})
+                else:
+                    return JsonResponse({'status': 'error', 'message': 'Failed to send data to api/cidrange/'})
+            except Exception as e:
+                return JsonResponse({'status': 'error', 'message': str(e)})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'No CSV file provided'})
 
     def parse_csv_file(self, csv_file):
-        data = []
-        # Assuming CSV structure is consistent with your example
-        # You may need to adjust this based on the actual structure of your CSV
-        csv_reader = csv.reader(csv_file)
-        next(csv_reader)  # Skip header row if present
-        for row in csv_reader:
-            # Assuming DPU_ID is the first column, CUST_ID is the second column, and so on
-            dpu_id, cust_id, name, mobile, adhar, bank_ac, ifsc = row
-            data.append({
-                'DPU_ID': dpu_id,
-                'CUST_ID': cust_id,
-                'NAME': name,
-                'MOBILE': mobile,
-                'ADHHAR': adhar,
-                'BANK': bank_ac,
-                'IFSC': ifsc,
-            })
+        # Ensure the file is opened in text mode
+        with io.TextIOWrapper(csv_file, encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            
+            data = []
+            for row in reader:
+                # Process each row and add to the data list
+                # Adjust this part based on your CSV structure
+                data.append(row)
+
         return data
 
-    def send_to_custupload_api(self, data):
-        # Adjust the API endpoint URL as needed
-        api_url = 'http://http://3.87.129.89:8000/api/custupload/'
+    def send_to_cidrange_api(self, data):
         headers = {'Content-Type': 'application/json'}
-        response = requests.post(api_url, json=data, headers=headers)
+        response = requests.post(self.api_url, json=data, headers=headers)
         return response
-
-        
-
-def show_file_data(request):
-    customers = Customer.objects.all()
-    return render(request, 'common/file_data.html', {'customers': customers})

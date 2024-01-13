@@ -20,7 +20,7 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import path,include
 from apps.common import views
-from apps.common.views import HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView, ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,DRECViewSet,NtpDatetimeView,CustomerUploadView,CustomerUploadView,show_file_data
+from apps.common.views import HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView, ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,DRECViewSet,NtpDatetimeView,CustomerUploadView,CustomerUploadView
 
 
 from django.contrib.auth import views as auth_views
@@ -99,7 +99,6 @@ urlpatterns = [
 
     path('custupload/', CustomerUploadView.as_view(), name='customer_upload'),
     path('api/cidrange/', CustomerUploadView.as_view(), name='api_custupload'),
-    path('file_data/', show_file_data, name='file_data'),
 
 ]
 
