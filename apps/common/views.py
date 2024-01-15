@@ -72,6 +72,8 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework import status
 from apps.common.models import DREC  # Import your Drec model
+from django.shortcuts import render, get_object_or_404
+from apps.common.models import DPU
 
 
 class HomeView(TemplateView):
@@ -249,3 +251,14 @@ class NtpDatetimeView(View):
 
         # Return the response as a JSON object
         return JsonResponse(response_data)
+
+def dpudetails(request, dpuid):
+    dpu = get_object_or_404(DPU, dpuid=dpuid)
+    drecs = dpu.drecs.all()  # Assuming you set related_name='drecs' in the ForeignKey field
+
+    context = {
+        'dpu': dpu,
+        'drecs': drecs,
+    }
+
+    return render(request, 'common/dpudetails.html', context)
