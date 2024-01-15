@@ -28,7 +28,7 @@ class DPU(models.Model):
         return f"{self.user.username}'s DPU - {self.dpu_id}"
 
 class DREC(models.Model):
-     REC_TYPE = models.CharField(max_length=100, null=True, blank=True)
+    REC_TYPE = models.CharField(max_length=100, null=True, blank=True)
     SLIP_TYPE = models.CharField(max_length=100, null=True, blank=True)
     ST_ID = models.CharField(max_length=5000, null=True, blank=True)
     CUST_ID = models.IntegerField(null=True, blank=True)
