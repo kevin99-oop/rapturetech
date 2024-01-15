@@ -4,8 +4,6 @@ from django.contrib.auth.forms import UserCreationForm
 from apps.userprofile.models import Profile
 from django.forms import ModelForm
 
-
-
 class SignUpForm(UserCreationForm):
     def __init__(self,*args, **kwargs):
         super().__init__(*args, **kwargs)
