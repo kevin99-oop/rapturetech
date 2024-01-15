@@ -35,6 +35,18 @@ class LoginSerializer(serializers.Serializer):
 
 
 class DRECSerializer(serializers.ModelSerializer):
+    dpu_id = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = DREC
+        fields = '__all__'
+
+    def create(self, validated_data):
+        dpu_id = validated_data.pop('dpu_id')
+        # Assuming you have a method to retrieve or create DPU based on dpu_id
+        dpuid_instance = get_or_create_dpu(dpu_id)
+        validated_data['dpuid'] = dpuid_instance
+        return super().create(validated_data)
     class Meta:
         model = DREC
         fields = '__all__' 
