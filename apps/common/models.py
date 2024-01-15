@@ -55,4 +55,5 @@ class DREC(models.Model):
     dpuid = models.ForeignKey(DPU, on_delete=models.CASCADE, to_field='dpu_id')
 
     def __str__(self):
-        return f"DREC for {self.dpu.user.username}'s DPU - {self.dpuid.dpu_id}"
+        return f"DREC for {self.dpuid.user.username}'s DPU - {self.dpuid.dpu_id}"
+
