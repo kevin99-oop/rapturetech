@@ -237,7 +237,18 @@ class DRECViewSet(viewsets.ModelViewSet):
         response.status_code = 200  # Set the status code to 200
         return response
     
+    def save(self, *args, **kwargs):
+        # Replace None values with "null"
+        for field in self._meta.fields:
+            value = getattr(self, field.name)
+            if value is None:
+                setattr(self, field.name, "null")
 
+        # Assuming dpuid is a ForeignKey to DPU model
+        if self.dpuid:
+            self.dpuid = self.dpuid.dpu_id
+
+        super().save(*args, **kwargs)
 class NtpDatetimeView(View):
     def get(self, request, *args, **kwargs):
         # Get the current system date and time
