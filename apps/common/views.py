@@ -249,3 +249,18 @@ class NtpDatetimeView(View):
 
         # Return the response as a JSON object
         return JsonResponse(response_data)
+    
+class DRECViewSet(viewsets.ModelViewSet):
+    serializer_class = DRECSerializer
+    queryset = DREC.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save()
+class DRECViewSet(viewsets.ModelViewSet):
+    serializer_class = DRECSerializer
+    queryset = DREC.objects.all()
+
+    def perform_create(self, serializer):
+        print("Request Data:", self.request.data)
+        print("Serialized Data:", serializer.validated_data)
+        serializer.save()
