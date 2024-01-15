@@ -52,8 +52,7 @@ class DREC(models.Model):
     CSR_NO = models.IntegerField(null=True, default=None)
     CREV = models.IntegerField(null=True, default=None)
     END_TAG = models.CharField(max_length=255, default="", blank=True)
-    dpu = models.ForeignKey(DPU, on_delete=models.CASCADE)
-
+    dpuid = models.ForeignKey(DPU, on_delete=models.CASCADE, to_field='dpu_id')
 
     def __str__(self):
-        return f"DREC for {self.dpu.user.username} - {self.ST_ID}"
+        return f"DREC for {self.dpu.user.username}'s DPU - {self.dpuid.dpu_id}"
