@@ -223,18 +223,6 @@ class DRECViewSet(viewsets.ModelViewSet):
     queryset = DREC.objects.all()
     serializer_class = DRECSerializer
 
-    def perform_create(self, serializer):
-        # You can customize the save process here before calling the super method
-        instance = serializer.save()
-
-        # Additional logic, if needed
-        # For example, you can perform some actions based on the created instance
-
-    def create(self, request, *args, **kwargs):
-        response = super().create(request, *args, **kwargs)
-        response.status_code = 200  # Set the status code to 200
-        return response
-    
 
 class NtpDatetimeView(View):
     def get(self, request, *args, **kwargs):
@@ -249,18 +237,3 @@ class NtpDatetimeView(View):
 
         # Return the response as a JSON object
         return JsonResponse(response_data)
-    
-class DRECViewSet(viewsets.ModelViewSet):
-    serializer_class = DRECSerializer
-    queryset = DREC.objects.all()
-
-    def perform_create(self, serializer):
-        serializer.save()
-class DRECViewSet(viewsets.ModelViewSet):
-    serializer_class = DRECSerializer
-    queryset = DREC.objects.all()
-
-    def perform_create(self, serializer):
-        print("Request Data:", self.request.data)
-        print("Serialized Data:", serializer.validated_data)
-        serializer.save()
