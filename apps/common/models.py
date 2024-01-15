@@ -56,4 +56,4 @@ class DREC(models.Model):
     dpuid = models.OneToOneField(DPU, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"DREC for {self.user.username}'s DPU - {self.dpuid}"
+        return f"DREC for {self.user.username}'s DPU - {self.dpuid.dpu_id}"
