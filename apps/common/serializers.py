@@ -38,3 +38,35 @@ class DRECSerializer(serializers.ModelSerializer):
     class Meta:
         model = DREC
         fields = '__all__'
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        dpuid = instance.dpuid.dpu_id if instance.dpuid else None  # Assuming dpuid is a ForeignKey to DPU
+        return {
+            "REC_TYPE": representation["REC_TYPE"],
+            "SLIP_TYPE": representation["SLIP_TYPE"],
+            "ST_ID": representation["ST_ID"],
+            "CUST_ID": representation["CUST_ID"],
+            "TotalFileRecord": representation["TotalFileRecord"],
+            "FlagEdited": representation["FlagEdited"],
+            "MType": representation["MType"],
+            "RecordingDate": representation["RecordingDate"],
+            "SHIFT": representation["SHIFT"],
+            "FAT": representation["FAT"],
+            "FAT_UNIT": representation["FAT_UNIT"],
+            "SNF": representation["SNF"],
+            "SNF_UNIT": representation["SNF_UNIT"],
+            "CLR": representation["CLR"],
+            "CLR_UNIT": representation["CLR_UNIT"],
+            "WATER": representation["WATER"],
+            "WATER_UNIT": representation["WATER_UNIT"],
+            "QT": representation["QT"],
+            "QT_UNIT": representation["QT_UNIT"],
+            "RATE": representation["RATE"],
+            "Amount": representation["Amount"],
+            "CAmount": representation["CAmount"],
+            "CSR_NO": representation["CSR_NO"],
+            "CREV": representation["CREV"],
+            "END_TAG": representation["END_TAG"],
+            "dpuid": dpuid,
+        }
