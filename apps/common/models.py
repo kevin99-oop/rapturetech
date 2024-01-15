@@ -53,7 +53,9 @@ class DREC(models.Model):
     CSR_NO = models.IntegerField()
     CREV = models.IntegerField()
     END_TAG = models.CharField(max_length=100)
-    dpuid = models.OneToOneField(DPU, on_delete=models.CASCADE)
+    dpuid = models.CharField(max_length=5000)
 
     def __str__(self):
-        return f"DREC for {self.dpuid.user.username}'s DPU - {self.dpuid.dpu_id}"
+        return f"DREC for CUST_ID: {self.CUST_ID}, Recording Date: {self.RecordingDate}"
+    
+

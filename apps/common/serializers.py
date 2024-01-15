@@ -39,8 +39,4 @@ class DRECSerializer(serializers.ModelSerializer):
     class Meta:
         model = DREC
         fields = '__all__' 
-    CLR = serializers.FloatField(required=False)
-    WATER = serializers.FloatField(required=False)
-    RATE = serializers.FloatField(required=False)
-    Amount = serializers.FloatField(required=False)
-    CAmount = serializers.FloatField(required=False)
+ 
