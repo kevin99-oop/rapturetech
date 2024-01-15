@@ -26,6 +26,7 @@ class DPU(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s DPU - {self.dpu_id}"
+
 class DREC(models.Model):
     REC_TYPE = models.CharField(max_length=100)
     SLIP_TYPE = models.CharField(max_length=100)
@@ -52,9 +53,7 @@ class DREC(models.Model):
     CSR_NO = models.IntegerField()
     CREV = models.IntegerField()
     END_TAG = models.CharField(max_length=100)
-    dpuid = models.CharField(max_length=5000)
+    dpuid = models.OneToOneField(DPU, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"DREC for CUST_ID: {self.CUST_ID}, Recording Date: {self.RecordingDate}"
-    
-
+        return f"DREC for {self.user.username}'s DPU - {self.dpuid}"

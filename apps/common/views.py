@@ -26,6 +26,7 @@ from apps.common.serializers import UserSerializer, LoginSerializer
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework import permissions, authentication
 import datetime
+from django.shortcuts import render, get_object_or_404
 
 from apps.common.forms import DPUForm
 from rest_framework.authentication import TokenAuthentication
@@ -70,6 +71,7 @@ from rest_framework.views import APIView
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework import status
+from apps.common.models import DREC  # Import your Drec model
 
 
 class HomeView(TemplateView):
@@ -84,6 +86,16 @@ class HomeView(TemplateView):
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
+  # Assuming you have a way to fetch DREC data, for example:
+    drec_data = DREC.objects.all()
+    dpu_data = DPU.objects.all()
+
+    context = {
+        'drec_data': drec_data,
+        'dpu_data': dpu_data,
+
+        # ... other context variables ...
+    }
     template_name = 'example.html'
     login_url = reverse_lazy('home')
 
@@ -237,5 +249,3 @@ class NtpDatetimeView(View):
 
         # Return the response as a JSON object
         return JsonResponse(response_data)
-
-

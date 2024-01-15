@@ -242,7 +242,8 @@
                                 <td class="align-middle text-sm">
                                     <div class="d-flex px-2 py-1 align-items-center">
                                         <div>
-                                            <h6 class="text-sm mb-0">Root</h6>
+                                            <h6 class="text-sm mb-0">REC Type
+                                            </h6>
                                         </div>
                                         <div class="ms-4">
                                             <h6 class="text-sm mb-0">Society</h6>
@@ -285,15 +286,20 @@
                                     </div>
                                 </td>
                             </tr>
+                            {% for dpu in active_dpu_list %}
+
+                {% for drec in drec_data %}
                             <tr>
+
                                 <!--Table Content-->
                                 <td class="align-middle text-sm">
                                     <div class="d-flex px-2 py-1 align-items-center">
                                         <div>
-                                            <p class="text-xs font-weight-bold mb-0">1</p>
+                                            <p class="text-xs font-weight-bold mb-0">                        {{ drec.REC_TYPE }}
+                                            </p>
                                         </div>
                                         <div class="ms-5">
-                                            <p class="text-xs font-weight-bold mb-0">Society Name</p>
+                                            <p class="text-xs font-weight-bold mb-0">{{ dpu.society }}</p>
                                         </div>
                                     </div>
                                 </td>
@@ -332,8 +338,12 @@
                                         <h6 class="text-sm mb-0">20</h6>
                                     </div>
                                 </td>
+
                                 <!--Table Content end-->
                             </tr>
+                            {% endfor %}
+                            {% endfor %}
+
                             <tr>
                                 <!--Table Content-->
                                 <td class="align-middle text-sm">
