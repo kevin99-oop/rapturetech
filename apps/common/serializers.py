@@ -35,8 +35,6 @@ class LoginSerializer(serializers.Serializer):
 
 
 class DRECSerializer(serializers.ModelSerializer):
-    
     class Meta:
         model = DREC
-        fields = '__all__' 
- 
+        fields = '__all__'
