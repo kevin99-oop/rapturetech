@@ -162,24 +162,38 @@
                 <div class="table-title border rounded">
                     <div class="row">
                         <div class="col-sm-6">
-                            <h5 class="text-white mt-2">Active DPU's</h5>
+                            <h5 class="text-white mt-2">{{ dpu.user.username }}'s DPU - {{ dpu.dpu_id }}</h5>
                         </div>
-                        <div class="col-md-6">
-                            <a href="{% url 'add_dpu' %}" class="btn btn-success"> <span>Add New DPU</span></a>
-                        </div>
+                    
                     </div>
                 </div>
 
                 <table class="table table-striped table-hover rounded table-responsive">
-                    <h1>{{ dpu.user.username }}'s DPU - {{ dpu.dpu_id }}</h1>
+                    <thead>
+                        Shift Report
+                        <h2>DPU Details:</h2>
+                        <p>Society: {{ dpu.society }}</p>
+                        <p>SID: {{ dpu.dpu_id }}</p>
+                        <p>Date: {{ dpu.date }}</p>
+                        <tr>
+                            <th>REC_TYPE</th>
+                            <th>SLIP_TYPE</th>
+                            <th>RecordingDate</th>
+                          
+                        </tr>
+                    </thead>
+                    {% for drec in drecs %}
+                    <tbody>
+                        <tr class="align-items-center text-align-center rounded">
+                            <td>{{ drec.REC_TYPE }}</td>
+                            <td>{{ drec.SLIP_TYPE }}</td>
+                            <td>{{ drec.RecordingDate }}</td>
+                         
+                           
+                        </tr>
+                    </tbody>
+                    {% endfor %}
 
-                    <h2>Related DREC Instances:</h2>
-                    <ul>
-                        {% for drec in drecs %}
-                            <li>{{ drec.REC_TYPE }} - {{ drec.SLIP_TYPE }} - {{ drec.RecordingDate }}</li>
-                        {% endfor %}
-                    </ul>
-                
                 </table>
 
             </div>

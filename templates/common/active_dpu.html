@@ -188,7 +188,8 @@
                         <tr class="align-items-center text-align-center rounded">
                             <td>{{ dpu.location }}</td>
                             <td>               
-                                {{ dpu.dpu_id }}</td>
+                                <a href="{% url 'dpudetails' dpuid=dpu.dpu_id %}">
+                                {{ dpu.dpu_id }}</a></td>
                             <td>{{ dpu.society }}</td>
                             <td>{{ dpu.mobile_number }}</td>
                             <td>{{ dpu.owner }}</td>
@@ -196,7 +197,6 @@
                                 {{ dpu.status }}
                             </td>
                         </tr>
-
                     </tbody>
                     {% endfor %}
 

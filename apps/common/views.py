@@ -253,8 +253,8 @@ class NtpDatetimeView(View):
         return JsonResponse(response_data)
 
 def dpudetails(request, dpuid):
-    dpu = get_object_or_404(DPU, dpuid=dpuid)
-    drecs = dpu.drecs.all()  # Assuming you set related_name='drecs' in the ForeignKey field
+    dpu = get_object_or_404(DPU, dpu_id=dpuid)
+    drecs = dpu.drec_set.all()  # Use the correct related name
 
     context = {
         'dpu': dpu,

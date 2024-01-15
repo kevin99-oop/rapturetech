@@ -23,6 +23,8 @@ class DPU(models.Model):
         ('deactivated', 'Deactivated'),
     ]
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    date = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
+
 
     def __str__(self):
         return f"{self.user.username}'s DPU - {self.dpu_id}"
