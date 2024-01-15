@@ -28,6 +28,7 @@ class DPU(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s DPU - {self.dpu_id}"
+    
 class DREC(models.Model):
     REC_TYPE = models.CharField(max_length=255, default="", blank=True)
     SLIP_TYPE = models.IntegerField(null=True, default=None)
