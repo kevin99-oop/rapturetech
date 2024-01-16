@@ -27,11 +27,9 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework import permissions, authentication
 import datetime
 from django.shortcuts import render, get_object_or_404
-
 from apps.common.forms import DPUForm
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -39,22 +37,17 @@ from django.contrib.auth import get_user_model
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.decorators import login_required
 from .models import DPU
-
 from rest_framework.views import APIView
-from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from django.contrib.auth import authenticate
-
-
 from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import JSONParser
-from rest_framework.decorators import parser_classes
 from rest_framework.authtoken.models import Token
 from rest_framework import viewsets
 from apps.common.models import DREC
@@ -64,17 +57,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
 from django.http import JsonResponse
 from django.views import View
 from rest_framework.views import APIView
-from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework import status
 from apps.common.models import DREC  # Import your Drec model
 from django.shortcuts import render, get_object_or_404
 from apps.common.models import DPU
 from django.db.models import Count
+from django.contrib import messages
 
 
 class HomeView(TemplateView):
@@ -86,7 +78,6 @@ class HomeView(TemplateView):
         print(self.request.user.id)
         context['book_list'] = self.request.user
         return context
-
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'example.html'
@@ -111,10 +102,8 @@ class SignUpView(CreateView):
    
     form_class = SignUpForm
     success_url = reverse_lazy('home')
-    template_name = 'common/register.html'
-    
+    template_name = 'common/register.html'    
 
-   
 class UserRegistrationView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -157,8 +146,6 @@ class UserLoginView(APIView):
             # Handle other exceptions
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR, content_type='application/json')
 
-    
-    
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
     def get_context_data(self, **kwargs):
@@ -284,3 +271,78 @@ def dpudetails(request, dpuid):
 
     return render(request, 'common/dpudetails.html', context)
 
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.views import View
+from apps.common.models import DPU, DREC, Customer
+from apps.common.forms import DPUForm, CustomerForm
+import csv
+
+class CustUploadView(View):
+    template_name = 'common/custupload.html'  # Update with your template name
+
+    def get(self, request, st_id):
+        form = CustomerForm()
+        return render(request, self.template_name, {'form': form, 'st_id': st_id})
+
+    def post(self, request, st_id):
+        form = CustomerForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            csv_file = form.cleaned_data['csv_file']
+            decoded_file = csv_file.read().decode('utf-8').splitlines()
+
+            csv_reader = csv.DictReader(decoded_file)
+
+            for row in csv_reader:
+                Customer.objects.create(
+                    st_id=st_id,
+                    user=request.user,  # Assuming you have user authentication
+                    cust_id=row.get('CUST_id'),
+                    name=row.get('NAME'),
+                    mobile=row.get('MOBILE'),
+                    adhaar=row.get('ADHHAR'),
+                    bank_ac=row.get('BANK AC'),
+                    ifsc=row.get('IFSC')
+                )
+
+            return HttpResponse("CSV uploaded successfully!")
+
+        return render(request, self.template_name, {'form': form, 'st_id': st_id})
+    
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from apps.common.serializers import CIDRangeSerializer
+from apps.common.models import Customer
+import csv
+
+class CIDRangeAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = CIDRangeSerializer(data=request.data)
+
+        if serializer.is_valid():
+            csv_file = serializer.validated_data['csv_file']
+            decoded_file = csv_file.read().decode('utf-8').splitlines()
+
+            csv_reader = csv.DictReader(decoded_file)
+
+            # Process the CSV data as needed
+            for row in csv_reader:
+                # Example: Create Customer objects
+                Customer.objects.create(
+                    st_id=row.get('st_id'),
+                    user=request.user,  # Adjust this based on your authentication logic
+                    cust_id=row.get('cust_id'),
+                    name=row.get('name'),
+                    mobile=row.get('mobile'),
+                    adhaar=row.get('adhaar'),
+                    bank_ac=row.get('bank_ac'),
+                    ifsc=row.get('ifsc')
+                )
+
+            return Response({'message': 'CSV uploaded and processed successfully'}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

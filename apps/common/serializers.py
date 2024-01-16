@@ -39,4 +39,5 @@ class DRECSerializer(serializers.ModelSerializer):
         model = DREC
         fields = '__all__'
 
-  
+class CIDRangeSerializer(serializers.Serializer):
+    csv_file = serializers.FileField()

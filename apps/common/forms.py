@@ -63,3 +63,5 @@ class DPUForm(forms.ModelForm):
         
         fields = ['location', 'st_id', 'society', 'mobile_number', 'owner', 'status']
 
+class CustomerForm(forms.Form):
+    csv_file = forms.FileField(label='CSV File')
