@@ -198,10 +198,15 @@
         
         <div class="row ">
             <div class="col-lg-3 my-5">
-                
+                <h1>Shift Report Form</h1>
+
             </div>
             <div class="col-lg-9 my-5">
-        
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit">Submit</button>
+                </form>
             </div>
         </div>
 

@@ -74,6 +74,7 @@ from rest_framework import status
 from apps.common.models import DREC  # Import your Drec model
 from django.shortcuts import render, get_object_or_404
 from apps.common.models import DPU
+from django.db.models import Count
 
 
 class HomeView(TemplateView):
@@ -88,18 +89,23 @@ class HomeView(TemplateView):
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
-  # Assuming you have a way to fetch DREC data, for example:
-    drec_data = DREC.objects.all()
-    dpu_data = DPU.objects.all()
-
-    context = {
-        'drec_data': drec_data,
-        'dpu_data': dpu_data,
-
-        # ... other context variables ...
-    }
     template_name = 'example.html'
     login_url = reverse_lazy('home')
+
+    def get_context_data(self, **kwargs):
+        # Assuming you have a way to fetch DREC data
+        active_dpu_list = DPU.objects.all()
+        drec_data = DREC.objects.all()
+        society_customer_count = DREC.objects.values('ST_ID__society').annotate(customer_count=Count('CUST_ID', distinct=True))
+
+        context = {
+            'active_dpu_list': active_dpu_list,
+            'drec_data': drec_data,
+            'society_customer_count': society_customer_count,
+
+        }
+
+        return context
 
 class SignUpView(CreateView):
    
@@ -198,6 +204,9 @@ class ProfileUpdateView(LoginRequiredMixin, TemplateView):
 class ShiftreportView(LoginRequiredMixin, TemplateView):
     template_name = 'common/shift_report.html'
 
+   
+
+
 @login_required
 def add_dpu(request):
     if request.method == 'POST':
@@ -266,7 +275,7 @@ class NtpDatetimeView(View):
 
 def dpudetails(request, dpuid):
     dpu = get_object_or_404(DPU, st_id=dpuid)
-    drecs = dpu.drec_set.all()  # Use the correct related name
+    drecs = dpu.drecs.all()  # Use the correct related name
 
     context = {
         'dpu': dpu,
@@ -274,3 +283,4 @@ def dpudetails(request, dpuid):
     }
 
     return render(request, 'common/dpudetails.html', context)
+

@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from apps.userprofile.models import Profile
 from django.forms import ModelForm
+from django import forms
+from apps.common.models import DPU
 
 class SignUpForm(UserCreationForm):
     def __init__(self,*args, **kwargs):
@@ -54,8 +56,6 @@ class ProfileForm(forms.ModelForm):
 
 # forms.py
 
-from django import forms
-from apps.common.models import DPU
 
 class DPUForm(forms.ModelForm):
     class Meta:

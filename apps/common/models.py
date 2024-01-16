@@ -59,3 +59,4 @@ class DREC(models.Model):
 
     def __str__(self):
         return f"DREC for {self.ST_ID.user.username}'s DPU - {self.ST_ID.st_id}"
+

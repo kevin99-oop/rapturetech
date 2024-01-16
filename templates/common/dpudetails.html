@@ -164,7 +164,7 @@
                         <div class="col-sm-6">
                             <h5 class="text-white mt-2">{{ dpu.user.username }}'s DPU - {{ dpu.dpu_id }}</h5>
                         </div>
-                    
+
                     </div>
                 </div>
 
@@ -176,20 +176,34 @@
                         <p>SID: {{ dpu.st_id }}</p>
                         <p>Date: {{ dpu.date }}</p>
                         <tr>
-                            <th>REC_TYPE</th>
-                            <th>SLIP_TYPE</th>
-                            <th>RecordingDate</th>
-                          
+                            <th>CUST_ID </th>
+                            <th>Shift</th>
+                            <th>MType</th>
+                            <th>FAT</th>
+                            <th>SNF</th>
+                            <th>CLR</th>
+                            <th>WATER</th>
+                            <th>QT</th>
+                            <th>RATE</th>
+                            <th>Amount</th>
+                            <th>CAmount</th>
+
                         </tr>
                     </thead>
                     {% for drec in drecs %}
                     <tbody>
                         <tr class="align-items-center text-align-center rounded">
-                            <td>{{ drec.REC_TYPE }}</td>
-                            <td>{{ drec.SLIP_TYPE }}</td>
-                            <td>{{ drec.RecordingDate }}</td>
-                         
-                           
+                            <td>{{ drec.CUST_ID }}</td>
+                            <td>{{ drec.SHIFT }}</td>
+                            <td>{{ drec.MType }}</td>
+                            <td>{{ drec.FAT }}</td>
+                            <td>{{ drec.SNF }}</td>
+                            <td>{{ drec.CLR }}</td>
+                            <td>{{ drec.WATER }}</td>
+                            <td>{{ drec.QT }}</td>
+                            <td>{{ drec.RATE }}</td>
+                            <td>{{ drec.Amount }}</td>
+                            <td>{{ drec.CAmount }}</td>
                         </tr>
                     </tbody>
                     {% endfor %}
