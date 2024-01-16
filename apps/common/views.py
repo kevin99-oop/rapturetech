@@ -320,6 +320,13 @@ from apps.common.models import Customer
 import csv
 
 class CIDRangeAPIView(APIView):
+    def get(self, request, dpuid):
+        # Your logic to retrieve CID range based on dpuid
+        # For example, assuming you have a `get_cid_range` function in your model
+        cid_range = Customer.get_cid_range(dpuid)
+
+        # Return the CID range as JSON response
+        return JsonResponse({'cid_range': cid_range})
     def post(self, request, *args, **kwargs):
         serializer = CIDRangeSerializer(data=request.data)
 
