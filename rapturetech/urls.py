@@ -100,7 +100,7 @@ urlpatterns = [
     path('dpudetails/<str:dpuid>/', dpudetails, name='dpudetails'),
     path('custupload/<str:st_id>/', CustUploadView.as_view(), name='cust_upload'),
     path('cidrange/', CIDRangeAPIView.as_view(), name='cid_range_api'),
-    path('api/cidrange/<str:dpuid>/', CIDRangeView.as_view(), name='cid_range_api'),
+    path('api/cidrange/', CIDRangeView.as_view(), name='cid_range_api'),
 
 ]
 
