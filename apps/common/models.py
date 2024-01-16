@@ -54,7 +54,7 @@ class DREC(models.Model):
     CSR_NO = models.IntegerField(null=True, default=None)
     CREV = models.IntegerField(null=True, default=None)
     END_TAG = models.CharField(max_length=255, default="", blank=True)
-    dpuid = models.OneToOneField(DPU, on_delete=models.CASCADE, to_field='st_id', unique=True)
+    dpuid = models.CharField(max_length=255, default="", blank=True)
 
     def __str__(self):
         return f"DREC for {self.ST_ID}"
