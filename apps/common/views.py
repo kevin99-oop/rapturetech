@@ -327,29 +327,27 @@ class CIDRangeAPIView(APIView):
 
         # Return the CID range as JSON response
         return JsonResponse({'cid_range': cid_range})
-    def post(self, request, *args, **kwargs):
-        serializer = CIDRangeSerializer(data=request.data)
+    def post(self, request, st_id):
+        form = CustomerForm(request.POST, request.FILES)
 
-        if serializer.is_valid():
-            csv_file = serializer.validated_data['csv_file']
+        if form.is_valid():
+            csv_file = form.cleaned_data['csv_file']
             decoded_file = csv_file.read().decode('utf-8').splitlines()
 
             csv_reader = csv.DictReader(decoded_file)
 
-            # Process the CSV data as needed
             for row in csv_reader:
-                # Example: Create Customer objects
                 Customer.objects.create(
-                    st_id=row.get('st_id'),
-                    user=request.user,  # Adjust this based on your authentication logic
-                    cust_id=row.get('cust_id'),
-                    name=row.get('name'),
-                    mobile=row.get('mobile'),
-                    adhaar=row.get('adhaar'),
-                    bank_ac=row.get('bank_ac'),
-                    ifsc=row.get('ifsc')
+                    st_id=st_id,
+                    cust_id=row.get('CUST_id'),
+                    name=row.get('NAME'),
+                    mobile=row.get('MOBILE'),
+                    adhaar=row.get('ADHHAR'),
+                    bank_ac=row.get('BANK AC'),
+                    ifsc=row.get('IFSC')
                 )
 
-            return Response({'message': 'CSV uploaded and processed successfully'}, status=status.HTTP_200_OK)
+            # Redirect to CIDRangeView for the given dpuid
+            return redirect(reverse('cid_range_api', args=[st_id]))
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return render(request, self.template_name, {'form': form, 'st_id': st_id})
