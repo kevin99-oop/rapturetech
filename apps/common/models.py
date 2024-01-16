@@ -32,7 +32,7 @@ class DPU(models.Model):
 class DREC(models.Model):
     REC_TYPE = models.CharField(max_length=255, default="", blank=True)
     SLIP_TYPE = models.IntegerField(null=True, default=None)
-    ST_ID = models.OneToOneField(DPU, on_delete=models.CASCADE, primary_key=True)  # Updated to OneToOneField
+    ST_ID = models.ForeignKey(DPU, on_delete=models.CASCADE, related_name='drecs')  # Use ForeignKey instead of OneToOneField
     CUST_ID = models.IntegerField(null=True, default=None)
     TotalFileRecord = models.IntegerField(null=True, default=None)
     FlagEdited = models.CharField(max_length=255, default="", blank=True)
@@ -59,4 +59,3 @@ class DREC(models.Model):
 
     def __str__(self):
         return f"DREC for {self.ST_ID.user.username}'s DPU - {self.ST_ID.st_id}"
-    
