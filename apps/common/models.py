@@ -23,15 +23,16 @@ class DPU(models.Model):
         ('deactivated', 'Deactivated'),
     ]
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
 
     def __str__(self):
         return f"{self.user.username}'s DPU - {self.st_id}"
 
+
 class DREC(models.Model):
     REC_TYPE = models.CharField(max_length=255, default="", blank=True)
     SLIP_TYPE = models.IntegerField(null=True, default=None)
-    ST_ID = models.CharField(max_length=255, default="", blank=True, primary_key=True)  # Renamed from dpuid to ST_ID
+    ST_ID = models.OneToOneField(DPU, on_delete=models.CASCADE, primary_key=True)  # Updated to OneToOneField
     CUST_ID = models.IntegerField(null=True, default=None)
     TotalFileRecord = models.IntegerField(null=True, default=None)
     FlagEdited = models.CharField(max_length=255, default="", blank=True)
@@ -57,4 +58,5 @@ class DREC(models.Model):
     dpuid = models.CharField(max_length=255, default="", blank=True)
 
     def __str__(self):
-        return f"DREC for {self.ST_ID}"
+        return f"DREC for {self.ST_ID.user.username}'s DPU - {self.ST_ID.st_id}"
+    
