@@ -351,3 +351,9 @@ class CIDRangeAPIView(APIView):
             return redirect(reverse('cid_range_api', args=[st_id]))
 
         return render(request, self.template_name, {'form': form, 'st_id': st_id})
+    
+class CIDRangeView(APIView):
+    def get(self, request, dpuid):
+        customers = Customer.objects.filter(dpuid=dpuid)
+        serializer = CustomerSerializer(customers, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
