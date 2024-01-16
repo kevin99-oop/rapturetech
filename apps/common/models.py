@@ -14,7 +14,7 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 class DPU(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     location = models.CharField(max_length=255)
-    dpu_id = models.CharField(max_length=50, unique=True)
+    st_id = models.CharField(max_length=50, unique=True, primary_key=True)
     society = models.CharField(max_length=255)
     mobile_number = models.CharField(max_length=15)
     owner = models.CharField(max_length=255)
@@ -25,14 +25,13 @@ class DPU(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     date = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
 
-
     def __str__(self):
-        return f"{self.user.username}'s DPU - {self.dpu_id}"
-    
+        return f"{self.user.username}'s DPU - {self.st_id}"
+
 class DREC(models.Model):
     REC_TYPE = models.CharField(max_length=255, default="", blank=True)
     SLIP_TYPE = models.IntegerField(null=True, default=None)
-    ST_ID = models.CharField(max_length=255, default="", blank=True)
+    ST_ID = models.ForeignKey(DPU, on_delete=models.CASCADE, to_field='st_id')
     CUST_ID = models.IntegerField(null=True, default=None)
     TotalFileRecord = models.IntegerField(null=True, default=None)
     FlagEdited = models.CharField(max_length=255, default="", blank=True)
@@ -55,8 +54,8 @@ class DREC(models.Model):
     CSR_NO = models.IntegerField(null=True, default=None)
     CREV = models.IntegerField(null=True, default=None)
     END_TAG = models.CharField(max_length=255, default="", blank=True)
-    dpuid = models.ForeignKey(DPU, on_delete=models.CASCADE, to_field='dpu_id')
+    dpuid = models.CharField(max_length=255, default="", blank=True)
 
     def __str__(self):
-        return f"DREC for {self.dpuid.user.username}'s DPU - {self.dpuid.dpu_id}"
+        return f"DREC for {self.ST_ID.user.username}'s DPU - {self.ST_ID.st_id}"
 

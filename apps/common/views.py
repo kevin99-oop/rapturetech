@@ -210,7 +210,7 @@ def add_dpu(request):
     else:
         form = DPUForm()
     
-    return render(request, 'common/add_dpu.html', {'form': form})
+    return render(request, 'common/active_dpu.html', {'form': form})
 
 def active_dpu(request):
     active_dpu_list = DPU.objects.filter(user=request.user)
@@ -246,9 +246,10 @@ class DRECViewSet(viewsets.ModelViewSet):
 
         # Assuming dpuid is a ForeignKey to DPU model
         if self.dpuid:
-            self.dpuid = self.dpuid.dpu_id
+            self.dpuid = self.dpuid.st_id
 
         super().save(*args, **kwargs)
+
 class NtpDatetimeView(View):
     def get(self, request, *args, **kwargs):
         # Get the current system date and time
@@ -264,7 +265,7 @@ class NtpDatetimeView(View):
         return JsonResponse(response_data)
 
 def dpudetails(request, dpuid):
-    dpu = get_object_or_404(DPU, dpu_id=dpuid)
+    dpu = get_object_or_404(DPU, st_id=dpuid)
     drecs = dpu.drec_set.all()  # Use the correct related name
 
     context = {

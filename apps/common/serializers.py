@@ -41,7 +41,7 @@ class DRECSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        dpuid = instance.dpuid.dpu_id if instance.dpuid else None  # Assuming dpuid is a ForeignKey to DPU
+        dpuid = instance.dpuid.st_id if instance.dpuid else None  # Assuming dpuid is a ForeignKey to DPU
         return {
             "REC_TYPE": representation["REC_TYPE"],
             "SLIP_TYPE": representation["SLIP_TYPE"],

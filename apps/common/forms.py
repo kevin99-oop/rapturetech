@@ -61,5 +61,5 @@ class DPUForm(forms.ModelForm):
     class Meta:
         model = DPU
         
-        fields = ['location', 'dpu_id', 'society', 'mobile_number', 'owner', 'status']
+        fields = ['location', 'st_id', 'society', 'mobile_number', 'owner', 'status']
 
