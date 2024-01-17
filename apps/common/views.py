@@ -251,16 +251,14 @@ class NtpDatetimeView(View):
         # Get the current system date and time
         current_datetime = datetime.datetime.now()
 
-        # Format the date and time as strings
-        formatted_time = current_datetime.strftime("%H:%M")  # HH:MM format
-        formatted_date = current_datetime.strftime("%d %m %y")  # dd mm yy format
+        # Format the date and time as a string
+        formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
 
         # Create a dictionary with the response data
-        response_data = {'time': formatted_time, 'date': formatted_date}
+        response_data = {'datetime': formatted_datetime}
 
         # Return the response as a JSON object
         return JsonResponse(response_data)
-
 
 def dpudetails(request, dpuid):
     dpu = get_object_or_404(DPU, st_id=dpuid)
