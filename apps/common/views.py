@@ -84,11 +84,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     login_url = reverse_lazy('home')
 
     def get_context_data(self, **kwargs):
-        # Assuming you have a way to fetch DREC data
-        active_dpu_list = DPU.objects.all()
-        drec_data = DREC.objects.all()
-        society_customer_count = DREC.objects.values('ST_ID__society').annotate(customer_count=Count('CUST_ID', distinct=True))
-
+        user = self.request.user
+        active_dpu_list = DPU.objects.filter(user=user)
+        drec_data = DREC.objects.filter(ST_ID__user=user)
+        society_customer_count = DREC.objects.filter(ST_ID__user=user).values('ST_ID__society').annotate(customer_count=Count('CUST_ID', distinct=True))
         context = {
             'active_dpu_list': active_dpu_list,
             'drec_data': drec_data,
@@ -206,7 +205,7 @@ def add_dpu(request):
     else:
         form = DPUForm()
     
-    return render(request, 'common/active_dpu.html', {'form': form})
+    return render(request, 'common/add_dpu.html', {'form': form})
 
 def active_dpu(request):
     active_dpu_list = DPU.objects.filter(user=request.user)
