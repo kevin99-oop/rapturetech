@@ -5,13 +5,11 @@ import sys
 from datetime import datetime
 
 # Print the current date and time
-print(f"Current date and time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'rapturetech.settings')
-    print(f"Current date and time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
     try:
         from django.core.management import execute_from_command_line
