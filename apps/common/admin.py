@@ -13,4 +13,3 @@ class DRECAdmin(admin.ModelAdmin):
 
     # Additional configurations as needed
 admin.site.register(DPU)
-

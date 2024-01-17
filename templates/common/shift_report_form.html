@@ -1,0 +1,15 @@
+<!-- shift_report_form.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shift Report Form</title>
+</head>
+<body>
+    <h1>Shift Report Form</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

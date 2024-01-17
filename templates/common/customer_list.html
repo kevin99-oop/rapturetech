@@ -1,0 +1,32 @@
+<!-- your_template.html -->
+
+{% extends 'base2.html' %}  <!-- Extend your base template if you have one -->
+
+{% block content %}
+<h1>Customer List</h1>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>CUST ID</th>
+            <th>Name</th>
+            <th>Mobile</th>
+            <th>Adhaar</th>
+            <th>Bank AC</th>
+            <th>IFSC</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for customer in customers %}
+        <tr>
+            <td>{{ customer.cust_id }}</td>
+            <td>{{ customer.name }}</td>
+            <td>{{ customer.mobile }}</td>
+            <td>{{ customer.adhaar }}</td>
+            <td>{{ customer.bank_ac }}</td>
+            <td>{{ customer.ifsc }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

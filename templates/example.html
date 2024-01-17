@@ -225,20 +225,21 @@
         </div>
     </div>
 
-    <div class="row mt-4">
-        <div class="col-lg-12 mb-lg-0 mb-5">
+    <div class="row mt-4" id="divID">
+        <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
             <div class="card">
                 <div class="card-header pb-0 p-3">
                     <div class="d-flex justify-content-between">
                         <h6 class="mb-2">Last Record Summary</h6>
                     </div>
                 </div>
-                <div class="table-responsive">
+                <div class="table-responsive" >
                     <table class="table align-items-center">
                         <thead>
                             <tr>
                                 <th>Location</th>
                                 <th>Society</th>
+                                <th>Station Id</th>
                                 <th>Date</th>
                                 <th>Shift</th>
                                 <th>Total Quantity</th>
@@ -248,13 +249,14 @@
                                 <th>No. of Customer</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody >
                             {% for dpu in active_dpu_list %}
                                 {% for drec in dpu.drecs.all %}
                                     {% for society_count in society_customer_count %}
                                         <tr>
                                             <td>{{ dpu.location }}</td>
                                             <td>{{ dpu.society }}</td>
+                                            <td>{{ dpu.st_id }}</td>
                                             <td>{{ drec.RecordingDate }}</td>
                                             <td>{{ drec.SHIFT }}</td>
                                             <td>{{ drec.QT }}</td>
@@ -576,4 +578,13 @@
         </div>
     </div>
 </footer> -->
+<script>
+ $(document).ready(function () {
+
+setInterval( function() {
+    $("#divID").load(location.href + " #myRefreshDiv");
+ }, 5000 );
+
+});
+</script>
 {% endblock content %}

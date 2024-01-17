@@ -26,6 +26,7 @@ from apps.common.serializers import UserSerializer, LoginSerializer
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework import permissions, authentication
 import datetime
+from django.utils import timezone
 from django.shortcuts import render, get_object_or_404
 from apps.common.forms import DPUForm
 from rest_framework.authentication import TokenAuthentication
@@ -92,9 +93,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'active_dpu_list': active_dpu_list,
             'drec_data': drec_data,
             'society_customer_count': society_customer_count,
+            'last_updated': timezone.now(),  # Add a timestamp
 
         }
-
         return context
 
 class SignUpView(CreateView):
@@ -269,90 +270,12 @@ def dpudetails(request, dpuid):
     }
 
     return render(request, 'common/dpudetails.html', context)
+class CacheControlMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
 
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.views import View
-from apps.common.models import DPU, DREC, Customer
-from apps.common.forms import DPUForm, CustomerForm
-import csv
-
-class CustUploadView(View):
-    template_name = 'common/custupload.html'  # Update with your template name
-
-    def get(self, request, st_id):
-        form = CustomerForm()
-        return render(request, self.template_name, {'form': form, 'st_id': st_id})
-
-    def post(self, request, st_id):
-        form = CustomerForm(request.POST, request.FILES)
-
-        if form.is_valid():
-            csv_file = form.cleaned_data['csv_file']
-            decoded_file = csv_file.read().decode('utf-8').splitlines()
-
-            csv_reader = csv.DictReader(decoded_file)
-
-            for row in csv_reader:
-                Customer.objects.create(
-                    st_id=st_id,
-                    user=request.user,  # Assuming you have user authentication
-                    cust_id=row.get('CUST_id'),
-                    name=row.get('NAME'),
-                    mobile=row.get('MOBILE'),
-                    adhaar=row.get('ADHHAR'),
-                    bank_ac=row.get('BANK AC'),
-                    ifsc=row.get('IFSC')
-                )
-
-            return HttpResponse("CSV uploaded successfully!")
-
-        return render(request, self.template_name, {'form': form, 'st_id': st_id})
-    
-
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from apps.common.serializers import CIDRangeSerializer
-from apps.common.models import Customer
-import csv
-
-class CIDRangeAPIView(APIView):
-    def get(self, request, dpuid):
-        # Your logic to retrieve CID range based on dpuid
-        # For example, assuming you have a `get_cid_range` function in your model
-        cid_range = Customer.get_cid_range(dpuid)
-
-        # Return the CID range as JSON response
-        return JsonResponse({'cid_range': cid_range})
-    def post(self, request, st_id):
-        form = CustomerForm(request.POST, request.FILES)
-
-        if form.is_valid():
-            csv_file = form.cleaned_data['csv_file']
-            decoded_file = csv_file.read().decode('utf-8').splitlines()
-
-            csv_reader = csv.DictReader(decoded_file)
-
-            for row in csv_reader:
-                Customer.objects.create(
-                    st_id=st_id,
-                    cust_id=row.get('CUST_id'),
-                    name=row.get('NAME'),
-                    mobile=row.get('MOBILE'),
-                    adhaar=row.get('ADHHAR'),
-                    bank_ac=row.get('BANK AC'),
-                    ifsc=row.get('IFSC')
-                )
-
-            # Redirect to CIDRangeView for the given dpuid
-            return redirect(reverse('cid_range_api', args=[st_id]))
-
-        return render(request, self.template_name, {'form': form, 'st_id': st_id})
-    
-class CIDRangeView(APIView):
-    def get(self, request, dpuid):
-        customers = Customer.objects.filter(dpuid=dpuid)
-        serializer = CustomerSerializer(customers, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def __call__(self, request):
+        response = self.get_response(request)
+        response['Cache-Control'] = 'max-age=86400'  # Cache for one day
+        return response
+# views.py

@@ -6,6 +6,7 @@ from django.forms import ModelForm
 from django import forms
 from apps.common.models import DPU
 
+
 class SignUpForm(UserCreationForm):
     def __init__(self,*args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -62,6 +63,3 @@ class DPUForm(forms.ModelForm):
         model = DPU
         
         fields = ['location', 'st_id', 'society', 'mobile_number', 'owner', 'status']
-
-class CustomerForm(forms.Form):
-    csv_file = forms.FileField(label='CSV File')
