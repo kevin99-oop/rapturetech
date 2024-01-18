@@ -361,10 +361,12 @@ class CIDRangeCSVAPIView(APIView):
         if not customer_data.exists():
             return HttpResponse("No customer data found for the specified dpuid", status=404)
 
-        # Assuming that each customer data object has a unique CSV file
-        csv_file_path = customer_data.first().csv_file.path
-
-        with open(csv_file_path, 'rb') as csv_file:
-            response = HttpResponse(csv_file.read(), content_type='text/csv')
-            response['Content-Disposition'] = f'attachment; filename="{dpuid}_customer_data.csv"'
-            return response
+        # Check if the customer data object has an associated CSV file
+        if customer_data.first().csv_file:
+            csv_file_path = customer_data.first().csv_file.path
+            with open(csv_file_path, 'rb') as csv_file:
+                response = HttpResponse(csv_file.read(), content_type='text/csv')
+                response['Content-Disposition'] = f'attachment; filename="{dpuid}.csv"'
+                return response
+        else:
+            return HttpResponse("No CSV file associated with the specified dpuid", status=404)
