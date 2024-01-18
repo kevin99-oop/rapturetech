@@ -350,8 +350,14 @@ def customer_list(request):
     return render(request, 'common/customer_list.html', {'customers': customers})
 
 class CIDRangeCSVAPIView(APIView):
-    def get(self, request, st_id):
+    def get(self, request):
+        dpuid = self.request.query_params.get('dpuid', None)
+        if not dpuid:
+            return Response({"error": "dpuid parameter is required"}, status=400)
+
+        st_id = get_object_or_404(CustomerUpload, dpuid=dpuid).st_id
         customer_data = CustomerUpload.objects.filter(st_id=st_id)
+        
         if not customer_data.exists():
             return HttpResponse("No customer data found for the specified ST_ID", status=404)
 
