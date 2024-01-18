@@ -3,11 +3,10 @@
 {% extends 'base2.html' %}  <!-- Extend your base template if you have one -->
 
 {% block content %}
-  <h2>Upload CSV for {{ st_id }}</h2>
-
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Upload</button>
-  </form>
+<h2>Customer Upload</h2>
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Upload</button>
+</form>
 {% endblock %}

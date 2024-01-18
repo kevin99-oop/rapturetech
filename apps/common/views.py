@@ -296,3 +296,69 @@ def edit_dpu(request, st_id):
         form = DPUForm(instance=dpu)
     
     return render(request, 'common/edit_dpu.html', {'form': form, 'dpu': dpu})
+
+
+
+import csv
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from .forms import CustomerUploadForm
+from .models import CustomerUpload
+
+import csv
+from django.shortcuts import render, redirect
+from .forms import CustomerUploadForm
+from .models import CustomerUpload
+from apps.common.models import DPU
+
+def customer_upload(request):
+    if request.method == 'POST':
+        form = CustomerUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            st_id = form.cleaned_data['st_id']
+            csv_file = form.cleaned_data['csv_file'].read().decode('utf-8').splitlines()
+
+            customer_upload_instance = CustomerUpload(st_id=st_id, csv_file=form.cleaned_data['csv_file'])
+            customer_upload_instance.save()
+
+            for row in csv.reader(csv_file):
+                cust_id, name, mobile, adhaar, bank_account, ifsc = row
+                try:
+                    cust_id = int(cust_id)
+                except ValueError:
+                    continue
+
+                CustomerUpload.objects.create(
+                    st_id=st_id,
+                    cust_id=cust_id,
+                    name=name,
+                    mobile=mobile,
+                    adhaar=adhaar,
+                    bank_account=bank_account,
+                    ifsc=ifsc
+                )
+
+            return redirect('customer_list')  # Redirect to the customer list view
+
+    else:
+        form = CustomerUploadForm()
+
+    return render(request, 'customer_upload.html', {'form': form})
+
+def customer_list(request):
+    customers = CustomerUpload.objects.all()
+    return render(request, 'common/customer_list.html', {'customers': customers})
+
+class CIDRangeCSVAPIView(APIView):
+    def get(self, request, st_id):
+        customer_data = CustomerUpload.objects.filter(st_id=st_id)
+        if not customer_data.exists():
+            return HttpResponse("No customer data found for the specified ST_ID", status=404)
+
+        # Assuming that each customer data object has a unique CSV file
+        csv_file_path = customer_data.first().csv_file.path
+
+        with open(csv_file_path, 'rb') as csv_file:
+            response = HttpResponse(csv_file.read(), content_type='text/csv')
+            response['Content-Disposition'] = f'attachment; filename="{st_id}_customer_data.csv"'
+            return response

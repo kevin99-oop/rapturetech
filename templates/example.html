@@ -291,7 +291,7 @@
                     <table class="table align-items-center table table-striped table-hover rounded table-responsive">
                         <thead>
                             <tr>
-                                <th>Station ID</th>
+                                <th>St ID</th>
                                 <th>Root</th>
                                 <th>Society</th>
                                 <th>Date</th>
@@ -303,11 +303,11 @@
                                 <th>CLR</th>
                                 <th>Water</th>
                                 <th>Ltr. Qty </th>
-                                <th>Amount</th>
+                                <th>Amt</th>
                                 <th>Cum. Amount</th>
                             </tr>
                             </thead>
-                            <tbody >
+                            <tbody class="{% if forloop.first %}new-entry{% endif %}">
                                 {% for dpu in active_dpu_list %}
                                     {% for drec in dpu.drecs.all %}
                                         {% for society_count in society_customer_count %}

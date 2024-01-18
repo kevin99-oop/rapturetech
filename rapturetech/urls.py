@@ -20,7 +20,7 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import path,include
 from apps.common import views
-from apps.common.views import HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView, ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,DRECViewSet,NtpDatetimeView,dpudetails
+from apps.common.views import HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView, ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,DRECViewSet,NtpDatetimeView,dpudetails,customer_upload, customer_list,CIDRangeCSVAPIView
 from django.contrib.auth import views as auth_views
 from django.urls import path,include
 from apps.common import views
@@ -96,10 +96,11 @@ urlpatterns = [
     path('api/ntpdatetime/', NtpDatetimeView.as_view(), name='ntp_datetime_api'),
 
     path('dpudetails/<str:dpuid>/', dpudetails, name='dpudetails'),
-path('edit_dpu/<str:st_id>/', views.edit_dpu, name='edit_dpu'),
+    path('edit_dpu/<str:st_id>/', views.edit_dpu, name='edit_dpu'),
 
-
-
+ path('customer/upload/', customer_upload, name='customer_upload'),
+    path('customer/list/', customer_list, name='customer_list'),
+    path('api/cidrange/<int:st_id>/', CIDRangeCSVAPIView.as_view(), name='cid_range_csv_api'),
 
 ]
 

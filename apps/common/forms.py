@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from apps.userprofile.models import Profile
 from django.forms import ModelForm
 from django import forms
-from apps.common.models import DPU
+from apps.common.models import DPU,CustomerUpload
 
 
 class SignUpForm(UserCreationForm):
@@ -63,3 +63,12 @@ class DPUForm(forms.ModelForm):
         model = DPU
         
         fields = ['location', 'st_id', 'society', 'mobile_number', 'owner', 'status']
+
+
+class CustomerUploadForm(forms.ModelForm):
+    st_id = forms.ModelChoiceField(queryset=DPU.objects.all(), empty_label="Select ST_ID")
+    csv_file = forms.FileField(label="CSV File")
+
+    class Meta:
+        model = CustomerUpload
+        fields = ['st_id', 'csv_file']
