@@ -1,0 +1,81 @@
+{% extends 'base2.html' %}
+
+{% block content %}
+<style>.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+  }
+  
+  .popup-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    border-radius: 20px;
+
+  }
+  
+  .popup-content p {
+    margin-bottom: 20px;
+  }
+  
+  .popup-content button {
+    margin: 0 10px;
+    padding: 10px 15px;
+    cursor: pointer;
+  }
+  </style>
+ <h2>Edit DPU</h2>
+
+ <form method="post" action="" id="editDpuForm" onsubmit="return confirmDeactivation()">
+   {% csrf_token %}
+   {{ form.as_p }}
+
+   <button type="submit">Save Changes</button>
+ </form>
+
+ <a href="{% url 'active_dpu' %}">Back to Active DPUs</a>
+
+ <div id="confirmationPopup" class="popup">
+   <div class="popup-content">
+     <p>Are you sure you want to deactivate this DPU?</p>
+     <button onclick="cancelDeactivation()">Cancel</button>
+     <button onclick="confirmDeactivation()"type="submit">Confirm</button>
+   </div>
+ </div>
+
+ <script>
+ 
+   $(document).ready(function() {
+    $('#editDpuForm').submit(function(event) {
+      event.preventDefault();
+
+      // Your existing confirmation script...
+      var confirmationPopup = confirmDeactivation();
+      
+      $.ajax({
+        type: 'POST',
+        url: $(this).attr('action'),
+        data: $(this).serialize(),
+        success: function(response) {
+          if (response.status_changed) {
+            confirmationPopup.style.display = 'block';
+          } else {
+            window.location.href = '{% url "active_dpu" %}';
+          }
+        },
+        error: function(error) {
+          console.log('Error:', error);
+        }
+      });
+    });
+  });
+ </script>
+{% endblock %}

@@ -96,7 +96,8 @@ urlpatterns = [
     path('api/ntpdatetime/', NtpDatetimeView.as_view(), name='ntp_datetime_api'),
 
     path('dpudetails/<str:dpuid>/', dpudetails, name='dpudetails'),
-    
+path('edit_dpu/<str:st_id>/', views.edit_dpu, name='edit_dpu'),
+
 
 
 

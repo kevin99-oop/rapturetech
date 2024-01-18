@@ -89,6 +89,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         active_dpu_list = DPU.objects.filter(user=user)
         drec_data = DREC.objects.filter(ST_ID__user=user)
         society_customer_count = DREC.objects.filter(ST_ID__user=user).values('ST_ID__society').annotate(customer_count=Count('CUST_ID', distinct=True))
+
         context = {
             'active_dpu_list': active_dpu_list,
             'drec_data': drec_data,
@@ -279,3 +280,19 @@ class CacheControlMiddleware:
         response['Cache-Control'] = 'max-age=86400'  # Cache for one day
         return response
 # views.py
+
+def edit_dpu(request, st_id):
+    dpu = get_object_or_404(DPU, st_id=st_id)
+    
+    if request.method == 'POST':
+        form = DPUForm(request.POST, instance=dpu)
+        if form.is_valid():
+            # Check if the status has changed
+            if dpu.status != form.cleaned_data['status']:
+                return JsonResponse({'status_changed': True})
+            form.save()
+            return redirect('active_dpu')  # Redirect to the desired page after editing
+    else:
+        form = DPUForm(instance=dpu)
+    
+    return render(request, 'common/edit_dpu.html', {'form': form, 'dpu': dpu})
