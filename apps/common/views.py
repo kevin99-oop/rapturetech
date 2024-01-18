@@ -355,16 +355,16 @@ class CIDRangeCSVAPIView(APIView):
         if not dpuid:
             return Response({"error": "dpuid parameter is required"}, status=400)
 
-        st_id = get_object_or_404(CustomerUpload, dpuid=dpuid).st_id
+        st_id = get_object_or_404(DPU, dpuid=dpuid)
         customer_data = CustomerUpload.objects.filter(st_id=st_id)
         
         if not customer_data.exists():
-            return HttpResponse("No customer data found for the specified ST_ID", status=404)
+            return HttpResponse("No customer data found for the specified dpuid", status=404)
 
         # Assuming that each customer data object has a unique CSV file
         csv_file_path = customer_data.first().csv_file.path
 
         with open(csv_file_path, 'rb') as csv_file:
             response = HttpResponse(csv_file.read(), content_type='text/csv')
-            response['Content-Disposition'] = f'attachment; filename="{st_id}_customer_data.csv"'
+            response['Content-Disposition'] = f'attachment; filename="{dpuid}_customer_data.csv"'
             return response
