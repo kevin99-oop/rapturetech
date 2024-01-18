@@ -100,7 +100,7 @@ urlpatterns = [
 
  path('customer/upload/', customer_upload, name='customer_upload'),
     path('customer/list/', customer_list, name='customer_list'),
-    path('api/cidrange/', CIDRangeCSVAPIView.as_view(), name='cid_range_csv_api'),
+    path('api/cidrange/<str:st_id>/', CIDRangeCSVAPIView.as_view(), name='cid_range_csv_api'),
 
 ]
 
