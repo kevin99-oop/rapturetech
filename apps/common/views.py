@@ -355,7 +355,7 @@ class CIDRangeCSVAPIView(APIView):
         if not dpuid:
             return Response({"error": "dpuid parameter is required"}, status=400)
 
-        st_id = get_object_or_404(DPU, dpuid=dpuid)
+        st_id = get_object_or_404(DPU, st_id=dpuid)
         customer_data = CustomerUpload.objects.filter(st_id=st_id)
         
         if not customer_data.exists():
