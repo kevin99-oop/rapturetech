@@ -343,7 +343,7 @@ def customer_upload(request):
     else:
         form = CustomerUploadForm()
 
-    return render(request, 'customer_upload.html', {'form': form})
+    return render(request, 'common/custupload.html', {'form': form})
 
 def customer_list(request):
     customers = CustomerUpload.objects.all()
