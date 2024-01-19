@@ -351,15 +351,18 @@ from apps.common.models import Customer
 
 class CIDRangeView(APIView):
     def get(self, request, *args, **kwargs):
+        dpuid = self.request.query_params.get('dpuid', None)
+
+        if not dpuid:
+            return Response({"detail": "dpuid parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            dpuid = request.query_params.get('dpuid')
-            # Assuming you have a method to get the corresponding st_id based on dpuid
-            st_id = get_st_id_from_dpuid(dpuid)  # Implement this method
-            if st_id:
-                # Assuming you have a method to retrieve CID range based on st_id
-                cid_range = get_cid_range(st_id)  # Implement this method
-                return Response({"cid_range": cid_range}, status=status.HTTP_200_OK)
-            else:
-                return Response({"error": "Invalid dpuid"}, status=status.HTTP_400_BAD_REQUEST)
+            customer = Customer.objects.get(dpu__dpuid=dpuid, user=request.user)
+            serializer = CustomerSerializer(customer)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Customer.DoesNotExist:
+            return Response({"detail": "Customer not found for the given dpuid"}, status=status.HTTP_404_NOT_FOUND)
+
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"detail": f"Error retrieving CID range: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
