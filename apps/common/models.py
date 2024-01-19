@@ -59,15 +59,11 @@ class DREC(models.Model):
 
     def __str__(self):
         return f"DREC for {self.ST_ID.user.username}'s DPU - {self.ST_ID.st_id}"
-class CustomerUpload(models.Model):
-    st_id = models.ForeignKey(DPU, on_delete=models.CASCADE)
-    cust_id = models.IntegerField()
-    name = models.CharField(max_length=255)
-    mobile = models.CharField(max_length=15)
-    adhaar = models.CharField(max_length=12)
-    bank_account = models.CharField(max_length=30)
-    ifsc = models.CharField(max_length=15)
-    csv_file = models.FileField(upload_to='customer_csv/', null=True, blank=True)
+
+class Customer(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    st_id = models.CharField(max_length=50)  # Assuming st_id is a CharField
+    csv_file = models.FileField(upload_to='customer_csv/')  # Assuming you want to upload to 'customer_csv/' directory
 
     def __str__(self):
-        return f"{self.name} - {self.cust_id}"
+        return f"Customer CSV for {self.user.username}'s DPU - {self.st_id}"

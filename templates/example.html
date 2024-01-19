@@ -239,7 +239,7 @@
                         <thead>
                             <tr>
                                 <th>Station ID</th>
-                                <th>Root</th>
+                                <th>Location</th>
                                 <th>Societ</th>
                                 <th>Date</th>
                                 <th>Shift</th>
@@ -253,23 +253,21 @@
                             </tr>
                         </thead>
                         <tbody >
-                            {% for dpu in active_dpu_list %}
-                                {% for drec in dpu.drecs.all %}
-                                    {% for society_count in society_customer_count %}
-                                        <tr>
-                                            <td>{{ dpu.location }}</td>
-                                            <td>{{ dpu.society }}</td>
-                                            <td>{{ dpu.st_id }}</td>
-                                            <td>{{ drec.RecordingDate }}</td>
-                                            <td>{{ drec.SHIFT }}</td>
-                                            <td>{{ drec.QT }}</td>
-                                            <td>{{ drec.Amount }}</td>
-                                            <td>{{ drec.CAmount }}</td>
-                                            <td>{{ drec.FAT }}</td>
-                                            <td>{{ society_count.customer_count }}</td>
-                                        </tr>
-                                    {% endfor %}
-                                {% endfor %}
+                            {% for record in summary_data %}
+                            <tr>
+                                <td>{{ record.ST_ID__st_id }}</td>
+                                <td>{{ record.ST_ID__location }}</td>
+                                <td>{{ record.ST_ID__society }}</td>
+                                <td>{{ record.RecordingDate }}</td>
+                                <td>{{ record.SHIFT }}</td>
+                                <td>{{ record.fat_avg }}</td>
+                                <td>{{ record.snf_avg }}</td>
+                                <td>{{ record.clr_avg }}</td>
+                                <td>{{ record.water_avg }}</td>
+                                <td>{{ record.total_ltr }}</td>
+                                <td>{{ record.total_amt }}</td>
+                                <td>{{ record.total_cust }}</td>
+                            </tr>
                             {% endfor %}
                         </tbody>
                     </table>

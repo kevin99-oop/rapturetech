@@ -68,6 +68,7 @@ from django.shortcuts import render, get_object_or_404
 from apps.common.models import DPU
 from django.db.models import Count
 from django.contrib import messages
+from django.db.models import Sum,Avg
 
 
 class HomeView(TemplateView):
@@ -83,6 +84,18 @@ class HomeView(TemplateView):
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'example.html'
     login_url = reverse_lazy('home')
+
+    def summary_view(request):
+        summary_data = DREC.objects.values('ST_ID__st_id', 'ST_ID__location', 'ST_ID__society', 'RecordingDate', 'SHIFT').annotate(
+            fat_avg=Avg('FAT'),
+            snf_avg=Avg('SNF'),
+            clr_avg=Avg('CLR'),
+            water_avg=Avg('WATER'),
+            total_ltr=Sum('QT'),  # Assuming QT represents Total Ltr.
+            total_amt=Sum('Amount'),
+            total_cust=Sum('CSR_NO')
+        )
+        print(summary_data)
 
     def get_context_data(self, **kwargs):
         user = self.request.user
@@ -296,77 +309,58 @@ def edit_dpu(request, st_id):
         form = DPUForm(instance=dpu)
     
     return render(request, 'common/edit_dpu.html', {'form': form, 'dpu': dpu})
-
-
-
+# views.py in your common app
 import csv
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from .forms import CustomerUploadForm
-from .models import CustomerUpload
-
-import csv
-from django.shortcuts import render, redirect
-from .forms import CustomerUploadForm
-from .models import CustomerUpload
-from apps.common.models import DPU
-
-def customer_upload(request):
+from django.shortcuts import render
+from django.contrib import messages
+from .forms import UploadCSVForm
+from .models import Customer
+def upload_customer_csv(request):
     if request.method == 'POST':
-        form = CustomerUploadForm(request.POST, request.FILES)
+        form = UploadCSVForm(request.POST, request.FILES)
         if form.is_valid():
-            st_id = form.cleaned_data['st_id']
-            csv_file = form.cleaned_data['csv_file'].read().decode('utf-8').splitlines()
+            csv_file = request.FILES['csv_file']
 
-            customer_upload_instance = CustomerUpload(st_id=st_id, csv_file=form.cleaned_data['csv_file'])
-            customer_upload_instance.save()
+            try:
+                dpu = DPU.objects.get(user=request.user)
 
-            for row in csv.reader(csv_file):
-                cust_id, name, mobile, adhaar, bank_account, ifsc = row
-                try:
-                    cust_id = int(cust_id)
-                except ValueError:
-                    continue
-
-                CustomerUpload.objects.create(
-                    st_id=st_id,
-                    cust_id=cust_id,
-                    name=name,
-                    mobile=mobile,
-                    adhaar=adhaar,
-                    bank_account=bank_account,
-                    ifsc=ifsc
+                # Save the CSV file reference
+                Customer.objects.create(
+                    user=request.user,
+                    st_id=dpu.st_id,  # Replace with actual DPU object
+                    csv_file=csv_file,
                 )
 
-            return redirect('customer_list')  # Redirect to the customer list view
-
+                messages.success(request, 'CSV file uploaded successfully.')
+                return redirect('upload_customer_csv')  # Redirect to the same page after successful upload
+            except Exception as e:
+                messages.error(request, f'Error processing CSV file: {e}')
     else:
-        form = CustomerUploadForm()
+        form = UploadCSVForm()
 
-    return render(request, 'common/custupload.html', {'form': form})
+    return render(request, 'common/upload_customer_csv.html', {'form': form})
 
-def customer_list(request):
-    customers = CustomerUpload.objects.all()
-    return render(request, 'common/customer_list.html', {'customers': customers})
+def customer_data(request):
+    customers = Customer.objects.filter(user=request.user)
+    return render(request, 'common/customer_data.html', {'customers': customers})
+# views.py in your common app
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
-class CIDRangeCSVAPIView(APIView):
-    def get(self, request):
-        dpuid = self.request.query_params.get('dpuid', None)
-        if not dpuid:
-            return Response({"error": "dpuid parameter is required"}, status=400)
+class CIDRangeView(APIView):
+    def get(self, request, st_id):
+        try:
+            # Check if the st_id exists in the CSV file
+            customer_csv = Customer.objects.get(st_id=st_id, user=request.user)
+            
+            # Get the range of customers
+            start_cust_id = customer_csv.customer_set.order_by('cust_id').first().cust_id
+            end_cust_id = customer_csv.customer_set.order_by('-cust_id').first().cust_id
 
-        st_id = get_object_or_404(DPU, st_id=dpuid)
-        customer_data = CustomerUpload.objects.filter(st_id=st_id)
-        
-        if not customer_data.exists():
-            return HttpResponse("No customer data found for the specified dpuid", status=404)
-
-        # Check if the customer data object has an associated CSV file
-        if customer_data.first().csv_file:
-            csv_file_path = customer_data.first().csv_file.path
-            with open(csv_file_path, 'rb') as csv_file:
-                response = HttpResponse(csv_file.read(), content_type='text/csv')
-                response['Content-Disposition'] = f'attachment; filename="{dpuid}.csv"'
-                return response
-        else:
-            return HttpResponse("No CSV file associated with the specified dpuid", status=404)
+            return Response({
+                'st_id': st_id,
+                'start_cust_id': start_cust_id,
+                'end_cust_id': end_cust_id,
+            })
+        except Customer.DoesNotExist:
+            return Response({'error': 'Invalid st_id or CSV file not found.'}, status=400)
