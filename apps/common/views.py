@@ -346,21 +346,20 @@ def customer_data(request):
 # views.py in your common app
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
+from apps.common.models import Customer 
 
 class CIDRangeView(APIView):
-    def get(self, request, st_id):
+    def get(self, request, *args, **kwargs):
         try:
-            # Check if the st_id exists in the CSV file
-            customer_csv = Customer.objects.get(st_id=st_id, user=request.user)
-            
-            # Get the range of customers
-            start_cust_id = customer_csv.customer_set.order_by('cust_id').first().cust_id
-            end_cust_id = customer_csv.customer_set.order_by('-cust_id').first().cust_id
-
-            return Response({
-                'st_id': st_id,
-                'start_cust_id': start_cust_id,
-                'end_cust_id': end_cust_id,
-            })
-        except Customer.DoesNotExist:
-            return Response({'error': 'Invalid st_id or CSV file not found.'}, status=400)
+            dpuid = request.query_params.get('dpuid')
+            # Assuming you have a method to get the corresponding st_id based on dpuid
+            st_id = get_st_id_from_dpuid(dpuid)  # Implement this method
+            if st_id:
+                # Assuming you have a method to retrieve CID range based on st_id
+                cid_range = get_cid_range(st_id)  # Implement this method
+                return Response({"cid_range": cid_range}, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "Invalid dpuid"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
