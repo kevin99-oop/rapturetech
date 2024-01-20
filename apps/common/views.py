@@ -414,6 +414,9 @@ def get_cid_range(request):
 
         # Read CSV data and calculate start and end range
         with open(csv_file_path, 'r') as file:
+            # Skip the header row
+            next(file)
+            
             reader = csv.DictReader(file)
             cust_ids = [int(row['CUST_ID']) for row in reader]
 
