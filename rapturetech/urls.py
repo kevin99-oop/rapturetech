@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 from apps.common.views import (
     HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView,
     ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,
-    DRECViewSet, NtpDatetimeView, dpudetails, edit_dpu,upload_customer_csv,download_latest_csv,get_cid_range, get_customer_info
+    DRECViewSet, NtpDatetimeView, dpudetails, edit_dpu,upload_customer_csv,download_latest_csv,get_cid_range, cust_info
 )
 from django.contrib.auth import views as auth_views
 from rest_framework.authtoken.views import obtain_auth_token
@@ -61,7 +61,7 @@ urlpatterns = [
     path('upload-customer-csv/', upload_customer_csv, name='upload_customer_csv'),
     path('download-latest-csv/', download_latest_csv, name='download_latest_csv'),
   path('api/cidrange/', get_cid_range, name='get_cid_range'),
-    path('api/cust_info/', get_customer_info, name='get_customer_info'),
+    path('api/cust_info/', cust_info, name='cust_info'),
 ]
 
 # Serve media files during development

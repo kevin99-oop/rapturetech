@@ -365,28 +365,47 @@ def download_latest_csv(request):
             return response
     else:
         return HttpResponse("No CSV file found for download.")
+import csv
+from .models import Customer
+
 from django.http import JsonResponse
 from .models import Customer
-from .utils import get_cid_range as get_cid_range_util  # Rename the function
+from .utils import get_cid_range as get_cid_range_util, get_customer_data_range
 
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
     start_range, end_range = get_cid_range_util(dpuid)
     return JsonResponse({'start_range': start_range, 'end_range': end_range})
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from .models import Customer
+from .utils import get_cid_range as get_cid_range_util, get_customer_data_range
+# apps/common/utils.py
 
-def get_customer_info(request):
+
+def get_customer_data_range(dpuid, start_range, end_range):
+    try:
+        customer = Customer.objects.filter(st_id=dpuid).latest('id')
+        csv_file_path = customer.csv_file.path
+
+        with open(csv_file_path, 'r') as csv_file:
+            reader = csv.DictReader(csv_file)
+            data_range = []
+
+            for row in reader:
+                cust_id = int(row.get('CUST_ID', 0))
+
+                if start_range <= cust_id <= end_range:
+                    data_range.append(row)
+
+        return data_range
+    except Customer.DoesNotExist:
+        return []  # Handle case where no customer with the given dpuid is found
+    except Exception as e:
+        print(f"Error retrieving data range: {e}")
+        return []
+
+def cust_info(request):
     dpuid = request.GET.get('dpuid', '')
     start_range = int(request.GET.get('start_range', ''))
     end_range = int(request.GET.get('end_range', ''))
-    
-    # Placeholder logic, replace this with your actual implementation
-    # Query the database to get customer information within the specified CID range
-    customers = Customer.objects.filter(st_id=dpuid, id__range=(start_range, end_range))
-    
-    # Convert customer data to JSON format or format as needed
-    customer_data = [{'CUST_ID': customer.CUST_ID, 'NAME': customer.NAME, 'MOBILE': customer.MOBILE} for customer in customers]
-    
-    return JsonResponse({'customer_data': customer_data})
+
+    data_range = get_customer_data_range(dpuid, start_range, end_range)
+    return JsonResponse({'data_range': data_range})
