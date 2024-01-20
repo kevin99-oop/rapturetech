@@ -60,7 +60,7 @@ urlpatterns = [
 
     path('upload_customer_csv/', upload_customer_csv, name='upload_customer_csv'),
     path('download_latest_csv/', download_latest_csv, name='download_latest_csv'),
-    path('api/cidrange/', get_cid_range, name='cid_range_api'),
+    path('api/cidrange/', get_cid_range, name='get_cid_range'),
 
 
 ]
