@@ -397,8 +397,8 @@ logger = logging.getLogger(__name__)
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
     user = request.user  # Get the user making the request
+    print(f"Request: {request}")
     print(f"User: {user}, dpuid: {dpuid}")
-
     try:
         # Fetch all Customer entries for the given dpuid and user
         customer_entries = get_list_or_404(Customer, st_id=dpuid, user=user)
