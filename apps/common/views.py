@@ -372,7 +372,8 @@ from .models import Customer
 
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
-    
+    print(f"DEBUG: dpuid = {dpuid}")
+
     # Fetch the latest Customer entry for the given dpuid
     try:
         latest_customer = Customer.objects.filter(st_id=dpuid).latest('id')
@@ -405,6 +406,7 @@ def get_cid_range(request):
 
     # Prepare the JSON response with the range values
     response_data = {'range': f'{start_range},{end_range}'}
+    print(f"DEBUG: response_data = {response_data}")
 
     return JsonResponse(response_data)
 
