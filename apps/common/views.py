@@ -398,9 +398,11 @@ import logging
 from django.http import JsonResponse
 from django.shortcuts import get_list_or_404
 from .models import Customer
-
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 logger = logging.getLogger(__name__)
-
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
 
