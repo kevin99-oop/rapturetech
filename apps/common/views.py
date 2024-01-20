@@ -387,6 +387,8 @@ def download_latest_csv(request):
     else:
         return HttpResponse("No CSV file found for download.")
 
+# views.py
+
 import csv
 import logging
 from django.http import JsonResponse
@@ -398,13 +400,13 @@ logger = logging.getLogger(__name__)
 
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
-    
+
     # Log the dpuid for debugging
     logger.info(f"Received request for dpuid: {dpuid}")
 
     try:
         # Fetch the latest Customer entry for the given dpuid and current user
-        latest_customer = Customer.objects.filter(st_id=dpuid, user=request.user).order_by('-id').first()
+        latest_customer = Customer.objects.filter(st_id=dpuid, user=request.user.id).order_by('-id').first()
 
         if not latest_customer:
             return JsonResponse({'error': f'No CSV file found for the specified dpuid and user.'}, status=404)
