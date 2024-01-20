@@ -69,6 +69,25 @@ from apps.common.models import DPU
 from django.db.models import Count
 from django.contrib import messages
 from django.db.models import Sum,Avg
+import csv
+import logging
+from django.http import JsonResponse
+from django.shortcuts import get_list_or_404
+from apps.common.models import Customer
+from django.contrib.auth.models import AnonymousUser
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import UploadCSVForm
+from .models import Customer
+from django.http import HttpResponse
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from apps.common.forms import UploadCSVForm
+from apps.common.models import Customer
+from io import TextIOWrapper
+import csv
+
 
 
 class HomeView(TemplateView):
@@ -205,9 +224,6 @@ class ProfileUpdateView(LoginRequiredMixin, TemplateView):
 class ShiftreportView(LoginRequiredMixin, TemplateView):
     template_name = 'common/shift_report.html'
 
-   
-
-
 @login_required
 def add_dpu(request):
     if request.method == 'POST':
@@ -313,19 +329,6 @@ def edit_dpu(request, st_id):
 
 
 
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .forms import UploadCSVForm
-from .models import Customer
-from django.http import HttpResponse
-
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .forms import UploadCSVForm
-from .models import Customer
-from io import TextIOWrapper
-import csv
-
 def extract_cust_id_range(csv_file):
     # Read the CSV file and extract the start and end range based on CUST_ID values
     csv_content = csv_file.read().decode('utf-8').splitlines()
@@ -386,11 +389,7 @@ def download_latest_csv(request):
             return response
     else:
         return HttpResponse("No CSV file found for download.")
-import csv
-import logging
-from django.http import JsonResponse
-from django.shortcuts import get_list_or_404
-from .models import Customer
+
 
 logger = logging.getLogger(__name__)
 
@@ -400,7 +399,9 @@ def get_cid_range(request):
     try:
         # Fetch all Customer entries for the given dpuid
         customer_entries = get_list_or_404(Customer, st_id=dpuid)
-
+    # Check if the user is authenticated
+        if not request.user or isinstance(request.user, AnonymousUser):
+            return JsonResponse({'error': 'User not authenticated.'}, status=401)
         if not customer_entries:
             return JsonResponse({'error': f'No CSV file found for dpuid: {dpuid}'}, status=404)
 
