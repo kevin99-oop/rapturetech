@@ -391,7 +391,7 @@ def get_cid_range(request):
     last_cust_id = 0
     for row in reader:
         try:
-            current_cust_id = int(row['CUST_ID'])
+            current_cust_id = int(row.get('CUST_ID', 0))
             if current_cust_id > last_cust_id:
                 last_cust_id = current_cust_id
         except ValueError:
@@ -404,6 +404,7 @@ def get_cid_range(request):
     response_data = {'range': f'1,{end_range}'}
 
     return JsonResponse(response_data)
+
 # apps/common/utils.py
 
 
