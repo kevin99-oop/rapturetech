@@ -399,12 +399,10 @@ from django.http import JsonResponse
 from django.shortcuts import get_list_or_404
 from .models import Customer
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
 logger = logging.getLogger(__name__)
-@api_view(['PUT'])
 @api_view(['GET'])
-
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsAdminUser])
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
 
