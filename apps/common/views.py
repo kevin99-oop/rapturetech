@@ -390,26 +390,18 @@ def download_latest_csv(request):
 # views.py
 
 import csv
-import logging
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from .models import Customer
 
-# Configure logging
-logger = logging.getLogger(__name__)
-
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
 
-    # Log the dpuid for debugging
-    logger.info(f"Received request for dpuid: {dpuid}")
-
     try:
-        # Fetch the latest Customer entry for the given dpuid and current user
-        latest_customer = Customer.objects.filter(st_id=dpuid, user=request.user.id).order_by('-id').first()
-
+        # Fetch the latest Customer entry for the given dpuid and the current user
+        latest_customer = Customer.objects.filter(st_id=dpuid).order_by('-id').first()
         if not latest_customer:
-            return JsonResponse({'error': f'No CSV file found for the specified dpuid and user.'}, status=404)
+            return JsonResponse({'error': f'No CSV file found for dpuid: {dpuid}'}, status=404)
 
         # Retrieve the CSV file path from the latest_customer model
         csv_file_path = latest_customer.csv_file.path
@@ -428,7 +420,11 @@ def get_cid_range(request):
 
         return JsonResponse(response_data)
 
+    except Customer.DoesNotExist:
+        return JsonResponse({'error': 'No CSV file found for the specified dpuid.'}, status=404)
+
+    except Customer.MultipleObjectsReturned:
+        return JsonResponse({'error': 'Multiple CSV files found for the specified dpuid.'}, status=500)
+
     except Exception as e:
-        # Log the exception for debugging
-        logger.exception(f'Error processing request: {str(e)}')
         return JsonResponse({'error': f'Error reading CSV file: {str(e)}'}, status=500)
