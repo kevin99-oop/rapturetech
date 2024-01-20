@@ -388,7 +388,7 @@ def download_latest_csv(request):
         return HttpResponse("No CSV file found for download.")
 import csv
 import logging
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import get_list_or_404
 from .models import Customer
 
@@ -398,8 +398,8 @@ def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
 
     try:
-        # Fetch all Customer entries for the given dpuid and current user
-        customer_entries = get_list_or_404(Customer, st_id=dpuid, user=request.user)
+        # Fetch all Customer entries for the given dpuid
+        customer_entries = get_list_or_404(Customer, st_id=dpuid)
 
         if not customer_entries:
             return JsonResponse({'error': f'No CSV file found for dpuid: {dpuid}'}, status=404)
@@ -428,5 +428,6 @@ def get_cid_range(request):
         return JsonResponse(response_data)
 
     except Exception as e:
-        logger.exception(f'Error processing request for dpuid {dpuid} and user {request.user}: {e}')
+        logger.exception(f'Error processing request for dpuid {dpuid}: {e}')
         return JsonResponse({'error': f'Internal Server Error'}, status=500)
+
