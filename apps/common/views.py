@@ -368,19 +368,21 @@ def download_latest_csv(request):
 import csv
 from io import StringIO
 from django.http import JsonResponse
+from .models import Customer
 
 def get_cid_range(request):
-    # Your logic to read the CSV file and determine the end range
-    # Assuming the CSV data is stored in the 'csv_data' variable
-    csv_data = """
-    CUST_ID,NAME,MOBILE,ADHHAR,BANK_AC,IFSC
-    1,Jack 1,M9374672571,A123412341001,B501000500000010000,B5010005000
-    2,PARAS 2,M9374672571,A123412341002,B501000500000020000,B5010005000
-    3,PARAS 3,M9374672571,A123412341003,B501000500000030000,B5010005000
-    ...  # Add the remaining CSV data here
-    """
+    dpuid = request.GET.get('dpuid', '')
+    
+    # Fetch the latest Customer entry for the given dpuid
+    try:
+        latest_customer = Customer.objects.filter(st_id=dpuid).latest('id')
+    except Customer.DoesNotExist:
+        return JsonResponse({'error': 'No CSV file found for the specified dpuid.'}, status=404)
 
-    # Parse the CSV data to find the last CUST_ID
+    # Read CSV data from the database
+    csv_data = latest_customer.csv_file.read().decode('utf-8')
+
+    # Parse the CSV data to find the start and end range
     csv_file = StringIO(csv_data)
     reader = csv.DictReader(csv_file)
 
@@ -388,22 +390,24 @@ def get_cid_range(request):
     if 'CUST_ID' not in reader.fieldnames:
         return JsonResponse({'error': 'Invalid CSV format. Header row missing.'}, status=400)
 
-    last_cust_id = 0
+    start_range = float('inf')  # Initialize with positive infinity
+    end_range = 0
+
     for row in reader:
         try:
             current_cust_id = int(row.get('CUST_ID', 0))
-            if current_cust_id > last_cust_id:
-                last_cust_id = current_cust_id
+            if current_cust_id < start_range:
+                start_range = current_cust_id
+            if current_cust_id > end_range:
+                end_range = current_cust_id
         except ValueError:
             return JsonResponse({'error': 'Invalid CUST_ID format. Must be an integer.'}, status=400)
 
-    # Calculate the end range based on the last CUST_ID
-    end_range = last_cust_id
-
     # Prepare the JSON response with the range values
-    response_data = {'range': f'1,{end_range}'}
+    response_data = {'range': f'{start_range},{end_range}'}
 
     return JsonResponse(response_data)
+
 
 # apps/common/utils.py
 
