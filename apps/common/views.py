@@ -387,32 +387,44 @@ def download_latest_csv(request):
     else:
         return HttpResponse("No CSV file found for download.")
 
-# views.py
-from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from .models import Customer
-from .serializers import CIDRangeSerializer
+from rest_framework.decorators import api_view
 from .utils import get_user_st_id
+from .models import Customer
 
-class CIDRangeAPIView(APIView):
-    def get(self, request):
-        # Get the user's st_id
-        user_st_id = get_user_st_id(request.user)
+@api_view(['GET'])
+def cid_range(request):
+    # Get the user's ST_ID
+    user_st_id = get_user_st_id(request.user)
 
-        if user_st_id:
-            try:
-                # Retrieve the Customer instance for the user and st_id
-                customer = Customer.objects.get(user=request.user, st_id=user_st_id)
+    # Check if the user_st_id is available
+    if user_st_id is None:
+        return Response({"error": "User ST_ID not found."}, status=400)
 
-                # Extract start and end range from the CSV file
-                start_range = customer.start_range
-                end_range = customer.end_range
+    # Get the start and end range from the request data
+    start_end_data = request.GET.get("noofcustomer", "")
+    start, end = map(int, start_end_data.split(','))
 
-                # Serialize the data
-                serializer = CIDRangeSerializer({'start_range': start_range, 'end_range': end_range})
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            except Customer.DoesNotExist:
-                return Response({'detail': 'Customer not found for the user and st_id.'}, status=status.HTTP_404_NOT_FOUND)
-        else:
-            return Response({'detail': 'User does not have st_id.'}, status=status.HTTP_400_BAD_REQUEST)
+    # Fetch CUST_ID range for the given ST_ID
+    try:
+        customer = Customer.objects.get(user=request.user, st_id=user_st_id)
+        # Assuming start_range and end_range are fields in your Customer model
+        start_range = customer.start_range
+        end_range = customer.end_range
+
+        # Validate the requested range
+        if start < start_range or end > end_range:
+            return Response({"error": "Requested range is not valid."}, status=400)
+
+        # Respond with the requested range
+        response_data = {
+            "st_id": user_st_id,
+            "start_range": start_range,
+            "end_range": end_range,
+            "requested_start": start,
+            "requested_end": end,
+        }
+
+        return Response(response_data)
+    except Customer.DoesNotExist:
+        return Response({"error": "Customer data not found."}, status=404)
