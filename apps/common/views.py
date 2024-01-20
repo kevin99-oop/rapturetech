@@ -366,16 +366,13 @@ def download_latest_csv(request):
     else:
         return HttpResponse("No CSV file found for download.")
 from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
 from .models import Customer
-from .utils import get_cid_range 
+from .utils import get_cid_range as get_cid_range_util  # Rename the function
 
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
-    start_range, end_range = get_cid_range(dpuid)
+    start_range, end_range = get_cid_range_util(dpuid)
     return JsonResponse({'start_range': start_range, 'end_range': end_range})
-
-
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import Customer
