@@ -416,11 +416,11 @@ def get_customer_data_range(dpuid, start_range, end_range):
 import csv
 from django.http import JsonResponse
 from io import StringIO
-def get_csv_data(dpuid):
+from .models import Customer
+
+def get_csv_data(user, dpuid):
     try:
-        # Assuming you have a model named Customer with a FileField named csv_file
-        customer = Customer.objects.get(st_id=dpuid)
-        # Assuming the csv_file field contains the path to the CSV file
+        customer = Customer.objects.get(user=user, st_id=dpuid)
         csv_file_path = customer.csv_file.path
 
         with open(csv_file_path, 'r') as file:
@@ -429,47 +429,24 @@ def get_csv_data(dpuid):
         return csv_data
 
     except Customer.DoesNotExist:
-        raise Exception(f"Customer with dpuid {dpuid} not found")
+        raise Exception(f"Customer with dpuid {dpuid} not found for user {user}")
 
     except Exception as e:
         raise Exception(f"Error retrieving CSV data: {str(e)}")
-    
+
 def cust_info(request):
-    # Retrieve dpuid and cid from the request
     dpuid = request.GET.get('dpuid', '')
     cid = request.GET.get('cid', '')
 
-    # Check if start_range is provided, otherwise default to 1
-    start_range = request.GET.get('start_range', '1')
-
     try:
-        # Assuming you have a method to get the CSV data based on dpuid
-        csv_data = get_csv_data(dpuid)
+        user = request.user
+        csv_data = get_csv_data(user, dpuid)
 
-        # Parse the CSV data
-        csv_file = StringIO(csv_data)
-        reader = csv.DictReader(csv_file)
+        # Now, you can process the CSV data as needed for the specific 'cid'
+        # For demonstration, let's just return the entire CSV data
+        response_data = {'cinfo': csv_data}
 
-        # Find the row with the matching CUST_ID
-        for row in reader:
-            if row.get('CUST_ID') == cid:
-                # You can access other fields as needed, for example:
-                name = row.get('NAME')
-                mobile = row.get('MOBILE')
-
-                # Construct the response
-                response_data = {
-                    'dpuid': dpuid,
-                    'cid': cid,
-                    'name': name,
-                    'mobile': mobile,
-                    # Add other fields as needed
-                }
-
-                return JsonResponse(response_data)
-
-        # If the loop completes without finding a matching CUST_ID
-        return JsonResponse({'error': 'Customer not found'}, status=404)
+        return JsonResponse(response_data)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
