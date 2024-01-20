@@ -313,8 +313,8 @@ def edit_dpu(request, st_id):
 import csv
 from django.shortcuts import render
 from django.contrib import messages
-from .forms import UploadCSVForm
-from .models import Customer
+from apps.common.forms import UploadCSVForm
+from apps.common.models import Customer
 def upload_customer_csv(request):
     if request.method == 'POST':
         form = UploadCSVForm(request.POST, request.FILES)
@@ -343,12 +343,12 @@ def upload_customer_csv(request):
 def customer_data(request):
     customers = Customer.objects.filter(user=request.user)
     return render(request, 'common/customer_data.html', {'customers': customers})
-# views.py in your common app
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from apps.common.models import Customer 
-from apps.common.serializers import CustomerSerializer
+from .models import Customer
+from .serializers import CustomerSerializer
 
 class CIDRangeView(APIView):
     def get(self, request, *args, **kwargs):
@@ -358,12 +358,12 @@ class CIDRangeView(APIView):
             return Response({"detail": "dpuid parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            customer = Customer.objects.get(dpu__dpuid=dpuid, user=request.user)
+            customer = Customer.objects.get(st_id=dpuid, user=request.user)
             serializer = CustomerSerializer(customer)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Customer.DoesNotExist:
-            return Response({"detail": "Customer not found for the given dpuid"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": f"Customer not found for dpuid: {dpuid}"}, status=status.HTTP_404_NOT_FOUND)
 
         except Exception as e:
             error_detail = f"Error retrieving CID range: {str(e)}"
