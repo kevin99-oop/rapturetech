@@ -365,39 +365,33 @@ def download_latest_csv(request):
             return response
     else:
         return HttpResponse("No CSV file found for download.")
-import csv
 from django.http import JsonResponse
-from rest_framework.decorators import api_view
-from rest_framework import status
-from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.decorators import login_required
+from .models import Customer
+from apps.common.utils import get_cid_range 
 
-@api_view(['GET'])
-def cidrange_view(request, dpuid):
-    # Check if the user is authenticated
-    if isinstance(request.user, AnonymousUser):
-        return JsonResponse({"error": "User is not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+@login_required
+def get_cid_range(request):
+    dpuid = request.GET.get('dpuid', '')
+    start_range, end_range = get_cid_range(dpuid)
+    return JsonResponse({'start_range': start_range, 'end_range': end_range})
 
-    # Get start and end range from the query parameters
-    start_range = int(request.GET.get('start_range', 1))
-    end_range = int(request.GET.get('end_range', 1))
 
-    try:
-        # Retrieve the latest uploaded CSV file for the user and DPUID
-        customer = Customer.objects.filter(user=request.user, st_id=dpuid).latest('id')
-        csv_file_path = customer.csv_file.path
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from .models import Customer
 
-        # Read the CSV file and extract data within the specified range
-        csv_data = []
-        with open(csv_file_path, 'r') as file:
-            reader = csv.DictReader(file)
-            for i, row in enumerate(reader, start=1):
-                if start_range <= i <= end_range:
-                    csv_data.append(row)
-
-        return JsonResponse({"csv_data": csv_data}, status=status.HTTP_200_OK)
-
-    except Customer.DoesNotExist:
-        return JsonResponse({"error": f"No CSV file found for DPUID: {dpuid}"}, status=status.HTTP_404_NOT_FOUND)
-
-    except Exception as e:
-        return JsonResponse({"error": f"Error processing CSV file: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+@login_required
+def get_customer_info(request):
+    dpuid = request.GET.get('dpuid', '')
+    start_range = int(request.GET.get('start_range', ''))
+    end_range = int(request.GET.get('end_range', ''))
+    
+    # Placeholder logic, replace this with your actual implementation
+    # Query the database to get customer information within the specified CID range
+    customers = Customer.objects.filter(st_id=dpuid, id__range=(start_range, end_range))
+    
+    # Convert customer data to JSON format or format as needed
+    customer_data = [{'CUST_ID': customer.CUST_ID, 'NAME': customer.NAME, 'MOBILE': customer.MOBILE} for customer in customers]
+    
+    return JsonResponse({'customer_data': customer_data})
