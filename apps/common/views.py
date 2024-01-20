@@ -387,67 +387,38 @@ def download_latest_csv(request):
     else:
         return HttpResponse("No CSV file found for download.")
 
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from .utils import get_user_st_id
-from .models import Customer
-
-@api_view(['GET'])
-def cid_range(request):
-    # Get the user's ST_ID
-    user_st_id = get_user_st_id(request.user)
-
-    # Check if the user_st_id is available
-    if user_st_id is None:
-        return Response({"error": "User ST_ID not found."}, status=400)
-
-    # Get the start and end range from the request data
-    start_end_data = request.GET.get("noofcustomer", "")
-    start, end = map(int, start_end_data.split(','))
-
-    # Fetch CUST_ID range for the given ST_ID
-    try:
-        customer = Customer.objects.get(user=request.user, st_id=user_st_id)
-        # Assuming start_range and end_range are fields in your Customer model
-        start_range = customer.start_range
-        end_range = customer.end_range
-
-        # Validate the requested range
-        if start < start_range or end > end_range:
-            return Response({"error": "Requested range is not valid."}, status=400)
-
-        # Respond with the requested range
-        response_data = {
-            "st_id": user_st_id,
-            "start_range": start_range,
-            "end_range": end_range,
-            "requested_start": start,
-            "requested_end": end,
-        }
-
-        return Response(response_data)
-    except Customer.DoesNotExist:
-        return Response({"error": "Customer data not found."}, status=404)
+import csv
 from django.http import JsonResponse
+from io import StringIO
 
-def cid_range(request):
-    user_st_id, start_range, end_range = get_user_st_id(request.user)
+def get_cid_range(request):
+    # Your logic to read the CSV file and determine the end range
+    # Assuming the CSV data is stored in the 'csv_data' variable
+    csv_data = """
+    CUST_ID,NAME,MOBILE,ADHHAR,BANK_AC,IFSC
+    1,Jack 1,M9374672571,A123412341001,B501000500000010000,B5010005000
+    2,PARAS 2,M9374672571,A123412341002,B501000500000020000,B5010005000
+    3,PARAS 3,M9374672571,A123412341003,B501000500000030000,B5010005000
+    ...  # Add the remaining CSV data here
+    """
 
-    if user_st_id is None:
-        return JsonResponse({'error': 'User not authenticated or associated with DPU'}, status=400)
+    # Parse the CSV data to find the last CUST_ID
+    csv_file = StringIO(csv_data)
+    reader = csv.DictReader(csv_file)
 
-    dpuid = request.GET.get('dpuid', None)
+    # Check if the header row exists
+    if 'CUST_ID' not in reader.fieldnames:
+        return JsonResponse({'error': 'Invalid CSV format. Header row missing.'}, status=400)
 
-    if dpuid is None:
-        return JsonResponse({'error': 'dpuid parameter is required'}, status=400)
+    last_cust_id = 0
+    for row in reader:
+        last_cust_id = int(row['CUST_ID'])
 
-    try:
-        start_end_data = request.GET.get('noofcustomer', '')
-        start, end = map(int, start_end_data.split(','))
+    # Calculate the end range based on the last CUST_ID
 
-        # Your logic to fetch CID range from the CSV file based on user_st_id and dpuid
-        # ...
+    end_range = last_cust_id
 
-        return JsonResponse({'start': start, 'end': end, 'user_st_id': user_st_id}, status=200)
-    except ValueError:
-        return JsonResponse({'error': 'Invalid format for noofcustomer parameter'}, status=400)
+    # Prepare the JSON response with the range values
+    response_data = {'noofcustomer': f'1,{end_range}'}
+
+    return JsonResponse(response_data)
