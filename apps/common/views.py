@@ -366,11 +366,8 @@ def download_latest_csv(request):
     else:
         return HttpResponse("No CSV file found for download.")
 import csv
-from .models import Customer
-
-import csv
-from django.http import JsonResponse
 from io import StringIO
+from django.http import JsonResponse
 
 def get_cid_range(request):
     # Your logic to read the CSV file and determine the end range
@@ -393,16 +390,20 @@ def get_cid_range(request):
 
     last_cust_id = 0
     for row in reader:
-        last_cust_id = int(row['CUST_ID'])
+        try:
+            current_cust_id = int(row['CUST_ID'])
+            if current_cust_id > last_cust_id:
+                last_cust_id = current_cust_id
+        except ValueError:
+            return JsonResponse({'error': 'Invalid CUST_ID format. Must be an integer.'}, status=400)
 
     # Calculate the end range based on the last CUST_ID
     end_range = last_cust_id
 
     # Prepare the JSON response with the range values
-    response_data = {'noofcustomer': f'1,{end_range}'}
+    response_data = {'range': f'1,{end_range}'}
 
     return JsonResponse(response_data)
-
 # apps/common/utils.py
 
 
