@@ -386,7 +386,11 @@ def get_cid_range(request):
     # Parse the CSV data to find the last CUST_ID
     csv_file = StringIO(csv_data)
     reader = csv.DictReader(csv_file)
-    
+
+    # Check if the header row exists
+    if 'CUST_ID' not in reader.fieldnames:
+        return JsonResponse({'error': 'Invalid CSV format. Header row missing.'}, status=400)
+
     last_cust_id = 0
     for row in reader:
         last_cust_id = int(row['CUST_ID'])
