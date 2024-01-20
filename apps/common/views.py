@@ -309,51 +309,103 @@ def edit_dpu(request, st_id):
         form = DPUForm(instance=dpu)
     
     return render(request, 'common/edit_dpu.html', {'form': form, 'dpu': dpu})
-# views.py in your common app
-import csv
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib import messages
-from apps.common.forms import UploadCSVForm
-from apps.common.models import Customer
+from .forms import UploadCSVForm
+from .models import Customer
+from io import TextIOWrapper
+import csv
+from django.http import HttpResponse
+
 def upload_customer_csv(request):
     if request.method == 'POST':
-        form = UploadCSVForm(request.POST, request.FILES)
-        if form.is_valid():
-            csv_file = request.FILES['csv_file']
+        csv_file = request.FILES['csv_file']
+        
+        # Read the CSV file
+        csv_content = csv_file.read().decode('utf-8')
+        csv_lines = csv_content.splitlines()
 
-            try:
-                # Save the CSV file reference
-                customer = Customer.objects.create(
-                    user=request.user,
-                    st_id=form.cleaned_data['st_id'],
-                    csv_file=csv_file,
-                )
+        # Extract ST_ID from the first line
+        st_id = csv_lines[0].strip()
 
-                messages.success(request, 'CSV file uploaded successfully.')
-                return redirect('upload_customer_csv')  # Redirect to the same page after successful upload
-            except Exception as e:
-                messages.error(request, f'Error processing CSV file: {e}')
-    else:
-        form = UploadCSVForm()
+        # Check if DPU with the specified ST_ID exists
+        try:
+            dpu = DPU.objects.get(st_id=st_id)
+            related_to_user = False
+        except DPU.DoesNotExist:
+            # Handle the case where no DPU is found
+            related_to_user = True
 
-    return render(request, 'common/upload_customer_csv.html', {'form': form})
+        # Save the CSV file reference with the corresponding DPU and User
+        try:
+            Customer.objects.create(
+                user=request.user,
+                st_id=st_id,
+                csv_file=csv_file,
+                related_to_user=related_to_user,
+            )
+            messages.success(request, 'CSV file uploaded successfully.')
+            return redirect('upload_customer_csv')  # Redirect to the same page after successful upload
+        except Exception as e:
+            messages.error(request, f'Error processing CSV file: {e}')
+
+    return render(request, 'common/upload_customer_csv.html', {'form': UploadCSVForm()})
 def customer_data(request):
     customers = Customer.objects.filter(user=request.user)
-    return render(request, 'common/customer_data.html', {'customers': customers})
+    return render(request, 'common/upload_customer_csv.html', {'customers': customers})
+def download_latest_csv(request):
+    # Get the latest Customer record for the logged-in user
+    latest_customer = Customer.objects.filter(user=request.user).order_by('-id').first()
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
+    if latest_customer:
+        # Open the CSV file and create an HttpResponse with the file content
+        with open(latest_customer.csv_file.path, 'rb') as csv_file:
+            response = HttpResponse(csv_file.read(), content_type='text/csv')
+            response['Content-Disposition'] = f'attachment; filename="{latest_customer.csv_file.name}"'
+            return response
+    else:
+        return HttpResponse("No CSV file found for download.")
+import csv
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.core.exceptions import ObjectDoesNotExist
 from .models import Customer
-from .serializers import CustomerSerializer
 
-class CIDRangeView(APIView):
-    def get(self, request, *args, **kwargs):
-        user = request.user
-        latest_customer = Customer.objects.filter(user=user).order_by('-id').first()
+@csrf_exempt
+@require_POST
+def cid_range(request):
+    try:
+        # Get the uploaded CSV file for the logged-in user
+        latest_customer = Customer.objects.filter(user=request.user).order_by('-id').first()
 
         if latest_customer:
-            serializer = CustomerSerializer(latest_customer)
-            return Response(serializer.data)
+            # Open the CSV file and read the first line to extract st_id
+            with open(latest_customer.csv_file.path, 'r') as csv_file:
+                csv_reader = csv.reader(csv_file)
+                st_id = next(csv_reader)[0]
+
+            # Prompt the user to enter a range
+            range_input = request.POST.get('range_input', '')
+
+            # Call the api/cust_info/ endpoint with the specified range
+            # You can customize this part based on your cust_info API implementation
+            cust_info_response = call_cust_info_api(st_id, range_input)
+
+            return JsonResponse({'message': 'Success', 'response': cust_info_response})
         else:
-            return Response({'message': 'No customer data available.'})
+            return JsonResponse({'message': 'No CSV file found for the user'})
+    except ObjectDoesNotExist:
+        return JsonResponse({'message': 'User not found'})
+    except Exception as e:
+        return JsonResponse({'message': f'Error: {str(e)}'})
+
+def call_cust_info_api(st_id, range_input):
+    # Implement the logic to call the api/cust_info/ endpoint with st_id and range_input
+    # You can use requests library or Django's built-in HttpRequest to make the API call
+    # Example:
+    # response = requests.get(f'http://your-api-server/api/cust_info/?st_id={st_id}&range={range_input}')
+    # return response.json()
+
+    # For now, returning a dummy response
+    return {'st_id': st_id, 'range_input': range_input}

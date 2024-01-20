@@ -60,11 +60,11 @@ class DREC(models.Model):
     def __str__(self):
         return f"DREC for {self.ST_ID.user.username}'s DPU - {self.ST_ID.st_id}"
 
-# models.py
 class Customer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     st_id = models.CharField(max_length=50)
     csv_file = models.FileField(upload_to='customer_csv/')
+    related_to_user = models.BooleanField(default=True)  # Indicates whether it's related to a user or DPU
 
     def __str__(self):
         return f"Customer CSV for {self.user.username}'s DPU - {self.st_id}"
