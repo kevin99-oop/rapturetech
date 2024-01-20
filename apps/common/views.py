@@ -384,7 +384,7 @@ def get_cid_range(request):
     end_range = latest_customer.end_range
 
     # Prepare the JSON response with the range values
-    response_data = {'range': f'{start_range},{end_range}'}
+    response_data = {'noofcustomer': f'{start_range},{end_range}'}
 
     return JsonResponse(response_data)
 
