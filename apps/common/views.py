@@ -368,39 +368,37 @@ def download_latest_csv(request):
 import csv
 from .models import Customer
 
+import csv
 from django.http import JsonResponse
-from .models import Customer
-from .utils import get_cid_range as get_cid_range_util, get_customer_data_range
+from io import StringIO
 
-def get_cid_range(dpuid):
-    try:
-        # Assuming dpuid uniquely identifies a DPU
-        customer = Customer.objects.filter(st_id=dpuid).latest('id')
+def get_cid_range(request):
+    # Your logic to read the CSV file and determine the end range
+    # Assuming the CSV data is stored in the 'csv_data' variable
+    csv_data = """
+    CUST_ID,NAME,MOBILE,ADHHAR,BANK_AC,IFSC
+    1,Jack 1,M9374672571,A123412341001,B501000500000010000,B5010005000
+    2,PARAS 2,M9374672571,A123412341002,B501000500000020000,B5010005000
+    3,PARAS 3,M9374672571,A123412341003,B501000500000030000,B5010005000
+    ...  # Add the remaining CSV data here
+    """
 
-        # Assuming csv_file is the field where you store the uploaded CSV file
-        csv_file_path = customer.csv_file.path
+    # Parse the CSV data to find the last CUST_ID
+    csv_file = StringIO(csv_data)
+    reader = csv.DictReader(csv_file)
+    
+    last_cust_id = 0
+    for row in reader:
+        last_cust_id = int(row['CUST_ID'])
 
-        # Read the CSV file to determine the range dynamically
-        with open(csv_file_path, 'r') as file:
-            csv_reader = csv.reader(file)
-            next(csv_reader)  # Skip header
+    # Calculate the end range based on the last CUST_ID
+    end_range = last_cust_id
 
-            # Get the last row to determine the end_range
-            last_row = None
-            for row in csv_reader:
-                last_row = row
+    # Prepare the JSON response with the range values
+    response_data = {'noofcustomer': f'1,{end_range}'}
 
-            if last_row:
-                end_range = int(last_row[0])  # Assuming CID is the first column
-            else:
-                end_range = 1  # Default value if the CSV is empty
+    return JsonResponse(response_data)
 
-        start_range = 1  # Always start from 1
-
-        return start_range, end_range
-    except Customer.DoesNotExist:
-        # Handle the case where the customer with the given dpuid is not found
-        return None, None
 # apps/common/utils.py
 
 
