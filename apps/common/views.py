@@ -388,28 +388,30 @@ def download_latest_csv(request):
         return HttpResponse("No CSV file found for download.")
 
 # views.py
-
 import csv
+import logging
 from django.http import JsonResponse
 from django.shortcuts import get_list_or_404
 from .models import Customer
 
+logger = logging.getLogger(__name__)
+
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
 
-    # Fetch all Customer entries for the given dpuid
-    customer_entries = get_list_or_404(Customer, st_id=dpuid)
-
-    if not customer_entries:
-        return JsonResponse({'error': f'No CSV file found for dpuid: {dpuid}'}, status=404)
-
-    # Get the latest Customer entry based on id
-    latest_customer = max(customer_entries, key=lambda entry: entry.id)
-
-    # Retrieve the CSV file path from the latest_customer model
-    csv_file_path = latest_customer.csv_file.path
-
     try:
+        # Fetch all Customer entries for the given dpuid
+        customer_entries = get_list_or_404(Customer, st_id=dpuid)
+
+        if not customer_entries:
+            return JsonResponse({'error': f'No CSV file found for dpuid: {dpuid}'}, status=404)
+
+        # Get the latest Customer entry based on id
+        latest_customer = max(customer_entries, key=lambda entry: entry.id)
+
+        # Retrieve the CSV file path from the latest_customer model
+        csv_file_path = latest_customer.csv_file.path
+
         # Read CSV data and calculate start and end range
         with open(csv_file_path, 'r') as file:
             reader = csv.DictReader(file)
@@ -425,4 +427,5 @@ def get_cid_range(request):
         return JsonResponse(response_data)
 
     except Exception as e:
-        return JsonResponse({'error': f'Error reading CSV file: {str(e)}'}, status=500)
+        logger.exception(f'Error processing request for dpuid {dpuid}: {e}')
+        return JsonResponse({'error': f'Internal Server Error'}, status=500)
