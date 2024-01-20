@@ -38,7 +38,6 @@ class DRECSerializer(serializers.ModelSerializer):
     class Meta:
         model = DREC
         fields = '__all__'
-
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer

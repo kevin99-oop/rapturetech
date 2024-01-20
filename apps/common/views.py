@@ -322,12 +322,10 @@ def upload_customer_csv(request):
             csv_file = request.FILES['csv_file']
 
             try:
-                dpu = DPU.objects.get(user=request.user)
-
                 # Save the CSV file reference
-                Customer.objects.create(
+                customer = Customer.objects.create(
                     user=request.user,
-                    st_id=dpu.st_id,  # Replace with actual DPU object
+                    st_id=form.cleaned_data['st_id'],
                     csv_file=csv_file,
                 )
 
@@ -339,7 +337,6 @@ def upload_customer_csv(request):
         form = UploadCSVForm()
 
     return render(request, 'common/upload_customer_csv.html', {'form': form})
-
 def customer_data(request):
     customers = Customer.objects.filter(user=request.user)
     return render(request, 'common/customer_data.html', {'customers': customers})
@@ -352,19 +349,11 @@ from .serializers import CustomerSerializer
 
 class CIDRangeView(APIView):
     def get(self, request, *args, **kwargs):
-        dpuid = self.request.query_params.get('dpuid', None)
+        user = request.user
+        latest_customer = Customer.objects.filter(user=user).order_by('-id').first()
 
-        if not dpuid:
-            return Response({"detail": "dpuid parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            customer = Customer.objects.get(st_id=dpuid, user=request.user)
-            serializer = CustomerSerializer(customer)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-        except Customer.DoesNotExist:
-            return Response({"detail": f"Customer not found for dpuid: {dpuid}"}, status=status.HTTP_404_NOT_FOUND)
-
-        except Exception as e:
-            error_detail = f"Error retrieving CID range: {str(e)}"
-            return Response({"detail": error_detail}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if latest_customer:
+            serializer = CustomerSerializer(latest_customer)
+            return Response(serializer.data)
+        else:
+            return Response({'message': 'No customer data available.'})
