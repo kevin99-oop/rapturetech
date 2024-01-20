@@ -413,40 +413,92 @@ def get_customer_data_range(dpuid, start_range, end_range):
     except Exception as e:
         print(f"Error retrieving data range: {e}")
         return []
-import csv
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from django.http import JsonResponse
+import csv
 from io import StringIO
 from .models import Customer
 
-def get_csv_data(user, dpuid):
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_cid_range(request):
+    dpuid = request.GET.get('dpuid', '')
+
     try:
-        customer = Customer.objects.get(user=user, st_id=dpuid)
+        # Fetch the latest Customer entry for the given dpuid
+        latest_customer = Customer.objects.filter(st_id=dpuid).latest('id')
+
+        # Retrieve start and end range from the latest_customer model
+        start_range = latest_customer.start_range
+        end_range = latest_customer.end_range
+
+        # Prepare the JSON response with the range values
+        response_data = {'noofcustomer': f'{start_range},{end_range}'}
+
+        return JsonResponse(response_data)
+
+    except Customer.DoesNotExist:
+        return JsonResponse({'error': 'No CSV file found for the specified dpuid.'}, status=404)
+
+    except Exception as e:
+        return JsonResponse({'error': f"An error occurred: {str(e)}"}, status=500)
+
+    
+def cust_info(request):
+    # Retrieve dpuid and cid from the request
+    dpuid = request.GET.get('dpuid', '')
+    cid = request.GET.get('cid', '')
+
+    # Check if start_range is provided, otherwise default to 1
+    start_range = request.GET.get('start_range', '1')
+
+    try:
+        # Assuming you have a method to get the CSV data based on dpuid
+        csv_data = get_csv_data(dpuid)
+
+        # Parse the CSV data
+        csv_file = StringIO(csv_data)
+        reader = csv.DictReader(csv_file)
+
+        # Find the row with the matching CUST_ID
+        for row in reader:
+            if row.get('CUST_ID') == cid:
+                # You can access other fields as needed, for example:
+                name = row.get('NAME')
+                mobile = row.get('MOBILE')
+
+                # Construct the response
+                response_data = {
+                    'dpuid': dpuid,
+                    'cid': cid,
+                    'name': name,
+                    'mobile': mobile,
+                    # Add other fields as needed
+                }
+
+                return JsonResponse(response_data)
+
+        # If the loop completes without finding a matching CUST_ID
+        return JsonResponse({'error': 'Customer not found'}, status=404)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+def get_csv_data(dpuid):
+    try:
+        # Assuming you have a model named Customer with a FileField named csv_file
+        customer = Customer.objects.get(st_id=dpuid)
+
+        # Assuming the csv_file field contains the path to the CSV file
         csv_file_path = customer.csv_file.path
 
         with open(csv_file_path, 'r') as file:
             csv_data = file.read()
 
-        return csv_data
+        return JsonResponse({'csv_data': csv_data})
 
     except Customer.DoesNotExist:
-        raise Exception(f"Customer with dpuid {dpuid} not found for user {user}")
+        return JsonResponse({'error': f'Customer with dpuid {dpuid} not found'}, status=404)
 
     except Exception as e:
-        raise Exception(f"Error retrieving CSV data: {str(e)}")
-
-def cust_info(request):
-    dpuid = request.GET.get('dpuid', '')
-    cid = request.GET.get('cid', '')
-
-    try:
-        user = request.user
-        csv_data = get_csv_data(user, dpuid)
-
-        # Now, you can process the CSV data as needed for the specific 'cid'
-        # For demonstration, let's just return the entire CSV data
-        response_data = {'cinfo': csv_data}
-
-        return JsonResponse(response_data)
-
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({'error': f'Error retrieving CSV data: {str(e)}'}, status=500)
