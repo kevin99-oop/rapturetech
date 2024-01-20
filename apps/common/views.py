@@ -375,6 +375,7 @@ import logging
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.contrib.auth.models import AnonymousUser
 from .models import Customer
 
 logger = logging.getLogger(__name__)
@@ -387,6 +388,10 @@ class CIDRangeView(APIView):
             return Response({"error": "dpuid parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
+            # Check if the user is authenticated
+            if isinstance(request.user, AnonymousUser):
+                return Response({"error": "User is not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+
             # Get the latest CSV file associated with the user
             customer = Customer.objects.filter(user=request.user, st_id=dpuid).latest('id')
 
@@ -411,6 +416,7 @@ class CIDRangeView(APIView):
             # Log the exception
             logger.error(f"Exception: {e}")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @csrf_exempt
 @require_POST
 def cid_range(request):
