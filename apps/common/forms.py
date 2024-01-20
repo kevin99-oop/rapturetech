@@ -64,8 +64,14 @@ class DPUForm(forms.ModelForm):
         
         fields = ['location', 'st_id', 'society', 'mobile_number', 'owner', 'status']
 
-
 class UploadCSVForm(forms.ModelForm):
     class Meta:
         model = Customer
         fields = ['csv_file']
+
+    def clean_csv_file(self):
+        csv_file = self.cleaned_data['csv_file']
+
+        # Perform any additional validation for the CSV file if needed
+
+        return csv_file

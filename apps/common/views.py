@@ -300,6 +300,7 @@ def edit_dpu(request, st_id):
     if request.method == 'POST':
         form = DPUForm(request.POST, instance=dpu)
         if form.is_valid():
+            form.save()
             # Check if the status has changed
             if dpu.status != form.cleaned_data['status']:
                 return JsonResponse({'status_changed': True})
@@ -309,50 +310,70 @@ def edit_dpu(request, st_id):
         form = DPUForm(instance=dpu)
     
     return render(request, 'common/edit_dpu.html', {'form': form, 'dpu': dpu})
+
+
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import UploadCSVForm
+from .models import Customer
+from django.http import HttpResponse
+
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import UploadCSVForm
 from .models import Customer
 from io import TextIOWrapper
 import csv
-from django.http import HttpResponse
+
+def extract_cust_id_range(csv_file):
+    # Read the CSV file and extract the start and end range based on CUST_ID values
+    csv_content = csv_file.read().decode('utf-8').splitlines()
+    reader = csv.DictReader(csv_content)
+    
+    # Extract CUST_ID values
+    cust_ids = [int(row['CUST_ID']) for row in reader]
+
+    # Determine start and end range
+    start_range = min(cust_ids) if cust_ids else 1
+    end_range = max(cust_ids) if cust_ids else 10
+
+    return start_range, end_range
 
 def upload_customer_csv(request):
     if request.method == 'POST':
-        csv_file = request.FILES['csv_file']
-        
-        # Read the CSV file
-        csv_content = csv_file.read().decode('utf-8')
-        csv_lines = csv_content.splitlines()
+        form = UploadCSVForm(request.POST, request.FILES)
+        if form.is_valid():
+            csv_file = form.cleaned_data['csv_file']
 
-        # Extract ST_ID from the first line
-        st_id = csv_lines[0].strip()
+            # Extract ST_ID from the first line of the CSV file
+            csv_content = csv_file.read().decode('utf-8')
+            csv_lines = csv_content.splitlines()
+            st_id = csv_lines[0].strip()
 
-        # Check if DPU with the specified ST_ID exists
-        try:
-            dpu = DPU.objects.get(st_id=st_id)
-            related_to_user = False
-        except DPU.DoesNotExist:
-            # Handle the case where no DPU is found
-            related_to_user = True
+            # Extract CUST_ID range dynamically
+            start_range, end_range = extract_cust_id_range(csv_file)
 
-        # Save the CSV file reference with the corresponding DPU and User
-        try:
-            Customer.objects.create(
-                user=request.user,
-                st_id=st_id,
-                csv_file=csv_file,
-                related_to_user=related_to_user,
-            )
-            messages.success(request, 'CSV file uploaded successfully.')
-            return redirect('upload_customer_csv')  # Redirect to the same page after successful upload
-        except Exception as e:
-            messages.error(request, f'Error processing CSV file: {e}')
+            # Save the CSV file reference with the corresponding user, ST_ID, and dynamic range
+            try:
+                Customer.objects.create(
+                    user=request.user,
+                    st_id=st_id,
+                    csv_file=csv_file,
+                    start_range=start_range,
+                    end_range=end_range,
+                )
+                messages.success(request, 'CSV file uploaded successfully.')
+                return redirect('upload_customer_csv')
+            except Exception as e:
+                messages.error(request, f'Error processing CSV file: {e}')
+        else:
+            messages.error(request, 'Invalid form submission. Please check the file format.')
+    else:
+        form = UploadCSVForm()
 
-    return render(request, 'common/upload_customer_csv.html', {'form': UploadCSVForm()})
-def customer_data(request):
-    customers = Customer.objects.filter(user=request.user)
-    return render(request, 'common/upload_customer_csv.html', {'customers': customers})
+    return render(request, 'common/upload_customer_csv.html', {'form': form})
+
 def download_latest_csv(request):
     # Get the latest Customer record for the logged-in user
     latest_customer = Customer.objects.filter(user=request.user).order_by('-id').first()
@@ -365,140 +386,32 @@ def download_latest_csv(request):
             return response
     else:
         return HttpResponse("No CSV file found for download.")
-import csv
-from io import StringIO
-from django.http import JsonResponse
+
+# views.py
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from .models import Customer
+from .serializers import CIDRangeSerializer
 
-def get_cid_range(request):
-    dpuid = request.GET.get('dpuid', '')
+class CIDRangeAPIView(APIView):
+    def get(self, request):
+        # Get the user's st_id
+        user_st_id = get_user_st_id(request.user)
 
-    try:
-        # Fetch the latest Customer entry for the given dpuid
-        latest_customer = Customer.objects.filter(st_id=dpuid).latest('id')
-    except Customer.DoesNotExist:
-        return JsonResponse({'error': 'No CSV file found for the specified dpuid.'}, status=404)
+        if user_st_id:
+            try:
+                # Retrieve the Customer instance for the user and st_id
+                customer = Customer.objects.get(user=request.user, st_id=user_st_id)
 
-    # Retrieve start and end range from the latest_customer model
-    start_range = latest_customer.start_range
-    end_range = latest_customer.end_range
+                # Extract start and end range from the CSV file
+                start_range = customer.start_range
+                end_range = customer.end_range
 
-    # Prepare the JSON response with the range values
-    response_data = {'noofcustomer': f'{start_range},{end_range}'}
-
-    return JsonResponse(response_data)
-
-
-# apps/common/utils.py
-
-
-def get_customer_data_range(dpuid, start_range, end_range):
-    try:
-        customer = Customer.objects.filter(st_id=dpuid).latest('id')
-        csv_file_path = customer.csv_file.path
-
-        with open(csv_file_path, 'r') as csv_file:
-            reader = csv.DictReader(csv_file)
-            data_range = []
-
-            for row in reader:
-                cust_id = int(row.get('CUST_ID', 0))
-
-                if start_range <= cust_id <= end_range:
-                    data_range.append(row)
-
-        return data_range
-    except Customer.DoesNotExist:
-        return []  # Handle case where no customer with the given dpuid is found
-    except Exception as e:
-        print(f"Error retrieving data range: {e}")
-        return []
-from django.http import JsonResponse
-from .models import Customer
-
-def get_cid_range(request):
-    dpuid = request.GET.get('dpuid', '')
-
-    try:
-        # Fetch the latest Customer entry for the given dpuid for all users
-        latest_customer = Customer.objects.filter(st_id=dpuid).latest('id')
-
-        # Retrieve start and end range from the latest_customer model
-        start_range = latest_customer.start_range
-        end_range = latest_customer.end_range
-
-        # Prepare the JSON response with the range values
-        response_data = {'noofcustomer': f'{start_range},{end_range}'}
-
-        return JsonResponse(response_data)
-
-    except Customer.DoesNotExist:
-        return JsonResponse({'error': 'No CSV file found for the specified dpuid.'}, status=404)
-
-    except Exception as e:
-        return JsonResponse({'error': f"An error occurred: {str(e)}"}, status=500)
-
-    
-def cust_info(request):
-    # Retrieve dpuid and cid from the request
-    dpuid = request.GET.get('dpuid', '')
-    cid = request.GET.get('cid', '')
-
-    try:
-        # Assuming you have a method to get the CSV data based on dpuid
-        csv_data = get_csv_data(dpuid)
-
-        # Parse the CSV data
-        csv_file = StringIO(csv_data)
-        reader = csv.DictReader(csv_file)
-
-        # Find the row with the matching CUST_ID
-        for row in reader:
-            if row.get('CUST_ID') == cid:
-                # Extract additional fields
-                cust_id = row.get('CUST_ID')
-                name = row.get('NAME')
-                mobile = row.get('MOBILE')
-                adhaar = row.get('ADHHAR')
-                bank_account = row.get('BANK AC')
-                ifsc = row.get('IFSC')
-
-                # Construct the response
-                response_data = {
-                    'dpuid': dpuid,
-                    'cid': cid,
-                    'cust_id': cust_id,
-                    'name': name,
-                    'mobile': mobile,
-                    'adhaar': adhaar,
-                    'bank_account': bank_account,
-                    'ifsc': ifsc,
-                    # Add other fields as needed
-                }
-
-                return JsonResponse(response_data)
-
-        # If the loop completes without finding a matching CUST_ID
-        return JsonResponse({'error': 'Customer not found'}, status=404)
-
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
-    
-def get_csv_data(dpuid):
-    try:
-        # Assuming you have a model named Customer with a FileField named csv_file
-        customer = Customer.objects.get(st_id=dpuid)
-
-        # Assuming the csv_file field contains the path to the CSV file
-        csv_file_path = customer.csv_file.path
-
-        with open(csv_file_path, 'r') as file:
-            csv_data = file.read()
-
-        return csv_data
-
-    except Customer.DoesNotExist:
-        return f'Customer with dpuid {dpuid} not found'
-
-    except Exception as e:
-        return f'Error retrieving CSV data: {str(e)}'
+                # Serialize the data
+                serializer = CIDRangeSerializer({'start_range': start_range, 'end_range': end_range})
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except Customer.DoesNotExist:
+                return Response({'detail': 'Customer not found for the user and st_id.'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({'detail': 'User does not have st_id.'}, status=status.HTTP_400_BAD_REQUEST)

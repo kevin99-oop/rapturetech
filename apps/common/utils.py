@@ -1,5 +1,9 @@
-def get_cid_range(dpuid):
-    # Your logic to calculate and return the CID range
-    start_range = 1
-    end_range = 100
-    return start_range, end_range
+from apps.common.models import DPU
+
+
+def get_user_st_id(user):
+    try:
+        dpu = DPU.objects.get(user=user)
+        return dpu.st_id
+    except DPU.DoesNotExist:
+        return None

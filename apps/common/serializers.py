@@ -42,3 +42,8 @@ class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = '__all__'
+
+
+class CIDRangeSerializer(serializers.Serializer):
+    start_range = serializers.IntegerField()
+    end_range = serializers.IntegerField()
