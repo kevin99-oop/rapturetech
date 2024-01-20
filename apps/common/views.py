@@ -388,7 +388,6 @@ def get_cid_range(request):
 
     return JsonResponse(response_data)
 
-
 # apps/common/utils.py
 
 
