@@ -62,7 +62,7 @@ class DREC(models.Model):
 
 class Customer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    st_id = models.CharField(max_length=255)
+    st_id = models.CharField(max_length=50)
     csv_file = models.FileField(upload_to='csv_files/')
     start_range = models.IntegerField()
     end_range = models.IntegerField()
