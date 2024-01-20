@@ -386,8 +386,6 @@ def download_latest_csv(request):
             return response
     else:
         return HttpResponse("No CSV file found for download.")
-
-# views.py
 import csv
 import logging
 from django.http import JsonResponse
@@ -432,3 +430,4 @@ def get_cid_range(request):
     except Exception as e:
         logger.exception(f'Error processing request for dpuid {dpuid}: {e}')
         return JsonResponse({'error': f'Internal Server Error'}, status=500)
+
