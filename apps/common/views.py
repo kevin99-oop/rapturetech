@@ -403,8 +403,11 @@ def get_cid_range(request):
     logger.info(f"Received request for dpuid: {dpuid}")
 
     try:
-        # Fetch the latest Customer entry for the given dpuid
-        latest_customer = get_object_or_404(Customer, st_id=dpuid)
+        # Fetch the latest Customer entry for the given dpuid and current user
+        latest_customer = Customer.objects.filter(st_id=dpuid, user=request.user).order_by('-id').first()
+
+        if not latest_customer:
+            return JsonResponse({'error': f'No CSV file found for the specified dpuid and user.'}, status=404)
 
         # Retrieve the CSV file path from the latest_customer model
         csv_file_path = latest_customer.csv_file.path
