@@ -372,11 +372,35 @@ from django.http import JsonResponse
 from .models import Customer
 from .utils import get_cid_range as get_cid_range_util, get_customer_data_range
 
-def get_cid_range(request):
-    dpuid = request.GET.get('dpuid', '')
-    start_range, end_range = get_cid_range_util(dpuid)
-    return JsonResponse( {'range': f'{start_range}, {end_range}'})
-from .utils import get_cid_range as get_cid_range_util, get_customer_data_range
+def get_cid_range(dpuid):
+    try:
+        # Assuming dpuid uniquely identifies a DPU
+        customer = Customer.objects.filter(st_id=dpuid).latest('id')
+
+        # Assuming csv_file is the field where you store the uploaded CSV file
+        csv_file_path = customer.csv_file.path
+
+        # Read the CSV file to determine the range dynamically
+        with open(csv_file_path, 'r') as file:
+            csv_reader = csv.reader(file)
+            next(csv_reader)  # Skip header
+
+            # Get the last row to determine the end_range
+            last_row = None
+            for row in csv_reader:
+                last_row = row
+
+            if last_row:
+                end_range = int(last_row[0])  # Assuming CID is the first column
+            else:
+                end_range = 1  # Default value if the CSV is empty
+
+        start_range = 1  # Always start from 1
+
+        return start_range, end_range
+    except Customer.DoesNotExist:
+        # Handle the case where the customer with the given dpuid is not found
+        return None, None
 # apps/common/utils.py
 
 
