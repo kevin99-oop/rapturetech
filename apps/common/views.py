@@ -428,3 +428,26 @@ def cid_range(request):
         return Response(response_data)
     except Customer.DoesNotExist:
         return Response({"error": "Customer data not found."}, status=404)
+from django.http import JsonResponse
+
+def cid_range(request):
+    user_st_id, start_range, end_range = get_user_st_id(request.user)
+
+    if user_st_id is None:
+        return JsonResponse({'error': 'User not authenticated or associated with DPU'}, status=400)
+
+    dpuid = request.GET.get('dpuid', None)
+
+    if dpuid is None:
+        return JsonResponse({'error': 'dpuid parameter is required'}, status=400)
+
+    try:
+        start_end_data = request.GET.get('noofcustomer', '')
+        start, end = map(int, start_end_data.split(','))
+
+        # Your logic to fetch CID range from the CSV file based on user_st_id and dpuid
+        # ...
+
+        return JsonResponse({'start': start, 'end': end, 'user_st_id': user_st_id}, status=200)
+    except ValueError:
+        return JsonResponse({'error': 'Invalid format for noofcustomer parameter'}, status=400)
