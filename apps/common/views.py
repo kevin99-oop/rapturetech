@@ -373,10 +373,17 @@ from .models import Customer
 from .utils import get_cid_range as get_cid_range_util, get_customer_data_range
 
 def get_cid_range(request):
-    dpuid = request.GET.get('dpuid', '')
-    start_range, end_range = get_cid_range_util(dpuid)
-    return JsonResponse({'start_range': start_range, 'end_range': end_range})
-from .utils import get_cid_range as get_cid_range_util, get_customer_data_range
+    if request.method == 'GET':
+        dpuid = request.GET.get('dpuid', '')
+        start_range, end_range = get_cid_range_util(dpuid)
+
+        # Assuming you want to send a JSON response with the specified format
+        response_data = {'range': f'{start_range}, {end_range}'}
+
+        return JsonResponse(response_data)
+    else:
+        # Handle other HTTP methods if needed
+        return JsonResponse({'error': 'Method Not Allowed'}, status=405)
 # apps/common/utils.py
 
 
