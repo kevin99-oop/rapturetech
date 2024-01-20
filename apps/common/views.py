@@ -388,37 +388,38 @@ def download_latest_csv(request):
         return HttpResponse("No CSV file found for download.")
 
 import csv
-from django.http import JsonResponse
 from io import StringIO
+from django.http import JsonResponse
+from .models import Customer
 
 def get_cid_range(request):
-    # Your logic to read the CSV file and determine the end range
-    # Assuming the CSV data is stored in the 'csv_data' variable
-    csv_data = """
-    CUST_ID,NAME,MOBILE,ADHHAR,BANK_AC,IFSC
-    1,Jack 1,M9374672571,A123412341001,B501000500000010000,B5010005000
-    2,PARAS 2,M9374672571,A123412341002,B501000500000020000,B5010005000
-    3,PARAS 3,M9374672571,A123412341003,B501000500000030000,B5010005000
-    ...  # Add the remaining CSV data here
-    """
+    dpuid = request.GET.get('dpuid', '')
 
-    # Parse the CSV data to find the last CUST_ID
-    csv_file = StringIO(csv_data)
-    reader = csv.DictReader(csv_file)
+    try:
+        # Fetch the latest Customer entry for the given dpuid
+        latest_customer = Customer.objects.get(st_id=dpuid)
+    except Customer.DoesNotExist:
+        return JsonResponse({'error': 'No CSV file found for the specified dpuid.'}, status=404)
+    except Customer.MultipleObjectsReturned:
+        return JsonResponse({'error': 'Multiple CSV files found for the specified dpuid.'}, status=500)
 
-    # Check if the header row exists
-    if 'CUST_ID' not in reader.fieldnames:
-        return JsonResponse({'error': 'Invalid CSV format. Header row missing.'}, status=400)
+    # Retrieve the CSV file path from the latest_customer model
+    csv_file_path = latest_customer.csv_file.path
 
-    last_cust_id = 0
-    for row in reader:
-        last_cust_id = int(row['CUST_ID'])
+    try:
+        # Read CSV data and calculate start and end range
+        with open(csv_file_path, 'r') as file:
+            reader = csv.DictReader(file)
+            cust_ids = [int(row['CUST_ID']) for row in reader]
 
-    # Calculate the end range based on the last CUST_ID
+        # Calculate start and end range
+        start_range = 1 if cust_ids else 0
+        end_range = max(cust_ids) if cust_ids else 0
 
-    end_range = last_cust_id
+        # Prepare the JSON response with the range values
+        response_data = {'noofcustomer': f'{start_range},{end_range}'}
 
-    # Prepare the JSON response with the range values
-    response_data = {'noofcustomer': f'1,{end_range}'}
+        return JsonResponse(response_data)
 
-    return JsonResponse(response_data)
+    except Exception as e:
+        return JsonResponse({'error': f'Error reading CSV file: {str(e)}'}, status=500)
