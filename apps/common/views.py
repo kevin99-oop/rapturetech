@@ -368,9 +368,8 @@ def download_latest_csv(request):
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import Customer
-from apps.common.utils import get_cid_range 
+from .utils import get_cid_range 
 
-@login_required
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
     start_range, end_range = get_cid_range(dpuid)
@@ -381,7 +380,6 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import Customer
 
-@login_required
 def get_customer_info(request):
     dpuid = request.GET.get('dpuid', '')
     start_range = int(request.GET.get('start_range', ''))
