@@ -393,6 +393,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Customer
 from .serializers import CIDRangeSerializer
+from .utils import get_user_st_id
 
 class CIDRangeAPIView(APIView):
     def get(self, request):
