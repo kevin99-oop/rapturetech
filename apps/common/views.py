@@ -390,39 +390,33 @@ def download_latest_csv(request):
 import csv
 import logging
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from .models import Customer
 
+# Configure logging
 logger = logging.getLogger(__name__)
 
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
+    
+    # Log the dpuid for debugging
+    logger.info(f"Received request for dpuid: {dpuid}")
 
     try:
         # Fetch the latest Customer entry for the given dpuid
-        latest_customer = Customer.objects.get(st_id=dpuid)
-    except Customer.DoesNotExist:
-        logger.error(f'No CSV file found for dpuid: {dpuid}')
-        return JsonResponse({'error': 'No CSV file found for the specified dpuid.'}, status=404)
-    except Customer.MultipleObjectsReturned:
-        logger.error(f'Multiple CSV files found for dpuid: {dpuid}')
-        return JsonResponse({'error': 'Multiple CSV files found for the specified dpuid.'}, status=500)
+        latest_customer = get_object_or_404(Customer, st_id=dpuid)
 
-    # Retrieve the CSV file path from the latest_customer model
-    csv_file_path = latest_customer.csv_file.path
+        # Retrieve the CSV file path from the latest_customer model
+        csv_file_path = latest_customer.csv_file.path
 
-    try:
         # Read CSV data and calculate start and end range
-        with open(csv_file_path, 'r', encoding='utf-8') as file:
+        with open(csv_file_path, 'r') as file:
             reader = csv.DictReader(file)
             cust_ids = [int(row['CUST_ID']) for row in reader]
 
-        if not cust_ids:
-            logger.warning(f'CSV file is empty for dpuid: {dpuid}')
-            return JsonResponse({'error': 'CSV file is empty.'}, status=500)
-
         # Calculate start and end range
-        start_range = min(cust_ids)
-        end_range = max(cust_ids)
+        start_range = 1 if cust_ids else 0
+        end_range = max(cust_ids) if cust_ids else 0
 
         # Prepare the JSON response with the range values
         response_data = {'noofcustomer': f'{start_range},{end_range}'}
@@ -430,5 +424,6 @@ def get_cid_range(request):
         return JsonResponse(response_data)
 
     except Exception as e:
-        logger.exception(f'Error reading CSV file for dpuid: {dpuid}. Error: {str(e)}')
+        # Log the exception for debugging
+        logger.exception(f'Error processing request: {str(e)}')
         return JsonResponse({'error': f'Error reading CSV file: {str(e)}'}, status=500)

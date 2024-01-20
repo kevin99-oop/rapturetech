@@ -177,3 +177,4 @@ AUTHENTICATION_BACKENDS = [
     
     # Add any additional backends as needed
 ]
+
