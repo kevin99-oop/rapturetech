@@ -64,6 +64,8 @@ class Customer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     st_id = models.CharField(max_length=50)
     csv_file = models.FileField(upload_to='customer_csv/')
+    start_range = models.IntegerField(default=1)
+    end_range = models.IntegerField(default=1)
     related_to_user = models.BooleanField(default=True)  # Indicates whether it's related to a user or DPU
 
     def __str__(self):

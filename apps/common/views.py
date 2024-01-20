@@ -373,39 +373,15 @@ from .models import Customer
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
 
-    # Fetch the latest Customer entry for the given dpuid
     try:
+        # Fetch the latest Customer entry for the given dpuid
         latest_customer = Customer.objects.filter(st_id=dpuid).latest('id')
     except Customer.DoesNotExist:
         return JsonResponse({'error': 'No CSV file found for the specified dpuid.'}, status=404)
 
-    # Read CSV data from the database
-    csv_data = latest_customer.csv_file.read().decode('utf-8')
-
-    try:
-        # Parse the CSV data to find the start and end range
-        csv_file = StringIO(csv_data)
-        reader = csv.DictReader(csv_file)
-
-        # Check if the header row exists
-        if 'CUST_ID' not in reader.fieldnames:
-            return JsonResponse({'error': 'Invalid CSV format. Header row missing.'}, status=400)
-
-        start_range = float('inf')  # Initialize with positive infinity
-        end_range = 0
-
-        for row in reader:
-            try:
-                current_cust_id = int(row.get('CUST_ID', 0))
-                if current_cust_id < start_range:
-                    start_range = current_cust_id
-                if current_cust_id > end_range:
-                    end_range = current_cust_id
-            except ValueError:
-                return JsonResponse({'error': 'Invalid CUST_ID format. Must be an integer.'}, status=400)
-
-    except Exception as e:
-        return JsonResponse({'error': f'Error parsing CSV data: {str(e)}'}, status=400)
+    # Retrieve start and end range from the latest_customer model
+    start_range = latest_customer.start_range
+    end_range = latest_customer.end_range
 
     # Prepare the JSON response with the range values
     response_data = {'range': f'{start_range},{end_range}'}
