@@ -413,19 +413,14 @@ def get_customer_data_range(dpuid, start_range, end_range):
     except Exception as e:
         print(f"Error retrieving data range: {e}")
         return []
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
 from django.http import JsonResponse
-import csv
-from io import StringIO
 from .models import Customer
 
-@api_view(['GET'])
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
 
     try:
-        # Fetch the latest Customer entry for the given dpuid
+        # Fetch the latest Customer entry for the given dpuid for all users
         latest_customer = Customer.objects.filter(st_id=dpuid).latest('id')
 
         # Retrieve start and end range from the latest_customer model
@@ -449,9 +444,6 @@ def cust_info(request):
     dpuid = request.GET.get('dpuid', '')
     cid = request.GET.get('cid', '')
 
-    # Check if start_range is provided, otherwise default to 1
-    start_range = request.GET.get('start_range', '1')
-
     try:
         # Assuming you have a method to get the CSV data based on dpuid
         csv_data = get_csv_data(dpuid)
@@ -463,16 +455,24 @@ def cust_info(request):
         # Find the row with the matching CUST_ID
         for row in reader:
             if row.get('CUST_ID') == cid:
-                # You can access other fields as needed, for example:
+                # Extract additional fields
+                cust_id = row.get('CUST_ID')
                 name = row.get('NAME')
                 mobile = row.get('MOBILE')
+                adhaar = row.get('ADHHAR')
+                bank_account = row.get('BANK AC')
+                ifsc = row.get('IFSC')
 
                 # Construct the response
                 response_data = {
                     'dpuid': dpuid,
                     'cid': cid,
+                    'cust_id': cust_id,
                     'name': name,
                     'mobile': mobile,
+                    'adhaar': adhaar,
+                    'bank_account': bank_account,
+                    'ifsc': ifsc,
                     # Add other fields as needed
                 }
 
@@ -483,6 +483,7 @@ def cust_info(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+    
 def get_csv_data(dpuid):
     try:
         # Assuming you have a model named Customer with a FileField named csv_file
@@ -494,10 +495,10 @@ def get_csv_data(dpuid):
         with open(csv_file_path, 'r') as file:
             csv_data = file.read()
 
-        return JsonResponse({'csv_data': csv_data})
+        return csv_data
 
     except Customer.DoesNotExist:
-        return JsonResponse({'error': f'Customer with dpuid {dpuid} not found'}, status=404)
+        return f'Customer with dpuid {dpuid} not found'
 
     except Exception as e:
-        return JsonResponse({'error': f'Error retrieving CSV data: {str(e)}'}, status=500)
+        return f'Error retrieving CSV data: {str(e)}'
