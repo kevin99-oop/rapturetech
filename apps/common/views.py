@@ -371,7 +371,26 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ObjectDoesNotExist
 from .models import Customer
+class CIDRangeView(APIView):
+    def get(self, request, *args, **kwargs):
+        # Retrieve the dpuid from the query parameters
+        dpuid = request.query_params.get('dpuid', None)
 
+        if not dpuid:
+            return Response({'error': 'dpuid parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Get the latest customer CSV for the given dpuid
+            customer = Customer.objects.filter(user=request.user, st_id=dpuid).latest('id')
+            csv_file_path = customer.csv_file.path
+
+            # Process the CSV file and return the data
+            # Your logic to read CSV file and get data based on the range
+            # ...
+
+            return Response({'success': 'CSV data processed successfully'}, status=status.HTTP_200_OK)
+        except ObjectDoesNotExist:
+            return Response({'error': 'No customer CSV found for the given dpuid'}, status=status.HTTP_404_NOT_FOUND)
 @csrf_exempt
 @require_POST
 def cid_range(request):
