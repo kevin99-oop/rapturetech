@@ -348,6 +348,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from apps.common.models import Customer 
+from apps.common.serializers import CustomerSerializer
 
 class CIDRangeView(APIView):
     def get(self, request, *args, **kwargs):
@@ -365,4 +366,5 @@ class CIDRangeView(APIView):
             return Response({"detail": "Customer not found for the given dpuid"}, status=status.HTTP_404_NOT_FOUND)
 
         except Exception as e:
-            return Response({"detail": f"Error retrieving CID range: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            error_detail = f"Error retrieving CID range: {str(e)}"
+            return Response({"detail": error_detail}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
