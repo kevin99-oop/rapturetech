@@ -397,10 +397,12 @@ logger = logging.getLogger(__name__)
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
     user = request.user  # Get the user making the request
+    print(f"User: {user}, dpuid: {dpuid}")
 
     try:
         # Fetch all Customer entries for the given dpuid and user
         customer_entries = get_list_or_404(Customer, st_id=dpuid, user=user)
+        print(f"Customer entries: {customer_entries}")
 
         if not customer_entries:
             return JsonResponse({'error': f'No CSV file found for dpuid: {dpuid} and user: {user}'}, status=404)
