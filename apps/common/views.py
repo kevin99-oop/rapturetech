@@ -375,18 +375,32 @@ def get_cid_range(request):
 
     try:
         # Fetch the latest Customer entry for the given dpuid
-        latest_customer = Customer.objects.filter(st_id=dpuid).latest('id')
+        latest_customer = Customer.objects.get(st_id=dpuid)
     except Customer.DoesNotExist:
         return JsonResponse({'error': 'No CSV file found for the specified dpuid.'}, status=404)
+    except Customer.MultipleObjectsReturned:
+        return JsonResponse({'error': 'Multiple CSV files found for the specified dpuid.'}, status=500)
 
-    # Retrieve start and end range from the latest_customer model
-    start_range = latest_customer.start_range
-    end_range = latest_customer.end_range
+    # Retrieve the CSV file path from the latest_customer model
+    csv_file_path = latest_customer.csv_file.path
 
-    # Prepare the JSON response with the range values
-    response_data = {'noofcustomer': f'{start_range},{end_range}'}
+    try:
+        # Read CSV data and calculate start and end range
+        with open(csv_file_path, 'r') as file:
+            reader = csv.DictReader(file)
+            cust_ids = [int(row['CUST_ID']) for row in reader]
 
-    return JsonResponse(response_data)
+        # Calculate start and end range
+        start_range = 1 if cust_ids else 0
+        end_range = max(cust_ids) if cust_ids else 0
+
+        # Prepare the JSON response with the range values
+        response_data = {'noofcustomer': f'{start_range},{end_range}'}
+
+        return JsonResponse(response_data)
+
+    except Exception as e:
+        return JsonResponse({'error': f'Error reading CSV file: {str(e)}'}, status=500)
 
 # apps/common/utils.py
 
