@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 from apps.common.views import (
     HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView,
     ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,
-    DRECViewSet, NtpDatetimeView, dpudetails, edit_dpu,upload_customer_csv,CIDRangeView,download_latest_csv
+    DRECViewSet, NtpDatetimeView, dpudetails, edit_dpu,upload_customer_csv,cidrange_view,download_latest_csv
 )
 from django.contrib.auth import views as auth_views
 from rest_framework.authtoken.views import obtain_auth_token
@@ -59,7 +59,7 @@ urlpatterns = [
     path('edit_dpu/<str:st_id>/', edit_dpu, name='edit_dpu'),
 
     path('upload-customer-csv/', upload_customer_csv, name='upload_customer_csv'),
-    path('api/cidrange/', CIDRangeView.as_view(), name='cid_range_api'),
+    path('api/cidrange/<str:dpuid>/', cidrange_view, name='cidrange_view'),
     path('download-latest-csv/', download_latest_csv, name='download_latest_csv'),
 
 ]

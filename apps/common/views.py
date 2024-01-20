@@ -367,90 +367,37 @@ def download_latest_csv(request):
         return HttpResponse("No CSV file found for download.")
 import csv
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-from django.core.exceptions import ObjectDoesNotExist
-from .models import Customer
-import logging
-from rest_framework.views import APIView
-from rest_framework.response import Response
+from rest_framework.decorators import api_view
 from rest_framework import status
 from django.contrib.auth.models import AnonymousUser
-from .models import Customer
 
-logger = logging.getLogger(__name__)
+@api_view(['GET'])
+def cidrange_view(request, dpuid):
+    # Check if the user is authenticated
+    if isinstance(request.user, AnonymousUser):
+        return JsonResponse({"error": "User is not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
 
-class CIDRangeView(APIView):
-    def get(self, request, *args, **kwargs):
-        dpuid = self.request.query_params.get('dpuid', None)
+    # Get start and end range from the query parameters
+    start_range = int(request.GET.get('start_range', 1))
+    end_range = int(request.GET.get('end_range', 1))
 
-        if not dpuid:
-            return Response({"error": "dpuid parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            # Check if the user is authenticated
-            if isinstance(request.user, AnonymousUser):
-                return Response({"error": "User is not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
-
-            # Get the latest CSV file associated with the user
-            customer = Customer.objects.filter(user=request.user, st_id=dpuid).latest('id')
-
-            # Extract st_id from the CSV file
-            st_id_from_csv = customer.st_id
-
-            # Ask the user to enter the range (you need to implement this part)
-            # For now, assuming range_input is provided
-            range_input = "1-10"  # Replace with your actual implementation
-
-            # Log extracted st_id and range_input
-            logger.info(f"Extracted st_id: {st_id_from_csv}, Range: {range_input}")
-
-            # Call api/cust_info/ with the extracted st_id and range_input
-            # You need to implement this part based on your requirements
-
-            return Response({"success": True}, status=status.HTTP_200_OK)
-
-        except Customer.DoesNotExist:
-            return Response({"error": "No matching CSV file found"}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            # Log the exception
-            logger.error(f"Exception: {e}")
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-@csrf_exempt
-@require_POST
-def cid_range(request):
     try:
-        # Get the uploaded CSV file for the logged-in user
-        latest_customer = Customer.objects.filter(user=request.user).order_by('-id').first()
+        # Retrieve the latest uploaded CSV file for the user and DPUID
+        customer = Customer.objects.filter(user=request.user, st_id=dpuid).latest('id')
+        csv_file_path = customer.csv_file.path
 
-        if latest_customer:
-            # Open the CSV file and read the first line to extract st_id
-            with open(latest_customer.csv_file.path, 'r') as csv_file:
-                csv_reader = csv.reader(csv_file)
-                st_id = next(csv_reader)[0]
+        # Read the CSV file and extract data within the specified range
+        csv_data = []
+        with open(csv_file_path, 'r') as file:
+            reader = csv.DictReader(file)
+            for i, row in enumerate(reader, start=1):
+                if start_range <= i <= end_range:
+                    csv_data.append(row)
 
-            # Prompt the user to enter a range
-            range_input = request.POST.get('range_input', '')
+        return JsonResponse({"csv_data": csv_data}, status=status.HTTP_200_OK)
 
-            # Call the api/cust_info/ endpoint with the specified range
-            # You can customize this part based on your cust_info API implementation
-            cust_info_response = call_cust_info_api(st_id, range_input)
+    except Customer.DoesNotExist:
+        return JsonResponse({"error": f"No CSV file found for DPUID: {dpuid}"}, status=status.HTTP_404_NOT_FOUND)
 
-            return JsonResponse({'message': 'Success', 'response': cust_info_response})
-        else:
-            return JsonResponse({'message': 'No CSV file found for the user'})
-    except ObjectDoesNotExist:
-        return JsonResponse({'message': 'User not found'})
     except Exception as e:
-        return JsonResponse({'message': f'Error: {str(e)}'})
-
-def call_cust_info_api(st_id, range_input):
-    # Implement the logic to call the api/cust_info/ endpoint with st_id and range_input
-    # You can use requests library or Django's built-in HttpRequest to make the API call
-    # Example:
-    # response = requests.get(f'http://your-api-server/api/cust_info/?st_id={st_id}&range={range_input}')
-    # return response.json()
-
-    # For now, returning a dummy response
-    return {'st_id': st_id, 'range_input': range_input}
+        return JsonResponse({"error": f"Error processing CSV file: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
