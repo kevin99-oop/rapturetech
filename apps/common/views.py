@@ -414,8 +414,12 @@ def get_customer_data_range(dpuid, start_range, end_range):
         print(f"Error retrieving data range: {e}")
         return []
 import csv
-from django.http import JsonResponse
 from io import StringIO
+from .models import Customer
+import logging
+
+logger = logging.getLogger(__name__)
+
 def get_csv_data(dpuid):
     try:
         # Assuming you have a model named Customer with a FileField named csv_file
@@ -423,17 +427,25 @@ def get_csv_data(dpuid):
         # Assuming the csv_file field contains the path to the CSV file
         csv_file_path = customer.csv_file.path
 
+        # Read CSV data and parse it
         with open(csv_file_path, 'r') as file:
-            csv_data = file.read()
+            reader = csv.DictReader(file)
+            # Get the first row of the CSV
+            first_row = next(reader)
 
-        return csv_data
+        # Create the JSON response
+        json_response = {
+            'cinfo': f"{first_row['CUST_ID']},{first_row.get('NAME', '')},{first_row.get('MOBILE', '')},{first_row.get('ADHHAR', '')},{first_row.get('BANK_AC', '')},{first_row.get('IFSC', '')}"
+        }
+
+        return json_response
 
     except Customer.DoesNotExist:
         raise Exception(f"Customer with dpuid {dpuid} not found")
 
     except Exception as e:
+        logger.error(f"Error retrieving CSV data: {str(e)}")
         raise Exception(f"Error retrieving CSV data: {str(e)}")
-    
 def cust_info(request):
     # Retrieve dpuid and cid from the request
     dpuid = request.GET.get('dpuid', '')
