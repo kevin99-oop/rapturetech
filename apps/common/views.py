@@ -421,7 +421,6 @@ from io import StringIO
 from .models import Customer
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
 
