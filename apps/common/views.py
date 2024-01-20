@@ -373,24 +373,31 @@ from django.core.exceptions import ObjectDoesNotExist
 from .models import Customer
 class CIDRangeView(APIView):
     def get(self, request, *args, **kwargs):
-        # Retrieve the dpuid from the query parameters
-        dpuid = request.query_params.get('dpuid', None)
+        dpuid = self.request.query_params.get('dpuid', None)
 
         if not dpuid:
-            return Response({'error': 'dpuid parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "dpuid parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # Get the latest customer CSV for the given dpuid
+            # Get the latest CSV file associated with the user
             customer = Customer.objects.filter(user=request.user, st_id=dpuid).latest('id')
-            csv_file_path = customer.csv_file.path
 
-            # Process the CSV file and return the data
-            # Your logic to read CSV file and get data based on the range
-            # ...
+            # Extract st_id from the CSV file
+            st_id_from_csv = customer.st_id
 
-            return Response({'success': 'CSV data processed successfully'}, status=status.HTTP_200_OK)
-        except ObjectDoesNotExist:
-            return Response({'error': 'No customer CSV found for the given dpuid'}, status=status.HTTP_404_NOT_FOUND)
+            # Ask the user to enter the range (you need to implement this part)
+            # For now, assuming range_input is provided
+            range_input = "1-10"  # Replace with your actual implementation
+
+            # Call api/cust_info/ with the extracted st_id and range_input
+            # You need to implement this part based on your requirements
+
+            return Response({"success": True}, status=status.HTTP_200_OK)
+
+        except Customer.DoesNotExist:
+            return Response({"error": "No matching CSV file found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @csrf_exempt
 @require_POST
 def cid_range(request):

@@ -59,7 +59,7 @@ urlpatterns = [
     path('edit_dpu/<str:st_id>/', edit_dpu, name='edit_dpu'),
 
     path('upload-customer-csv/', upload_customer_csv, name='upload_customer_csv'),
-    path('api/cidrange/<str:st_id>/', CIDRangeView.as_view(), name='cid_range_api'),
+    path('api/cidrange/', CIDRangeView.as_view(), name='cid_range_api'),
     path('download-latest-csv/', download_latest_csv, name='download_latest_csv'),
 
 ]
