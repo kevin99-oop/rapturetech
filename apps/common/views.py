@@ -371,6 +371,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ObjectDoesNotExist
 from .models import Customer
+import logging
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Customer
+
+logger = logging.getLogger(__name__)
+
 class CIDRangeView(APIView):
     def get(self, request, *args, **kwargs):
         dpuid = self.request.query_params.get('dpuid', None)
@@ -389,6 +397,9 @@ class CIDRangeView(APIView):
             # For now, assuming range_input is provided
             range_input = "1-10"  # Replace with your actual implementation
 
+            # Log extracted st_id and range_input
+            logger.info(f"Extracted st_id: {st_id_from_csv}, Range: {range_input}")
+
             # Call api/cust_info/ with the extracted st_id and range_input
             # You need to implement this part based on your requirements
 
@@ -397,6 +408,8 @@ class CIDRangeView(APIView):
         except Customer.DoesNotExist:
             return Response({"error": "No matching CSV file found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
+            # Log the exception
+            logger.error(f"Exception: {e}")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @csrf_exempt
 @require_POST
