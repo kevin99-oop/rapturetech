@@ -375,32 +375,19 @@ def get_cid_range(request):
 
     try:
         # Fetch the latest Customer entry for the given dpuid
-        latest_customer = Customer.objects.get(st_id=dpuid)
+        latest_customer = Customer.objects.filter(st_id=dpuid).latest('id')
     except Customer.DoesNotExist:
         return JsonResponse({'error': 'No CSV file found for the specified dpuid.'}, status=404)
-    except Customer.MultipleObjectsReturned:
-        return JsonResponse({'error': 'Multiple CSV files found for the specified dpuid.'}, status=500)
 
-    # Retrieve the CSV file path from the latest_customer model
-    csv_file_path = latest_customer.csv_file.path
+    # Retrieve start and end range from the latest_customer model
+    start_range = latest_customer.start_range
+    end_range = latest_customer.end_range
 
-    try:
-        # Read CSV data and calculate start and end range
-        with open(csv_file_path, 'r') as file:
-            reader = csv.DictReader(file)
-            cust_ids = [int(row['CUST_ID']) for row in reader]
+    # Prepare the JSON response with the range values
+    response_data = {'noofcustomer': f'{start_range},{end_range}'}
 
-        # Calculate start and end range
-        start_range = 1 if cust_ids else 0
-        end_range = max(cust_ids) if cust_ids else 0
+    return JsonResponse(response_data)
 
-        # Prepare the JSON response with the range values
-        response_data = {'noofcustomer': f'{start_range},{end_range}'}
-
-        return JsonResponse(response_data)
-
-    except Exception as e:
-        return JsonResponse({'error': f'Error reading CSV file: {str(e)}'}, status=500)
 
 # apps/common/utils.py
 
@@ -427,45 +414,26 @@ def get_customer_data_range(dpuid, start_range, end_range):
         print(f"Error retrieving data range: {e}")
         return []
 import csv
+from django.http import JsonResponse
 from io import StringIO
-from .models import Customer
-import logging
-
-logger = logging.getLogger(__name__)
-
 def get_csv_data(dpuid):
     try:
         # Assuming you have a model named Customer with a FileField named csv_file
-        customers = Customer.objects.filter(st_id=dpuid)
-
-        if customers.count() == 0:
-            raise Customer.DoesNotExist(f"Customer with dpuid {dpuid} not found")
-        elif customers.count() > 1:
-            raise Exception(f"Multiple customers found with dpuid {dpuid}")
-
-        customer = customers.first()
+        customer = Customer.objects.get(st_id=dpuid)
         # Assuming the csv_file field contains the path to the CSV file
         csv_file_path = customer.csv_file.path
 
-        # Read CSV data and parse it
         with open(csv_file_path, 'r') as file:
-            reader = csv.DictReader(file)
-            # Get the first row of the CSV
-            first_row = next(reader)
+            csv_data = file.read()
 
-        # Create the JSON response
-        json_response = {
-            'cinfo': f"{first_row['CUST_ID']},{first_row.get('NAME', '')},{first_row.get('MOBILE', '')},{first_row.get('ADHHAR', '')},{first_row.get('BANK_AC', '')},{first_row.get('IFSC', '')}"
-        }
-
-        return json_response
+        return csv_data
 
     except Customer.DoesNotExist:
         raise Exception(f"Customer with dpuid {dpuid} not found")
 
     except Exception as e:
-        logger.error(f"Error retrieving CSV data: {str(e)}")
         raise Exception(f"Error retrieving CSV data: {str(e)}")
+    
 def cust_info(request):
     # Retrieve dpuid and cid from the request
     dpuid = request.GET.get('dpuid', '')
