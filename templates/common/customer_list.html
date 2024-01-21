@@ -1,0 +1,47 @@
+<!-- your_template.html -->
+
+{% extends 'base2.html' %}  <!-- Extend your base template if you have one -->
+
+{% block content %}
+<!-- apps/common/templates/common/customer_data.html -->
+<!-- customer_list.html -->
+
+<html>
+<head>
+    <!-- Include necessary libraries, CSS, and JS -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+    <h1>Customer List</h1>
+    <div id="customer-list"></div>
+
+    <script>
+        // Function to update customer list using AJAX
+        function updateCustomerList() {
+            $.ajax({
+                url: '/api/cust_info/',  // Update with your actual API endpoint
+                data: { dpuid: 'YOUR_DP_UID', cid: 'CUSTOMER_ID' },  // Add parameters if needed
+                dataType: 'json',
+                success: function(data) {
+                    // Update the customer list HTML with the received data
+                    $('#customer-list').html(data.cinfo);
+                },
+                error: function() {
+                    console.error('Error updating customer list.');
+                }
+            });
+        }
+
+        // Initial update when the page loads
+        $(document).ready(function() {
+            updateCustomerList();
+        });
+
+        // Optionally, set up a periodic refresh
+        // setInterval(updateCustomerList, 5000);  // Refresh every 5 seconds (adjust as needed)
+    </script>
+</body>
+</html>
+
+
+{% endblock %}

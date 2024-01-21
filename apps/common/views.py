@@ -436,13 +436,11 @@ def get_cid_range(request):
         logger.exception(f'Error processing request for dpuid {dpuid}: {e}')
         return JsonResponse({'error': f'Internal Server Error'}, status=500)
 # views.py
-import csv
-import logging
+# views.py
+
 from django.http import JsonResponse
 from django.shortcuts import get_list_or_404
 from .models import Customer
-
-logger = logging.getLogger(__name__)
 
 def get_cust_info(request):
     dpuid = request.GET.get('dpuid', '')
@@ -466,29 +464,16 @@ def get_cust_info(request):
             # Skip the header row
             next(file)
             
-            reader = csv.DictReader(file)
-            
-            for row in reader:
-                # Log the row data for debugging
-                logger.debug(f"Row data: {row}")
-
-                # Check if the row has the required 'CUST_ID' key
+            for row in csv.DictReader(file):
                 if 'CUST_ID' in row and row['CUST_ID'] == cid:
                     # Prepare the JSON response with the customer info
                     response_data = {
                         'cinfo': f"{row['CUST_ID']},{row['NAME']},{row['MOBILE']},{row['ADHHAR']},{row['BANK_AC']},{row['IFSC']}"
                     }
-
-                    # Save the downloaded customer information in the session
-                    downloaded_customers = request.session.get('downloaded_customers', [])
-                    downloaded_customers.append({'CUST_ID': row['CUST_ID'], 'NAME': row['NAME']})
-                    request.session['downloaded_customers'] = downloaded_customers
-
                     return JsonResponse(response_data)
 
         # If no matching row is found
         return JsonResponse({'error': f'No customer found with CID: {cid}'}, status=404)
 
     except Exception as e:
-        logger.exception(f'Error processing request for dpuid {dpuid} and cid {cid}: {e}')
         return JsonResponse({'error': f'Internal Server Error'}, status=500)
