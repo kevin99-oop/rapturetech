@@ -392,8 +392,7 @@ def download_latest_csv(request):
 
 
 
-import csv
-import logging
+
 from django.http import JsonResponse
 from django.shortcuts import get_list_or_404
 from .models import Customer
@@ -404,25 +403,27 @@ def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
 
     try:
-        # Check if the user is authenticated
-        if request.user.is_authenticated:
-            # Retrieve data based on dpuid, regardless of the user
-            customer_entries = get_list_or_404(Customer, st_id=dpuid)
+        # Retrieve data based on dpuid without user authentication
+        customer_entries = get_list_or_404(Customer, st_id=dpuid)
+
+        if not customer_entries:
+            return JsonResponse({'error': f'No Customer found for dpuid: {dpuid}'}, status=404)
+
 
 
             # Get the latest Customer entry based on id
-            latest_customer = max(customer_entries, key=lambda entry: entry.id)
+        latest_customer = max(customer_entries, key=lambda entry: entry.id)
 
             # Retrieve the CSV file path from the latest_customer model
-            csv_file_path = latest_customer.csv_file.path
+        csv_file_path = latest_customer.csv_file.path
 
             # Read CSV data and calculate start and end range
-            with open(csv_file_path, 'r') as file:
+        with open(csv_file_path, 'r') as file:
                 # Skip the header row
-                next(file)
+            next(file)
                 
-                reader = csv.DictReader(file)
-                cust_ids = [int(row['CUST_ID']) for row in reader]
+            reader = csv.DictReader(file)
+            cust_ids = [int(row['CUST_ID']) for row in reader]
 
             # Calculate start and end range
             start_range = 1 if cust_ids else 0
@@ -431,12 +432,9 @@ def get_cid_range(request):
             # Prepare the JSON response with the range values
             response_data = {'noofcustomer': f'{start_range},{end_range}'}
 
-            return JsonResponse(response_data)
-
-        else:
-            return JsonResponse({'error': 'Unauthorized'}, status=401)
+        return JsonResponse(response_data)
 
     except Exception as e:
         # Log the exception for debugging
-        print(f'Error processing request for dpuid {dpuid} and user {request.user}: {e}')
+        print(f'Error processing request for dpuid {dpuid}: {e}')
         return JsonResponse({'error': f'Internal Server Error'}, status=500)
