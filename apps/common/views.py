@@ -435,6 +435,7 @@ def get_cid_range(request):
     except Exception as e:
         logger.exception(f'Error processing request for dpuid {dpuid}: {e}')
         return JsonResponse({'error': f'Internal Server Error'}, status=500)
+
 import csv
 import logging
 from django.http import JsonResponse
@@ -473,6 +474,10 @@ def get_cust_info(request):
 
                 # Check if the row has the required 'CUST_ID' key
                 if 'CUST_ID' in row and row['CUST_ID'] == cid:
+                    # Save the downloaded CUST_ID in the Customer model
+                    latest_customer.downloaded_cust_id = int(cid)
+                    latest_customer.save()
+
                     # Prepare the JSON response with the customer info
                     response_data = {
                         'cinfo': f"{row['CUST_ID']},{row['NAME']},{row['MOBILE']},{row['ADHHAR']},{row['BANK_AC']},{row['IFSC']}"
