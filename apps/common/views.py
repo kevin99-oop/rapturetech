@@ -438,7 +438,7 @@ def get_cid_range(request):
 import csv
 import logging
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_list_or_404
 from .models import Customer
 
 logger = logging.getLogger(__name__)
@@ -460,19 +460,27 @@ def get_cust_info(request):
         # Retrieve the CSV file path from the latest_customer model
         csv_file_path = latest_customer.csv_file.path
 
-        # Read CSV data and find the entry with the specified CUST_ID
+        # Read CSV data and find the row with the given CID
         with open(csv_file_path, 'r') as file:
+            # Skip the header row
+            next(file)
+            
             reader = csv.DictReader(file)
+            
             for row in reader:
-                if row['CUST_ID'] == cid:
-                    # Prepare the JSON response with the customer information
+                # Log the row data for debugging
+                logger.debug(f"Row data: {row}")
+
+                # Check if the row has the required 'CUST_ID' key
+                if 'CUST_ID' in row and row['CUST_ID'] == cid:
+                    # Prepare the JSON response with the customer info
                     response_data = {
                         'cinfo': f"{row['CUST_ID']},{row['NAME']},{row['MOBILE']},{row['ADHHAR']},{row['BANK_AC']},{row['IFSC']}"
                     }
                     return JsonResponse(response_data)
 
-        # If CUST_ID is not found, return an error response
-        return JsonResponse({'error': f'No information found for CUST_ID: {cid}'}, status=404)
+        # If no matching row is found
+        return JsonResponse({'error': f'No customer found with CID: {cid}'}, status=404)
 
     except Exception as e:
         logger.exception(f'Error processing request for dpuid {dpuid} and cid {cid}: {e}')
