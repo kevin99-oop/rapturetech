@@ -394,9 +394,15 @@ import logging
 from django.http import JsonResponse
 from django.shortcuts import get_list_or_404
 from .models import Customer
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import AllowAny
 
 logger = logging.getLogger(__name__)
 
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([AllowAny])
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
 
@@ -433,4 +439,3 @@ def get_cid_range(request):
     except Exception as e:
         logger.exception(f'Error processing request for dpuid {dpuid}: {e}')
         return JsonResponse({'error': f'Internal Server Error'}, status=500)
-
