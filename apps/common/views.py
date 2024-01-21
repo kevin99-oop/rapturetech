@@ -435,3 +435,45 @@ def get_cid_range(request):
     except Exception as e:
         logger.exception(f'Error processing request for dpuid {dpuid}: {e}')
         return JsonResponse({'error': f'Internal Server Error'}, status=500)
+import csv
+import logging
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import Customer
+
+logger = logging.getLogger(__name__)
+
+def get_cust_info(request):
+    dpuid = request.GET.get('dpuid', '')
+    cid = request.GET.get('cid', '')
+
+    try:
+        # Fetch all Customer entries for the given dpuid
+        customer_entries = get_list_or_404(Customer, st_id=dpuid)
+
+        if not customer_entries:
+            return JsonResponse({'error': f'No CSV file found for dpuid: {dpuid}'}, status=404)
+
+        # Get the latest Customer entry based on id
+        latest_customer = max(customer_entries, key=lambda entry: entry.id)
+
+        # Retrieve the CSV file path from the latest_customer model
+        csv_file_path = latest_customer.csv_file.path
+
+        # Read CSV data and find the entry with the specified CUST_ID
+        with open(csv_file_path, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row['CUST_ID'] == cid:
+                    # Prepare the JSON response with the customer information
+                    response_data = {
+                        'cinfo': f"{row['CUST_ID']},{row['NAME']},{row['MOBILE']},{row['ADHHAR']},{row['BANK_AC']},{row['IFSC']}"
+                    }
+                    return JsonResponse(response_data)
+
+        # If CUST_ID is not found, return an error response
+        return JsonResponse({'error': f'No information found for CUST_ID: {cid}'}, status=404)
+
+    except Exception as e:
+        logger.exception(f'Error processing request for dpuid {dpuid} and cid {cid}: {e}')
+        return JsonResponse({'error': f'Internal Server Error'}, status=500)
