@@ -477,3 +477,5 @@ def get_cust_info(request):
 
     except Exception as e:
         return JsonResponse({'error': f'Internal Server Error'}, status=500)
+def customer_list(request):
+    return render(request, 'common/customer_list.html')
