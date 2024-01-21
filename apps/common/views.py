@@ -355,7 +355,6 @@ def upload_customer_csv(request):
             st_id = csv_lines[0].strip()
 
             # Extract CUST_ID range dynamically
-            start_range, end_range = extract_cust_id_range(csv_file)
 
             # Save the CSV file reference with the corresponding user, ST_ID, and dynamic range
             try:
@@ -363,8 +362,7 @@ def upload_customer_csv(request):
                     user=request.user,
                     st_id=st_id,
                     csv_file=csv_file,
-                    start_range=start_range,
-                    end_range=end_range,
+                  
                 )
                 messages.success(request, 'CSV file uploaded successfully.')
                 return redirect('upload_customer_csv')
@@ -391,8 +389,7 @@ def download_latest_csv(request):
         return HttpResponse("No CSV file found for download.")
 
 
-
-
+import csv
 from django.http import JsonResponse
 from django.shortcuts import get_list_or_404
 from .models import Customer
@@ -403,34 +400,32 @@ def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
 
     try:
-        # Retrieve data based on dpuid without user authentication
+        # Retrieve data based on dpuid, regardless of the user
         customer_entries = get_list_or_404(Customer, st_id=dpuid)
 
         if not customer_entries:
-            return JsonResponse({'error': f'No Customer found for dpuid: {dpuid}'}, status=404)
+            return JsonResponse({'error': f'No Customer matches the given dpuid: {dpuid}'}, status=404)
 
-
-
-            # Get the latest Customer entry based on id
+        # Get the latest Customer entry based on id
         latest_customer = max(customer_entries, key=lambda entry: entry.id)
 
-            # Retrieve the CSV file path from the latest_customer model
+        # Retrieve the CSV file path from the latest_customer model
         csv_file_path = latest_customer.csv_file.path
 
-            # Read CSV data and calculate start and end range
+        # Read CSV data and calculate start and end range
         with open(csv_file_path, 'r') as file:
-                # Skip the header row
+            # Skip the header row
             next(file)
-                
+            
             reader = csv.DictReader(file)
             cust_ids = [int(row['CUST_ID']) for row in reader]
 
-            # Calculate start and end range
-            start_range = 1 if cust_ids else 0
-            end_range = max(cust_ids) if cust_ids else 0
+        # Calculate start and end range
+        start_range = 1 if cust_ids else 0
+        end_range = max(cust_ids) if cust_ids else 0
 
-            # Prepare the JSON response with the range values
-            response_data = {'noofcustomer': f'{start_range},{end_range}'}
+        # Prepare the JSON response with the range values
+        response_data = {'noofcustomer': f'{start_range},{end_range}'}
 
         return JsonResponse(response_data)
 
