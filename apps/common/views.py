@@ -399,18 +399,15 @@ from django.shortcuts import get_list_or_404
 from .models import Customer
 from rest_framework.decorators import api_view
 
-logger = logging.getLogger(__name__)
 @api_view(['GET'])
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
 
     try:
+        # Check if the user is authenticated
         if request.user.is_authenticated:
-            # Ensure that the user has access to data associated with the provided dpuid
-            customer_entries = Customer.objects.filter(st_id=dpuid, user=request.user)
-
-            if not customer_entries.exists():
-                return JsonResponse({'error': f'No Customer found for dpuid: {dpuid} and user: {request.user}'}, status=404)
+            # Retrieve data based on dpuid, regardless of the user
+            customer_entries = get_list_or_404(Customer, st_id=dpuid)
 
 
             # Get the latest Customer entry based on id
