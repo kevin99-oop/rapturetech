@@ -394,11 +394,11 @@ import logging
 from django.http import JsonResponse
 from django.shortcuts import get_list_or_404
 from .models import Customer
-from django.views.decorators.csrf import csrf_exempt  # Import csrf_exempt decorator
+from rest_framework.decorators import api_view
 
 logger = logging.getLogger(__name__)
 
-@csrf_exempt  # Apply csrf_exempt decorator to allow unauthenticated access
+@api_view(['GET'])
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
 
