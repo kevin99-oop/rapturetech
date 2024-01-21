@@ -64,9 +64,4 @@ class Customer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     st_id = models.CharField(max_length=50)
     csv_file = models.FileField(upload_to='csv_files/')
-    start_range = models.IntegerField()
-    end_range = models.IntegerField()
-    downloaded_cust_id = models.IntegerField(null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.user.username}'s Customer - {self.st_id}"
+ 
