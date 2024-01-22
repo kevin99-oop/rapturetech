@@ -328,20 +328,21 @@ def edit_dpu(request, st_id):
     return render(request, 'common/edit_dpu.html', {'form': form, 'dpu': dpu})
 
 
+import csv
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from .forms import UploadCSVForm
+from .models import Customer
 
-def extract_cust_id_range(csv_file):
-    # Read the CSV file and extract the start and end range based on CUST_ID values
-    csv_content = csv_file.read().decode('utf-8').splitlines()
-    reader = csv.DictReader(csv_content)
-    
-    # Extract CUST_ID values
-    cust_ids = [int(row['CUST_ID']) for row in reader]
-
-    # Determine start and end range
-    start_range = min(cust_ids) if cust_ids else 1
-    end_range = max(cust_ids) if cust_ids else 10
-
-    return start_range, end_range
+def extract_dpuid_from_csv(file):
+    """
+    Extracts the dpuid from the first line of the CSV file.
+    """
+    file.seek(0)  # Reset the file position to the beginning
+    first_line = file.readline().decode('utf-8').strip()
+    # Assuming dpuid is the first value in the first line (modify as needed)
+    dpuid = first_line.split(',')[0]
+    return dpuid
 
 def upload_customer_csv(request):
     if request.method == 'POST':
@@ -349,20 +350,16 @@ def upload_customer_csv(request):
         if form.is_valid():
             csv_file = form.cleaned_data['csv_file']
 
-            # Extract ST_ID from the first line of the CSV file
-            csv_content = csv_file.read().decode('utf-8')
-            csv_lines = csv_content.splitlines()
-            st_id = csv_lines[0].strip()
-
-            # Extract CUST_ID range dynamically
+            # Extract dpuid from the first line of the CSV file
+            dpuid = extract_dpuid_from_csv(csv_file)
 
             # Save the CSV file reference with the corresponding user, ST_ID, and dynamic range
             try:
                 Customer.objects.create(
                     user=request.user,
-                    st_id=st_id,
+                    st_id=dpuid,
                     csv_file=csv_file,
-                  
+                    # Add other fields as needed
                 )
                 messages.success(request, 'CSV file uploaded successfully.')
                 return redirect('upload_customer_csv')
@@ -374,6 +371,7 @@ def upload_customer_csv(request):
         form = UploadCSVForm()
 
     return render(request, 'common/upload_customer_csv.html', {'form': form})
+
 
 def download_latest_csv(request):
     # Get the latest Customer record for the logged-in user
