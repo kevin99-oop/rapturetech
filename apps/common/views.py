@@ -391,21 +391,23 @@ def download_latest_csv(request):
 
 import csv
 import logging
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse
 from django.shortcuts import get_list_or_404
 from .models import Customer
+from rest_framework.decorators import api_view
 
 logger = logging.getLogger(__name__)
 
+@api_view(['GET'])
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
 
     try:
-        # Fetch all Customer entries for the given dpuid and user
-        customer_entries = Customer.objects.filter(user=request.user, st_id=dpuid)
+        # Fetch all Customer entries for the given dpuid
+        customer_entries = get_list_or_404(Customer, st_id=dpuid)
 
-        if not customer_entries.exists():
-            raise Http404(f'No Customer found for dpuid: {dpuid} and user: {request.user}')
+        if not customer_entries:
+            return JsonResponse({'error': f'No CSV file found for dpuid: {dpuid}'}, status=404)
 
         # Get the latest Customer entry based on id
         latest_customer = max(customer_entries, key=lambda entry: entry.id)
@@ -431,8 +433,10 @@ def get_cid_range(request):
         return JsonResponse(response_data)
 
     except Exception as e:
-        logger.exception(f'Error processing request for dpuid {dpuid} and user {request.user}: {e}')
+        logger.exception(f'Error processing request for dpuid {dpuid}: {e}')
         return JsonResponse({'error': f'Internal Server Error'}, status=500)
+# views.py
+# views.py
 
 from django.http import JsonResponse
 from django.shortcuts import get_list_or_404
