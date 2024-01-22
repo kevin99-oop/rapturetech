@@ -403,40 +403,42 @@ def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
 
     try:
-        # Fetch all Customer entries for the given dpuid
-        customer_entries = get_list_or_404(Customer, st_id=dpuid)
+        # Check if the user is authenticated
+        if request.user.is_authenticated:
+            # Retrieve data based on dpuid and user
+            customer_entries = get_list_or_404(Customer, user=request.user, st_id=dpuid)
 
-        if not customer_entries:
-            return JsonResponse({'error': f'No CSV file found for dpuid: {dpuid}'}, status=404)
+            # Get the latest Customer entry based on id
+            latest_customer = max(customer_entries, key=lambda entry: entry.id)
 
-        # Get the latest Customer entry based on id
-        latest_customer = max(customer_entries, key=lambda entry: entry.id)
+            # Retrieve the CSV file path from the latest_customer model
+            csv_file_path = latest_customer.csv_file.path
 
-        # Retrieve the CSV file path from the latest_customer model
-        csv_file_path = latest_customer.csv_file.path
+            # Read CSV data and calculate start and end range
+            with open(csv_file_path, 'r') as file:
+                # Skip the header row
+                next(file)
+                
+                reader = csv.DictReader(file)
+                cust_ids = [int(row['CUST_ID']) for row in reader]
 
-        # Read CSV data and calculate start and end range
-        with open(csv_file_path, 'r') as file:
-            # Skip the header row
-            next(file)
-            
-            reader = csv.DictReader(file)
-            cust_ids = [int(row['CUST_ID']) for row in reader]
+            # Calculate start and end range
+            start_range = 1 if cust_ids else 0
+            end_range = max(cust_ids) if cust_ids else 0
 
-        # Calculate start and end range
-        start_range = 1 if cust_ids else 0
-        end_range = max(cust_ids) if cust_ids else 0
+            # Prepare the JSON response with the range values
+            response_data = {'noofcustomer': f'{start_range},{end_range}'}
 
-        # Prepare the JSON response with the range values
-        response_data = {'noofcustomer': f'{start_range},{end_range}'}
+            return JsonResponse(response_data)
 
-        return JsonResponse(response_data)
+        else:
+            return JsonResponse({'error': 'Unauthorized'}, status=401)
 
     except Exception as e:
-        logger.exception(f'Error processing request for dpuid {dpuid}: {e}')
+        # Log the exception for debugging
+        logger.exception(f'Error processing request for dpuid {dpuid} and user {request.user}: {e}')
         return JsonResponse({'error': f'Internal Server Error'}, status=500)
-# views.py
-# views.py
+
 
 from django.http import JsonResponse
 from django.shortcuts import get_list_or_404
