@@ -1,0 +1,14 @@
+
+
+
+
+
+Record Type:
+
+
+1= Normal Slip
+2= Edited
+3= Local Sell
+4= Local Sell Edited
+5= Deduction
+6= Deduction  Edited

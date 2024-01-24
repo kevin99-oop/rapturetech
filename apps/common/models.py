@@ -27,7 +27,12 @@ class DPU(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s DPU - {self.st_id}"
-
+    def get_latest_csv_path(self):
+            try:
+                latest_customer = Customer.objects.filter(st_id=self.st_id).latest('date_uploaded')
+                return latest_customer.csv_file.path
+            except Customer.DoesNotExist:
+                return None
 
 class DREC(models.Model):
     REC_TYPE = models.CharField(max_length=255, default="", blank=True)
@@ -64,4 +69,13 @@ class Customer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     st_id = models.CharField(max_length=50)
     csv_file = models.FileField(upload_to='csv_files/')
- 
+
+
+class TextFile(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    st_id = models.CharField(max_length=255)
+    file = models.FileField(upload_to='text_files/')
+    upload_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user.username} - {self.st_id} - {self.upload_date}'

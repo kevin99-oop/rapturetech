@@ -1,0 +1,28 @@
+<!-- upload_text.html -->
+
+{% extends 'base2.html' %}
+
+{% block content %}
+<h2>Upload Text File</h2>
+<form method="post" enctype="multipart/form-data" action="{% url 'upload_text' %}">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Upload</button>
+</form>
+
+<h2>Download Latest Text File</h2>
+<p>Debug: st_id={{ dpu.st_id }}</p>
+
+<h2>Download Text File</h2>
+<form method="post" action="{% url 'download_latest_text' st_id='selected_st_id' %}">
+    {% csrf_token %}
+    <label for="st_id">Select ST_ID:</label>
+    <select name="st_id" id="st_id">
+        {% for dpu in dpu_list %}
+            <option value="{{ dpu.st_id }}">{{ dpu.st_id }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Download</button>
+</form>
+
+{% endblock %}

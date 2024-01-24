@@ -374,19 +374,22 @@ def upload_customer_csv(request):
         form = UploadCSVForm()
 
     return render(request, 'common/upload_customer_csv.html', {'form': form})
-
 def download_latest_csv(request):
-    # Get the latest Customer record for the logged-in user
-    latest_customer = Customer.objects.filter(user=request.user).order_by('-id').first()
+    if request.method == 'POST':
+        st_id = request.POST.get('st_id')
+        if st_id:
+            # Get the latest Customer record for the logged-in user and the provided st_id
+            latest_customer = get_object_or_404(Customer, user=request.user, st_id=st_id)
 
-    if latest_customer:
-        # Open the CSV file and create an HttpResponse with the file content
-        with open(latest_customer.csv_file.path, 'rb') as csv_file:
-            response = HttpResponse(csv_file.read(), content_type='text/csv')
-            response['Content-Disposition'] = f'attachment; filename="{latest_customer.csv_file.name}"'
-            return response
-    else:
-        return HttpResponse("No CSV file found for download.")
+            # Open the CSV file and create an HttpResponse with the file content
+            with open(latest_customer.csv_file.path, 'rb') as csv_file:
+                response = HttpResponse(csv_file.read(), content_type='text/csv')
+                response['Content-Disposition'] = f'attachment; filename="{latest_customer.csv_file.name}"'
+                return response
+
+    # If there's an issue with the form submission or no st_id is provided, render the form
+    return render(request, 'common/dpudetails.html')
+
 
 
 import csv
@@ -479,3 +482,33 @@ def get_cust_info(request):
         return JsonResponse({'error': f'Internal Server Error'}, status=500)
 def customer_list(request):
     return render(request, 'common/customer_list.html')
+# views.py
+# views.py
+
+# views.py
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from apps.common.models import TextFile
+from apps.common.serializers import TextFileSerializer
+from rest_framework.permissions import IsAdminUser
+
+class TextFileUploadView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        st_id = request.data.get('st_id')
+        file = request.data.get('file')
+
+        # Validate st_id and file
+        if not st_id or not file:
+            return Response({'error': 'Invalid st_id or file'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create a TextFile instance
+        text_file = TextFile(user=user, st_id=st_id, file=file)
+        text_file.save()
+
+        # Serialize the response
+        serializer = TextFileSerializer(text_file)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

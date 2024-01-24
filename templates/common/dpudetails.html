@@ -212,8 +212,12 @@
 
             </div>
         </div>
-
-
+        <form method="post" action="{% url 'download_latest_csv' %}">
+            {% csrf_token %}
+            <label for="st_id">Enter st_id:</label>
+            <input type="text" name="st_id" id="st_id" required>
+            <button type="submit">Download Latest CSV</button>
+        </form>
 
 
 

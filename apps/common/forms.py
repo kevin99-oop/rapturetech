@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from apps.userprofile.models import Profile
 from django.forms import ModelForm
 from django import forms
-from apps.common.models import DPU,Customer
+from apps.common.models import DPU,Customer,TextFile
 
 
 class SignUpForm(UserCreationForm):
@@ -75,3 +75,18 @@ class UploadCSVForm(forms.ModelForm):
         # Perform any additional validation for the CSV file if needed
 
         return csv_file
+    
+
+class UploadTextForm(forms.Form):
+    st_id = forms.ChoiceField(choices=[])  # Define an empty choices list initially
+    text_file = forms.FileField(label='Choose a text file', widget=forms.ClearableFileInput(attrs={'accept': '.txt'}))
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)  # Get the 'user' parameter from kwargs
+        super(UploadTextForm, self).__init__(*args, **kwargs)
+
+        # If 'user' is provided, filter st_id choices based on the user's DPUs
+        if user:
+            dpus = DPU.objects.filter(user=user)
+            st_id_choices = [(dpu.st_id, dpu.st_id) for dpu in dpus]
+            self.fields['st_id'].choices = st_id_choices
