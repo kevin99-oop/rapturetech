@@ -486,11 +486,12 @@ def customer_list(request):
 # views.py
 
 # views.py
+# views.py
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from apps.common.models import TextFile
-from apps.common.serializers import TextFileSerializer
+from .models import TextFile
+from .serializers import TextFileSerializer
 from rest_framework.permissions import IsAuthenticated
 
 class TextFileUploadView(APIView):
@@ -515,6 +516,6 @@ class TextFileUploadView(APIView):
 
     def get(self, request, *args, **kwargs):
         # Retrieve and serialize all text files
-        text_files = TextFile.objects.all()
+        text_files = TextFile.objects.filter(user=request.user)
         serializer = TextFileSerializer(text_files, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
