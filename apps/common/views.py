@@ -486,12 +486,13 @@ def customer_list(request):
 # views.py
 
 # views.py
-from rest_framework import status
-from rest_framework.response import Response
+# views.py
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 from apps.common.models import TextFile
 from apps.common.serializers import TextFileSerializer
+from rest_framework.permissions import IsAuthenticated
 
 class TextFileUploadView(APIView):
     permission_classes = [IsAuthenticated]

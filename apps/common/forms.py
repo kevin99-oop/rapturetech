@@ -78,7 +78,7 @@ class UploadCSVForm(forms.ModelForm):
     
 
 
-class TextFileForm(forms.ModelForm):
+class TextFileUploadForm(forms.ModelForm):
     class Meta:
         model = TextFile
-        fields = ['st_id', 'file']
+        fields = ['user', 'st_id', 'file']
