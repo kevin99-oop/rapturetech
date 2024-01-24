@@ -494,8 +494,11 @@ from .models import TextFile
 from .serializers import TextFileSerializer
 from rest_framework.permissions import IsAuthenticated
 
+
+from rest_framework.permissions import AllowAny
+
 class TextFileUploadView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         user = request.user
