@@ -496,8 +496,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.parsers import FileUploadParser
 
 class TextFileUploadView(APIView):
-    permission_classes = [IsAuthenticated]  # Allow only authenticated users
-    parser_classes = [FileUploadParser]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         user = request.user
