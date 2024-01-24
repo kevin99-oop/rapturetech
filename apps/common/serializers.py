@@ -51,11 +51,6 @@ class CIDRangeSerializer(serializers.Serializer):
 
 
 class TextFileSerializer(serializers.ModelSerializer):
-    file_link = serializers.SerializerMethodField()
-
     class Meta:
         model = TextFile
-        fields = ['user', 'st_id', 'file_link', 'upload_date']
-
-    def get_file_link(self, obj):
-        return obj.file.url
+        fields = ['user', 'st_id', 'file', 'upload_date']
