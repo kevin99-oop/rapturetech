@@ -495,7 +495,7 @@ from apps.common.models import TextFile
 from apps.common.serializers import TextFileSerializer
 
 class TextFileUploadView(APIView):
-   # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         user = request.user
