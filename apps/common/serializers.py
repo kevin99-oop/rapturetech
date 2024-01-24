@@ -48,7 +48,8 @@ class CIDRangeSerializer(serializers.Serializer):
     start_range = serializers.IntegerField()
     end_range = serializers.IntegerField()
 
+
 class TextFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = TextFile
-        fields = '__all__'
+        fields = ['user', 'file', 'st_id', 'timestamp']  # Add 'st_id' here

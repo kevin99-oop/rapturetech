@@ -23,7 +23,7 @@ class CustomerAdmin(admin.ModelAdmin):
 from django.contrib import admin
 from django.http import HttpResponse
 from django.utils.html import format_html
-from .models import TextFile
+from apps.common.models import TextFile
 
 class TextFileAdmin(admin.ModelAdmin):
     list_display = ['user', 'st_id', 'file_link', 'formatted_upload_date']
