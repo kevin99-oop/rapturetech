@@ -51,4 +51,4 @@ class CIDRangeSerializer(serializers.Serializer):
 class TextFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = TextFile
-        fields = ['user', 'st_id', 'file', 'upload_date']
+        fields = '__all__'
