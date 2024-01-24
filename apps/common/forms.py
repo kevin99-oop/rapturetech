@@ -77,16 +77,8 @@ class UploadCSVForm(forms.ModelForm):
         return csv_file
     
 
-class UploadTextForm(forms.Form):
-    st_id = forms.ChoiceField(choices=[])  # Define an empty choices list initially
-    text_file = forms.FileField(label='Choose a text file', widget=forms.ClearableFileInput(attrs={'accept': '.txt'}))
 
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)  # Get the 'user' parameter from kwargs
-        super(UploadTextForm, self).__init__(*args, **kwargs)
-
-        # If 'user' is provided, filter st_id choices based on the user's DPUs
-        if user:
-            dpus = DPU.objects.filter(user=user)
-            st_id_choices = [(dpu.st_id, dpu.st_id) for dpu in dpus]
-            self.fields['st_id'].choices = st_id_choices
+class TextFileForm(forms.ModelForm):
+    class Meta:
+        model = TextFile
+        fields = ['st_id', 'file']

@@ -485,17 +485,16 @@ def customer_list(request):
 # views.py
 # views.py
 
-from rest_framework.parsers import FileUploadParser
-from rest_framework.permissions import IsAuthenticated
+# views.py
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from apps.common.models import TextFile
 from apps.common.serializers import TextFileSerializer
 
 class TextFileUploadView(APIView):
     permission_classes = [IsAuthenticated]
-    parser_classes = [FileUploadParser]
 
     def post(self, request, *args, **kwargs):
         user = request.user
@@ -508,11 +507,6 @@ class TextFileUploadView(APIView):
 
         # Create a TextFile instance
         text_file = TextFile(user=user, st_id=st_id, file=file)
-        
-        # Use timestamp in the filename to make it unique
-        timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-        text_file.file.name = f"{st_id}_{timestamp}_{file.name}"
-
         text_file.save()
 
         # Serialize the response

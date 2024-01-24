@@ -72,9 +72,9 @@ class Customer(models.Model):
 
 class TextFile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    st_id = models.CharField(max_length=255)
+    st_id = models.CharField(max_length=50)
     file = models.FileField(upload_to='text_files/')
-    upload_date = models.DateTimeField(auto_now_add=True)  # Add this line for upload date
+    upload_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.st_id} - {self.upload_date}"
+        return f"TextFile for {self.user.username} - {self.st_id}"
