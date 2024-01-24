@@ -77,4 +77,4 @@ class TextFile(models.Model):
     upload_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"TextFile for {self.user.username} - {self.st_id}"
+        return f"TextFile - {self.st_id} by {self.user.username}"

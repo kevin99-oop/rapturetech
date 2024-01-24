@@ -486,32 +486,18 @@ def customer_list(request):
 # views.py
 
 # views.py
-# views.py
-from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from apps.common.models import TextFile
 from apps.common.serializers import TextFileSerializer
+from rest_framework.permissions import IsAuthenticated
 
 class TextFileUploadView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, *args, **kwargs):
         user = request.user
-
-        # Check if the user is authenticated
-        if not user.is_authenticated:
-            return Response({'detail': 'Authentication credentials were not provided.'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        # Check if the user is an admin for download permission
-        if user.is_staff:
-            permission_classes = [IsAuthenticated]
-        else:
-            permission_classes = []
-
-        # Set permissions dynamically
-        self.permission_classes = permission_classes
-        self.check_permissions(request)
-
         st_id = request.data.get('st_id')
         file = request.data.get('file')
 
@@ -526,3 +512,9 @@ class TextFileUploadView(APIView):
         # Serialize the response
         serializer = TextFileSerializer(text_file)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def get(self, request, *args, **kwargs):
+        # Retrieve and serialize all text files
+        text_files = TextFile.objects.all()
+        serializer = TextFileSerializer(text_files, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
