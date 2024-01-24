@@ -65,7 +65,7 @@ urlpatterns = [
     path('api/cust_info/', get_cust_info, name='get_cust_info'),
     path('customer_list/', customer_list, name='customer_list'),
     #/config_file
-    path('api/config/', TextFileUploadView.as_view(), name='upload_text'),
+    path('api/config/', TextFileUploadView.as_view(), name='api/config/'),
 
     # Add other URLs as needed
 
