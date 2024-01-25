@@ -475,42 +475,18 @@ def customer_list(request):
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from .models import TextFile
-from apps.common.serializers import TextFileSerializer
-import logging
+from .serializers import TextFileSerializer
+from apps.common.models import TextFile  # Replace YourModel with the actual model you want to use
 
-# Configure the logger
-logger = logging.getLogger(__name__)
+class TextFileConfigView(APIView):
+    def get(self, request, format=None):
+        text_files = TextFile.objects.all()
+        serializer = TextFileSerializer(text_files, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-class TextFileUploadView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, *args, **kwargs):
-        try:
-            user = request.user
-            st_id = request.data.get('st_id')
-            text_data = request.data.get('text_data')  # Assuming your text data is passed with the key 'text_data'
-
-            # Validate st_id and text_data
-            if not st_id or not text_data:
-                error_msg = 'Invalid st_id or text_data'
-                logger.warning(error_msg)
-                return Response({'error': error_msg}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Create a TextFile instance
-            text_file = TextFile(user=user, st_id=st_id, text_data=text_data)
-            text_file.save()
-
-            return Response({'message': 'Text data uploaded successfully'}, status=status.HTTP_201_CREATED)
-
-        except ValueError as ve:
-            # Log the exception
-            logger.warning("ValueError occurred: %s", str(ve))
-            return Response({"error": str(ve)}, status=status.HTTP_400_BAD_REQUEST)
-
-        except Exception as e:
-            # Log the exception
-            logger.exception("An error occurred: %s", str(e))
-            # Handle other exceptions
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    def post(self, request, format=None):
+        serializer = TextFileSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

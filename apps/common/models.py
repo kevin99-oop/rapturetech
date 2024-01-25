@@ -74,7 +74,7 @@ class Customer(models.Model):
 class TextFile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     st_id = models.CharField(max_length=50)
-    text_data = models.CharField()  # Change to TextField to store plain text
+    text_data = models.CharField(max_length=500000000000)  # Change to TextField to store plain text
     upload_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
