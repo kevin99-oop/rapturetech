@@ -1,21 +1,22 @@
-# Dockerfile
-
-# The first instruction is what image we want to base our container on
-# We Use an official Python runtime as a parent image
 FROM docker.io/python:3.11.7-alpine
 
 WORKDIR /
 
-# Allows docker to cache installed dependencies between builds
+# Create a non-root user
+RUN adduser -D myuser
+USER myuser
+
+# Copy only requirements first to leverage Docker cache
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
-RUN ls -l
-# Mounts the application code to the image
+
+# Copy the rest of the application code
 COPY . /
-WORKDIR /
 
 EXPOSE 8000
 
-# runs the production servers
+# Set environment variable if needed
+# ENV DJANGO_SETTINGS_MODULE=myapp.settings.production
+
 ENTRYPOINT ["python", "manage.py"]
 CMD ["runserver", "0.0.0.0:8000"]
