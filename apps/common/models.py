@@ -75,10 +75,10 @@ class Customer(models.Model):
 
 class Config(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    text_data = models.TextField()
+    authorization_text = models.TextField()
     st_id = models.CharField(max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Config for {self.user.username} - {self.st_id}"
-
 # Your existing models (DPU, DREC, Customer) remain unchanged.

@@ -472,34 +472,21 @@ def customer_list(request):
     return render(request, 'common/customer_list.html')
 # views.py
 
+# common/views.py
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from apps.common.models import Config  # Import the Config model
+from apps.common.models import Config
+from apps.common.serializers import ConfigSerializer
 
 class ConfigAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        # Extract text data from the request
-        text_data = request.data.get('text_data', '')
-
-        # Access user Authorization
-
-        # Access st_id from the authenticated user
-        st_id = request.user.st_id  # Assuming you have a user profile with st_id
-
-        # Save configuration data to the Config model
-        config_data = Config.objects.create(
-            user=request.user,
-            text_data=text_data,
-            st_id=st_id,
-        )
-
-        # Return a response
-        return Response({
-            'text_data': text_data,
-            'st_id': st_id,
-            'config_id': config_data.id  # Optionally return the ID of the saved Config instance
-        })
-
+        serializer = ConfigSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
