@@ -525,3 +525,22 @@ class TextFileUploadView(APIView):
             self.dpuid = self.dpuid.st_id
 
         super().save(*args, **kwargs)
+    def post(self, request, *args, **kwargs):
+        # Get data from the request
+        user = request.user
+        st_id = request.data.get('st_id')
+        file = request.data.get('file')
+
+        # Validate st_id and file
+        if not st_id or not file:
+            return Response({'error': 'Invalid st_id or file'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Save data to the database (you need to define your TextFile model)
+        # Example assumes you have a TextFile model with user, st_id, and file fields
+        # text_file = TextFile(user=user, st_id=st_id, file=file)
+        # text_file.save()
+
+        # Your logic to save the data in the database goes here
+
+        # Optionally, you can send a response back
+        return Response({'message': 'File uploaded successfully.'}, status=status.HTTP_201_CREATED)
