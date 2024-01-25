@@ -475,26 +475,17 @@ def customer_list(request):
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import TextFileSerializer  # Make sure to import your TextFileSerializer
+from .serializers import TextFileSerializer
 
 class TextFileConfigView(APIView):
     def post(self, request, format=None):
-        # Perform authentication check here
-        if not request.auth:
-            return Response({"detail": "Authentication credentials were not provided."}, status=status.HTTP_401_UNAUTHORIZED)
-
         serializer = TextFileSerializer(data=request.data)
         if serializer.is_valid():
-            # You can customize the save process here before calling the super method
-            instance = serializer.save()
-
-            # Additional logic, if needed
-            # For example, you can perform some actions based on the created instance
-
-            response_data = {"message": "Text file saved successfully."}
+            serializer.save()
+            response_data = {'message': 'Data successfully saved.'}
             return Response(response_data, status=status.HTTP_201_CREATED)
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     
 

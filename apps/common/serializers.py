@@ -62,4 +62,4 @@ class TextFileSerializer(serializers.ModelSerializer):
 class TextFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = TextFile
-        fields = '__all__'
+        fields = ['user', 'st_id', 'text_field_name']
