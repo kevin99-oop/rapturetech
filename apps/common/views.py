@@ -475,16 +475,25 @@ def customer_list(request):
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework import status
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from .models import TextFile
 from .serializers import TextFileSerializer
 
 class TextFileConfigView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, format=None):
         # Extract the text from the request data
         text_data = request.data.get('text_data')  # Adjust based on your payload structure
 
-        # Create a TextFile instance with the extracted text
+        # Get the authenticated user
+        user = request.user
+
+        # Create a TextFile instance with the extracted text and user
         text_file_data = {
+            'user': user.id,
             'text_field_name': text_data,
         }
 
@@ -499,3 +508,4 @@ class TextFileConfigView(APIView):
 
         # If validation fails, return an error response with a status code of 400
         return JsonResponse({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
