@@ -472,76 +472,40 @@ def customer_list(request):
     return render(request, 'common/customer_list.html')
 # views.py
 # views.py
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.parsers import MultiPartParser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from apps.common.models import TextFile
 from apps.common.serializers import TextFileSerializer
-import logging
-
-# Configure the logger
-logger = logging.getLogger(__name__)
 
 class TextFileUploadView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser]
 
-    def create(self, request, *args, **kwargs):
-        try:
-            user = request.user
-            st_id = request.data.get('st_id')
-            file = request.data.get('file')
-
-            # Validate st_id and file
-            if not st_id or not file:
-                error_msg = 'Invalid st_id or file'
-                logger.warning(error_msg)
-                return Response({'error': error_msg}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Create a TextFile instance
-            serializer = TextFileSerializer(data={'user': user, 'st_id': st_id, 'file': file})
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        except ValueError as ve:
-            # Log the exception
-            logger.warning("ValueError occurred: %s", str(ve))
-            return Response({"error": str(ve)}, status=status.HTTP_400_BAD_REQUEST)
-
-        except Exception as e:
-            # Log the exception
-            logger.exception("An error occurred: %s", str(e))
-            # Handle other exceptions
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
     def post(self, request, *args, **kwargs):
         try:
             # Check if the 'file' key is present in the request data
             if 'file' not in request.data:
-                error_msg = 'File not provided'
-                logger.error(error_msg)
-                return Response({'error': error_msg}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'File not provided'}, status=status.HTTP_400_BAD_REQUEST)
 
             # Access the uploaded file using request.data['file']
             uploaded_file = request.data['file']
 
-            # Perform actions with the file (save to storage, process, etc.)
-            # Example: Save the file to media root
-            file_path = 'media/' + uploaded_file.name
-            with open(file_path, 'wb') as file:
-                for chunk in uploaded_file.chunks():
-                    file.write(chunk)
+            # Create a TextFile instance
+            user = request.user
+            st_id = request.data.get('st_id', '')
+            text_file = TextFile(user=user, st_id=st_id, file=uploaded_file)
+            text_file.save()
 
             # You can return additional information in the response if needed
-            return Response({'message': 'File uploaded successfully', 'file_path': file_path}, status=status.HTTP_201_CREATED)
+            serializer = TextFileSerializer(text_file)
+            return Response({'message': 'File uploaded and TextFile created successfully', 'data': serializer.data}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            # Log the exception
-            logger.exception("An error occurred: %s", str(e))
+            # Log the exception if needed
+            print(f"An error occurred: {str(e)}")
             
             # Handle other exceptions
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
