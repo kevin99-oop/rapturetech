@@ -483,54 +483,24 @@ def customer_list(request):
     return render(request, 'common/customer_list.html')
 # views.py
 # views.py
-
-import logging
+# apps/common/views.py
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from apps.common.models import TextFile
-from apps.common.serializers import TextFileSerializer
-
-# Create a logger instance
-logger = logging.getLogger(__name__)
+from .models import TextFile
+from .serializers import TextFileSerializer
 
 class TextFileUploadView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def post(self, request, *args, **kwargs):
-        # Check if the user is authenticated
-        if not request.user.is_authenticated:
-            return Response({'detail': 'Authentication credentials were not provided.'}, 
-                            status=status.HTTP_403_FORBIDDEN)
-
         user = request.user
         st_id = request.data.get('st_id')
         file = request.data.get('file')
 
-        # Validate st_id and file
         if not st_id or not file:
-            error_message = {'error': 'Invalid st_id or file'}
-            return Response(error_message, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Invalid st_id or file'}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            # Create a TextFile instance
-            text_file = TextFile(user=user, st_id=st_id, file=file)
-            text_file.save()
+        text_file = TextFile(user=user, st_id=st_id, file=file)
+        text_file.save()
 
-            # Serialize the response
-            serializer = TextFileSerializer(text_file)
-            response_data = {
-                'file_data': serializer.data,
-                'message': 'File uploaded successfully'
-            }
-
-            return Response(response_data, status=status.HTTP_201_CREATED, content_type='application/json')
-
-        except Exception as e:
-            # Log the exception
-            logger.error(f'An error occurred: {str(e)}')
-
-            error_message = {'error': 'Internal server error'}
-            return Response(error_message, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+        serializer = TextFileSerializer(text_file)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
