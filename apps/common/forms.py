@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from apps.userprofile.models import Profile
 from django.forms import ModelForm
 from django import forms
-from apps.common.models import DPU,Customer,TextFile
+from apps.common.models import DPU,Customer
 
 
 class SignUpForm(UserCreationForm):

@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from apps.common.models import DREC,DPU,Customer,TextFile
+from apps.common.models import DREC,DPU,Customer
 
 
 class DPUAdmin(admin.ModelAdmin):
@@ -20,3 +20,9 @@ class CustomerAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'st_id')
 
 # admin.py
+from .models import Config
+
+class ConfigAdmin(admin.ModelAdmin):
+    list_display = ['user', 'text_data', 'user_authorization', 'st_id']
+
+admin.site.register(Config, ConfigAdmin)
