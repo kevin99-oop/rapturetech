@@ -472,36 +472,25 @@ def customer_list(request):
     return render(request, 'common/customer_list.html')
 # views.py
 # views.py
-import os
-from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework import status
-from apps.common.models import TextFile
-from apps.common.serializers import TextFileSerializer
+from .models import TextFile
+from .serializers import TextFileSerializer
 
 class TextFileConfigView(APIView):
-    def get(self, request, format=None):
-        # Extract relevant data from the request
-        user = request.data.get('user')  # Adjust based on your payload structure
-        st_id = request.data.get('st_id')  # Adjust based on your payload structure
+    def post(self, request, format=None):
+        # Extract the text from the request data
         text_data = request.data.get('text_data')  # Adjust based on your payload structure
 
-        # Create a TextFile instance with the extracted data
+        # Create a TextFile instance with the extracted text
         text_file_data = {
-            'user': user,
-            'st_id': st_id,
-            'text_field_name': f"{user}_{st_id}.txt",  # Create a unique filename
+            'text_field_name': text_data,
         }
 
         # Serialize and save the TextFile instance
         serializer = TextFileSerializer(data=text_file_data)
         if serializer.is_valid():
-            text_file = serializer.save()
-
-            # Store the text content in a text file
-            file_path = os.path.join('/media/', text_file.text_field_name)
-            with open(file_path, 'w') as text_file:
-                text_file.write(text_data)
-
-            return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
-        return JsonResponse({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
