@@ -472,7 +472,6 @@ def customer_list(request):
     return render(request, 'common/customer_list.html')
 # views.py
 # views.py
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -482,23 +481,12 @@ from apps.common.models import TextFile
 from apps.common.serializers import TextFileSerializer
 import logging
 
-from rest_framework.parsers import MultiPartParser
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework import status
-
 # Configure the logger
 logger = logging.getLogger(__name__)
+
 class TextFileUploadView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser]
-
-    def perform_create(self, serializer):
-        # You can customize the save process here before calling the super method
-        instance = serializer.save()
-
-        # Additional logic, if needed
-        # For example, you can perform some actions based on the created instance
 
     def create(self, request, *args, **kwargs):
         try:
@@ -509,40 +497,26 @@ class TextFileUploadView(APIView):
             # Validate st_id and file
             if not st_id or not file:
                 error_msg = 'Invalid st_id or file'
-                logger.warning(error_msg)  # Adjust log level if needed
-                return JsonResponse({'error': error_msg}, status=status.HTTP_400_BAD_REQUEST)
+                logger.warning(error_msg)
+                return Response({'error': error_msg}, status=status.HTTP_400_BAD_REQUEST)
 
             # Create a TextFile instance
             serializer = TextFileSerializer(data={'user': user, 'st_id': st_id, 'file': file})
             serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
+            serializer.save()
 
-            return JsonResponse(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         except ValueError as ve:
             # Log the exception
             logger.warning("ValueError occurred: %s", str(ve))
-            return JsonResponse({"error": str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": str(ve)}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             # Log the exception
             logger.exception("An error occurred: %s", str(e))
             # Handle other exceptions
-            return JsonResponse({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    def save(self, *args, **kwargs):
-        # Replace None values with "null"
-        for field in self._meta.fields:
-            value = getattr(self, field.name)
-            if value is None:
-                setattr(self, field.name, "null")
-
-        # Assuming dpuid is a ForeignKey to DPU model
-        if self.dpuid:
-            self.dpuid = self.dpuid.st_id
-
-        super().save(*args, **kwargs)
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self, request, *args, **kwargs):
         try:
@@ -562,18 +536,12 @@ class TextFileUploadView(APIView):
                 for chunk in uploaded_file.chunks():
                     file.write(chunk)
 
-            # Create a TextFile instance
-            serializer = TextFileSerializer(data={'user': request.user, 'st_id': request.data.get('st_id'), 'file': file_path})
-            serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
-
             # You can return additional information in the response if needed
-            return JsonResponse({'message': 'File uploaded successfully', 'file_path': file_path}, status=status.HTTP_201_CREATED, headers=headers)
+            return Response({'message': 'File uploaded successfully', 'file_path': file_path}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             # Log the exception
             logger.exception("An error occurred: %s", str(e))
-
+            
             # Handle other exceptions
-            return JsonResponse({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
