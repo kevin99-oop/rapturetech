@@ -480,7 +480,7 @@ from apps.common.models import TextFile
 from apps.common.serializers import TextFileSerializer
 
 class TextFileConfigView(APIView):
-    def post(self, request, format=None):
+    def get(self, request, format=None):
         # Extract relevant data from the request
         user = request.data.get('user')  # Adjust based on your payload structure
         st_id = request.data.get('st_id')  # Adjust based on your payload structure
