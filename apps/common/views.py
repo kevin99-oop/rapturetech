@@ -484,13 +484,16 @@ def customer_list(request):
 # views.py
 # views.py
 
-# views.py
+import logging
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from apps.common.models import TextFile
 from apps.common.serializers import TextFileSerializer
+
+# Create a logger instance
+logger = logging.getLogger(__name__)
 
 class TextFileUploadView(APIView):
     permission_classes = [IsAuthenticated]
@@ -525,6 +528,9 @@ class TextFileUploadView(APIView):
             return Response(response_data, status=status.HTTP_201_CREATED, content_type='application/json')
 
         except Exception as e:
-            error_message = {'error': f'An error occurred: {str(e)}'}
+            # Log the exception
+            logger.error(f'An error occurred: {str(e)}')
+
+            error_message = {'error': 'Internal server error'}
             return Response(error_message, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
