@@ -481,18 +481,20 @@ from rest_framework.permissions import IsAuthenticated
 from .models import TextFile
 from .serializers import TextFileSerializer
 
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+
+from .models import TextFile
+from .serializers import TextFileSerializer
+
 class TextFileUploadView(APIView):
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
-    def perform_create(self, serializer):
-        # You can customize the save process here before calling the super method
-        instance = serializer.save()
-
-        # Additional logic, if needed
-        # For example, you can perform some actions based on the created instance
-
-    def create(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         try:
             user = request.user
             st_id = request.data.get('st_id')
@@ -503,44 +505,13 @@ class TextFileUploadView(APIView):
                 return Response({'error': 'Invalid st_id or file'}, status=status.HTTP_400_BAD_REQUEST)
 
             # Create a TextFile instance
-            serializer = TextFileSerializer(data={'user': user, 'st_id': st_id, 'file': file})
-            serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
+            text_file = TextFile(user=user, st_id=st_id, file=file)
+            text_file.save()
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            # Serialize the response
+            serializer = TextFileSerializer(text_file)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         except Exception as e:
-            # Handle other exceptions
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    def save(self, *args, **kwargs):
-        # Replace None values with "null"
-        for field in self._meta.fields:
-            value = getattr(self, field.name)
-            if value is None:
-                setattr(self, field.name, "null")
-
-        # Assuming dpuid is a ForeignKey to DPU model
-        if self.dpuid:
-            self.dpuid = self.dpuid.st_id
-
-        super().save(*args, **kwargs)
-    def post(self, request, *args, **kwargs):
-        # Get data from the request
-        user = request.user
-        st_id = request.data.get('st_id')
-        file = request.data.get('file')
-
-        # Validate st_id and file
-        if not st_id or not file:
-            return Response({'error': 'Invalid st_id or file'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Save data to the database (you need to define your TextFile model)
-        # Example assumes you have a TextFile model with user, st_id, and file fields
-        # text_file = TextFile(user=user, st_id=st_id, file=file)
-        # text_file.save()
-
-        # Your logic to save the data in the database goes here
-
-        # Optionally, you can send a response back
-        return Response({'message': 'File uploaded successfully.'}, status=status.HTTP_201_CREATED)
