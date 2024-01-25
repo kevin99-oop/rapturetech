@@ -3,7 +3,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from apps.common.models import DREC,Customer,Config
+from apps.common.models import DREC,Customer
 
 class UserSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only=True, required=True, validators=[validate_password])
@@ -52,7 +52,3 @@ class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = ['user', 'st_id', 'csv_file', 'date_uploaded']  # Add 'date_uploaded'
-class ConfigSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Config
-        fields = ['authorization_text', 'st_id']
