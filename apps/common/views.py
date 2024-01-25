@@ -526,21 +526,21 @@ class TextFileUploadView(APIView):
 
         super().save(*args, **kwargs)
     def post(self, request, *args, **kwargs):
-        # Get data from the request
-        user = request.user
-        st_id = request.data.get('st_id')
-        file = request.data.get('file')
+        # Check if the 'file' key is present in the request data
+        if 'file' not in request.data:
+            return Response({'error': 'File not provided'}, status=status.HTTP_400_BAD_REQUEST,content_type='application/json')
+    
 
-        # Validate st_id and file
-        if not st_id or not file:
-            return Response({'error': 'Invalid st_id or file'}, status=status.HTTP_400_BAD_REQUEST,content_type='application/json')
+        # Access the uploaded file using request.data['file']
+        uploaded_file = request.data['file']
 
-        # Save data to the database (you need to define your TextFile model)
-        # Example assumes you have a TextFile model with user, st_id, and file fields
-        # text_file = TextFile(user=user, st_id=st_id, file=file)
-        # text_file.save()
+        # Perform actions with the file (save to storage, process, etc.)
+        # Example: Save the file to media root
+        file_path = 'media/' + uploaded_file.name
+        with open(file_path, 'wb') as file:
+            for chunk in uploaded_file.chunks():
+                file.write(chunk)
 
-        # Your logic to save the data in the database goes here
-
-        # Optionally, you can send a response back
-        return Response({'message': 'File uploaded successfully.'}, status=status.HTTP_201_CREATED,content_type='application/json')
+        # You can return additional information in the response if needed
+        return Response({'message': 'File uploaded successfully', 'file_path': file_path}, status=status.HTTP_201_CREATED,content_type='application/json')
+    
