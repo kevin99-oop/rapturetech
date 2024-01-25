@@ -1,6 +1,6 @@
 FROM docker.io/python:3.11.7-alpine
 
-WORKDIR /
+WORKDIR /app
 
 # Create a non-root user
 RUN adduser -D myuser
@@ -11,8 +11,8 @@ COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code
-COPY . /
-
+COPY . /app 
+WORKDIR /app
 EXPOSE 8000
 
 # Set environment variable if needed
