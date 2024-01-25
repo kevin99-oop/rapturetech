@@ -507,23 +507,24 @@ class TextFileUploadView(APIView):
 
         # Validate st_id and file
         if not st_id or not file:
-            return Response({'error': 'Invalid st_id or file'}, status=status.HTTP_400_BAD_REQUEST)
+            error_message = {'error': 'Invalid st_id or file'}
+            return Response(error_message, status=status.HTTP_400_BAD_REQUEST)
 
-        # Create a TextFile instance
-        text_file = TextFile(user=user, st_id=st_id, file=file)
-        text_file.save()
+        try:
+            # Create a TextFile instance
+            text_file = TextFile(user=user, st_id=st_id, file=file)
+            text_file.save()
 
-        # Read the file content
-        file_content = file.read()
+            # Serialize the response
+            serializer = TextFileSerializer(text_file)
+            response_data = {
+                'file_data': serializer.data,
+                'message': 'File uploaded successfully'
+            }
 
-        # You may want to close the file after reading
-        file.close()
+            return Response(response_data, status=status.HTTP_201_CREATED, content_type='application/json')
 
-        # Serialize the response
-        serializer = TextFileSerializer(text_file)
-        response_data = {
-            'file_data': serializer.data,
-            'file_content': file_content.decode()  # Decode bytes to string if needed
-        }
+        except Exception as e:
+            error_message = {'error': f'An error occurred: {str(e)}'}
+            return Response(error_message, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response(response_data, status=status.HTTP_200_OK, content_type='application/json')
