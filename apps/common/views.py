@@ -500,7 +500,7 @@ class TextFileUploadView(APIView):
 
             # Validate st_id and file
             if not st_id or not file:
-                return Response({'error': 'Invalid st_id or file'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'Invalid st_id or file'}, status=status.HTTP_400_BAD_REQUEST,content_type='application/json')
 
             # Create a TextFile instance
             serializer = TextFileSerializer(data={'user': user, 'st_id': st_id, 'file': file})
@@ -508,10 +508,10 @@ class TextFileUploadView(APIView):
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers,content_type='application/json')
         except Exception as e:
             # Handle other exceptions
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR,content_type='application/json')
     
     def save(self, *args, **kwargs):
         # Replace None values with "null"
@@ -533,7 +533,7 @@ class TextFileUploadView(APIView):
 
         # Validate st_id and file
         if not st_id or not file:
-            return Response({'error': 'Invalid st_id or file'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Invalid st_id or file'}, status=status.HTTP_400_BAD_REQUEST,content_type='application/json')
 
         # Save data to the database (you need to define your TextFile model)
         # Example assumes you have a TextFile model with user, st_id, and file fields
@@ -543,4 +543,4 @@ class TextFileUploadView(APIView):
         # Your logic to save the data in the database goes here
 
         # Optionally, you can send a response back
-        return Response({'message': 'File uploaded successfully.'}, status=status.HTTP_201_CREATED)
+        return Response({'message': 'File uploaded successfully.'}, status=status.HTTP_201_CREATED,content_type='application/json')
