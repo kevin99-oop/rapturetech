@@ -478,7 +478,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
-from .models import TextFile
+from apps.common.models import TextFile
 from apps.common.serializers import TextFileSerializer
 import logging
 
@@ -489,7 +489,6 @@ from rest_framework import status
 
 # Configure the logger
 logger = logging.getLogger(__name__)
-
 class TextFileUploadView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser]
@@ -563,12 +562,18 @@ class TextFileUploadView(APIView):
                 for chunk in uploaded_file.chunks():
                     file.write(chunk)
 
+            # Create a TextFile instance
+            serializer = TextFileSerializer(data={'user': request.user, 'st_id': request.data.get('st_id'), 'file': file_path})
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+
             # You can return additional information in the response if needed
-            return Response({'message': 'File uploaded successfully', 'file_path': file_path}, status=status.HTTP_201_CREATED)
+            return Response({'message': 'File uploaded successfully', 'file_path': file_path}, status=status.HTTP_201_CREATED, headers=headers)
 
         except Exception as e:
             # Log the exception
             logger.exception("An error occurred: %s", str(e))
-            
+
             # Handle other exceptions
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
