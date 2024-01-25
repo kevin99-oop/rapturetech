@@ -472,8 +472,8 @@ def customer_list(request):
     return render(request, 'common/customer_list.html')
 # views.py
 # views.py
+from django.http import JsonResponse
 from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import status
 from .models import TextFile
 from .serializers import TextFileSerializer
@@ -492,5 +492,10 @@ class TextFileConfigView(APIView):
         serializer = TextFileSerializer(data=text_file_data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            response_data = {'message': 'TextFile created successfully'}
+
+            # Return the JSON response with a status code of 200
+            return JsonResponse(response_data, status=status.HTTP_200_OK)
+
+        # If validation fails, return an error response with a status code of 400
+        return JsonResponse({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
