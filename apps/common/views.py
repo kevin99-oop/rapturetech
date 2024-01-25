@@ -242,10 +242,6 @@ def active_dpu(request):
     active_dpu_list = DPU.objects.filter(user=request.user)
     return render(request, 'common/active_dpu.html', {'active_dpu_list': active_dpu_list})
 
-def custom_logout(request):
-    logout(request)
-    # Additional logout logic if needed
-    return redirect('home')  # Redirect to the home page or another URL
 
 class DRECViewSet(viewsets.ModelViewSet):
     queryset = DREC.objects.all()
@@ -300,14 +296,7 @@ def dpudetails(request, dpuid):
     }
 
     return render(request, 'common/dpudetails.html', context)
-class CacheControlMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
 
-    def __call__(self, request):
-        response = self.get_response(request)
-        response['Cache-Control'] = 'max-age=86400'  # Cache for one day
-        return response
 # views.py
 
 def edit_dpu(request, st_id):
@@ -483,24 +472,56 @@ def customer_list(request):
     return render(request, 'common/customer_list.html')
 # views.py
 # views.py
-# apps/common/views.py
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser
+from rest_framework.permissions import IsAuthenticated
 from .models import TextFile
 from .serializers import TextFileSerializer
 
 class TextFileUploadView(APIView):
-    def post(self, request, *args, **kwargs):
-        user = request.user
-        st_id = request.data.get('st_id')
-        file = request.data.get('file')
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser]
 
-        if not st_id or not file:
-            return Response({'error': 'Invalid st_id or file'}, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        # You can customize the save process here before calling the super method
+        instance = serializer.save()
 
-        text_file = TextFile(user=user, st_id=st_id, file=file)
-        text_file.save()
+        # Additional logic, if needed
+        # For example, you can perform some actions based on the created instance
 
-        serializer = TextFileSerializer(text_file)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def create(self, request, *args, **kwargs):
+        try:
+            user = request.user
+            st_id = request.data.get('st_id')
+            file = request.data.get('file')
+
+            # Validate st_id and file
+            if not st_id or not file:
+                return Response({'error': 'Invalid st_id or file'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Create a TextFile instance
+            serializer = TextFileSerializer(data={'user': user, 'st_id': st_id, 'file': file})
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        except Exception as e:
+            # Handle other exceptions
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def save(self, *args, **kwargs):
+        # Replace None values with "null"
+        for field in self._meta.fields:
+            value = getattr(self, field.name)
+            if value is None:
+                setattr(self, field.name, "null")
+
+        # Assuming dpuid is a ForeignKey to DPU model
+        if self.dpuid:
+            self.dpuid = self.dpuid.st_id
+
+        super().save(*args, **kwargs)
