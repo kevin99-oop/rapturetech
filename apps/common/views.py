@@ -511,7 +511,7 @@ class TextFileUploadView(APIView):
             if not st_id or not file:
                 error_msg = 'Invalid st_id or file'
                 logger.warning(error_msg)  # Adjust log level if needed
-                return Response({'error': error_msg}, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
+                return Response({'error': error_msg}, status=status.HTTP_400_BAD_REQUEST)
 
             # Create a TextFile instance
             serializer = TextFileSerializer(data={'user': user, 'st_id': st_id, 'file': file})
@@ -519,18 +519,18 @@ class TextFileUploadView(APIView):
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers, content_type='application/json')
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
         except ValueError as ve:
             # Log the exception
             logger.warning("ValueError occurred: %s", str(ve))
-            return Response({"error": str(ve)}, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
+            return Response({"error": str(ve)}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             # Log the exception
             logger.exception("An error occurred: %s", str(e))
             # Handle other exceptions
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR, content_type='application/json')
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def save(self, *args, **kwargs):
         # Replace None values with "null"
@@ -551,7 +551,7 @@ class TextFileUploadView(APIView):
             if 'file' not in request.data:
                 error_msg = 'File not provided'
                 logger.error(error_msg)
-                return Response({'error': error_msg}, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
+                return Response({'error': error_msg}, status=status.HTTP_400_BAD_REQUEST)
 
             # Access the uploaded file using request.data['file']
             uploaded_file = request.data['file']
@@ -564,11 +564,11 @@ class TextFileUploadView(APIView):
                     file.write(chunk)
 
             # You can return additional information in the response if needed
-            return Response({'message': 'File uploaded successfully', 'file_path': file_path}, status=status.HTTP_201_CREATED, content_type='application/json')
+            return Response({'message': 'File uploaded successfully', 'file_path': file_path}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             # Log the exception
             logger.exception("An error occurred: %s", str(e))
             
             # Handle other exceptions
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR, content_type='application/json')
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
