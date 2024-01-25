@@ -477,7 +477,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from apps.common.models import TextFile
-from .serializers import TextFileSerializer
+from apps.common.serializers import TextFileSerializer
 
 class TextFileConfigView(APIView):
     def post(self, request, format=None):
@@ -499,9 +499,9 @@ class TextFileConfigView(APIView):
             text_file = serializer.save()
 
             # Store the text content in a text file
-            file_path = os.path.join('path/to/your/directory', text_file.text_field_name)
+            file_path = os.path.join('/media/', text_file.text_field_name)
             with open(file_path, 'w') as text_file:
                 text_file.write(text_data)
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
+        return JsonResponse({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
