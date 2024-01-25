@@ -472,22 +472,32 @@ def customer_list(request):
     return render(request, 'common/customer_list.html')
 # views.py
 # views.py
-from django.http import JsonResponse
 from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
-from .models import TextFile
-from .serializers import TextFileSerializer
+from .serializers import TextFileSerializer  # Make sure to import your TextFileSerializer
 
 class TextFileConfigView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
     def post(self, request, format=None):
-        print(request.auth)  # Print authentication information
+        # Perform authentication check here
+        if not request.auth:
+            return Response({"detail": "Authentication credentials were not provided."}, status=status.HTTP_401_UNAUTHORIZED)
+
         serializer = TextFileSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            # You can customize the save process here before calling the super method
+            instance = serializer.save()
+
+            # Additional logic, if needed
+            # For example, you can perform some actions based on the created instance
+
+            response_data = {"message": "Text file saved successfully."}
+            return Response(response_data, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    
+
+
+
+
