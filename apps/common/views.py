@@ -477,8 +477,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from apps.common.models import TextFile
-from apps.common.serializers import TextFileSerializer
+from .models import TextFile
+from .serializers import TextFileSerializer
 
 class TextFileUploadView(APIView):
     permission_classes = [IsAuthenticated]
