@@ -75,7 +75,10 @@ class UploadCSVForm(forms.ModelForm):
         # Perform any additional validation for the CSV file if needed
 
         return csv_file
-    
+class CustomerForm(forms.ModelForm):
+    class Meta:
+        model = Customer
+        fields = ['st_id', 'csv_file']  # Add 'date_uploaded'
 
 class TextFileForm(forms.ModelForm):
     class Meta:

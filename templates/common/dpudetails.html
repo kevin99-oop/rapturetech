@@ -162,9 +162,14 @@
                 <div class="table-title border rounded">
                     <div class="row">
                         <div class="col-sm-6">
-                            <h5 class="text-white mt-2">{{ dpu.user.username }}'s DPU - {{ dpu.dpu_id }}</h5>
+                            <h5 class="text-white mt-2">{{ dpu.user.username }}'s DPU - {{ dpu.st_id }}</h5>
                         </div>
-
+                        <div class="col-md-6">
+                        <form method="post" action="{% url 'download_latest_csv' st_id=dpu.st_id %}">
+                            {% csrf_token %}
+                            <input type="submit" class="btn btn-success" value="Download Latest Customer .CSV file">
+                          </form>  
+                        </div>    
                     </div>
                 </div>
 
@@ -212,18 +217,7 @@
 
             </div>
         </div>
-        <form method="post" action="{% url 'download_latest_csv' %}">
-            {% csrf_token %}
-            <label for="st_id">Enter st_id:</label>
-            <input type="text" name="st_id" id="st_id" required>
-            <button type="submit">Download Latest CSV</button>
-        </form>
-
-
-
     </div>
-
-    <!-- /.container-fluid -->
 </div>
 
 {% endblock content %}

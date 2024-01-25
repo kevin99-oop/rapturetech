@@ -374,23 +374,22 @@ def upload_customer_csv(request):
         form = UploadCSVForm()
 
     return render(request, 'common/upload_customer_csv.html', {'form': form})
-def download_latest_csv(request):
-    if request.method == 'POST':
-        st_id = request.POST.get('st_id')
-        if st_id:
-            # Get the latest Customer record for the logged-in user and the provided st_id
-            latest_customer = get_object_or_404(Customer, user=request.user, st_id=st_id)
 
-            # Open the CSV file and create an HttpResponse with the file content
-            with open(latest_customer.csv_file.path, 'rb') as csv_file:
-                response = HttpResponse(csv_file.read(), content_type='text/csv')
-                response['Content-Disposition'] = f'attachment; filename="{latest_customer.csv_file.name}"'
-                return response
+
+from django.shortcuts import render
+
+def download_latest_csv(request, st_id):
+    # Get the latest Customer record for the logged-in user and the provided st_id
+    latest_customer = get_object_or_404(Customer.objects.filter(user=request.user, st_id=st_id).order_by('-date_uploaded')[:1])
+
+    # Open the CSV file and create an HttpResponse with the file content
+    with open(latest_customer.csv_file.path, 'rb') as csv_file:
+        response = HttpResponse(csv_file.read(), content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{latest_customer.csv_file.name}"'
+        return response
 
     # If there's an issue with the form submission or no st_id is provided, render the form
-    return render(request, 'common/dpudetails.html')
-
-
+    return render(request, 'common/dpudetails.html', {'st_id': st_id})
 
 import csv
 import logging

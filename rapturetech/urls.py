@@ -60,7 +60,7 @@ urlpatterns = [
     path('edit_dpu/<str:st_id>/', edit_dpu, name='edit_dpu'),
     #Customer Upload/download/add
     path('upload_customer_csv/', upload_customer_csv, name='upload_customer_csv'),
-    path('download_latest_csv/', download_latest_csv, name='download_latest_csv'),
+    path('download_latest_csv/<str:st_id>/', download_latest_csv, name='download_latest_csv'),
     path('api/cidrange/', get_cid_range, name='get_cid_range'),
     path('api/cust_info/', get_cust_info, name='get_cust_info'),
     path('customer_list/', customer_list, name='customer_list'),

@@ -1,8 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-{% load static %}
-
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -19,11 +17,10 @@
     <link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
 
     <!-- Font Awesome Icons -->
-    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
     <link href="{% static 'assets/css/nucleo-svg.css'%}" rel="stylesheet" />
     <!-- CSS Files -->
     <link id="pagestyle" href="{% static 'assets/css/argon-dashboard.css' %}" rel="stylesheet" />
-    <script type="text/javascript"       src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.0/jquery.min.js"></script>
+   
 
 </head>
 
@@ -52,6 +49,7 @@
                         <span class="nav-link-text ms-1">Dashboard</span>
                     </a>
                 </li>
+                
                 <li class="nav-item">
                     <a class="nav-link " href="{% url 'shift_report' %}">
                         <div
@@ -219,8 +217,13 @@
     </script>
     <!-- Github buttons -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
     <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
     <script src="{% static 'assets/js/argon-dashboard.min.js?v=2.0.4'%}"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.0/jquery.min.js"></script>
+    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+    
 </body>
 
 </html>
