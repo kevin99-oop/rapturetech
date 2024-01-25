@@ -472,40 +472,45 @@ def customer_list(request):
     return render(request, 'common/customer_list.html')
 # views.py
 # views.py
-from rest_framework.parsers import MultiPartParser
-from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .models import TextFile
-from .serializers import TextFileSerializer
+from apps.common.serializers import TextFileSerializer
+import logging
+
+# Configure the logger
+logger = logging.getLogger(__name__)
 
 class TextFileUploadView(APIView):
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser]
 
     def post(self, request, *args, **kwargs):
         try:
-            # Check if the 'file' key is present in the request data
-            if 'file' not in request.data:
-                return Response({'error': 'File not provided'}, status=status.HTTP_400_BAD_REQUEST)
+            user = request.user
+            st_id = request.data.get('st_id')
+            text_data = request.data.get('text_data')  # Assuming your text data is passed with the key 'text_data'
 
-            # Access the uploaded file using request.data['file']
-            uploaded_file = request.data['file']
+            # Validate st_id and text_data
+            if not st_id or not text_data:
+                error_msg = 'Invalid st_id or text_data'
+                logger.warning(error_msg)
+                return Response({'error': error_msg}, status=status.HTTP_400_BAD_REQUEST)
 
             # Create a TextFile instance
-            user = request.user
-            st_id = request.data.get('st_id', '')
-            text_file = TextFile(user=user, st_id=st_id, file=uploaded_file)
+            text_file = TextFile(user=user, st_id=st_id, text_data=text_data)
             text_file.save()
 
-            # You can return additional information in the response if needed
-            serializer = TextFileSerializer(text_file)
-            return Response({'message': 'File uploaded and TextFile created successfully', 'data': serializer.data}, status=status.HTTP_201_CREATED)
+            return Response({'message': 'Text data uploaded successfully'}, status=status.HTTP_201_CREATED)
+
+        except ValueError as ve:
+            # Log the exception
+            logger.warning("ValueError occurred: %s", str(ve))
+            return Response({"error": str(ve)}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
-            # Log the exception if needed
-            print(f"An error occurred: {str(e)}")
-            
+            # Log the exception
+            logger.exception("An error occurred: %s", str(e))
             # Handle other exceptions
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
