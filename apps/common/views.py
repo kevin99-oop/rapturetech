@@ -480,14 +480,14 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from .models import TextFile
 from .serializers import TextFileSerializer
-from rest_framework.parsers import FileUploadParser, MultiPartParser, TextParser
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
 class TextFileUploadView(APIView):
     permission_classes = [IsAuthenticated]
-    parser_classes = [FileUploadParser, MultiPartParser, TextParser]
+    parser_classes = [MultiPartParser]
 
     def post(self, request, *args, **kwargs):
         try:
@@ -495,16 +495,29 @@ class TextFileUploadView(APIView):
             st_id = request.data.get('st_id')
             file = request.data.get('file')
 
-            # Validate st_id and file
-            if not st_id or not file:
-                return Response({'error': 'Invalid st_id or file'}, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
+            # Check if the 'file' key is present in the request data
+            if not file:
+                return Response({'error': 'File not provided'}, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
+
+            # Validate st_id
+            if not st_id:
+                return Response({'error': 'Invalid st_id'}, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
+
+            # Perform actions with the file (save to storage, process, etc.)
+            # Example: Save the file to media root
+            file_path = 'media/' + file.name
+            with open(file_path, 'wb') as destination:
+                for chunk in file.chunks():
+                    destination.write(chunk)
 
             # Create a TextFile instance
-            serializer = TextFileSerializer(data={'user': user, 'st_id': st_id, 'file': file})
+            serializer = TextFileSerializer(data={'user': user, 'st_id': st_id, 'file': file_path})
             serializer.is_valid(raise_exception=True)
             serializer.save()
 
-            return Response({'message': 'File uploaded successfully'}, status=status.HTTP_201_CREATED, content_type='application/json')
+            # You can return additional information in the response if needed
+            return Response({'message': 'File uploaded successfully', 'file_path': file_path}, status=status.HTTP_201_CREATED, content_type='application/json')
+
         except Exception as e:
             # Handle other exceptions
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR, content_type='application/json')
