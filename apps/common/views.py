@@ -12,29 +12,21 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.models import User
-from apps.userprofile.models import Profile
 from rest_framework.decorators import api_view
 from rest_framework.response import Response 
-from rest_framework.authtoken.serializers import AuthTokenSerializer
-from django.contrib.auth import logout
 from django.shortcuts import redirect
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from apps.common.serializers import UserSerializer, LoginSerializer
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework import permissions, authentication
+
 import datetime
 from django.utils import timezone
 from django.shortcuts import render, get_object_or_404
 from apps.common.forms import DPUForm
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import serializers
+
 from django.contrib.auth.password_validation import validate_password
-from django.core.exceptions import ValidationError
-from django.contrib.auth import get_user_model
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.decorators import login_required
 from .models import DPU
@@ -53,7 +45,6 @@ from rest_framework.authtoken.models import Token
 from rest_framework import viewsets
 from apps.common.models import DREC
 from apps.common.serializers import DRECSerializer
-from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -74,7 +65,6 @@ import logging
 from django.http import JsonResponse
 from django.shortcuts import get_list_or_404
 from apps.common.models import Customer
-from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import UploadCSVForm
@@ -85,7 +75,6 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from apps.common.forms import UploadCSVForm
 from apps.common.models import Customer
-from io import TextIOWrapper
 import csv
 
 
@@ -470,6 +459,3 @@ def get_cust_info(request):
         return JsonResponse({'error': f'Internal Server Error'}, status=500)
 def customer_list(request):
     return render(request, 'common/customer_list.html')
-# views.py
-
-# common/views.py
