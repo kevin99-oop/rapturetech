@@ -4,15 +4,15 @@
 # We Use an official Python runtime as a parent image
 FROM docker.io/python:3.11.7-alpine
 
-WORKDIR /app
+WORKDIR /
 
 # Allows docker to cache installed dependencies between builds
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 RUN ls -l
 # Mounts the application code to the image
-COPY . /app
-WORKDIR /app
+COPY . /
+WORKDIR /
 
 EXPOSE 8000
 
