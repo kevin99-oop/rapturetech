@@ -472,21 +472,36 @@ def customer_list(request):
     return render(request, 'common/customer_list.html')
 # views.py
 # views.py
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .serializers import TextFileSerializer
-from apps.common.models import TextFile  # Replace YourModel with the actual model you want to use
-
+import os
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
+from apps.common.models import TextFile
 from .serializers import TextFileSerializer
 
 class TextFileConfigView(APIView):
     def post(self, request, format=None):
-        serializer = TextFileSerializer(data=request.data)
+        # Extract relevant data from the request
+        user = request.data.get('user')  # Adjust based on your payload structure
+        st_id = request.data.get('st_id')  # Adjust based on your payload structure
+        text_data = request.data.get('text_data')  # Adjust based on your payload structure
+
+        # Create a TextFile instance with the extracted data
+        text_file_data = {
+            'user': user,
+            'st_id': st_id,
+            'text_field_name': f"{user}_{st_id}.txt",  # Create a unique filename
+        }
+
+        # Serialize and save the TextFile instance
+        serializer = TextFileSerializer(data=text_file_data)
         if serializer.is_valid():
-            serializer.save()
+            text_file = serializer.save()
+
+            # Store the text content in a text file
+            file_path = os.path.join('path/to/your/directory', text_file.text_field_name)
+            with open(file_path, 'w') as text_file:
+                text_file.write(text_data)
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST,content_type='application/json')
+        return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
