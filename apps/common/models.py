@@ -70,15 +70,3 @@ class Customer(models.Model):
     st_id = models.CharField(max_length=50)
     csv_file = models.FileField(upload_to='csv_files/')
     date_uploaded = models.DateTimeField(auto_now_add=True)
-
-
-
-class Config(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    authorization_text = models.TextField()
-    st_id = models.CharField(max_length=50)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Config for {self.user.username} - {self.st_id}"
-# Your existing models (DPU, DREC, Customer) remain unchanged.
