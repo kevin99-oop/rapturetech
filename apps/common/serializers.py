@@ -56,4 +56,4 @@ class CustomerSerializer(serializers.ModelSerializer):
 class TextFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = TextFile
-        fields = ['user', 'st_id', 'file', 'upload_date']
+        fields = ['user', 'st_id', 'text_data', 'upload_date']

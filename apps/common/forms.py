@@ -80,7 +80,3 @@ class CustomerForm(forms.ModelForm):
         model = Customer
         fields = ['st_id', 'csv_file']  # Add 'date_uploaded'
 
-class TextFileForm(forms.ModelForm):
-    class Meta:
-        model = TextFile
-        fields = ['st_id', 'file']
