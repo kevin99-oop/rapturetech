@@ -485,27 +485,9 @@ class TextFileConfigView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, format=None):
-        # Extract the text from the request data
-        text_data = request.data.get('text_data')  # Adjust based on your payload structure
-
-        # Get the authenticated user
-        user = request.user
-
-        # Create a TextFile instance with the extracted text and user
-        text_file_data = {
-            'user': user.id,
-            'text_field_name': text_data,
-        }
-
-        # Serialize and save the TextFile instance
-        serializer = TextFileSerializer(data=text_file_data)
+        print(request.auth)  # Print authentication information
+        serializer = TextFileSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            response_data = {'message': 'TextFile created successfully'}
-
-            # Return the JSON response with a status code of 200
-            return JsonResponse(response_data, status=status.HTTP_200_OK)
-
-        # If validation fails, return an error response with a status code of 400
-        return JsonResponse({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
