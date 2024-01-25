@@ -479,45 +479,92 @@ from rest_framework import status
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from .models import TextFile
-from .serializers import TextFileSerializer
+from apps.common.serializers import TextFileSerializer
+import logging
+
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
+# Configure the logger
+logger = logging.getLogger(__name__)
+
 class TextFileUploadView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser]
 
-    def post(self, request, *args, **kwargs):
+    def perform_create(self, serializer):
+        # You can customize the save process here before calling the super method
+        instance = serializer.save()
+
+        # Additional logic, if needed
+        # For example, you can perform some actions based on the created instance
+
+    def create(self, request, *args, **kwargs):
         try:
             user = request.user
             st_id = request.data.get('st_id')
             file = request.data.get('file')
 
-            # Check if the 'file' key is present in the request data
-            if not file:
-                return Response({'error': 'File not provided'}, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
+            # Validate st_id and file
+            if not st_id or not file:
+                error_msg = 'Invalid st_id or file'
+                logger.error(error_msg)
+                return Response({'error': error_msg}, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
 
-            # Validate st_id
-            if not st_id:
-                return Response({'error': 'Invalid st_id'}, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
+            # Create a TextFile instance
+            serializer = TextFileSerializer(data={'user': user, 'st_id': st_id, 'file': file})
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers, content_type='application/json')
+
+        except Exception as e:
+            # Log the exception
+            logger.exception("An error occurred: %s", str(e))
+            
+            # Handle other exceptions
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR, content_type='application/json')
+
+    def save(self, *args, **kwargs):
+        # Replace None values with "null"
+        for field in self._meta.fields:
+            value = getattr(self, field.name)
+            if value is None:
+                setattr(self, field.name, "null")
+
+        # Assuming dpuid is a ForeignKey to DPU model
+        if self.dpuid:
+            self.dpuid = self.dpuid.st_id
+
+        super().save(*args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        try:
+            # Check if the 'file' key is present in the request data
+            if 'file' not in request.data:
+                error_msg = 'File not provided'
+                logger.error(error_msg)
+                return Response({'error': error_msg}, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
+
+            # Access the uploaded file using request.data['file']
+            uploaded_file = request.data['file']
 
             # Perform actions with the file (save to storage, process, etc.)
             # Example: Save the file to media root
-            file_path = 'media/' + file.name
-            with open(file_path, 'wb') as destination:
-                for chunk in file.chunks():
-                    destination.write(chunk)
-
-            # Create a TextFile instance
-            serializer = TextFileSerializer(data={'user': user, 'st_id': st_id, 'file': file_path})
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+            file_path = 'media/' + uploaded_file.name
+            with open(file_path, 'wb') as file:
+                for chunk in uploaded_file.chunks():
+                    file.write(chunk)
 
             # You can return additional information in the response if needed
             return Response({'message': 'File uploaded successfully', 'file_path': file_path}, status=status.HTTP_201_CREATED, content_type='application/json')
 
         except Exception as e:
+            # Log the exception
+            logger.exception("An error occurred: %s", str(e))
+            
             # Handle other exceptions
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR, content_type='application/json')
