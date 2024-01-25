@@ -510,7 +510,7 @@ class TextFileUploadView(APIView):
             # Validate st_id and file
             if not st_id or not file:
                 error_msg = 'Invalid st_id or file'
-                logger.error(error_msg)
+                logger.warning(error_msg)  # Adjust log level if needed
                 return Response({'error': error_msg}, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
 
             # Create a TextFile instance
@@ -521,10 +521,14 @@ class TextFileUploadView(APIView):
 
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers, content_type='application/json')
 
+        except ValueError as ve:
+            # Log the exception
+            logger.warning("ValueError occurred: %s", str(ve))
+            return Response({"error": str(ve)}, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
+
         except Exception as e:
             # Log the exception
             logger.exception("An error occurred: %s", str(e))
-            
             # Handle other exceptions
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR, content_type='application/json')
 
