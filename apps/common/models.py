@@ -76,7 +76,6 @@ class Customer(models.Model):
 class Config(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text_data = models.TextField()
-    user_authorization = models.CharField(max_length=255)
     st_id = models.CharField(max_length=50)
 
     def __str__(self):

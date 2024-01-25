@@ -23,6 +23,6 @@ class CustomerAdmin(admin.ModelAdmin):
 from .models import Config
 
 class ConfigAdmin(admin.ModelAdmin):
-    list_display = ['user', 'text_data', 'user_authorization', 'st_id']
+    list_display = ['user', 'text_data', 'st_id']
 
 admin.site.register(Config, ConfigAdmin)

@@ -485,23 +485,20 @@ class ConfigAPIView(APIView):
         text_data = request.data.get('text_data', '')
 
         # Access user Authorization
-        user_authorization = request.auth.key if request.auth else None
 
         # Access st_id from the authenticated user
-        st_id = request.user.profile.st_id  # Assuming you have a user profile with st_id
+        st_id = request.user.st_id  # Assuming you have a user profile with st_id
 
         # Save configuration data to the Config model
         config_data = Config.objects.create(
             user=request.user,
             text_data=text_data,
-            user_authorization=user_authorization,
             st_id=st_id,
         )
 
         # Return a response
         return Response({
             'text_data': text_data,
-            'user_authorization': user_authorization,
             'st_id': st_id,
             'config_id': config_data.id  # Optionally return the ID of the saved Config instance
         })
