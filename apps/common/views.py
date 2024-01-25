@@ -485,7 +485,6 @@ def customer_list(request):
 # views.py
 
 # views.py
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -494,9 +493,14 @@ from apps.common.models import TextFile
 from apps.common.serializers import TextFileSerializer
 
 class TextFileUploadView(APIView):
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
+        # Check if the user is authenticated
+        if not request.user.is_authenticated:
+            return Response({'detail': 'Authentication credentials were not provided.'}, 
+                            status=status.HTTP_403_FORBIDDEN)
+
         user = request.user
         st_id = request.data.get('st_id')
         file = request.data.get('file')
@@ -509,6 +513,17 @@ class TextFileUploadView(APIView):
         text_file = TextFile(user=user, st_id=st_id, file=file)
         text_file.save()
 
+        # Read the file content
+        file_content = file.read()
+
+        # You may want to close the file after reading
+        file.close()
+
         # Serialize the response
         serializer = TextFileSerializer(text_file)
-        return Response(serializer.data,status=status.HTTP_200_OK, content_type='application/json')
+        response_data = {
+            'file_data': serializer.data,
+            'file_content': file_content.decode()  # Decode bytes to string if needed
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK, content_type='application/json')
