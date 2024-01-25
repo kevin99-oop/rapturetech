@@ -511,4 +511,4 @@ class TextFileUploadView(APIView):
 
         # Serialize the response
         serializer = TextFileSerializer(text_file)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data,status=status.HTTP_200_OK, content_type='application/json')
