@@ -480,23 +480,16 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from .models import TextFile
 from .serializers import TextFileSerializer
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import FileUploadParser, MultiPartParser, TextParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
 class TextFileUploadView(APIView):
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser]
+    parser_classes = [FileUploadParser, MultiPartParser, TextParser]
 
-    def perform_create(self, serializer):
-        # You can customize the save process here before calling the super method
-        instance = serializer.save()
-
-        # Additional logic, if needed
-        # For example, you can perform some actions based on the created instance
-
-    def create(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         try:
             user = request.user
             st_id = request.data.get('st_id')
@@ -509,41 +502,9 @@ class TextFileUploadView(APIView):
             # Create a TextFile instance
             serializer = TextFileSerializer(data={'user': user, 'st_id': st_id, 'file': file})
             serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
+            serializer.save()
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers, content_type='application/json')
+            return Response({'message': 'File uploaded successfully'}, status=status.HTTP_201_CREATED, content_type='application/json')
         except Exception as e:
             # Handle other exceptions
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR, content_type='application/json')
-
-    def save(self, *args, **kwargs):
-        # Replace None values with "null"
-        for field in self._meta.fields:
-            value = getattr(self, field.name)
-            if value is None:
-                setattr(self, field.name, "null")
-
-        # Assuming dpuid is a ForeignKey to DPU model
-        if self.dpuid:
-            self.dpuid = self.dpuid.st_id
-
-        super().save(*args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        # Check if the 'file' key is present in the request data
-        if 'file' not in request.data:
-            return Response({'error': 'File not provided'}, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
-
-        # Access the uploaded file using request.data['file']
-        uploaded_file = request.data['file']
-
-        # Perform actions with the file (save to storage, process, etc.)
-        # Example: Save the file to media root
-        file_path = 'media/' + uploaded_file.name
-        with open(file_path, 'wb') as file:
-            for chunk in uploaded_file.chunks():
-                file.write(chunk)
-
-        # You can return additional information in the response if needed
-        return Response({'message': 'File uploaded successfully', 'file_path': file_path}, status=status.HTTP_201_CREATED, content_type='application/json')
