@@ -463,29 +463,25 @@ def customer_list(request):
 
 # views.py
 # views.py
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
 from .models import Config
-from .serializers import ConfigSerializer
 
 @csrf_exempt
-@api_view(['POST'])
-@authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def config_api(request):
     if request.method == 'POST':
-        serializer = ConfigSerializer(data=request.data)
+        try:
+            user = request.user
+            st_id = "your_st_id"  # Replace with the actual st_id you want to use
+            text_data = request.body.decode('utf-8')  # Assuming the data is received in the request body
+            Config.objects.create(user=user, st_id=st_id, text_data=text_data)
+            return JsonResponse({"success": True, "message": "Config created successfully."})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
 
-        if serializer.is_valid():
-            # Save the valid data to the Config model
-            serializer.save(user=request.user)
-            return JsonResponse({'success': True})
-        else:
-            return JsonResponse({'error': 'Invalid data', 'details': serializer.errors}, status=400)
-    else:
-        return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
-
+    return JsonResponse({"success": False, "message": "Invalid request method."})
 
