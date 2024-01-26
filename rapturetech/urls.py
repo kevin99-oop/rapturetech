@@ -6,7 +6,7 @@ from apps.common.views import (
     HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView,
     ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,
     DRECViewSet, NtpDatetimeView, dpudetails, edit_dpu,upload_customer_csv,download_latest_csv,
-    get_cid_range,get_cust_info,customer_list,ConfigAPIView
+    get_cid_range,get_cust_info,customer_list,config_view
 )
 from django.contrib.auth import views as auth_views
 from rest_framework.authtoken.views import obtain_auth_token
@@ -65,7 +65,7 @@ urlpatterns = [
     path('api/cust_info/', get_cust_info, name='get_cust_info'),
     path('customer_list/', customer_list, name='customer_list'),
     #/config_file
-    path('api/config/', ConfigAPIView.as_view(), name='config-api'),
+    path('api/config/', config_view, name='config-api'),
 
     # Add other URLs as needed
 
