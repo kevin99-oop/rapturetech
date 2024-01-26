@@ -77,8 +77,14 @@ class Customer(models.Model):
 
 class Config(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    st_id = models.CharField(max_length=50)
     text_data = models.TextField()
 
+    def save(self, *args, **kwargs):
+        # Set the user field to the current user if available
+        user = kwargs.pop('user', None)
+        if user:
+            self.user = user
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"Config for {self.user.username}'s DPU - {self.st_id}"
+        return f"Config - {self.id}"

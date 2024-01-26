@@ -462,43 +462,24 @@ def customer_list(request):
     return render(request, 'common/customer_list.html')
 
 # views.py
+# myapp/views.py
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
 from .models import Config
 from .serializers import ConfigSerializer
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import permission_classes
-from rest_framework.permissions import IsAuthenticated
-from .models import Config
 
 @csrf_exempt
 @permission_classes([IsAuthenticated])
 def config_api(request):
     if request.method == 'POST':
         try:
-            # Assuming st_id is a constant, replace it with the actual st_id you want to use
-            st_id = "your_st_id"
-            
             text_data = request.body.decode('utf-8')  # Assuming the data is received in the request body
-            print("Received data:", text_data)
-
-            # Get the actual User instance from the request
-            user = request.user if request.user.is_authenticated else None
-            print("User:", user)
-
-            # Check if the user is authenticated before creating a Config object
-            if user is not None and user.is_authenticated:
-                # Create a new Config object with user and text_data
-                Config.objects.create(user=user, st_id=st_id, text_data=text_data)
-                return JsonResponse({"success": True, "message": "Config created successfully."})
-            else:
-                return JsonResponse({"success": False, "message": "User not authenticated."})
-
+            config_instance = Config.objects.create(text_data=text_data, user=request.user)
+            serializer = ConfigSerializer(config_instance)
+            return JsonResponse({"success": True, "message": "Config created successfully.", "data": serializer.data})
         except Exception as e:
-            print("Error:", str(e))
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method."})

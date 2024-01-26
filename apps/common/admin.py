@@ -16,10 +16,8 @@ admin.site.register(DPU)
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ('user', 'st_id', 'csv_file','date_uploaded')
+    list_display = ('user', 'st_id', 'csv_file',)
     search_fields = ('user__username', 'st_id')
 
-@admin.register(Config)
 class ConfigAdmin(admin.ModelAdmin):
-    list_display = ('user', 'st_id', 'text_data')  # Add other fields as needed
-    search_fields = ('user__username', 'st_id')  # Add other fields as
+    list_display = ('text_data')  # Add other fields as needed
