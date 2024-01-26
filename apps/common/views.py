@@ -472,7 +472,7 @@ from django.contrib.auth.models import AnonymousUser
 from rest_framework.authtoken.models import Token
 
 @csrf_exempt
-def config_api(request):
+def config_api(request,st_id):
     if request.method == 'POST':
         try:
             # Extract token from Authorization header
@@ -485,7 +485,7 @@ def config_api(request):
             except Token.DoesNotExist:
                 user = AnonymousUser()
 
-            st_id = "your_st_id"  # Replace with the actual st_id you want to use
+            st_id = st_id  # Replace with the actual st_id you want to use
 
             # Decode the text data from the request body
             text_data = request.body.decode('utf-8').strip()
