@@ -72,6 +72,10 @@ class Customer(models.Model):
     date_uploaded = models.DateTimeField(auto_now_add=True)
 
 # models.p
+# models.py
+from django.db import models
+from django.contrib.auth.models import User
+
 class Config(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text_data = models.TextField()

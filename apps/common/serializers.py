@@ -57,4 +57,4 @@ class CustomerSerializer(serializers.ModelSerializer):
 class ConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = Config
-        fields = ['text_data']  # Add more fields as needed
+        fields = '__all__'

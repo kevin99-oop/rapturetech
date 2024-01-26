@@ -462,6 +462,7 @@ def customer_list(request):
     return render(request, 'common/customer_list.html')
 
 # views.py
+# views.py
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -480,10 +481,11 @@ def config_api(request):
 
         if serializer.is_valid():
             # Save the valid data to the Config model
-            serializer.save(user=request.user, st_id="your_st_id")
+            serializer.save(user=request.user)
             return JsonResponse({'success': True})
         else:
             return JsonResponse({'error': 'Invalid data', 'details': serializer.errors}, status=400)
     else:
         return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
+
 
