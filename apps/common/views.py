@@ -461,32 +461,31 @@ def get_cust_info(request):
 def customer_list(request):
     return render(request, 'common/customer_list.html')
 
+# views.py
 
-from rest_framework.views import APIView
+from rest_framework import generics
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from apps.common.models import Config  # Import the Config model
-class ConfigAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-    def post(self, request, *args, **kwargs):
-        # Extract text data from the request
-        text_data = request.data.get('text_data', '')
+from rest_framework.decorators import api_view
+from rest_framework import status
+from .models import Customer, Config
+from .serializers import  ConfigSerializer
 
-        # Access user Authorization
+@api_view(['GET', 'POST'])
+def config_view(request):
+    user = request.user
 
-        # Access st_id from the authenticated user
-        st_id = request.user.st_id  # Assuming you have a user profile with st_id
+    try:
+        config = Config.objects.get(user=user)
+    except Config.DoesNotExist:
+        return Response({'error': 'Config record not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Save configuration data to the Config model
-        config_data = Config.objects.create(
-            user=request.user,
-            text_data=text_data,
-            st_id=st_id,
-        )
+    if request.method == 'GET':
+        serializer = ConfigSerializer(config)
+        return Response(serializer.data)
 
-        # Return a response
-        return Response({
-            'text_data': text_data,
-            'st_id': st_id,
-            'config_id': config_data.id  # Optionally return the ID of the saved Config instance
-        })
+    elif request.method == 'POST':
+        serializer = ConfigSerializer(config, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
