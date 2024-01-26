@@ -55,7 +55,6 @@ class ProfileForm(forms.ModelForm):
             'phone_number',
         ]
 
-# forms.py
 
 
 class DPUForm(forms.ModelForm):
@@ -75,6 +74,7 @@ class UploadCSVForm(forms.ModelForm):
         # Perform any additional validation for the CSV file if needed
 
         return csv_file
+    
 class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
