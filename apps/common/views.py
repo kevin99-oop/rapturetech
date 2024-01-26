@@ -462,7 +462,6 @@ def customer_list(request):
     return render(request, 'common/customer_list.html')
 
 # views.py
-# views.py
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import permission_classes
@@ -476,10 +475,14 @@ def config_api(request):
         try:
             st_id = "your_st_id"  # Replace with the actual st_id you want to use
             text_data = request.body.decode('utf-8')  # Assuming the data is received in the request body
-            print(text_data)
+
+            # Save the Config instance
             Config.objects.create(user=request.user, st_id=st_id, text_data=text_data)
+
             return JsonResponse({"success": True, "message": "Config created successfully."})
         except Exception as e:
+            print("Error:", e)
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method."})
+
