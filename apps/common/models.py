@@ -83,3 +83,12 @@ class Config(models.Model):
 
     def __str__(self):
         return f"Config for {self.user.username} - {self.st_id}"
+
+    def save(self, *args, **kwargs):
+        # Replace None values with "null"
+        for field in self._meta.fields:
+            value = getattr(self, field.name)
+            if value is None:
+                setattr(self, field.name, "null")
+
+        super().save(*args, **kwargs)
