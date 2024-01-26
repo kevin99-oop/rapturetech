@@ -463,7 +463,6 @@ def customer_list(request):
 
 # views.py
 # views.py
-
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import permission_classes
@@ -475,13 +474,12 @@ from .models import Config
 def config_api(request):
     if request.method == 'POST':
         try:
-            user = request.user
             st_id = "your_st_id"  # Replace with the actual st_id you want to use
             text_data = request.body.decode('utf-8')  # Assuming the data is received in the request body
-            Config.objects.create(user=user, st_id=st_id, text_data=text_data)
+            print(text_data)
+            Config.objects.create(user=request.user, st_id=st_id, text_data=text_data)
             return JsonResponse({"success": True, "message": "Config created successfully."})
         except Exception as e:
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method."})
-
