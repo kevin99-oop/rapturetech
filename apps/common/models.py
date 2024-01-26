@@ -79,8 +79,9 @@ class Customer(models.Model):
 
 
 class Config(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    text_payload = models.TextField()
+    user = models.CharField(max_length=255)  # Change this field based on your user model
+    st_id = models.CharField(max_length=50, blank=True, null=True)  # Change this field based on your user model
+    text_data = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

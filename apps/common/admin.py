@@ -22,5 +22,5 @@ class CustomerAdmin(admin.ModelAdmin):
 
 @admin.register(Config)
 class ConfigAdmin(admin.ModelAdmin):
-    list_display = ('user', 'text_payload', 'timestamp')
+    list_display = ('user', 'text_data', 'timestamp','st_id')
     search_fields = ('user__username',)  # Enable searching by username

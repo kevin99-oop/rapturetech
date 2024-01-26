@@ -463,32 +463,35 @@ def customer_list(request):
 
 # views.py
 # myapp/views.py
-from rest_framework import generics
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import IsAuthenticated
-from apps.common.models import Config
-from apps.common.serializers import ConfigSerializer
+from .models import Config  # Assuming Config is the name of your model
 
-# apps/common/views.py
+@csrf_exempt
+def config_api(request):
+    dpuid = request.GET.get('dpuid', '')
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from apps.common.models import Config
-from apps.common.serializers import ConfigSerializer
-from rest_framework.permissions import IsAuthenticated
+    if request.method == 'POST':
+        try:
+            st_id = dpuid  # Replace with the actual st_id you want to use
 
-class ConfigAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+            # Decode the text data from the request body
+            text_data = request.body.decode('utf-8').strip()
+            print(f"Received text data: {text_data}")
 
-    def post(self, request, *args, **kwargs):
-        data = {
-            'user': request.user.id,
-            'text_payload': request.data.get('text_payload', '')
-        }
+            # Print information to check if request.user and st_id have correct values
+            print(f"User: {request.user}, st_id: {st_id}")
 
-        serializer = ConfigSerializer(data=data)
+            # Create a Config instance and save it to the database
+            config_instance = Config.objects.create(user=request.user, st_id=st_id, text_data=text_data)
+            print(f"Config instance created: {config_instance}")
 
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"success": True, "message": "Config created successfully."})
+        except Exception as e:
+            print(f"Error: {e}")
+            return JsonResponse({"success": False, "message": str(e)})
+
+    return JsonResponse({"success": False, "message": "Invalid request method."})
+
+
