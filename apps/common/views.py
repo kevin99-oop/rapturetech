@@ -462,35 +462,41 @@ def customer_list(request):
     return render(request, 'common/customer_list.html')
 
 # views.py
+import json
+from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Config  # Adjust the import based on your app structure
-from urllib.parse import parse_qs
-from django.contrib.auth.models import User
-from django.utils.functional import SimpleLazyObject
+from rest_framework.decorators import authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 
-# ...
+from .models import Config
+from .serializers import ConfigSerializer
 
 @csrf_exempt
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def config_api(request):
     if request.method == 'POST':
-        raw_data = request.body.decode('utf-8')
-        parsed_data = parse_qs(raw_data)
+        # Ensure that request.user is a User instance
+        if not isinstance(request.user, User):
+            return JsonResponse({'error': 'Invalid user'}, status=400)
 
-        soc = parsed_data.get('SOC', [''])[0]
-        dt = parsed_data.get('DT', [''])[0]
-        dpu_type = parsed_data.get('DPUTYPE', [''])[0]
-        rate_table = parsed_data.get('RATE TABLE', [''])[0]
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
 
-        # Convert SimpleLazyObject to User instance
-        user = request.user
-        if isinstance(user, SimpleLazyObject):
-            user = user._wrapped
+        soc = data.get('SOC', '')
+        dt = data.get('DT', '')
+        dpu_type = data.get('DPUTYPE', '')
+        rate_table = data.get('RATE TABLE', '')
 
         # Now you can handle these values as needed
         # Example: Save them to the Config model
-        Config.objects.create(user=user, st_id="your_st_id", text_data=f"SOC: {soc}, DT: {dt}, DPUTYPE: {dpu_type}, RATE TABLE: {rate_table}")
+        Config.objects.create(user=request.user, st_id="your_st_id", text_data=f"SOC: {soc}, DT: {dt}, DPUTYPE: {dpu_type}, RATE TABLE: {rate_table}")
 
         return JsonResponse({'success': True})
     else:
         return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
+
