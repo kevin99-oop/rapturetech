@@ -470,9 +470,10 @@ from .models import Config  # Assuming Config is the name of your model
 
 from django.contrib.auth.models import AnonymousUser
 from rest_framework.authtoken.models import Token
+import json
 
 @csrf_exempt
-def config_api(request,st_id):
+def config_api(request):
     if request.method == 'POST':
         try:
             # Extract token from Authorization header
@@ -485,11 +486,17 @@ def config_api(request,st_id):
             except Token.DoesNotExist:
                 user = AnonymousUser()
 
-            st_id = st_id  # Replace with the actual st_id you want to use
-
             # Decode the text data from the request body
             text_data = request.body.decode('utf-8').strip()
             print(f"Received text data: {text_data}")
+
+            # Try to load the text_data as JSON (assuming it follows JSON-like structure)
+            try:
+                json_data = json.loads(text_data)
+                st_id = json_data.get('ST_ID', 'default_st_id')  # Replace 'default_st_id' with a default value or raise an error if not found
+            except json.JSONDecodeError:
+                # Handle the case where the text_data is not valid JSON
+                st_id = 'default_st_id'
 
             # Print information to check if user and st_id have correct values
             print(f"User: {user}, st_id: {st_id}")
