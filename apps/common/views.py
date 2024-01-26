@@ -462,30 +462,29 @@ def customer_list(request):
     return render(request, 'common/customer_list.html')
 
 # views.py
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Config  # Adjust the import based on your app structure
+from urllib.parse import parse_qs
 
-from rest_framework import generics
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from rest_framework import status
-from .models import Customer, Config
-from .serializers import  ConfigSerializer
+@csrf_exempt
+def config_api(request):
+    if request.method == 'POST':
+        raw_data = request.body.decode('utf-8')
+        parsed_data = parse_qs(raw_data)
 
-@api_view(['GET', 'POST'])
-def config_view(request):
-    user = request.user
+        # Assuming parsed_data is a dictionary with keys and lists of values
+        # You might need to extract the values based on your actual data structure
+        soc = parsed_data.get('SOC', [''])[0]
+        dt = parsed_data.get('DT', [''])[0]
+        dpu_type = parsed_data.get('DPUTYPE', [''])[0]
+        rate_table = parsed_data.get('RATE TABLE', [''])[0]
 
-    try:
-        config = Config.objects.get(user=user)
-    except Config.DoesNotExist:
-        return Response({'error': 'Config record not found'}, status=status.HTTP_404_NOT_FOUND)
+        # Now you can handle these values as needed
+        # Example: Save them to the Config model
+        Config.objects.create(user=request.user, st_id="your_st_id", text_data=f"SOC: {soc}, DT: {dt}, DPUTYPE: {dpu_type}, RATE TABLE: {rate_table}")
 
-    if request.method == 'GET':
-        serializer = ConfigSerializer(config)
-        return Response(serializer.data)
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
 
-    elif request.method == 'POST':
-        serializer = ConfigSerializer(config, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
