@@ -70,3 +70,11 @@ class Customer(models.Model):
     st_id = models.CharField(max_length=50)
     csv_file = models.FileField(upload_to='csv_files/')
     date_uploaded = models.DateTimeField(auto_now_add=True)
+
+class Config(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    text_data = models.TextField()
+    st_id = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"Config for {self.user.username} - {self.st_id}"

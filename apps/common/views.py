@@ -76,8 +76,15 @@ from django.contrib import messages
 from apps.common.forms import UploadCSVForm
 from apps.common.models import Customer
 import csv
+import logging
+from django.http import JsonResponse
+from django.shortcuts import get_list_or_404
+from .models import Customer
+from rest_framework.decorators import api_view
 
-
+from django.http import JsonResponse
+from django.shortcuts import get_list_or_404
+from .models import Customer
 
 class HomeView(TemplateView):
     template_name = 'common/index.html'
@@ -139,21 +146,24 @@ class UserRegistrationView(generics.CreateAPIView):
 class UserLoginView(APIView):
     def post(self, request, *args, **kwargs):
         try:
+            print("before if")
             # Parse request data as JSON if content type is "text/plain"
             if request.content_type == 'text/plain':
                 request_data = JSONParser().parse(request)
             else:
                 request_data = request.data
-
-            # Deserialize JSON data using your serializer
+            print(request_data)            
+                            # Deserialize JSON data using your serializer
             serializer = LoginSerializer(data=request_data)
+            print("before if")
             if serializer.is_valid():
                 username = serializer.validated_data['username']
                 password = serializer.validated_data['password']
+                print("after if",username,password)
 
                 # Add your authentication logic here (e.g., using Django's built-in authentication)
                 user = authenticate(request, username=username, password=password)
-
+                print("userauth",user)
                 if user is not None:
                     # Authentication successful, create or retrieve a token
                     token, created = Token.objects.get_or_create(user=user)
@@ -235,19 +245,19 @@ def active_dpu(request):
 class DRECViewSet(viewsets.ModelViewSet):
     queryset = DREC.objects.all()
     serializer_class = DRECSerializer
+    print("perform create before")
 
     def perform_create(self, serializer):
         # You can customize the save process here before calling the super method
         instance = serializer.save()
-
-        # Additional logic, if needed
-        # For example, you can perform some actions based on the created instance
+        print("perform create")
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
         response.status_code = 200  # Set the status code to 200
+        print("perform create",response)
         return response
-    
+        
     def save(self, *args, **kwargs):
         # Replace None values with "null"
         for field in self._meta.fields:
@@ -369,12 +379,6 @@ def download_latest_csv(request, st_id):
     # If there's an issue with the form submission or no st_id is provided, render the form
     return render(request, 'common/dpudetails.html', {'st_id': st_id})
 
-import csv
-import logging
-from django.http import JsonResponse
-from django.shortcuts import get_list_or_404
-from .models import Customer
-from rest_framework.decorators import api_view
 
 logger = logging.getLogger(__name__)
 
@@ -418,9 +422,6 @@ def get_cid_range(request):
 # views.py
 # views.py
 
-from django.http import JsonResponse
-from django.shortcuts import get_list_or_404
-from .models import Customer
 
 def get_cust_info(request):
     dpuid = request.GET.get('dpuid', '')
@@ -459,3 +460,33 @@ def get_cust_info(request):
         return JsonResponse({'error': f'Internal Server Error'}, status=500)
 def customer_list(request):
     return render(request, 'common/customer_list.html')
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from apps.common.models import Config  # Import the Config model
+class ConfigAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        # Extract text data from the request
+        text_data = request.data.get('text_data', '')
+
+        # Access user Authorization
+
+        # Access st_id from the authenticated user
+        st_id = request.user.st_id  # Assuming you have a user profile with st_id
+
+        # Save configuration data to the Config model
+        config_data = Config.objects.create(
+            user=request.user,
+            text_data=text_data,
+            st_id=st_id,
+        )
+
+        # Return a response
+        return Response({
+            'text_data': text_data,
+            'st_id': st_id,
+            'config_id': config_data.id  # Optionally return the ID of the saved Config instance
+        })

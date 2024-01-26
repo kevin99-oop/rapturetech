@@ -134,9 +134,9 @@ REST_FRAMEWORK = {
         # Add other authentication classes if needed
     ),
     'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
         'rest_framework.parsers.MultiPartParser',
-        'rest_framework.parsers.FormParser',
-    ],
+     ],
     # other settings...
 }
 
