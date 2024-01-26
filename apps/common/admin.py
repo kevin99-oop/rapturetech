@@ -19,6 +19,8 @@ class CustomerAdmin(admin.ModelAdmin):
     list_display = ('user', 'st_id', 'csv_file',)
     search_fields = ('user__username', 'st_id')
 
+
 @admin.register(Config)
 class ConfigAdmin(admin.ModelAdmin):
-    list_display = ('user', 'text_data')  # Add other fields as needed
+    list_display = ('user', 'text_payload', 'timestamp')
+    search_fields = ('user__username',)  # Enable searching by username

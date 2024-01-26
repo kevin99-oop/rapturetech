@@ -463,23 +463,14 @@ def customer_list(request):
 
 # views.py
 # myapp/views.py
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import permission_classes
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-from .models import Config
-from .serializers import ConfigSerializer
+from apps.common.models import Config
+from apps.common.serializers import ConfigSerializer
 
-@csrf_exempt
-@permission_classes([IsAuthenticated])
-def config_api(request):
-    if request.method == 'POST':
-        try:
-            text_data = request.body.decode('utf-8')  # Assuming the data is received in the request body
-            config_instance = Config.objects.create(text_data=text_data, user=request.user)
-            serializer = ConfigSerializer(config_instance)
-            return JsonResponse({"success": True, "message": "Config created successfully.", "data": serializer.data})
-        except Exception as e:
-            return JsonResponse({"success": False, "message": str(e)})
+class ConfigAPIView(generics.CreateAPIView):
+    serializer_class = ConfigSerializer
+    permission_classes = [IsAuthenticated]
 
-    return JsonResponse({"success": False, "message": "Invalid request method."})
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

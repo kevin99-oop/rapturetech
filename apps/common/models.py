@@ -75,16 +75,13 @@ class Customer(models.Model):
 # models.py
 
 
+# apps/common/models.py
+
+
 class Config(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    text_data = models.TextField()
-
-    def save(self, *args, **kwargs):
-        # Set the user field to the current user if available
-        user = kwargs.pop('user', None)
-        if user:
-            self.user = user
-        super().save(*args, **kwargs)
+    text_payload = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Config - {self.id}"
+        return f"Config for {self.user.username} - {self.timestamp}"

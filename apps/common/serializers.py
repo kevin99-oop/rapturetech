@@ -52,7 +52,6 @@ class CustomerSerializer(serializers.ModelSerializer):
         model = Customer
         fields = ['user', 'st_id', 'csv_file', 'date_uploaded']  # Add 'date_uploaded'
 
-# serializers.py
 class ConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = Config
