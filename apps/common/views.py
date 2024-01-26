@@ -468,23 +468,34 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import IsAuthenticated
 from .models import Config  # Assuming Config is the name of your model
 
+from django.contrib.auth.models import AnonymousUser
+from rest_framework.authtoken.models import Token
+
 @csrf_exempt
 def config_api(request):
-    dpuid = request.GET.get('dpuid', '')
-
     if request.method == 'POST':
         try:
-            st_id = dpuid  # Replace with the actual st_id you want to use
+            # Extract token from Authorization header
+            authorization_header = request.headers.get('Authorization', '')
+            _, token = authorization_header.split()  # Assumes a format like "Token your-token-here"
+            
+            # Get user from the token
+            try:
+                user = Token.objects.get(key=token).user
+            except Token.DoesNotExist:
+                user = AnonymousUser()
+
+            st_id = "your_st_id"  # Replace with the actual st_id you want to use
 
             # Decode the text data from the request body
             text_data = request.body.decode('utf-8').strip()
             print(f"Received text data: {text_data}")
 
-            # Print information to check if request.user and st_id have correct values
-            print(f"User: {request.user}, st_id: {st_id}")
+            # Print information to check if user and st_id have correct values
+            print(f"User: {user}, st_id: {st_id}")
 
             # Create a Config instance and save it to the database
-            config_instance = Config.objects.create(user=request.user, st_id=st_id, text_data=text_data)
+            config_instance = Config.objects.create(user=user, st_id=st_id, text_data=text_data)
             print(f"Config instance created: {config_instance}")
 
             return JsonResponse({"success": True, "message": "Config created successfully."})
@@ -493,5 +504,3 @@ def config_api(request):
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method."})
-
-
