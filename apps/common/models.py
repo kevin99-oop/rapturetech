@@ -73,22 +73,12 @@ class Customer(models.Model):
 
 # models.p
 # models.py
-from django.db import models
-from django.contrib.auth.models import User
+
 
 class Config(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    text_data = models.TextField()
     st_id = models.CharField(max_length=50)
+    text_data = models.TextField()
 
     def __str__(self):
-        return f"Config for {self.user.username} - {self.st_id}"
-
-    def save(self, *args, **kwargs):
-        # Replace None values with "null"
-        for field in self._meta.fields:
-            value = getattr(self, field.name)
-            if value is None:
-                setattr(self, field.name, "null")
-
-        super().save(*args, **kwargs)
+        return f"Config for {self.user.username}'s DPU - {self.st_id}"
