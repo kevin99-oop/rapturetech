@@ -5,7 +5,11 @@ from apps.common.models import DREC,DPU,Customer,Config
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
-import csv
+import os
+import tempfile
+from django.contrib import admin
+from django.contrib.auth.decorators import user_passes_test
+
 class DPUAdmin(admin.ModelAdmin):
     list_display = ('user', 'location', 'dpu_id', 'society', 'mobile_number', 'owner', 'status', 'Amount', 'CAmount')
 @admin.register(DREC)
@@ -22,8 +26,34 @@ class CustomerAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'st_id')
 
 
+
 @admin.register(Config)
 class ConfigAdmin(admin.ModelAdmin):
     list_display = ('user','st_id','timestamp','text_data')
-    search_fields = ('user',)  # Enable searching by username
-    
+    actions = ['download_lines']
+
+    @user_passes_test(lambda u: u.is_staff)
+    def download_lines(self, request, queryset):
+        try:
+            # Create a temporary file to store the content
+            temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w+')
+
+            # Write the text content to the temporary file
+            for config in queryset:
+                line = f"{config.st_id} {config.created_at} {config.dputype} {config.rate_table}\n"
+                temp_file.write(line)
+
+            # Move the file cursor to the beginning for reading
+            temp_file.seek(0)
+
+            # Prepare the response for file download
+            response = HttpResponse(temp_file, content_type='text/plain')
+            response['Content-Disposition'] = 'attachment; filename="config_data.txt"'
+
+            return response
+        finally:
+            # Close and delete the temporary file
+            temp_file.close()
+            os.unlink(temp_file.name)
+
+    download_lines.short_description = "Download selected lines as TXT file"
