@@ -471,40 +471,42 @@ from .models import Config  # Assuming Config is the name of your model
 from django.contrib.auth.models import AnonymousUser
 from rest_framework.authtoken.models import Token
 import json
-
+import tempfile
+import os
+from django.http import HttpResponse
+from django.core.files import File
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes, api_view
 @csrf_exempt
+@permission_classes([IsAuthenticated])
 def config_api(request):
     if request.method == 'POST':
         try:
-            # Extract token from Authorization header
-            authorization_header = request.headers.get('Authorization', '')
-            _, token = authorization_header.split()  # Assumes a format like "Token your-token-here"
-            
-            # Get user from the token
-            try:
-                user = Token.objects.get(key=token).user
-            except Token.DoesNotExist:
-                user = AnonymousUser()
+            # Get the ST_ID from the text data
+            text_data = request.body.decode('utf-8')
+            st_id_start = text_data.find("ST_ID:") + len("ST_ID:")
+            st_id_end = text_data.find(" ", st_id_start)
+            st_id = text_data[st_id_start:st_id_end].strip()
 
-            # Decode the text data from the request body
-            text_data = request.body.decode('utf-8').strip()
-            print(f"Received text data: {text_data}")
+            # Create a temporary file and write the text data to it
+            with tempfile.NamedTemporaryFile(delete=False, mode='w+') as temp_file:
+                temp_file.write(text_data)
 
-            # Extract ST_ID from the text_data using string manipulation
-            st_id_start = text_data.find('ST_ID:') + len('ST_ID:')
-            st_id_end = text_data.find('DT:')
-            st_id = text_data[st_id_start:st_id_end].strip() if st_id_start >= 0 and st_id_end >= 0 else 'default_st_id'
+            # Create a Config object and save the temporary file
+            config = Config(user=request.user, st_id=st_id)
+            config.text_data.save(f"{st_id}_config.txt", File(temp_file))
 
-            # Print information to check if user and st_id have correct values
-            print(f"User: {user}, ST_ID: {st_id}")
-
-            # Create a Config instance and save it to the database
-            config_instance = Config.objects.create(user=user, st_id=st_id, text_data=text_data)
-            print(f"Config instance created: {config_instance}")
+            # Clean up the temporary file
+            os.remove(temp_file.name)
 
             return JsonResponse({"success": True, "message": "Config created successfully."})
         except Exception as e:
-            print(f"Error: {e}")
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method."})
+class DownloadConfigByStIdView(View):
+    def get(self, request, st_id):
+        config = get_object_or_404(Config, st_id=st_id)
+        response = HttpResponse(config.text_data, content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename="{st_id}_config.txt"'
+        return response
