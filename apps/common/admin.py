@@ -39,12 +39,4 @@ from apps.common.models import Config
 
 @admin.register(Config)
 class ConfigAdmin(admin.ModelAdmin):
-    list_display = ('user', 'st_id', 'timestamp', 'text_data', 'download_link')
-
-    def download_link(self, obj):
-        if obj.st_id:  # Check if st_id is not empty
-            download_url = reverse('download_config_by_st_id', args=[obj.st_id])
-            return format_html('<a href="{}" target="_blank">{}</a>', reverse('download_config_by_st_id', args=[obj.st_id]), obj.st_id)
-        return "N/A"
-
-    download_link.short_description = 'Download'
+    list_display = ('user', 'st_id', 'timestamp', 'text_data')
