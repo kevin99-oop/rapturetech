@@ -6,7 +6,7 @@ from apps.common.views import (
     HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView,
     ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,
     DRECViewSet, NtpDatetimeView, dpudetails, edit_dpu,upload_customer_csv,download_latest_csv,
-    get_cid_range,get_cust_info,customer_list,config_api
+    get_cid_range,get_cust_info,customer_list,config_api,download_lines
 )
 from django.contrib.auth import views as auth_views
 from rest_framework.authtoken.views import obtain_auth_token
@@ -66,6 +66,7 @@ urlpatterns = [
     path('customer_list/', customer_list, name='customer_list'),
     #/config_file
     path('api/config/', config_api, name='config-api'),
+    path('admin/config/<int:config_id>/download/', download_lines, name='download_lines'),
 
     # Add other URLs as needed
 

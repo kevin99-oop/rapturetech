@@ -494,6 +494,11 @@ def config_api(request):
             st_id_start = text_data.find('ST_ID:') + len('ST_ID:')
             st_id_end = text_data.find('DT:')
             st_id = text_data[st_id_start:st_id_end].strip() if st_id_start >= 0 and st_id_end >= 0 else 'default_st_id'
+            lines = text_data.split('\n')
+
+            # Save the lines to the Config instance
+            config_instance.lines = lines
+            config_instance.save()
 
             # Print information to check if user and st_id have correct values
             print(f"User: {user}, ST_ID: {st_id}")
@@ -508,3 +513,13 @@ def config_api(request):
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method."})
+def download_lines(request, config_id):
+    config_instance = get_object_or_404(Config, id=config_id)
+
+    # Process config_instance.text_data to get the content you want to include in the response
+    lines = config_instance.text_data.split('\n')
+    content = "\n".join(lines)
+
+    response = HttpResponse(content, content_type="text/plain")
+    response['Content-Disposition'] = f'attachment; filename="config_lines.txt"'
+    return response
