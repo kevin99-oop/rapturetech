@@ -490,16 +490,13 @@ def config_api(request):
             text_data = request.body.decode('utf-8').strip()
             print(f"Received text data: {text_data}")
 
-            # Try to load the text_data as JSON (assuming it follows JSON-like structure)
-            try:
-                json_data = json.loads(text_data)
-                st_id = json_data.get('ST_ID', 'default_st_id')  # Replace 'default_st_id' with a default value or raise an error if not found
-            except json.JSONDecodeError:
-                # Handle the case where the text_data is not valid JSON
-                st_id = 'default_st_id'
+            # Extract ST_ID from the text_data using string manipulation
+            st_id_start = text_data.find('ST_ID:') + len('ST_ID:')
+            st_id_end = text_data.find('DT:')
+            st_id = text_data[st_id_start:st_id_end].strip() if st_id_start >= 0 and st_id_end >= 0 else 'default_st_id'
 
             # Print information to check if user and st_id have correct values
-            print(f"User: {user}, st_id: {st_id}")
+            print(f"User: {user}, ST_ID: {st_id}")
 
             # Create a Config instance and save it to the database
             config_instance = Config.objects.create(user=user, st_id=st_id, text_data=text_data)
