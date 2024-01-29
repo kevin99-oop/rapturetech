@@ -463,40 +463,34 @@ def customer_list(request):
 
 # views.py
 # myapp/views.py
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.permissions import IsAuthenticated
-from .models import Config  # Assuming Config is the name of your model
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.http import JsonResponse
 from apps.common.models import Config
-import json
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def config_api(request):
     if request.method == 'POST':
         try:
-            # Assuming the data is received in the request body as a JSON object
-            data = json.loads(request.body.decode('utf-8'))
-            
+            text_data = request.body.decode('utf-8')  # Assuming the data is received in the request body
+            print(text_data)
+
             # Extract ST_ID from the text data
-            st_id = data.get('ST_ID', 'default_st_id')  # Replace 'default_st_id' with a default value or handle missing ST_ID
-            
+            st_id_start = text_data.find("ST_ID:") + len("ST_ID:")
+            st_id_end = text_data.find(" ", st_id_start)
+            st_id = text_data[st_id_start:st_id_end].strip()
+
             # Assuming the user is authenticated, you can access the user from the request
             user = request.user
 
-            # Create a Config object and save it
-            config = Config.objects.create(user=user, st_id=st_id, text_data=json.dumps(data))
-            
+            Config.objects.create(user=user, st_id=st_id, text_data=text_data)
             return JsonResponse({"success": True, "message": "Config created successfully."})
         except Exception as e:
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method."})
+
 
 
 
