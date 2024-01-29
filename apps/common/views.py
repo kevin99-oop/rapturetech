@@ -476,10 +476,10 @@ def config_api(request):
             text_data = request.body.decode('utf-8')  # Assuming the data is received in the request body
             print(text_data)
 
-            # Extract ST_ID from the text data, excluding newline characters
+            # Extract ST_ID from the text data before the "DT" part
             st_id_start = text_data.find("ST_ID:") + len("ST_ID:")
-            st_id_end = text_data.find(" ", st_id_start)
-            st_id = text_data[st_id_start:st_id_end].strip().replace('\n', '')
+            dt_start = text_data.find("DT:")
+            st_id = text_data[st_id_start:dt_start].strip()
 
             # Assuming the user is authenticated, you can access the user from the request
             user = request.user
@@ -490,6 +490,7 @@ def config_api(request):
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method."})
+
 
 
 from django.shortcuts import get_object_or_404
