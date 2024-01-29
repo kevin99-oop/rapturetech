@@ -476,7 +476,7 @@ from django.http import JsonResponse
 def config_api(request):
     if request.method == 'POST':
         try:
-            st_id = "your_st_id"  # Replace with the actual st_id you want to use
+            st_id = st_id  # Replace with the actual st_id you want to use
             text_data = request.body.decode('utf-8')  # Assuming the data is received in the request body
             print(text_data)
             
