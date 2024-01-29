@@ -5,8 +5,6 @@
 
 {% block content %}
 <style>
-
-
     h2 {
         text-align: center;
         color: #333;
@@ -26,7 +24,6 @@
     select {
         width: 100%;
         padding: 10px;
-        margin-bottom: 15px;
         border: 1px solid #ccc;
         border-radius: 4px;
         box-sizing: border-box;
@@ -50,9 +47,9 @@
     <div class="container-fluid py-1 px-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
-                <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="">Home</a>
+                <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="javascript:;">Home</a>
                 </li>
-                <li class="breadcrumb-item text-sm text-white active" aria-current="page">Add DPU</li>
+                <li class="breadcrumb-item text-sm text-white active" aria-current="page">Add Dpu </li>
             </ol>
 
         </nav>
@@ -88,17 +85,15 @@
                     <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4"
                         aria-labelledby="dropdownMenuButton">
                         <li class="mb-2">
-                            <a class="dropdown-item border-radius-md" href="javascript:;">
+                            <a class="dropdown-item border-radius-md" href="{% url 'profile' %}">
                                 <div class="d-flex py-1">
                                     <div class="my-auto">
-                                        <img src="{{user.profile.profile_image.url}}"
-                                            class="avatar avatar-sm bg-gradient-light me-3 ">
+                                        <i class="fa fa-user cursor-pointer pe-3" class="avatar avatar-sm  me-3 "></i>
                                     </div>
                                     <div class="d-flex flex-column justify-content-center">
                                         <h6 class="text-sm font-weight-normal mb-1">
-                                            <span class="font-weight-bold">Username:- </span> {{user}}
+                                            <span class="font-weight-bold">Profile</span>
                                         </h6>
-
                                     </div>
                                 </div>
                             </a>
@@ -113,18 +108,15 @@
                                         <h6 class="text-sm font-weight-normal mb-1">
                                             <span class="font-weight-bold">Change Password</span>
                                         </h6>
-                                        <p class="text-xs text-secondary mb-0">
-                                            <i class="fa fa-user me-1"></i>
-                                            {{user}}
-                                        </p>
                                     </div>
                                 </div>
                             </a>
                         </li>
 
 
-                    </ul>
                 </li>
+            </ul>
+            </li>
             </ul>
         </div>
     </div>
@@ -132,30 +124,32 @@
 <!-- Begin Page Content -->
 <div class="container-fluid mt-5">
 
-  
+
 
     <!-- Main Content Here -->
-    
+
     <div class="card o-hidden border-0 shadow-lg mt-5">
-        
+
         <div class="row ">
             <div class="col-lg-12 my-5">
-                <form method="post" action="{% url 'add_dpu' %}" class="dpu-form"> 
+                <h2>Add DPU</h2>
+
+                <form method="post" action="{% url 'add_dpu' %}" class="dpu-form">
                     {% csrf_token %}
                     {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                  </form>
-                  
-             
+                    <button type="submit" class="btn btn-success align-items-center center">Submit</button>
+                </form>
+
+
 
             </div>
-            
+
         </div>
 
 
 
     </div>
-    
+
     <!-- /.container-fluid -->
-    </div>
-    {% endblock content %}
+</div>
+{% endblock content %}

@@ -1,40 +1,8 @@
 {% extends 'base2.html' %}
 
 {% block content %}
-<style>.popup {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 9999;
-  }
-  
-  .popup-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    border-radius: 20px;
 
-  }
-  
-  .popup-content p {
-    margin-bottom: 20px;
-  }
-  
-  .popup-content button {
-    margin: 0 10px;
-    padding: 10px 15px;
-    cursor: pointer;
-  }
-  </style>
-  <style>
-
-
+<style>
     h2 {
         text-align: center;
         color: #333;
@@ -54,7 +22,6 @@
     select {
         width: 100%;
         padding: 10px;
-        margin-bottom: 15px;
         border: 1px solid #ccc;
         border-radius: 4px;
         box-sizing: border-box;
@@ -72,15 +39,46 @@
     button:hover {
         background-color: #45a049;
     }
+
+    .popup {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+    }
+
+    .popup-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        border-radius: 20px;
+
+    }
+
+    .popup-content p {
+        margin-bottom: 20px;
+    }
+
+    .popup-content button {
+        margin: 0 10px;
+        padding: 10px 15px;
+        cursor: pointer;
+    }
 </style>
 <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl " id="navbarBlur"
     data-scroll="false">
     <div class="container-fluid py-1 px-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
-                <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="">Home</a>
+                <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="javascript:;">Home</a>
                 </li>
-                <li class="breadcrumb-item text-sm text-white active" aria-current="page">Add DPU</li>
+                <li class="breadcrumb-item text-sm text-white active" aria-current="page">Edit Dpu</li>
             </ol>
 
         </nav>
@@ -116,17 +114,15 @@
                     <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4"
                         aria-labelledby="dropdownMenuButton">
                         <li class="mb-2">
-                            <a class="dropdown-item border-radius-md" href="javascript:;">
+                            <a class="dropdown-item border-radius-md" href="{% url 'profile' %}">
                                 <div class="d-flex py-1">
                                     <div class="my-auto">
-                                        <img src="{{user.profile.profile_image.url}}"
-                                            class="avatar avatar-sm bg-gradient-light me-3 ">
+                                        <i class="fa fa-user cursor-pointer pe-3" class="avatar avatar-sm  me-3 "></i>
                                     </div>
                                     <div class="d-flex flex-column justify-content-center">
                                         <h6 class="text-sm font-weight-normal mb-1">
-                                            <span class="font-weight-bold">Username:- </span> {{user}}
+                                            <span class="font-weight-bold">Profile</span>
                                         </h6>
-
                                     </div>
                                 </div>
                             </a>
@@ -141,90 +137,87 @@
                                         <h6 class="text-sm font-weight-normal mb-1">
                                             <span class="font-weight-bold">Change Password</span>
                                         </h6>
-                                        <p class="text-xs text-secondary mb-0">
-                                            <i class="fa fa-user me-1"></i>
-                                            {{user}}
-                                        </p>
                                     </div>
                                 </div>
                             </a>
                         </li>
 
 
-                    </ul>
                 </li>
+            </ul>
+            </li>
             </ul>
         </div>
     </div>
 </nav>
-  <div class="container-fluid mt-5">
+<div class="container-fluid mt-5">
 
-  
+
 
     <!-- Main Content Here -->
-    
+
     <div class="card o-hidden border-0 shadow-lg mt-5">
-        
-        <div class="row ">
-            <div class="col-lg-12 my-5">
+
+        <div class="row container">
+            <div class="col-lg-12 my-5 ">
                 <h2>Edit DPU</h2>
 
                 <form method="post" action="" id="editDpuForm" onsubmit="return confirmDeactivation()">
                     {% csrf_token %}
                     {{ form.as_p }}
-                 
-                    <button type="submit">Save Changes</button>
-                  </form>
-             
- <a href="{% url 'active_dpu' %}">Back to Active DPUs</a>
 
- <div id="confirmationPopup" class="popup">
-   <div class="popup-content">
-     <p>Are you sure you want to deactivate this DPU?</p>
-     <button onclick="cancelDeactivation()">Cancel</button>
-     <button onclick="confirmDeactivation()"type="submit">Confirm</button>
-   </div>
- </div>
+                    <button type="submit">Save Changes</button>
+                </form>
+
+                <a href="{% url 'active_dpu' %}">Back to Active DPUs</a>
+
+                <div id="confirmationPopup" class="popup">
+                    <div class="popup-content">
+                        <p>Are you sure you want to deactivate this DPU?</p>
+                        <button onclick="cancelDeactivation()">Cancel</button>
+                        <button onclick="confirmDeactivation()" type="submit">Confirm</button>
+                    </div>
+                </div>
 
             </div>
-            
+
         </div>
 
 
 
     </div>
-    
+
     <!-- /.container-fluid -->
-    </div>
+</div>
 
 
 
 
- <script>
- 
-   $(document).ready(function() {
-    $('#editDpuForm').submit(function(event) {
-      event.preventDefault();
+<script>
 
-      // Your existing confirmation script...
-      var confirmationPopup = confirmDeactivation();
-      
-      $.ajax({
-        type: 'POST',
-        url: $(this).attr('action'),
-        data: $(this).serialize(),
-        success: function(response) {
-          if (response.status_changed) {
-            confirmationPopup.style.display = 'block';
-          } else {
-            window.location.href = '{% url "active_dpu" %}';
-          }
-        },
-        error: function(error) {
-          console.log('Error:', error);
-        }
-      });
+    $(document).ready(function () {
+        $('#editDpuForm').submit(function (event) {
+            event.preventDefault();
+
+            // Your existing confirmation script...
+            var confirmationPopup = confirmDeactivation();
+
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
+                success: function (response) {
+                    if (response.status_changed) {
+                        confirmationPopup.style.display = 'block';
+                    } else {
+                        window.location.href = '{% url "active_dpu" %}';
+                    }
+                },
+                error: function (error) {
+                    console.log('Error:', error);
+                }
+            });
+        });
     });
-  });
- </script>
+</script>
 {% endblock %}

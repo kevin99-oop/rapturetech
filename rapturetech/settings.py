@@ -163,7 +163,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
-
+# Media files (uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Default primary key field type
@@ -171,21 +171,30 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+# Try to import local_settings.py (if it exists) to override settings
 try:
     from rapturetech.local_settings import *
 except ImportError:
     pass
-
+# Additional settings
 LOGIN_REDIRECT_URL = 'dashboard'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
-
+# Authentication backends
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     
     # Add any additional backends as needed
 ]
 
+# File storage settings
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'kevinpandya18@gnu.ac.in'
+EMAIL_PORT = 587  # Use the appropriate port for your SMTP server
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'kevinpandya18@gnu.ac.in'
+EMAIL_HOST_PASSWORD = 'JACK@99kevin281099'

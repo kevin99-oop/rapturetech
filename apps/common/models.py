@@ -6,12 +6,13 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
 
-@receiver (post_save, sender=settings. AUTH_USER_MODEL)
+# Signal to create a Token for a user upon registration
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token. objects.create(user=instance)
 
-
+# Model representing a DPU (Data Processing Unit)
 class DPU(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     location = models.CharField(max_length=255)
@@ -35,6 +36,7 @@ class DPU(models.Model):
             except Customer.DoesNotExist:
                 return None
 
+# Model representing DREC (Data Recording)
 class DREC(models.Model):
     REC_TYPE = models.CharField(max_length=255, default="", blank=True)
     SLIP_TYPE = models.IntegerField(null=True, default=None)
@@ -66,19 +68,14 @@ class DREC(models.Model):
     def __str__(self):
         return f"DREC for {self.ST_ID.user.username}'s DPU - {self.ST_ID.st_id}"
 
+# Model representing Customer and associated CSV file upload
 class Customer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     st_id = models.CharField(max_length=50)
     csv_file = models.FileField(upload_to='csv_files/')
     date_uploaded = models.DateTimeField(auto_now=True)
-
-# models.p
-# models.py
-
-
-# apps/common/models.py
-
-
+    
+# Model representing Configurations
 class Config(models.Model):
     user = models.CharField(max_length=255)  # Change this field based on your user model
     st_id = models.CharField(max_length=50, blank=True, null=True)  # Change this field based on your user model
@@ -86,6 +83,7 @@ class Config(models.Model):
     timestamp = models.DateTimeField(auto_now=True)
 
     def get_download_url(self):
+        # Method to generate download URL for the configuration
         if self.st_id:
             return reverse('download_config', kwargs={'st_id': self.st_id})
         return ''
