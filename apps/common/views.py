@@ -484,12 +484,23 @@ def config_api(request):
             # Assuming the user is authenticated, you can access the user from the request
             user = request.user
 
-            Config.objects.create(user=user, st_id=st_id, text_data=text_data)
-            return JsonResponse({"success": True, "message": "Config created successfully."})
+            # Check if a Config object with the same ST_ID exists
+            existing_config = Config.objects.filter(st_id=st_id).first()
+
+            if existing_config:
+                # If exists, update the text data and delete the old text
+                existing_config.text_data = text_data
+                existing_config.save()
+            else:
+                # If not exists, create a new Config object
+                Config.objects.create(user=user, st_id=st_id, text_data=text_data)
+
+            return JsonResponse({"success": True, "message": "Config created/updated successfully."})
         except Exception as e:
             return JsonResponse({"success": False, "message": str(e)})
 
-    return JsonResponse({"success": False, "message": "Invalid request methodS."})
+    return JsonResponse({"success": False, "message": "Invalid request method."})
+
 
 
 from django.shortcuts import get_object_or_404
