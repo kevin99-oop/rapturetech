@@ -492,6 +492,7 @@ def config_api(request):
                 return JsonResponse({"success": False, "message": "ST_ID not found in text_data."})
 
             text_data = request.body.decode('utf-8')
+            print(f"User: {request.user}")  # Print the user associated with the request
             print(text_data)
 
             # Create Config object
