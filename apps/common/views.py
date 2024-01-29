@@ -489,7 +489,7 @@ def config_api(request):
         except Exception as e:
             return JsonResponse({"success": False, "message": str(e)})
 
-    return JsonResponse({"success": False, "message": "Invalid request method."})
+    return JsonResponse({"success": False, "message": "Invalid request methodS."})
 
 
 from django.shortcuts import get_object_or_404
