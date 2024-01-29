@@ -504,3 +504,8 @@ def config_api(request):
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method."})
+def download_config(request, st_id):
+    config = get_object_or_404(Config, st_id=st_id)
+    response = HttpResponse(config.text_data, content_type='text/plain')
+    response['Content-Disposition'] = f'attachment; filename="{st_id}_config.txt"'
+    return response

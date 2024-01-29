@@ -188,3 +188,4 @@ AUTHENTICATION_BACKENDS = [
     # Add any additional backends as needed
 ]
 
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'

@@ -4,6 +4,7 @@ from django. dispatch import receiver
 from rest_framework.authtoken.models import Token
 from django.db import models
 from django.contrib.auth.models import User
+from django.urls import reverse
 
 @receiver (post_save, sender=settings. AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
@@ -84,5 +85,10 @@ class Config(models.Model):
     text_data = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    def get_download_url(self):
+        if self.st_id:
+            return reverse('download_config', kwargs={'st_id': self.st_id})
+        return ''
+        
     def __str__(self):
         return f"Config for {self.user} - {self.timestamp}"

@@ -37,6 +37,12 @@ from django.urls import reverse
 from django.utils.html import format_html
 from apps.common.models import Config
 
-@admin.register(Config)
+
 class ConfigAdmin(admin.ModelAdmin):
-    list_display = ('user', 'st_id', 'timestamp', 'text_data')
+    list_display = ('user', 'st_id', 'timestamp', 'download_link')
+
+    def download_link(self, obj):
+        return format_html('<a href="{}" target="_blank">Download</a>', obj.get_download_url())
+    download_link.short_description = 'Download'
+
+admin.site.register(Config, ConfigAdmin)
