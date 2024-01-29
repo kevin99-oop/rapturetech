@@ -43,12 +43,8 @@ class ConfigAdmin(admin.ModelAdmin):
     readonly_fields = ('download_link',)
 
     def download_link(self, obj):
-        if obj.st_id:
-            download_url = f'/admin/common/config/download/{obj.st_id}/'
-            return mark_safe(f'<a href="{download_url}" target="_blank">Download</a>')
-        return 'N/A'
+        st_id = obj.st_id
+        download_url = reverse('download_config_by_st_id', args=[st_id])
+        return format_html('<a href="{}" target="_blank">Download</a>', download_url)
 
-    download_link.allow_tags = True
     download_link.short_description = 'Download'
-
-admin.site.register(Config, ConfigAdmin)

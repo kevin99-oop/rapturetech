@@ -504,8 +504,19 @@ def config_api(request):
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method."})
-def download_config(request, st_id):
+
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from .models import Config
+import os
+
+def download_config_by_st_id(request, st_id):
     config = get_object_or_404(Config, st_id=st_id)
+    
+    # Create a response with the content type 'text/plain'
     response = HttpResponse(config.text_data, content_type='text/plain')
+    
+    # Set the Content-Disposition header to force download with a specific filename
     response['Content-Disposition'] = f'attachment; filename="{st_id}_config.txt"'
+    
     return response
