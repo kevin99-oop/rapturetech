@@ -467,45 +467,29 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import IsAuthenticated
 from .models import Config  # Assuming Config is the name of your model
-
-from django.contrib.auth.models import AnonymousUser
-from rest_framework.authtoken.models import Token
-import json
-import tempfile
-import os
-from django.http import HttpResponse
-from django.core.files import File
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes, api_view
-import re
-@csrf_exempt
+from django.http import JsonResponse
+
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def config_api(request):
     if request.method == 'POST':
         try:
-            # Extract ST_ID using regular expression
-            st_id_match = re.search(r'ST_ID:([^\s]+)', request.body.decode('utf-8'))
-            if st_id_match:
-                st_id = st_id_match.group(1)
-            else:
-                return JsonResponse({"success": False, "message": "ST_ID not found in text_data."})
-
-            text_data = request.body.decode('utf-8')
+            st_id = "your_st_id"  # Replace with the actual st_id you want to use
+            text_data = request.body.decode('utf-8')  # Assuming the data is received in the request body
+            print(text_data)
             
-            # Authenticate the user using the token
-            user = authenticate(request=request)
+            # Assuming the user is authenticated, you can access the user from the request
+            user = request.user
 
-            if user is not None:
-                print(f"Authenticated User: {user.username}")
-                # Create Config object
-                Config.objects.create(user=user, st_id=st_id, text_data=text_data)
-                return JsonResponse({"success": True, "message": "Config created successfully."})
-            else:
-                return JsonResponse({"success": False, "message": "User authentication failed."})
+            Config.objects.create(user=user, st_id=st_id, text_data=text_data)
+            return JsonResponse({"success": True, "message": "Config created successfully."})
         except Exception as e:
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method."})
+
 
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
