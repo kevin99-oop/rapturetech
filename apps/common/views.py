@@ -504,19 +504,49 @@ def config_api(request):
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method."})
-
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
+from django.conf import settings
+from django.core.exceptions import PermissionDenied
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import permission_classes
+from django.http import JsonResponse
 from .models import Config
-import os
+from django.http import Http404
 
+@csrf_exempt
+@permission_classes([IsAuthenticated])
 def download_config_by_st_id(request, st_id):
-    config = get_object_or_404(Config, st_id=st_id)
-    
-    # Create a response with the content type 'text/plain'
-    response = HttpResponse(config.text_data, content_type='text/plain')
-    
-    # Set the Content-Disposition header to force download with a specific filename
-    response['Content-Disposition'] = f'attachment; filename="{st_id}_config.txt"'
-    
+    configs = Config.objects.filter(st_id=st_id, user=request.user)
+
+    # Check if there are any configs matching the criteria
+    if not configs.exists():
+        raise Http404("Config not found for the specified st_id.")
+
+    # Concatenate and format text data from all matching configs
+    formatted_text_data = "\n".join(format_text_data(config.text_data) for config in configs)
+
+    # Create the response with the formatted text data
+    response = HttpResponse(formatted_text_data, content_type='text/plain')
+    response['Content-Disposition'] = f'attachment; filename={st_id}_config.txt'
     return response
+
+def format_text_data(text_data):
+    formatted_lines = []
+
+    # Split the input text by space and remove empty elements
+    elements = [elem.strip() for elem in text_data.split(' ') if elem.strip()]
+
+    print("Original elements:", elements)  # Add this print statement
+
+    # Iterate over the elements and format them
+    for element in elements:
+        if ':' in element:
+            key, value = element.split(':', 1)
+            formatted_lines.append(f"{key}: {value}")
+        else:
+            formatted_lines.append(element)
+
+    print("Formatted lines:", formatted_lines)  # Add this print statement
+
+    return '\n'.join(formatted_lines)

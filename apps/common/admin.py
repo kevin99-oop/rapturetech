@@ -33,18 +33,17 @@ class CustomerAdmin(admin.ModelAdmin):
 
 # admin.py
 
-from django.contrib import admin
-from django.urls import reverse
-from django.utils.safestring import mark_safe
-from .models import Config
 
+@admin.register(Config)
 class ConfigAdmin(admin.ModelAdmin):
     list_display = ('user', 'st_id', 'timestamp', 'text_data', 'download_link')
     readonly_fields = ('download_link',)
 
     def download_link(self, obj):
         st_id = obj.st_id
-        download_url = reverse('download_config_by_st_id', args=[st_id])
-        return format_html('<a href="{}" target="_blank">Download</a>', download_url)
+        if st_id:  # Check if st_id is not empty
+            download_url = reverse('download_config_by_st_id', args=[st_id])
+            return format_html('<a href="{}" target="_blank">Download</a>', download_url)
+        return "No st_id available"  # Provide a fallback message if st_id is empty
 
     download_link.short_description = 'Download'
