@@ -83,7 +83,7 @@ class Config(models.Model):
     user = models.CharField(max_length=255)  # Change this field based on your user model
     st_id = models.CharField(max_length=50, blank=True, null=True)  # Change this field based on your user model
     text_data = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(auto_now=True)
 
     def get_download_url(self):
         if self.st_id:
