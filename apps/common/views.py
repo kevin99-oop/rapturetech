@@ -492,7 +492,6 @@ def config_api(request):
     return JsonResponse({"success": False, "message": "Invalid request method."})
 
 
-
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django.conf import settings
