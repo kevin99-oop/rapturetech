@@ -32,17 +32,16 @@ class CustomerAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'st_id')
 
 # admin.py
-from django.contrib import admin
-from django.urls import reverse
-from django.utils.html import format_html
-from apps.common.models import Config
-
-
 class ConfigAdmin(admin.ModelAdmin):
-    list_display = ('user', 'st_id', 'timestamp', 'download_link')
+    list_display = ('user', 'st_id', 'timestamp', 'text_data', 'download_link')
+    readonly_fields = ('download_link',)
 
     def download_link(self, obj):
-        return format_html('<a href="{}" target="_blank">Download</a>', obj.get_download_url())
+        if obj.st_id:
+            return f'<a href="{obj.get_download_url()}" target="_blank">Download</a>'
+        return 'N/A'
+
+    download_link.allow_tags = True
     download_link.short_description = 'Download'
 
 admin.site.register(Config, ConfigAdmin)
