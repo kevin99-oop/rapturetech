@@ -470,25 +470,34 @@ from .models import Config  # Assuming Config is the name of your model
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.http import JsonResponse
-
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from django.http import JsonResponse
+from apps.common.models import Config
+import json
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def config_api(request):
     if request.method == 'POST':
         try:
-            st_id = st_id  # Replace with the actual st_id you want to use
-            text_data = request.body.decode('utf-8')  # Assuming the data is received in the request body
-            print(text_data)
+            # Assuming the data is received in the request body as a JSON object
+            data = json.loads(request.body.decode('utf-8'))
+            
+            # Extract ST_ID from the text data
+            st_id = data.get('ST_ID', 'default_st_id')  # Replace 'default_st_id' with a default value or handle missing ST_ID
             
             # Assuming the user is authenticated, you can access the user from the request
             user = request.user
 
-            Config.objects.create(user=user, st_id=st_id, text_data=text_data)
+            # Create a Config object and save it
+            config = Config.objects.create(user=user, st_id=st_id, text_data=json.dumps(data))
+            
             return JsonResponse({"success": True, "message": "Config created successfully."})
         except Exception as e:
             return JsonResponse({"success": False, "message": str(e)})
 
     return JsonResponse({"success": False, "message": "Invalid request method."})
+
 
 
 from django.shortcuts import get_object_or_404
