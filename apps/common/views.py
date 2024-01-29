@@ -430,3 +430,16 @@ def format_text_data(text_data):
         else:
             formatted_lines.append(element)
     return '\n'.join(formatted_lines)
+
+def live_records_summary(request):
+    # Assuming you have a 'status' field in your LiveRecord model to determine if it's live
+    live_records = DREC.objects.filter(status='live')
+    
+    # Calculate the total summary
+    total_summary = {
+        'total_records': live_records.count(),
+        'total_amount': live_records.aggregate(Sum('amount'))['amount__sum'],
+        # Add other fields as needed
+    }
+
+    return render(request, 'common/example.html', {'total_summary': total_summary})

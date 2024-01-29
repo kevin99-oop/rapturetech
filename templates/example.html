@@ -166,8 +166,12 @@
                                 <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Customer</p>
 
                                 <p class="mb-0">
-                                    <span class="text-success text-lg font-weight-bolder">+55%</span>
+                                    {% for society_count in society_customer_count %}
 
+                                    <span class="text-success text-lg font-weight-bolder">   
+
+                                    </span>
+                                {%endfor%}
                                 </p>
 
                             </div>
@@ -213,21 +217,23 @@
                         </thead>
                         <tbody>
                             {% for record in summary_data %}
-                            <tr>
-                                <td>{{ record.ST_ID__st_id }}</td>
-                                <td>{{ record.ST_ID__location }}</td>
-                                <td>{{ record.ST_ID__society }}</td>
-                                <td>{{ record.RecordingDate }}</td>
-                                <td>{{ record.SHIFT }}</td>
-                                <td>{{ record.fat_avg }}</td>
-                                <td>{{ record.snf_avg }}</td>
-                                <td>{{ record.clr_avg }}</td>
-                                <td>{{ record.water_avg }}</td>
-                                <td>{{ record.total_ltr }}</td>
-                                <td>{{ record.total_amt }}</td>
-                                <td>{{ record.total_cust }}</td>
-                            </tr>
-                            {% endfor %}
+                        <tr>
+                            <p>Total Records: {{ total_summary.total_records }}</p>
+                            <p>Total Amount: {{ total_summary.total_amount }}</p>
+                            <td>{{ record.ST_ID__location }}</td>
+                            <td>{{ record.ST_ID__society }}</td>
+                            <td>{{ record.RecordingDate }}</td>
+                            <td>{{ record.SHIFT }}</td>
+                            <td>{{ record.fat_avg }}</td>
+                            <td>{{ record.snf_avg }}</td>
+                            <td>{{ record.clr_avg }}</td>
+                            <td>{{ record.water_avg }}</td>
+                            <td>{{ record.total_ltr }}</td>
+                            <td>{{ record.total_amt }}</td>
+                            <td>{{ record.total_cust }}</td>
+                        </tr>
+                        {% endfor %}
+                        
                         </tbody>
                     </table>
                 </div>
@@ -237,7 +243,7 @@
 
 
     <div class="row mt-4">
-        <div class="col-lg-12 mb-lg-0 mb-5">
+        <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
             <div class="card ">
                 <div class="card-header pb-0 p-3">
                     <div class="d-flex justify-content-between">
@@ -299,50 +305,34 @@
     </div>
 </div>
 
-<!-- /.container-fluid <footer class="container footer text-center text-lg-end mt-5 pt-5 ">
+<!--<footer class="container footer text-center  mt-5 pt-5 ">
     <div class="container">
         <div class="row align-items-center justify-content-lg-between">
-            <div class="col-lg-6 mb-lg-0 mb-4">
+            <div class="col-lg-12 mb-lg-0 mb-4">
                 <div class="copyright text-center text-sm text-muted text-lg-start">
                     ©
                     <script>
                         document.write(new Date().getFullYear())
                     </script>,
-                    made with <i class="fa fa-heart"></i> by
-                    <a href="https://www.creative-tim.com" class="font-weight-bold" target="_blank">Creative Tim</a>
-                    for a better web.
+                    made by
+                    <a href="#" class="font-weight-bold" target="_blank">CloudStack Dynamics</a>
+                    
                 </div>
             </div>
-            <div class="col-lg-6">
-                <ul class="nav nav-footer justify-content-center justify-content-lg-end">
-                    <li class="nav-item">
-                        <a href="https://www.creative-tim.com" class="nav-link text-muted" target="_blank">Creative
-                            Tim</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="https://www.creative-tim.com/presentation" class="nav-link text-muted"
-                            target="_blank">About Us</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="https://www.creative-tim.com/blog" class="nav-link text-muted"
-                            target="_blank">Blog</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="https://www.creative-tim.com/license" class="nav-link pe-0 text-muted"
-                            target="_blank">License</a>
-                    </li>
-                </ul>
-            </div>
+         
         </div>
     </div>
 </footer> -->
 <script>
+    // Function to refresh the table content
+    function refreshTable() {
+        $("#myRefreshDiv").load(location.href + " #myRefreshDiv");
+    }
+
+    // Set interval to refresh the table every 5 seconds
     $(document).ready(function () {
-
-        setInterval(function () {
-            $("#divID").load(location.href + " #myRefreshDiv");
-        }, 33000);
-
+        setInterval(refreshTable, 5000);
     });
 </script>
+
 {% endblock content %}
