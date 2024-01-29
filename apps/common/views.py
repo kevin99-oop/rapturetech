@@ -482,23 +482,10 @@ from rest_framework.decorators import permission_classes, api_view
 def config_api(request):
     if request.method == 'POST':
         try:
-            # Get the ST_ID from the text data
-            text_data = request.body.decode('utf-8')
-            st_id_start = text_data.find("ST_ID:") + len("ST_ID:")
-            st_id_end = text_data.find(" ", st_id_start)
-            st_id = text_data[st_id_start:st_id_end].strip()
-
-            # Create a temporary file and write the text data to it
-            with tempfile.NamedTemporaryFile(delete=False, mode='w+') as temp_file:
-                temp_file.write(text_data)
-
-            # Create a Config object and save the temporary file
-            config = Config(user=request.user, st_id=st_id)
-            config.text_data.save(f"{st_id}_config.txt", File(temp_file))
-
-            # Clean up the temporary file
-            os.remove(temp_file.name)
-
+            st_id = "your_st_id"  # Replace with the actual st_id you want to use
+            text_data = request.body.decode('utf-8')  # Assuming the data is received in the request body
+            print(text_data)
+            Config.objects.create(user=request.user, st_id=st_id, text_data=text_data)
             return JsonResponse({"success": True, "message": "Config created successfully."})
         except Exception as e:
             return JsonResponse({"success": False, "message": str(e)})
