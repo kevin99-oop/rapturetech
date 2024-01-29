@@ -525,7 +525,6 @@ def format_text_data(text_data):
     # Split the input text by space and remove empty elements
     elements = [elem.strip() for elem in text_data.split(' ') if elem.strip()]
 
-    print("Original elements:", elements)  # Add this print statement
 
     # Iterate over the elements and format them
     for element in elements:
@@ -534,7 +533,5 @@ def format_text_data(text_data):
             formatted_lines.append(f"{key}: {value}")
         else:
             formatted_lines.append(element)
-
-    print("Formatted lines:", formatted_lines)  # Add this print statement
 
     return '\n'.join(formatted_lines)
