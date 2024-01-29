@@ -70,7 +70,7 @@ class Customer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     st_id = models.CharField(max_length=50)
     csv_file = models.FileField(upload_to='csv_files/')
-    date_uploaded = models.DateTimeField(auto_now_add=True)
+    date_uploaded = models.DateTimeField(auto_now=True)
 
 # models.p
 # models.py
