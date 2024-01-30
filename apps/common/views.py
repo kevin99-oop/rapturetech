@@ -431,15 +431,24 @@ def format_text_data(text_data):
             formatted_lines.append(element)
     return '\n'.join(formatted_lines)
 
-def live_records_summary(request):
-    # Assuming you have a 'status' field in your LiveRecord model to determine if it's live
-    live_records = DREC.objects.filter(status='live')
-    
-    # Calculate the total summary
-    total_summary = {
-        'total_records': live_records.count(),
-        'total_amount': live_records.aggregate(Sum('amount'))['amount__sum'],
-        # Add other fields as needed
-    }
 
-    return render(request, 'common/example.html', {'total_summary': total_summary})
+from django.shortcuts import render
+from apps.common.forms import RateTableUploadForm
+
+def rate_table_upload(request):
+    if request.method == 'POST':
+        form = RateTableUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Process the form data here
+            file = form.cleaned_data['file']
+            animal = form.cleaned_data['animal']
+            type = form.cleaned_data['type']
+            start_date = form.cleaned_data['start_date']
+
+            # Add your processing logic here
+
+            return render(request, 'common/rate_table_upload.html')  # Redirect to a success page or render another template
+    else:
+        form = RateTableUploadForm()
+
+    return render(request, 'common/rate_table_upload.html', {'form': form})

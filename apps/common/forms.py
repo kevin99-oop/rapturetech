@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from apps.userprofile.models import Profile
 from django.forms import ModelForm
 from django import forms
-from apps.common.models import DPU, Customer
+from apps.common.models import DPU, Customer,RateTable
 
 # SignUpForm is a custom form that extends UserCreationForm for user registration
 class SignUpForm(UserCreationForm):
@@ -81,3 +81,24 @@ class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
         fields = ['st_id', 'csv_file']  # Add 'date_uploaded'
+
+class RateTableUploadForm(forms.ModelForm):
+    file = forms.FileField(label='Choose File', required=True)
+    animal_choices = [('COW', 'COW'), ('BUFFALO', 'BUFFALO')]
+    type_choices = [('SNF', 'SNF'), ('FAT', 'FAT'), ('CLR', 'CLR')]
+    
+    animal = forms.ChoiceField(choices=animal_choices, label='Animal', required=False)
+    rate_type = forms.ChoiceField(choices=type_choices, label='Type', required=False)
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), label='Start Date', required=False)
+
+    class Meta:
+        model = RateTable
+        fields = ['file', 'animal', 'rate_type', 'start_date', 'value']
+    class Meta:
+        model = RateTable
+        fields = ['file', 'animal', 'rate_type', 'start_date', 'value']
+        widgets = {
+            'animal': forms.RadioSelect(),
+            'rate_type': forms.RadioSelect(),
+            'start_date': forms.DateInput(attrs={'type': 'date'}),
+        }
