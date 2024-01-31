@@ -434,21 +434,40 @@ def format_text_data(text_data):
 
 from django.shortcuts import render
 from apps.common.forms import RateTableUploadForm
+from apps.common.models import RateTable
 
 def rate_table_upload(request):
     if request.method == 'POST':
         form = RateTableUploadForm(request.POST, request.FILES)
         if form.is_valid():
-            # Process the form data here
-            file = form.cleaned_data['file']
-            animal = form.cleaned_data['animal']
-            type = form.cleaned_data['type']
-            start_date = form.cleaned_data['start_date']
-
+            try:
+                instance = form.save(commit=False)
+                instance.user = request.user  # Assuming user information is available in the request
+                # Process the form data here
+                file = form.cleaned_data['file']
+                animal = form.cleaned_data['animal']
+                rate_type = form.cleaned_data['rate_type']
+                start_date = form.cleaned_data['start_date']
+                instance.save()
+                
             # Add your processing logic here
+            except Exception as e:
+                print(f"Error saving data: {e}")
 
-            return render(request, 'common/rate_table_upload.html')  # Redirect to a success page or render another template
+
+            request.session['upload_success'] = True
+
+            return redirect('latest_rate_list')
     else:
         form = RateTableUploadForm()
 
     return render(request, 'common/rate_table_upload.html', {'form': form})
+def latest_rate_list(request):
+    # Retrieve the latest rate list from the Rate model
+    latest_rates = RateTable.objects.all().order_by('-start_date')[:10]
+
+    context = {
+        'latest_rates': latest_rates,
+    }
+
+    return render(request, 'common/rate_table_list.html', context)

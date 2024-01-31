@@ -6,7 +6,7 @@ from apps.common.views import (
     HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView,
     ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,
     DRECViewSet, NtpDatetimeView, dpudetails, edit_dpu,upload_customer_csv,download_latest_csv,
-    get_cid_range,get_cust_info,customer_list,config_api,download_config_by_st_id,rate_table_upload
+    get_cid_range,get_cust_info,customer_list,config_api,download_config_by_st_id,rate_table_upload,latest_rate_list
 )
 from django.contrib.auth import views as auth_views
 from rest_framework.authtoken.views import obtain_auth_token
@@ -70,6 +70,7 @@ urlpatterns = [
 
     # Add other URLs as needed
     path('rate_table_upload/', rate_table_upload, name='rate_table_upload'),
+    path('latest_rate_list/', latest_rate_list, name='latest_rate_list'),
 
 ]
 
