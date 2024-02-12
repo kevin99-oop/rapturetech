@@ -479,26 +479,35 @@ def lastrate_api(request):
         return JsonResponse({'error': 'No rate data available for the user.'}, status=404)
     except Exception as e:
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
-import logging
-logger = logging.getLogger(__name__)
+import csv
 
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+
+@login_required
 def lastratedate_api(request):
-    # Get the parameters from the request's query parameters
-    animal = request.GET.get('animal', '')
-    rate_type = request.GET.get('rate_type', '')
-
-    # Query the RateTable model to get the last rate date
     try:
-        rate_object = get_object_or_404(RateTable.objects.filter(
-            user=request.user, animal=animal, rate_type=rate_type).order_by('-start_date')[:1])
-
         # Get the last rate date
-        last_rate_date = rate_object.start_date
+        rate_object = RateTable.objects.filter(
+            user=request.user,
+            animal=request.GET.get('animal'),
+            rate_type=request.GET.get('rate_type')
+        ).order_by('-start_date').first()
 
-        # Return the last rate date in the response
-        response_data = {'last_rate_date': last_rate_date.strftime('%Y-%m-%d')}
-        return JsonResponse(response_data)
+        if rate_object:
+            # Open the CSV file and read the date from the first column of the first row
+            with open(rate_object.file.path, 'r') as csv_file:
+                reader = csv.reader(csv_file)
+                # Assuming the date is in the first column
+                first_row = next(reader, None)
+                if first_row:
+                    date_from_csv = first_row[0]
+                    response_data = {'last_rate_date_from_csv': date_from_csv}
+                    return JsonResponse(response_data)
+                else:
+                    return JsonResponse({'error': 'CSV file is empty.'}, status=500)
+        else:
+            return JsonResponse({'error': 'No matching rate found.'}, status=404)
     except Exception as e:
         logger.exception(f'Error in lastratedate_api: {e}')
-
-        return JsonResponse({'error': f'Error retrieving last rate date: {e}'}, status=500)
+        return JsonResponse({'error': 'Internal Server Error'}, status=500)
