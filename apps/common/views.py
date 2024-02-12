@@ -479,3 +479,22 @@ def lastrate_api(request):
         return JsonResponse({'error': 'No rate data available for the user.'}, status=404)
     except Exception as e:
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
+
+def lastratedate_api(request):
+    # Get the parameters from the request's query parameters
+    animal = request.GET.get('animal', '')
+    rate_type = request.GET.get('rate_type', '')
+
+    # Query the RateTable model to get the last rate date
+    try:
+        rate_object = get_object_or_404(RateTable.objects.filter(
+            user=request.user, animal=animal, rate_type=rate_type).order_by('-start_date')[:1])
+
+        # Get the last rate date
+        last_rate_date = rate_object.start_date
+
+        # Return the last rate date in the response
+        response_data = {'last_rate_date': last_rate_date.strftime('%Y-%m-%d')}
+        return JsonResponse(response_data)
+    except Exception as e:
+        return JsonResponse({'error': f'Error retrieving last rate date: {e}'}, status=500)
