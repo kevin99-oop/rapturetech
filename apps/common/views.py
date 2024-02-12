@@ -479,6 +479,8 @@ def lastrate_api(request):
         return JsonResponse({'error': 'No rate data available for the user.'}, status=404)
     except Exception as e:
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
+import logging
+logger = logging.getLogger(__name__)
 
 def lastratedate_api(request):
     # Get the parameters from the request's query parameters
@@ -497,4 +499,6 @@ def lastratedate_api(request):
         response_data = {'last_rate_date': last_rate_date.strftime('%Y-%m-%d')}
         return JsonResponse(response_data)
     except Exception as e:
+        logger.exception(f'Error in lastratedate_api: {e}')
+
         return JsonResponse({'error': f'Error retrieving last rate date: {e}'}, status=500)
