@@ -2,7 +2,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
-from apps.common.models import DREC, Customer, Config
+from apps.common.models import DREC, Customer, Config,RateTable
 
 # Serializer for User model, includes password validation
 class UserSerializer(serializers.ModelSerializer):
@@ -63,4 +63,9 @@ class CustomerSerializer(serializers.ModelSerializer):
 class ConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = Config
+        fields = '__all__'
+
+class RateTableSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RateTable
         fields = '__all__'

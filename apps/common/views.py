@@ -432,9 +432,11 @@ def format_text_data(text_data):
     return '\n'.join(formatted_lines)
 
 
-from django.shortcuts import render
+# views.py
+from django.shortcuts import render, redirect
 from apps.common.forms import RateTableUploadForm
 from apps.common.models import RateTable
+from django.http import JsonResponse
 
 def rate_table_upload(request):
     if request.method == 'POST':
@@ -442,32 +444,38 @@ def rate_table_upload(request):
         if form.is_valid():
             try:
                 instance = form.save(commit=False)
-                instance.user = request.user  # Assuming user information is available in the request
-                # Process the form data here
-                file = form.cleaned_data['file']
-                animal = form.cleaned_data['animal']
-                rate_type = form.cleaned_data['rate_type']
-                start_date = form.cleaned_data['start_date']
+                instance.user = request.user  # Assign the logged-in user
                 instance.save()
-                
-            # Add your processing logic here
             except Exception as e:
                 print(f"Error saving data: {e}")
-
-
             request.session['upload_success'] = True
-
             return redirect('latest_rate_list')
     else:
         form = RateTableUploadForm()
 
     return render(request, 'common/rate_table_upload.html', {'form': form})
-def latest_rate_list(request):
-    # Retrieve the latest rate list from the Rate model
-    latest_rates = RateTable.objects.all().order_by('-start_date')[:10]
 
+def latest_rate_list(request):
+    # Retrieve the latest rate list for the logged-in user
+    latest_rates = RateTable.objects.filter(user=request.user).order_by('-start_date')[:10]
     context = {
         'latest_rates': latest_rates,
     }
-
     return render(request, 'common/rate_table_list.html', context)
+
+def lastrate_api(request):
+    try:
+        # Get the latest RateTable entry for the logged-in user
+        latest_rate = RateTable.objects.filter(user=request.user).latest('start_date')
+        # Modify the response as needed based on your requirements
+        response_data = {
+            'animal': latest_rate.animal,
+            'rate_type': latest_rate.rate_type,
+            'start_date': latest_rate.start_date.strftime('%Y-%m-%d'),
+            # Add more fields as needed
+        }
+        return JsonResponse(response_data)
+    except RateTable.DoesNotExist:
+        return JsonResponse({'error': 'No rate data available for the user.'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)

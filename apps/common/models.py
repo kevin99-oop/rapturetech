@@ -93,10 +93,13 @@ class Config(models.Model):
     
 
 class RateTable(models.Model):
+    ANIMAL_CHOICES = [('COW', 'COW'), ('BUFFALO', 'BUFFALO')]
+    RATE_TYPE_CHOICES = [('SNF', 'SNF'), ('FAT', 'FAT'), ('CLR', 'CLR')]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     file = models.FileField(upload_to='rate_tables/')
-    animal = models.CharField(max_length=10, choices=[('COW', 'COW'), ('BUFFALO', 'BUFFALO')])
-    rate_type = models.CharField(max_length=10, choices=[('SNF', 'SNF'), ('FAT', 'FAT'), ('CLR', 'CLR')])
+    animal = models.CharField(max_length=10, choices=ANIMAL_CHOICES)
+    rate_type = models.CharField(max_length=10, choices=RATE_TYPE_CHOICES)
     start_date = models.DateField()
 
     def __str__(self):

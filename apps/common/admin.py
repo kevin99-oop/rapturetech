@@ -39,3 +39,14 @@ class ConfigAdmin(admin.ModelAdmin):
         return "No st_id available"  # Provide a fallback message if st_id is empty
 
     download_link.short_description = 'Download'  # Define the display name for the download link
+
+
+from django.contrib import admin
+from django.utils.html import format_html
+from .models import RateTable
+
+@admin.register(RateTable)
+class RateTableAdmin(admin.ModelAdmin):
+    list_display = ('user', 'animal', 'rate_type', 'start_date')
+    search_fields = ('user__username', 'animal', 'rate_type')
+    list_filter = ('user__username', 'animal', 'rate_type')
