@@ -480,7 +480,6 @@ def lastrate_api(request):
     except Exception as e:
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
 
-
 import csv
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -505,14 +504,14 @@ def lastratedate_api(request):
             with open(rate_object.file.path, 'r') as csv_file:
                 reader = csv.reader(csv_file)
                 
-                # Read data from the first row and first column
+                # Read data from the first row
                 row = next(reader, None)
                 
                 if row:
                     # Assuming the date is in the first column
                     date_from_csv = row[0]
                     # Add data to the list
-                    data_list.append({'animal': animal, 'rate_type': rate_type, 'date': date_from_csv})
+                    data_list.append({'date': date_from_csv})
 
         if data_list:
             return JsonResponse({'data_list': data_list})
