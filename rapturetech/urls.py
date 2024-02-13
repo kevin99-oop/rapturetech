@@ -72,7 +72,7 @@ urlpatterns = [
     path('rate_table_upload/', rate_table_upload, name='rate_table_upload'),
     path('latest_rate_list/', latest_rate_list, name='latest_rate_list'),
     path('api/lastrate/', lastrate_api, name='lastrate_api'),
-    path('api/lastratedate/', lastratedate_api, name='lastratedate_api'),  # Add this line
+    path('api/lastratedate/', lastratedate_api, name='lastratedate_api'),
 
 ]
 
