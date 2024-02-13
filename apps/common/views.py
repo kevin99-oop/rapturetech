@@ -481,9 +481,12 @@ def lastrate_api(request):
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
 
 # views.py
+# views.py
 import csv
+from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+import os
 
 @csrf_exempt
 def lastratedate_api(request):
@@ -492,19 +495,22 @@ def lastratedate_api(request):
         rate_type = request.GET.get('rate_type')
 
         # Assuming the CSV file is stored in the 'rate_files/' directory
-        file_path = f'rate_files/{animal}_{rate_type}.csv'
+        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_files', f'{animal}_{rate_type}.csv')
 
-        # Open the CSV file and read the data from the first row, first column
-        with open(file_path, 'r') as csv_file:
-            reader = csv.reader(csv_file)
-            # Skip the header row
-            next(reader, None)
-            # Get the date from the first column of the first row
-            date_from_csv = next(reader)[0]
+        if os.path.exists(file_path):
+            # Open the CSV file and read the data from the first row, first column
+            with open(file_path, 'r') as csv_file:
+                reader = csv.reader(csv_file)
+                # Skip the header row
+                next(reader, None)
+                # Get the date from the first column of the first row
+                date_from_csv = next(reader)[0]
 
-        print(f'Date from CSV: {date_from_csv}')
+            print(f'Date from CSV: {date_from_csv}')
 
-        return JsonResponse({'date': date_from_csv})
+            return JsonResponse({'date': date_from_csv})
+        else:
+            return JsonResponse({'error': 'CSV file not found'}, status=404)
 
     except Exception as e:
         # Handle exceptions appropriately
