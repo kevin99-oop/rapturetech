@@ -479,7 +479,6 @@ def lastrate_api(request):
         return JsonResponse({'error': 'No rate data available for the user.'}, status=404)
     except Exception as e:
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
-
 import csv
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -498,8 +497,10 @@ def lastratedate_api(request):
         # Open the CSV file and read just the first line
         with open(file_path, 'r') as csv_file:
             reader = csv.reader(csv_file, delimiter='\t')  # Assuming it's tab-separated
-            # Get the date from the first cell of the first row
-            date_from_csv = next(reader)[0]
+            # Get the first row from the CSV
+            first_row = next(reader)
+            # Join the elements up to the first occurrence of '{,0}' to get the date
+            date_from_csv = ''.join(first_row[:first_row.index('{,0}')])
 
         print(f'Date from CSV: {date_from_csv}')
 
@@ -509,4 +510,3 @@ def lastratedate_api(request):
         # Handle exceptions appropriately
         print(f'Error in lastratedate_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
-
