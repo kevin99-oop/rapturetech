@@ -484,7 +484,8 @@ def lastrate_api(request):
 import csv
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-
+from django.conf import settings
+import os
 @csrf_exempt
 def lastratedate_api(request):
     try:
@@ -492,7 +493,7 @@ def lastratedate_api(request):
         rate_type = request.GET.get('rate_type')
 
         # Assuming the CSV file is stored in the 'rate_files/' directory
-        file_path = f'rate_tables/{animal}_{rate_type}.csv'
+        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{animal}_{rate_type}.csv')
 
         # Open the CSV file and read the data from the first row, first column
         with open(file_path, 'r') as csv_file:
