@@ -513,7 +513,6 @@ def lastratedate_api(request):
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
 
 import csv
-import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
@@ -523,30 +522,29 @@ import os
 def ratesitem_api(request):
     try:
         animal = request.GET.get('animal')
-        rate_type = request.GET.get('rate_type')
         date = request.GET.get('date')
+        rate_type = request.GET.get('rate_type')
         item = request.GET.get('item')
 
-        # Construct the file path based on animal, rate_type, and date
+        # Assuming the CSV file is stored in the 'rate_files/' directory
         file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{animal}_{rate_type}.csv')
 
-        # Open the CSV file and read the data from the specified row (date) and column (item)
-        with open(file_path, 'r') as csv_file:
-            reader = csv.reader(csv_file)
-            header = next(reader)  # Skip the header row
-            date_index = header.index('Date')  # Assuming 'Date' is the header for the date column
-            item_index = int(float(item) * 10)  # Assuming items are in increments of 0.1
+        # Read CSV file
+        with open(file_path, newline='') as csvfile:
+            reader = csv.reader(csvfile)
+            data = [row for row in reader]
 
-            for row in reader:
-                if row[date_index] == date:
-                    row_data = row[item_index]
-                    break
-            else:
-                return JsonResponse({'error': f'Data not found for date {date} and item {item}'}, status=404)
+        # Extract date and values
+        date_row = data[0]
+        values_row = data[int(float(item))]  # Assuming 'item' is the row number
 
-        # Create a JSON response with the row data
-        response_data = {'row': row_data}
-        return JsonResponse(response_data)
+        # Extract the first 10 characters from the date
+        date = date_row[0][:10]
+
+        # Format output
+        output_data = {"row": ",".join(values_row)}
+
+        return JsonResponse(output_data)
 
     except Exception as e:
         # Handle exceptions appropriately
