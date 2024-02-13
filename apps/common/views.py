@@ -480,12 +480,9 @@ def lastrate_api(request):
     except Exception as e:
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
 import csv
-import logging
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from .models import RateTable  # Adjust the import based on your actual model location
-
-logger = logging.getLogger(__name__)
+from django.shortcuts import get_object_or_404
 
 @login_required
 def lastratedate_api(request):
@@ -493,35 +490,31 @@ def lastratedate_api(request):
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
-        # Get the rate objects for the specified animal and rate type
-        rate_objects = RateTable.objects.filter(
+        # Get the latest rate object for the specified animal and rate type
+        rate_object = get_object_or_404(
+            RateTable,
             user=request.user,
             animal=animal,
             rate_type=rate_type
-        ).order_by('-start_date')
+        )
 
-        data_list = []
+        # Open the CSV file and read the data from the first row and first column
+        with open(rate_object.file.path, 'r') as csv_file:
+            reader = csv.reader(csv_file)
+            
+            # Skip the header row
+            next(reader, None)
 
-        for rate_object in rate_objects:
-            # Open the CSV file and read the data from each row
-            with open(rate_object.file.path, 'r') as csv_file:
-                reader = csv.reader(csv_file)
-                
-                # Skip the header row
-                next(reader, None)
+            # Read the first row
+            first_row = next(reader, None)
 
-                for row in reader:
-                    # Assuming the date is in the first column
-                    if row:
-                        date_from_csv = row[0]
-                        # Add data to the list
-                        data_list.append({'animal': animal, 'rate_type': rate_type, 'date': date_from_csv})
-
-        if data_list:
-            return JsonResponse({'data_list': data_list})
-        else:
-            return JsonResponse({'error': 'No data found in the CSV files for the specified parameters.'}, status=404)
+            if first_row:
+                # Assuming the date is in the first column
+                date_from_csv = first_row[0]
+                return JsonResponse({'animal': animal, 'rate_type': rate_type, 'date': date_from_csv})
+            else:
+                return JsonResponse({'error': 'No data found in the CSV file.'}, status=404)
 
     except Exception as e:
-        logger.exception(f'Error in lastratedate_api: {e}')
+        logger.exception(f'Error in get_first_date_from_csv: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
