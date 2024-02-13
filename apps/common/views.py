@@ -481,14 +481,12 @@ def lastrate_api(request):
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
 
 import csv
-from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
 @login_required
 def lastratedate_api(request):
     try:
-        # Extract parameters from the request
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
@@ -501,32 +499,26 @@ def lastratedate_api(request):
 
         data_list = []
 
-        # Loop through each rate object
         for rate_object in rate_objects:
             # Open the CSV file and read the data from each row
             with open(rate_object.file.path, 'r') as csv_file:
                 reader = csv.reader(csv_file)
-
+                
                 # Skip the header row
                 next(reader, None)
 
-                # Assuming the date is in the first column
                 for row in reader:
-                    # Parse the date and format it as 'YYYY-MM-DD'
-                    date_from_csv = datetime.strptime(row[0], '%d-%m-%Y').strftime('%Y-%m-%d')
+                    # Assuming the date is in the first column
+                    date_from_csv = row[0]
                     # Add data to the list
                     data_list.append({'date': date_from_csv})
 
         if data_list:
-            # Return the list of dates as a JSON response
             return JsonResponse({'data_list': data_list})
         else:
-            # If no data is found, return a 404 response
             return JsonResponse({'error': 'No data found in the CSV files.'}, status=404)
 
     except Exception as e:
-        # Catch any exceptions and return a 500 internal server error response
         logger.exception(f'Error in lastratedate_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
-
 
