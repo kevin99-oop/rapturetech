@@ -484,6 +484,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import os
+from datetime import datetime
 
 @csrf_exempt
 def lastratedate_api(request):
@@ -502,9 +503,12 @@ def lastratedate_api(request):
             # Get the date from the first column of the first row
             date_from_csv = next(reader)[0]
 
-        print(f'Date from CSV: {date_from_csv}')
+        # Try to parse the date from the string (adjust the format as needed)
+        parsed_date = datetime.strptime(date_from_csv, "%d-%m-%Y").strftime("%Y-%m-%d")
 
-        return JsonResponse({'date': date_from_csv})
+        print(f'Date from CSV: {parsed_date}')
+
+        return JsonResponse({'date': parsed_date})
 
     except FileNotFoundError:
         return JsonResponse({'error': 'CSV file not found.'}, status=404)
