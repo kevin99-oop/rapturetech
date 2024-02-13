@@ -509,3 +509,4 @@ def lastratedate_api(request):
         # Handle exceptions appropriately
         print(f'Error in lastratedate_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
+
