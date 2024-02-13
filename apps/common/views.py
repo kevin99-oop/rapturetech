@@ -480,11 +480,12 @@ def lastrate_api(request):
     except Exception as e:
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
 import csv
-
-import csv
-
+import logging
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from .models import RateTable  # Adjust the import based on your actual model location
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def lastratedate_api(request):
@@ -511,14 +512,15 @@ def lastratedate_api(request):
 
                 for row in reader:
                     # Assuming the date is in the first column
-                    date_from_csv = row[0]
-                    # Add data to the list
-                    data_list.append({'animal': animal, 'rate_type': rate_type, 'date': date_from_csv})
+                    if row:
+                        date_from_csv = row[0]
+                        # Add data to the list
+                        data_list.append({'animal': animal, 'rate_type': rate_type, 'date': date_from_csv})
 
         if data_list:
             return JsonResponse({'data_list': data_list})
         else:
-            return JsonResponse({'error': 'No data found in the CSV files.'}, status=404)
+            return JsonResponse({'error': 'No data found in the CSV files for the specified parameters.'}, status=404)
 
     except Exception as e:
         logger.exception(f'Error in lastratedate_api: {e}')
