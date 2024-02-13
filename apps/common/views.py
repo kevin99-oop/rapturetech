@@ -479,46 +479,38 @@ def lastrate_api(request):
         return JsonResponse({'error': 'No rate data available for the user.'}, status=404)
     except Exception as e:
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
-
 import csv
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+import os
 
-@login_required
+@csrf_exempt
 def lastratedate_api(request):
     try:
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
-        # Get the rate objects for the specified animal and rate type
-        rate_objects = RateTable.objects.filter(
-            user=request.user,
-            animal=animal,
-            rate_type=rate_type
-        ).order_by('-start_date')
+        # Assuming the CSV file is stored in the 'rate_tables/' directory
+        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{animal}_{rate_type}.csv')
 
-        data_list = []
+        # Open the CSV file and read the data from the first row, first column
+        with open(file_path, 'r') as csv_file:
+            reader = csv.reader(csv_file)
+            # Skip the header row
+            next(reader, None)
+            # Get the date from the first column of the first row
+            date_from_csv = next(reader)[0]
 
-        for rate_object in rate_objects:
-            # Open the CSV file and read the data from each row
-            with open(rate_object.file.path, 'r') as csv_file:
-                reader = csv.reader(csv_file)
-                
-                # Skip the header row
-                next(reader, None)
+        print(f'Date from CSV: {date_from_csv}')
 
-                for row in reader:
-                    # Assuming the date is in the first column
-                    date_from_csv = row[0]
-                    # Add data to the list
-                    data_list.append({'date': date_from_csv})
+        return JsonResponse({'date': date_from_csv})
 
-        if data_list:
-            return JsonResponse({'data_list': data_list})
-        else:
-            return JsonResponse({'error': 'No data found in the CSV files.'}, status=404)
-
+    except FileNotFoundError:
+        return JsonResponse({'error': 'CSV file not found.'}, status=404)
+    except StopIteration:
+        return JsonResponse({'error': 'No data found in the CSV file.'}, status=404)
     except Exception as e:
-        logger.exception(f'Error in lastratedate_api: {e}')
+        # Handle other exceptions appropriately
+        print(f'Error in lastratedate_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
-
