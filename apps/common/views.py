@@ -484,7 +484,6 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import os
-from datetime import datetime
 
 @csrf_exempt
 def lastratedate_api(request):
@@ -492,29 +491,22 @@ def lastratedate_api(request):
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
-        # Assuming the CSV file is stored in the 'rate_tables/' directory
+        # Assuming the CSV file is stored in the 'rate_files/' directory
         file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{animal}_{rate_type}.csv')
 
         # Open the CSV file and read the data from the first row, first column
         with open(file_path, 'r') as csv_file:
-            reader = csv.reader(csv_file)
+            reader = csv.reader(csv_file, delimiter='\t')  # Assuming it's tab-separated
             # Skip the header row
             next(reader, None)
             # Get the date from the first column of the first row
             date_from_csv = next(reader)[0]
 
-        # Try to parse the date from the string (adjust the format as needed)
-        parsed_date = datetime.strptime(date_from_csv, "%d-%m-%Y").strftime("%Y-%m-%d")
+        print(f'Date from CSV: {date_from_csv}')
 
-        print(f'Date from CSV: {parsed_date}')
+        return JsonResponse({'date': date_from_csv})
 
-        return JsonResponse({'date': parsed_date})
-
-    except FileNotFoundError:
-        return JsonResponse({'error': 'CSV file not found.'}, status=404)
-    except StopIteration:
-        return JsonResponse({'error': 'No data found in the CSV file.'}, status=404)
     except Exception as e:
-        # Handle other exceptions appropriately
+        # Handle exceptions appropriately
         print(f'Error in lastratedate_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
