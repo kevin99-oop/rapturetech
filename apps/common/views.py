@@ -511,3 +511,44 @@ def lastratedate_api(request):
         # Handle exceptions appropriately
         print(f'Error in lastratedate_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
+
+import csv
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+import os
+
+@csrf_exempt
+def ratesitem_api(request):
+    try:
+        animal = request.GET.get('animal')
+        rate_type = request.GET.get('rate_type')
+        date = request.GET.get('date')
+        item = request.GET.get('item')
+
+        # Construct the file path based on animal, rate_type, and date
+        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{animal}_{rate_type}.csv')
+
+        # Open the CSV file and read the data from the specified row (date) and column (item)
+        with open(file_path, 'r') as csv_file:
+            reader = csv.reader(csv_file)
+            header = next(reader)  # Skip the header row
+            date_index = header.index('Date')  # Assuming 'Date' is the header for the date column
+            item_index = int(float(item) * 10)  # Assuming items are in increments of 0.1
+
+            for row in reader:
+                if row[date_index] == date:
+                    row_data = row[item_index]
+                    break
+            else:
+                return JsonResponse({'error': f'Data not found for date {date} and item {item}'}, status=404)
+
+        # Create a JSON response with the row data
+        response_data = {'row': row_data}
+        return JsonResponse(response_data)
+
+    except Exception as e:
+        # Handle exceptions appropriately
+        print(f'Error in ratesitem_api: {e}')
+        return JsonResponse({'error': 'Internal Server Error'}, status=500)

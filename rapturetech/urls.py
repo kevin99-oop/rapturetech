@@ -6,7 +6,7 @@ from apps.common.views import (
     HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView,
     ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,
     DRECViewSet, NtpDatetimeView, dpudetails, edit_dpu,upload_customer_csv,download_latest_csv,
-    get_cid_range,get_cust_info,customer_list,config_api,download_config_by_st_id,rate_table_upload,latest_rate_list,lastrate_api,lastratedate_api
+    get_cid_range,get_cust_info,customer_list,config_api,download_config_by_st_id,rate_table_upload,latest_rate_list,lastrate_api,lastratedate_api,ratesitem_api
 )
 from django.contrib.auth import views as auth_views
 from rest_framework.authtoken.views import obtain_auth_token
@@ -73,6 +73,8 @@ urlpatterns = [
     path('latest_rate_list/', latest_rate_list, name='latest_rate_list'),
     path('api/lastrate/', lastrate_api, name='lastrate_api'),
     path('api/lastratedate/', lastratedate_api, name='lastratedate_api'),
+        path('api/ratesitem/', ratesitem_api, name='ratesitem_api'),
+
 
 ]
 
