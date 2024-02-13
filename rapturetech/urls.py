@@ -73,7 +73,7 @@ urlpatterns = [
     path('latest_rate_list/', latest_rate_list, name='latest_rate_list'),
     path('api/lastrate/', lastrate_api, name='lastrate_api'),
     path('api/lastratedate/', lastratedate_api, name='lastratedate_api'),
-        path('api/ratesitem/', ratesitem_api, name='ratesitem_api'),
+    path('api/ratesitem/', ratesitem_api, name='ratesitem_api'),
 
 
 ]
