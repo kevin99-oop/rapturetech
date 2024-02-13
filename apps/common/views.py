@@ -479,10 +479,11 @@ def lastrate_api(request):
         return JsonResponse({'error': 'No rate data available for the user.'}, status=404)
     except Exception as e:
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
+
+
 import csv
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from .models import RateTable  # Import your RateTable model
 
 @login_required
 def lastratedate_api(request):
@@ -504,11 +505,9 @@ def lastratedate_api(request):
             with open(rate_object.file.path, 'r') as csv_file:
                 reader = csv.reader(csv_file)
                 
-                # Skip the header row
-                next(reader, None)
-
                 # Read data from the first row and first column
                 row = next(reader, None)
+                
                 if row:
                     # Assuming the date is in the first column
                     date_from_csv = row[0]
