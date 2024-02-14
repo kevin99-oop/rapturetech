@@ -479,7 +479,6 @@ def lastrate_api(request):
         return JsonResponse({'error': 'No rate data available for the user.'}, status=404)
     except Exception as e:
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
-
 import csv
 import os
 from django.http import JsonResponse
@@ -497,7 +496,7 @@ def lastratedate_api(request):
         rate_type = request.GET.get('rate_type')
 
         # Retrieve the latest RateTable entry for the specified animal and rate_type
-        latest_rate = RateTable.objects.filter(animal=animal, rate_type=rate_type).latest('start_date')
+        latest_rate = RateTable.objects.filter(animal=animal, rate_type=rate_type, user=user).latest('start_date')
 
         # Generate file path using os.path.join with the latest RateTable entry
         file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', f'{latest_rate.animal}_{latest_rate.rate_type}.csv')
@@ -512,19 +511,14 @@ def lastratedate_api(request):
 
         print(f'Date from CSV: {date_from_csv}')
 
-        return JsonResponse({'date': date_from_csv})
+        return JsonResponse({'date': date_from_csv, 'filename': f'{latest_rate.animal}_{latest_rate.rate_type}.csv'})
 
     except RateTable.DoesNotExist:
         return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
     except Exception as e:
         # Provide more specific error information for debugging
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
-import csv
-import os
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.conf import settings
-from apps.common.models import RateTable
+
 
 @csrf_exempt
 def ratesitem_api(request):
@@ -558,7 +552,8 @@ def ratesitem_api(request):
         # Format output
         output_data = {
             "date": date,
-            "values": values_row  # You may want to use a more descriptive key
+            "values": values_row,  # You may want to use a more descriptive key
+            "filename": f'{latest_rate.animal}_{latest_rate.rate_type}.csv'
         }
 
         return JsonResponse(output_data)
