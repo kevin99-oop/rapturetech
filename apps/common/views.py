@@ -481,10 +481,11 @@ def lastrate_api(request):
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
 
 import csv
+import os
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-import os
+from apps.common.models import RateTable
 
 @csrf_exempt
 def lastratedate_api(request):
@@ -495,8 +496,11 @@ def lastratedate_api(request):
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
-        # Assuming the CSV file is stored in the 'rate_files/' directory
-        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{animal}_{rate_type}.csv')
+        # Retrieve the latest RateTable entry for the specified animal and rate_type
+        latest_rate = RateTable.objects.filter(animal=animal, rate_type=rate_type).latest('start_date')
+
+        # Generate file path using os.path.join with the latest RateTable entry
+        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', f'{latest_rate.animal}_{latest_rate.rate_type}.csv')
 
         # Open the CSV file and read just the first line
         with open(file_path, 'r') as csv_file:
@@ -510,15 +514,17 @@ def lastratedate_api(request):
 
         return JsonResponse({'date': date_from_csv})
 
+    except RateTable.DoesNotExist:
+        return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
     except Exception as e:
-        # Handle exceptions appropriately
-        print(f'Error in lastratedate_api: {e}')
-        return JsonResponse({'error': 'Internal Server Error'}, status=500)
+        # Provide more specific error information for debugging
+        return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
 import csv
+import os
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-import os
+from apps.common.models import RateTable
 
 @csrf_exempt
 def ratesitem_api(request):
@@ -531,8 +537,11 @@ def ratesitem_api(request):
         rate_type = request.GET.get('rate_type')
         item = request.GET.get('item')
 
-        # Assuming the CSV file is stored in the 'rate_files/' directory
-        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{animal}_{rate_type}.csv')
+        # Retrieve the latest RateTable entry for the logged-in user and specified animal and rate_type
+        latest_rate = RateTable.objects.filter(user=user, animal=animal, rate_type=rate_type).latest('start_date')
+
+        # Generate file path using os.path.join with the latest RateTable entry
+        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', f'{latest_rate.animal}_{latest_rate.rate_type}.csv')
 
         # Read CSV file
         with open(file_path, newline='') as csvfile:
@@ -547,11 +556,15 @@ def ratesitem_api(request):
         date = date_row[0][:10]
 
         # Format output
-        output_data = {"row": ",".join(values_row)}
+        output_data = {
+            "date": date,
+            "values": values_row  # You may want to use a more descriptive key
+        }
 
         return JsonResponse(output_data)
 
+    except RateTable.DoesNotExist:
+        return JsonResponse({'error': 'No rate data available for the user.'}, status=404)
     except Exception as e:
-        # Handle exceptions appropriately
-        print(f'Error in ratesitem_api: {e}')
-        return JsonResponse({'error': 'Internal Server Error'}, status=500)
+        # Provide more specific error information for debugging
+        return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
