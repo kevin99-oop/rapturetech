@@ -496,7 +496,7 @@ def lastratedate_api(request):
         rate_type = request.GET.get('rate_type')
 
         # Assuming the CSV file is stored in the 'rate_files/' directory
-        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{user.username}_{animal}_{rate_type}.csv')
+        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{animal}_{rate_type}.csv')
 
         # Open the CSV file and read just the first line
         with open(file_path, 'r') as csv_file:
@@ -532,7 +532,7 @@ def ratesitem_api(request):
         item = request.GET.get('item')
 
         # Assuming the CSV file is stored in the 'rate_files/' directory
-        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{user.username}_{animal}_{rate_type}.csv')
+        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{animal}_{rate_type}.csv')
 
         # Read CSV file
         with open(file_path, newline='') as csvfile:
