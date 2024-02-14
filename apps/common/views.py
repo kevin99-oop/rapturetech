@@ -489,11 +489,14 @@ import os
 @csrf_exempt
 def lastratedate_api(request):
     try:
+        # Get the logged-in user
+        user = request.user
+
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
         # Assuming the CSV file is stored in the 'rate_files/' directory
-        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{animal}_{rate_type}.csv')
+        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{user.username}_{animal}_{rate_type}.csv')
 
         # Open the CSV file and read just the first line
         with open(file_path, 'r') as csv_file:
@@ -511,7 +514,6 @@ def lastratedate_api(request):
         # Handle exceptions appropriately
         print(f'Error in lastratedate_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
-
 import csv
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -521,13 +523,16 @@ import os
 @csrf_exempt
 def ratesitem_api(request):
     try:
+        # Get the logged-in user
+        user = request.user
+
         animal = request.GET.get('animal')
         date = request.GET.get('date')
         rate_type = request.GET.get('rate_type')
         item = request.GET.get('item')
 
         # Assuming the CSV file is stored in the 'rate_files/' directory
-        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{animal}_{rate_type}.csv')
+        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{user.username}_{animal}_{rate_type}.csv')
 
         # Read CSV file
         with open(file_path, newline='') as csvfile:
