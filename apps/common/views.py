@@ -544,13 +544,14 @@ def download_rate_table(request, rate_table_id):
 
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import get_object_or_404
-from .models import RateTable
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from apps.common.models import RateTable
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from apps.common.models import RateTable
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from apps.common.models import RateTable
@@ -575,7 +576,9 @@ def lastratedate_api(request):
     except RateTable.DoesNotExist:
         return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
     except Exception as e:
-        # Provide more specific error information for debugging
+        # Print the exception traceback in the console for debugging
+        import traceback
+        traceback.print_exc()
         return JsonResponse({'error': f'Internal Server Error: {str(e)}'}, status=500)
 
 import csv
