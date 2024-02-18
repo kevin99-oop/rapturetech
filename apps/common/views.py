@@ -548,9 +548,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from .models import RateTable
-
+import os
 import logging
-
 @csrf_exempt
 def lastratedate_api(request):
     try:
@@ -561,13 +560,10 @@ def lastratedate_api(request):
         rate_type = request.GET.get('rate_type')
 
         # Retrieve the latest RateTable entry for the specified animal and rate_type
-        try:
-            latest_rate = RateTable.objects.filter(animal=animal, rate_type=rate_type, user=user).latest('start_date')
-        except RateTable.DoesNotExist:
-            return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
+        latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type, user=user).latest('start_date')
 
         # Generate file path using os.path.join with the latest RateTable entry
-        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', f'{latest_rate.animal}_{latest_rate.rate_type}.csv')
+        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', f'{latest_rate.animal_type}_{latest_rate.rate_type}.csv')
 
         # Open the CSV file and read just the first line
         with open(file_path, 'r') as csv_file:
@@ -579,12 +575,13 @@ def lastratedate_api(request):
 
         print(f'Date from CSV: {date_from_csv}')
 
-        return JsonResponse({'date': date_from_csv, 'filename': f'{latest_rate.animal}_{latest_rate.rate_type}.csv'})
+        return JsonResponse({'date': date_from_csv, 'filename': f'{latest_rate.animal_type}_{latest_rate.rate_type}.csv'})
 
+    except RateTable.DoesNotExist:
+        return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
     except Exception as e:
-        # Log the exception for debugging
-        logging.exception(f'Error in lastratedate_api: {e}')
-        return JsonResponse({'error': 'Internal Server Error'}, status=500)
+        # Provide more specific error information for debugging
+        return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
 
 
 import csv
