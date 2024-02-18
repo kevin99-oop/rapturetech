@@ -485,7 +485,7 @@ def upload_rate_table(request):
             rate_type = filename_parts[0][1:4].upper()  # Extract the next 3 characters (rate type)
 
             # Convert animal_type_code to full animal type
-            animal_type = 'Cow' if animal_type_code == 'C' else 'Buffalo' if animal_type_code == 'B' else None
+            animal_type = 'COW' if animal_type_code == 'C' else 'BUFFALOW' if animal_type_code == 'B' else None
 
             if animal_type:
                 # Save the RateTable entry with the corresponding user, animal type, rate type, and CSV file
