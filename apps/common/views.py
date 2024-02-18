@@ -548,8 +548,10 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from .models import RateTable
-import os
-import logging
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from apps.common.models import RateTable
+
 @csrf_exempt
 def lastratedate_api(request):
     try:
