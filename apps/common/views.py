@@ -548,19 +548,14 @@ def download_rate_table(request, rate_table_id):
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from apps.common.models import RateTable
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from apps.common.models import RateTable
-
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from apps.common.models import RateTable
+from django.contrib.auth.decorators import login_required
 
 @csrf_exempt
+@login_required
 def lastratedate_api(request):
     try:
-        # Get the logged-in user
-        user = request.user
+        # Force evaluation of lazy object to get the actual user
+        user = request.user._wrapped if hasattr(request.user, '_wrapped') else request.user
 
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
