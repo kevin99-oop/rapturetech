@@ -552,14 +552,13 @@ from apps.common.models import RateTable
 @csrf_exempt
 def lastratedate_api(request):
     try:
-        # Retrieve the latest RateTable entry for the specified animal and rate_type
+        # Check if the user is authenticated
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'User not authenticated.'}, status=401)
+
         user = request.user
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
-        
-        # Ensure the user is authenticated
-        if not user.is_authenticated:
-            return JsonResponse({'error': 'User not authenticated.'}, status=401)
 
         # Retrieve the latest RateTable entry for the specified animal and rate_type
         latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type, user=user).latest('start_date')
@@ -578,7 +577,6 @@ def lastratedate_api(request):
         import traceback
         traceback.print_exc()
         return JsonResponse({'error': f'Internal Server Error: {str(e)}'}, status=500)
-
 
 
 import csv
