@@ -547,16 +547,19 @@ def download_rate_table(request, rate_table_id):
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import AnonymousUser
 from apps.common.models import RateTable
 
 @csrf_exempt
 def lastratedate_api(request):
     try:
-        user = request.user._wrapped if hasattr(request.user, '_wrapped') else request.user
+        # Get the logged-in user or use AnonymousUser if not authenticated
+        user = request.user if request.user.is_authenticated else AnonymousUser()
 
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
+        # Retrieve the latest RateTable entry for the specified animal and rate_type
         latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type, user=user).latest('start_date')
 
         start_date = latest_rate.start_date.strftime('%d-%m-%Y')
@@ -569,7 +572,6 @@ def lastratedate_api(request):
         import traceback
         traceback.print_exc()
         return JsonResponse({'error': f'Internal Server Error: {str(e)}'}, status=500)
-
 import csv
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
