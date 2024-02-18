@@ -1,5 +1,5 @@
 from django.contrib import admin
-from apps.common.models import DREC,DPU,Customer,Config
+from apps.common.models import DREC,DPU,Customer,Config,RateTable
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
@@ -40,13 +40,15 @@ class ConfigAdmin(admin.ModelAdmin):
 
     download_link.short_description = 'Download'  # Define the display name for the download link
 
-
-from django.contrib import admin
-from django.utils.html import format_html
-from .models import RateTable
-
 @admin.register(RateTable)
 class RateTableAdmin(admin.ModelAdmin):
-    list_display = ('user', 'animal', 'rate_type', 'start_date')
-    search_fields = ('user__username', 'animal', 'rate_type')
-    list_filter = ('user__username', 'animal', 'rate_type')
+    list_display = ('user', 'animal_type', 'rate_type', 'start_date', 'csv_file', 'download_link')
+
+    def download_link(self, obj):
+        return f'<a href="{obj.csv_file.url}" download>Download</a>'
+
+    download_link.allow_tags = True
+    download_link.short_description = 'Download'
+
+    def get_download_url(self, obj):
+        return obj.csv_file.url

@@ -431,60 +431,123 @@ def format_text_data(text_data):
             formatted_lines.append(element)
     return '\n'.join(formatted_lines)
 
+# apps/common/views.py
+from django.shortcuts import render, redirect, get_object_or_404
+from apps.common.forms import UploadRateTableForm
+from apps.common.models import RateTable
+from django.http import HttpResponse
+
+# apps/common/views.py
+from datetime import datetime
+from django.shortcuts import render, redirect, get_object_or_404
+from apps.common.forms import UploadRateTableForm
+from apps.common.models import RateTable
+from django.http import HttpResponse
+import csv
+
+# apps/common/views.py
+from datetime import datetime
+from django.shortcuts import render, redirect
+from apps.common.forms import UploadRateTableForm
+from apps.common.models import RateTable
+from django.http import HttpResponse
+import csv
+from django.contrib import messages
 
 # views.py
-from django.shortcuts import render, redirect
-from apps.common.forms import RateTableUploadForm
-from apps.common.models import RateTable
-from django.http import JsonResponse
+from django.core.exceptions import ValidationError
 
-def rate_table_upload(request):
+# views.py
+from django.core.exceptions import ValidationError
+
+def upload_rate_table(request):
     if request.method == 'POST':
-        form = RateTableUploadForm(request.POST, request.FILES)
+        form = UploadRateTableForm(request.POST, request.FILES)
         if form.is_valid():
+            csv_file = form.cleaned_data['csv_file']
+
+            # Extract start_date from the CSV file content (assuming it's in the left-top corner)
+            start_date = None
             try:
-                instance = form.save(commit=False)
-                instance.user = request.user  # Assign the logged-in user
-                instance.save()
+                # Decode the CSV content from bytes to string
+                csv_content = csv_file.read().decode('utf-8')
+                # Split the lines and get the first line
+                first_line = csv_content.splitlines()[0]
+                # Assuming the date is in the first column of the CSV file
+                date_str = first_line.split(',')[0].strip()
+                start_date = datetime.strptime(date_str, '%d-%m-%Y').date() if date_str else None
             except Exception as e:
-                print(f"Error saving data: {e}")
-            request.session['upload_success'] = True
-            return redirect('latest_rate_list')
+                messages.error(request, f'Error extracting start date from CSV: {e}')
+
+            # Extract information from the CSV file name
+            filename_parts = csv_file.name.split('_')
+            animal_type_code = filename_parts[0][0].upper()  # Extract the first letter (animal type code)
+            rate_type = filename_parts[0][1:4].upper()  # Extract the next 3 characters (rate type)
+
+            # Convert animal_type_code to full animal type
+            animal_type = 'Cow' if animal_type_code == 'C' else 'Buffalo' if animal_type_code == 'B' else None
+
+            if animal_type:
+                # Save the RateTable entry with the corresponding user, animal type, rate type, and CSV file
+                rate_table = RateTable(
+                    user=request.user,
+                    animal_type=animal_type,
+                    rate_type=rate_type,
+                    csv_file=csv_file,
+                    start_date=start_date,
+                )
+                rate_table.save()
+
+                messages.success(request, 'Rate table uploaded successfully.')
+                return redirect('rate_table_list')
+            else:
+                messages.error(request, 'Invalid animal type code in the file name.')
+        else:
+            messages.error(request, 'Invalid form submission. Please check the file format.')
     else:
-        form = RateTableUploadForm()
+        form = UploadRateTableForm()
 
-    return render(request, 'common/rate_table_upload.html', {'form': form})
+    rate_tables = RateTable.objects.filter(user=request.user)
+    return render(request, 'common/rate_table_upload.html', {'form': form, 'rate_tables': rate_tables})
 
-def latest_rate_list(request):
-    # Retrieve the latest rate list for the logged-in user
-    latest_rates = RateTable.objects.filter(user=request.user).order_by('-start_date')[:10]
+def rate_table_list(request):
+    # Fetch all rate tables for the current user
+    rate_tables = RateTable.objects.filter(user=request.user)
+
     context = {
-        'latest_rates': latest_rates,
+        'rate_tables': rate_tables,
     }
+
     return render(request, 'common/rate_table_list.html', context)
 
-def lastrate_api(request):
-    try:
-        # Get the latest RateTable entry for the logged-in user
-        latest_rate = RateTable.objects.filter(user=request.user).latest('start_date')
-        # Modify the response as needed based on your requirements
-        response_data = {
-            'animal': latest_rate.animal,
-            'rate_type': latest_rate.rate_type,
-            'start_date': latest_rate.start_date.strftime('%Y-%m-%d'),
-            # Add more fields as needed
-        }
-        return JsonResponse(response_data)
-    except RateTable.DoesNotExist:
-        return JsonResponse({'error': 'No rate data available for the user.'}, status=404)
-    except Exception as e:
-        return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
-import csv
-import os
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from apps.common.models import RateTable
+
+def download_rate_table(request, rate_table_id):
+    # Fetch the rate table object by ID
+    rate_table = get_object_or_404(RateTable, id=rate_table_id)
+
+    # Ensure that the rate table belongs to the current user
+    if rate_table.user == request.user:
+        # Open the CSV file and create an HttpResponse with the file content
+        with open(rate_table.csv_file.path, 'rb') as csv_file:
+            response = HttpResponse(csv_file.read(), content_type='text/csv')
+
+        # Modify the filename to include the username
+        filename_parts = rate_table.csv_file.name.split('.')
+        username = request.user.username
+        new_filename = f"{filename_parts[0]}_{username}.{filename_parts[1]}"
+
+        response['Content-Disposition'] = f'attachment; filename="{new_filename}"'
+        return response
+
+    # If the rate table doesn't belong to the current user, return a 404 response
+    return HttpResponse(status=404)
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.conf import settings
-from apps.common.models import RateTable
+from django.shortcuts import get_object_or_404
+from .models import RateTable
 
 @csrf_exempt
 def lastratedate_api(request):
@@ -496,22 +559,12 @@ def lastratedate_api(request):
         rate_type = request.GET.get('rate_type')
 
         # Retrieve the latest RateTable entry for the specified animal and rate_type
-        latest_rate = RateTable.objects.filter(animal=animal, rate_type=rate_type, user=user).latest('start_date')
+        latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type, user=user).latest('start_date')
 
-        # Generate file path using os.path.join with the latest RateTable entry
-        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', f'{latest_rate.animal}_{latest_rate.rate_type}.csv')
+        # Get the start date of the latest rate table
+        start_date = latest_rate.start_date.strftime('%d-%m-%Y')
 
-        # Open the CSV file and read just the first line
-        with open(file_path, 'r') as csv_file:
-            reader = csv.reader(csv_file, delimiter='\t')  # Assuming it's tab-separated
-            # Get the first row from the CSV
-            first_row = next(reader)
-            # Take the first 10 characters from the first row to get the date
-            date_from_csv = first_row[0][:10]
-
-        print(f'Date from CSV: {date_from_csv}')
-
-        return JsonResponse({'date': date_from_csv, 'filename': f'{latest_rate.animal}_{latest_rate.rate_type}.csv'})
+        return JsonResponse({'start_date': start_date, 'filename': f'{latest_rate.animal_type}_{latest_rate.rate_type}.csv'})
 
     except RateTable.DoesNotExist:
         return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
@@ -519,6 +572,11 @@ def lastratedate_api(request):
         # Provide more specific error information for debugging
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
 
+import csv
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
+from .models import RateTable
 
 @csrf_exempt
 def ratesitem_api(request):
@@ -527,15 +585,14 @@ def ratesitem_api(request):
         user = request.user
 
         animal = request.GET.get('animal')
-        date = request.GET.get('date')
         rate_type = request.GET.get('rate_type')
         item = request.GET.get('item')
 
         # Retrieve the latest RateTable entry for the logged-in user and specified animal and rate_type
-        latest_rate = RateTable.objects.filter(user=user, animal=animal, rate_type=rate_type).latest('start_date')
+        latest_rate = RateTable.objects.filter(user=user, animal_type=animal, rate_type=rate_type).latest('start_date')
 
         # Generate file path using os.path.join with the latest RateTable entry
-        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', f'{latest_rate.animal}_{latest_rate.rate_type}.csv')
+        file_path = latest_rate.csv_file.path
 
         # Read CSV file
         with open(file_path, newline='') as csvfile:
@@ -553,7 +610,7 @@ def ratesitem_api(request):
         output_data = {
             "date": date,
             "values": values_row,  # You may want to use a more descriptive key
-            "filename": f'{latest_rate.animal}_{latest_rate.rate_type}.csv'
+            "filename": f'{latest_rate.animal_type}_{latest_rate.rate_type}.csv'
         }
 
         return JsonResponse(output_data)

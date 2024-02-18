@@ -154,47 +154,58 @@
 
         <div class="container">
             <div class="table-wrapper table-responsive">
-                <div class="table-title border rounded">
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <h5 class="text-white mt-2">Rate Table Upload List</h5>
-                        </div>
-                        <div class="col-md-6">
-                            <a href="{% url 'rate_table_upload' %}" class="btn btn-success rounded"> <span>Upload Rate Table</span></a>
-                        </div>
-                    </div>
+              <div class="table-title border rounded">
+                <div class="row">
+                  <div class="col-sm-6">
+                    <h5 class="text-white mt-2">Rate Table List</h5>
+                  </div>
+                  <div class="col-md-6">
+                    <a href="{% url 'upload_rate_table' %}" class="btn btn-success rounded">
+                      <span>Upload Rate Table</span>
+                    </a>
+                  </div>
                 </div>
-                <table class="table table-striped table-hover rounded table-responsive">
-                    <thead>
-                        <tr>
-                            <th>Animal</th>
-                            <th>Rate Type</th>
-                            <th>Date</th>
-                            <th>Download</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for rate in latest_rates %}
-                            <tr>
-                                <td>{{ rate.animal }}</td>
-                                <td>{{ rate.rate_type }}</td>
-                                <td>{{ rate.start_date }}</td>
-                                <td><a href="{{ rate.file.url }}" download>Download</a></td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-
+              </div>
+              {% if messages %}
+              <ul class="messages">
+                {% for message in messages %}
+                  <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+              <table class="table table-striped table-hover rounded table-responsive">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Uploaded On</th>
+                    <th>Animal</th>
+                    <th>Rate Type</th>
+                    <td>Start Date</td>
+                    <th>Download</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for rate_table in rate_tables %}
+                  <tr>
+                    <td>{{ rate_table.user.username }}</td>
+                    <td>{{ rate_table.uploaded_at }}</td>
+                    <td>{{ rate_table.animal_type }}</td>
+                    <td>{{ rate_table.rate_type }}</td>
+                    <td>{{ rate_table.start_date}}</td>
+                    <td><a href="{% url 'download_rate_table' rate_table.id %}" download>Download</a></td>
+                </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+      
             </div>
-        </div>
-
-
-
+          </div>
 
 
     </div>
 
     <!-- /.container-fluid -->
 </div>
+
 
 {% endblock content %}

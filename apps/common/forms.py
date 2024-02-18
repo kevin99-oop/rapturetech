@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from apps.userprofile.models import Profile
 from django.forms import ModelForm
 from django import forms
-from apps.common.models import DPU, Customer,RateTable
+from apps.common.models import DPU, Customer
 
 # SignUpForm is a custom form that extends UserCreationForm for user registration
 class SignUpForm(UserCreationForm):
@@ -82,18 +82,18 @@ class CustomerForm(forms.ModelForm):
         model = Customer
         fields = ['st_id', 'csv_file']  # Add 'date_uploaded'
 
-class RateTableUploadForm(forms.ModelForm):
+# forms.py
+from django import forms
+from apps.common.models import RateTable
+
+class UploadRateTableForm(forms.ModelForm):
     class Meta:
         model = RateTable
-        fields = ['file', 'animal', 'rate_type', 'start_date']
-        widgets = {
-            'animal': forms.RadioSelect(),
-            'rate_type': forms.RadioSelect(),
-            'start_date': forms.DateInput(attrs={'type': 'date'}),
-        }
+        fields = ['csv_file']
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Remove the first line choices for animal and rate_type
-        self.fields['animal'].choices = self.fields['animal'].choices[1:]
-        self.fields['rate_type'].choices = self.fields['rate_type'].choices[1:]
+    def clean_csv_file(self):
+        csv_file = self.cleaned_data['csv_file']
+
+        # Perform any additional validation for the RateTable CSV file if needed
+
+        return csv_file

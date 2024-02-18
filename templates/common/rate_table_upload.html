@@ -41,6 +41,15 @@
     button:hover {
         background-color: #45a049;
     }
+    .messages{
+        color: red;
+        list-style-type: none !important;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    text-align: center;
+
+    }
 </style>
 <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl " id="navbarBlur"
     data-scroll="false">
@@ -132,15 +141,21 @@
 
         <div class="row ">
             <div class="col-lg-12 my-5">
-
+             
                 <h2>Rate Table Upload</h2>
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit">Upload</button>
-                </form>
-
-
+                <p class="text-center">Note:- Please Upload File name as <strong>(BSNF, CSNF, BCLR, CCLR, BFAT, CFAT)</strong></p>
+                {% if messages %}
+                <ul class="messages">
+                  {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form }}
+                <button type="submit">Upload Rate Table</button>
+              </form>
             </div>
 
         </div>
@@ -151,4 +166,6 @@
 
     <!-- /.container-fluid -->
 </div>
+
+    
 {% endblock content %}

@@ -90,17 +90,14 @@ class Config(models.Model):
         
     def __str__(self):
         return f"Config for {self.user} - {self.timestamp}"
-    
 
 class RateTable(models.Model):
-    ANIMAL_CHOICES = [('COW', 'COW'), ('BUFFALO', 'BUFFALO')]
-    RATE_TYPE_CHOICES = [('SNF', 'SNF'), ('FAT', 'FAT'), ('CLR', 'CLR')]
-
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    file = models.FileField(upload_to='rate_tables/')
-    animal = models.CharField(max_length=10, choices=ANIMAL_CHOICES)
-    rate_type = models.CharField(max_length=10, choices=RATE_TYPE_CHOICES)
-    start_date = models.DateField()
+    animal_type = models.CharField(max_length=1)
+    rate_type = models.CharField(max_length=3)
+    csv_file = models.FileField(upload_to='rate_tables/')
+    start_date = models.DateField(null=True, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username}'s Rate Table - {self.id}"
+        return f"RateTable for {self.user.username} - {self.id}"

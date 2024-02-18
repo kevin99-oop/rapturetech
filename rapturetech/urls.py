@@ -6,7 +6,8 @@ from apps.common.views import (
     HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView,
     ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,
     DRECViewSet, NtpDatetimeView, dpudetails, edit_dpu,upload_customer_csv,download_latest_csv,
-    get_cid_range,get_cust_info,customer_list,config_api,download_config_by_st_id,rate_table_upload,latest_rate_list,lastrate_api,lastratedate_api,ratesitem_api
+    get_cid_range,get_cust_info,customer_list,config_api,download_config_by_st_id,upload_rate_table,rate_table_list,download_rate_table,lastratedate_api, ratesitem_api
+
 )
 from django.contrib.auth import views as auth_views
 from rest_framework.authtoken.views import obtain_auth_token
@@ -69,12 +70,12 @@ urlpatterns = [
     path('download/<str:st_id>/', download_config_by_st_id, name='download_config_by_st_id'),
 
     # Add other URLs as needed
-    path('rate_table_upload/', rate_table_upload, name='rate_table_upload'),
-    path('latest_rate_list/', latest_rate_list, name='latest_rate_list'),
-    path('api/lastrate/', lastrate_api, name='lastrate_api'),
+    path('upload_rate_table/', upload_rate_table, name='upload_rate_table'),
+    path('rate_table_list/', rate_table_list, name='rate_table_list'),
+    path('download-rate-table/<int:rate_table_id>/', download_rate_table, name='download_rate_table'),
+
     path('api/lastratedate/', lastratedate_api, name='lastratedate_api'),
     path('api/ratesitem/', ratesitem_api, name='ratesitem_api'),
-
 
 ]
 
