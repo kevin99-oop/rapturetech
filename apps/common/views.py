@@ -548,10 +548,8 @@ def download_rate_table(request, rate_table_id):
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from apps.common.models import RateTable
-from django.contrib.auth.decorators import login_required
 
 @csrf_exempt
-@login_required
 def lastratedate_api(request):
     try:
         # Retrieve the latest RateTable entry for the specified animal and rate_type
@@ -580,6 +578,7 @@ def lastratedate_api(request):
         import traceback
         traceback.print_exc()
         return JsonResponse({'error': f'Internal Server Error: {str(e)}'}, status=500)
+
 
 
 import csv
