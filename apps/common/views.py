@@ -547,14 +547,15 @@ def download_rate_table(request, rate_table_id):
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.models import AnonymousUser
 from apps.common.models import RateTable
+from django.contrib.auth.decorators import login_required
 
 @csrf_exempt
+@login_required
 def lastratedate_api(request):
     try:
-        # Get the logged-in user or use AnonymousUser if not authenticated
-        user = request.user if request.user.is_authenticated else AnonymousUser()
+        # Force evaluation of lazy object to get the actual user
+        user = request.user._wrapped if hasattr(request.user, '_wrapped') else request.user
 
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
@@ -562,16 +563,19 @@ def lastratedate_api(request):
         # Retrieve the latest RateTable entry for the specified animal and rate_type
         latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type, user=user).latest('start_date')
 
-        start_date = latest_rate.start_date.strftime('%d-%m-%Y')
+        # Extract the start date from the latest RateTable entry
+        start_date = latest_rate.start_date.strftime('%Y-%m-%d')  # Change the date format
 
-        return JsonResponse({'start_date': start_date, 'filename': f'{latest_rate.animal_type}_{latest_rate.rate_type}.csv'})
+        return JsonResponse({'date': start_date, 'filename': f'{latest_rate.animal_type}_{latest_rate.rate_type}.csv'})
 
     except RateTable.DoesNotExist:
         return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
     except Exception as e:
+        # Print the exception traceback in the console for debugging
         import traceback
         traceback.print_exc()
         return JsonResponse({'error': f'Internal Server Error: {str(e)}'}, status=500)
+
 import csv
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
