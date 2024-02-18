@@ -554,19 +554,22 @@ from django.contrib.auth.decorators import login_required
 @login_required
 def lastratedate_api(request):
     try:
-        # Force evaluation of lazy object to get the actual user
-        user = request.user._wrapped if hasattr(request.user, '_wrapped') else request.user
-
+        # Retrieve the latest RateTable entry for the specified animal and rate_type
+        user = request.user
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
+        
+        # Ensure the user is authenticated
+        if not user.is_authenticated:
+            return JsonResponse({'error': 'User not authenticated.'}, status=401)
 
         # Retrieve the latest RateTable entry for the specified animal and rate_type
         latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type, user=user).latest('start_date')
 
         # Extract the start date from the latest RateTable entry
-        start_date = latest_rate.start_date.strftime('%Y-%m-%d')  # Change the date format
+        start_date = latest_rate.start_date.strftime('%d-%m-%Y')
 
-        return JsonResponse({'date': start_date, 'filename': f'{latest_rate.animal_type}_{latest_rate.rate_type}.csv'})
+        return JsonResponse({'start_date': start_date, 'filename': f'{latest_rate.animal_type}_{latest_rate.rate_type}.csv'})
 
     except RateTable.DoesNotExist:
         return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
