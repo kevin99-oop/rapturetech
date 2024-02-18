@@ -551,6 +551,9 @@ from .models import RateTable
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from apps.common.models import RateTable
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from apps.common.models import RateTable
 
 @csrf_exempt
 def lastratedate_api(request):
@@ -573,7 +576,7 @@ def lastratedate_api(request):
         return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
     except Exception as e:
         # Provide more specific error information for debugging
-        return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
+        return JsonResponse({'error': f'Internal Server Error: {str(e)}'}, status=500)
 
 import csv
 from django.http import JsonResponse
