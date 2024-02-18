@@ -567,9 +567,11 @@ def lastratedate_api(request):
         latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type, user=user).latest('start_date')
 
         # Extract the start date from the latest RateTable entry
-        start_date = latest_rate.start_date.strftime('%d-%m-%Y')
+        start_date = latest_rate.start_date.strftime('%Y-%m-%d')
 
-        return JsonResponse({'start_date': start_date, 'filename': f'{latest_rate.animal_type}_{latest_rate.rate_type}.csv'})
+        # Return a proper JSON response with the date field
+        response_data = {'date': start_date, 'filename': f'{latest_rate.animal_type}_{latest_rate.rate_type}.csv'}
+        return JsonResponse(response_data)
 
     except RateTable.DoesNotExist:
         return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
@@ -578,6 +580,7 @@ def lastratedate_api(request):
         import traceback
         traceback.print_exc()
         return JsonResponse({'error': f'Internal Server Error: {str(e)}'}, status=500)
+
 
 import csv
 from django.http import JsonResponse
