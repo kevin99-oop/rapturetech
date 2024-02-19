@@ -545,39 +545,23 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
-import csv
-import os
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.conf import settings
 from apps.common.models import RateTable
 
 @csrf_exempt
 def lastratedate_api(request):
     try:
-        # Get the logged-in user
-        user = request.user
-
         animal_type = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
         # Retrieve the latest RateTable entry for the specified animal_type and rate_type
-        latest_rate = RateTable.objects.filter(animal_type=animal_type, rate_type=rate_type).latest('start_date')
+        latest_rate = RateTable.objects.filter(animal_type=animal_type, rate_type=rate_type).latest('uploaded_at')
 
-        # Generate file path using os.path.join with the latest RateTable entry
-        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', f'{latest_rate.animal_type}_{latest_rate.rate_type}.csv')
+        # Get the latest uploaded_at date
+        date_from_rate_table = latest_rate.uploaded_at.strftime('%Y-%m-%d')
 
-        # Open the CSV file and read just the first line
-        with open(file_path, 'r') as csv_file:
-            reader = csv.reader(csv_file, delimiter='\t')  # Assuming it's tab-separated
-            # Get the first row from the CSV
-            first_row = next(reader)
-            # Take the first 10 characters from the first row to get the date
-            date_from_csv = first_row[0][:10]
-
-        print(f'Date from CSV: {date_from_csv}')
-
-        return JsonResponse({'date': date_from_csv})
+        return JsonResponse({'date': date_from_rate_table})
 
     except RateTable.DoesNotExist:
         return JsonResponse({'error': f'No rate data available for animal_type: {animal_type}, rate_type: {rate_type}'}, status=404)
