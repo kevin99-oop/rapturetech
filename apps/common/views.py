@@ -569,6 +569,7 @@ def lastratedate_api(request):
         response_data = {'date': start_date}
         return JsonResponse(response_data)
 
+
     except RateTable.DoesNotExist:
         return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
 
