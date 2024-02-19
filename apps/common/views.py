@@ -567,6 +567,8 @@ def lastratedate_api(request):
     except RateTable.DoesNotExist:
         return JsonResponse({'error': 'No rate data available for the user.'}, status=404)
     except Exception as e:
+        print(f'Error: {e}')
+
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
 import csv
 from django.http import JsonResponse
