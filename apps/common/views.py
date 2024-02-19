@@ -547,29 +547,23 @@ def download_rate_table(request, rate_table_id):
 
 import os
 import csv
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from apps.common.models import RateTable
-from django.contrib.auth.models import AnonymousUser
-from django.utils.functional import SimpleLazyObject
 
 @csrf_exempt
 def lastratedate_api(request):
     try:
-        # Get the logged-in user
-        user = request.user
-
-        # Force evaluation of lazy object to get the actual user
-        if isinstance(user, SimpleLazyObject):
-            user._setup()
-            user = user._wrapped
+        # Check if the user is authenticated
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'User not authenticated.'}, status=401)
 
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
         # Retrieve the latest RateTable entry for the specified animal and rate_type
-        latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type, user=user).latest('start_date')
+        latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type, user=request.user).latest('start_date')
 
         # Generate file path using os.path.join with the latest RateTable entry
         file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', f'{latest_rate.animal_type}_{latest_rate.rate_type}.csv')
@@ -593,7 +587,6 @@ def lastratedate_api(request):
     except Exception as e:
         # Provide more specific error information for debugging
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
-
 
 
 
