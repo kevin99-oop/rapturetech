@@ -551,12 +551,16 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from apps.common.models import RateTable
+from django.contrib.auth.models import AnonymousUser
 
 @csrf_exempt
 def lastratedate_api(request):
     try:
         # Get the logged-in user
         user = request.user
+
+        # Force evaluation of lazy object to get the actual user
+        user = user._wrapped if hasattr(user, '_wrapped') else user
 
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
