@@ -546,26 +546,23 @@ def download_rate_table(request, rate_table_id):
     return HttpResponse(status=404)
 import csv
 import os
-import logging  # Import the logging module
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from apps.common.models import RateTable
 
-# Create a logger instance
-logger = logging.getLogger(__name__)
-
 @csrf_exempt
 def lastratedate_api(request):
     try:
-        # Get the logged-in user
-        user = request.user
+        # Ensure that the user is authenticated
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'Unauthorized'}, status=401)
 
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
         # Retrieve the latest RateTable entry for the specified animal and rate_type
-        latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type, user=user).latest('start_date')
+        latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type, user=request.user).latest('start_date')
 
         # Generate file path using os.path.join with the latest RateTable entry
         file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', f'{latest_rate.animal_type}_{latest_rate.rate_type}.csv')
@@ -585,8 +582,8 @@ def lastratedate_api(request):
     except RateTable.DoesNotExist:
         return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
     except Exception as e:
-        # Log the exception using the logger
-        logger.exception(f'Internal Server Error: {str(e)}')
+        # Log the exception for debugging
+        print(f'Error: {str(e)}')
         return JsonResponse({'error': f'Internal Server Error: {str(e)}'}, status=500)
 
 
