@@ -561,6 +561,8 @@ def lastratedate_api(request):
         animal_type = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
+        print(f'Animal Type: {animal_type}, Rate Type: {rate_type}')
+
         # Retrieve the latest RateTable entry for the specified animal_type and rate_type
         latest_rate = RateTable.objects.filter(animal_type=animal_type, rate_type=rate_type).latest('start_date')
 
