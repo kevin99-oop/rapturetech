@@ -579,6 +579,7 @@ def lastratedate_api(request):
 
         print(f'Date from CSV: {date_from_csv}')
 
+        # Return the date in JSON format
         return JsonResponse({'date': date_from_csv})
 
     except RateTable.DoesNotExist:
@@ -586,7 +587,6 @@ def lastratedate_api(request):
     except Exception as e:
         # Provide more specific error information for debugging
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
-
 
 
 import csv
