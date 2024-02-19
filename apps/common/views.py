@@ -561,12 +561,6 @@ def lastratedate_api(request):
         animal_type = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
-        print(f'Animal Type: {animal_type}, Rate Type: {rate_type}')
-
-        # Count entries for the specified animal_type and rate_type
-        entry_count = RateTable.objects.filter(animal_type=animal_type, rate_type=rate_type).count()
-        print(f'Entry count: {entry_count}')
-
         # Retrieve the latest RateTable entry for the specified animal_type and rate_type
         latest_rate = RateTable.objects.filter(animal_type=animal_type, rate_type=rate_type).latest('start_date')
 
@@ -586,7 +580,7 @@ def lastratedate_api(request):
         return JsonResponse({'date': date_from_csv})
 
     except RateTable.DoesNotExist:
-        return JsonResponse({'error': f'No rate data available for animal_type: {animal_type}, rate_type: {rate_type}.'}, status=404)
+        return JsonResponse({'error': 'No rate data available for the specified animal_type and rate_type.'}, status=404)
     except Exception as e:
         # Provide more specific error information for debugging
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
