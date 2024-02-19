@@ -551,6 +551,8 @@ from apps.common.models import RateTable
 
 @csrf_exempt
 def lastratedate_api(request):
+    print("View called!")  # Add this line
+
     try:
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')

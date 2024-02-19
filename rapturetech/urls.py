@@ -74,7 +74,7 @@ urlpatterns = [
     path('rate_table_list/', rate_table_list, name='rate_table_list'),
     path('download-rate-table/<int:rate_table_id>/', download_rate_table, name='download_rate_table'),
 
-    path('api/lastratedate/', lastratedate_api, name='lastratedate_api'),
+path('api/lastratedate/', lastratedate_api, name='lastratedate_api'),
     #path('api/ratesitem/', ratesitem_api, name='ratesitem_api'),
 
 ]
