@@ -552,6 +552,7 @@ from django.conf import settings
 from apps.common.models import RateTable
 
 @csrf_exempt
+@login_required
 def lastratedate_api(request):
     try:
         # Ensure that the user is authenticated
