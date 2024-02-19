@@ -558,30 +558,26 @@ logger = logging.getLogger(__name__)
 @csrf_exempt
 def lastratedate_api(request):
     try:
+        # Get the logged-in user
+        user = request.user
+
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
+
+        # Print debug information
+        print(f'Received request for animal: {animal}, rate_type: {rate_type}')
 
         # Retrieve the latest RateTable entry for the specified animal and rate_type
         latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('start_date')
 
-        # Generate file path using os.path.join with the latest RateTable entry
-        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', f'{latest_rate.animal}_{latest_rate.rate_type}.csv')
-
-        # Open the CSV file and read the first row
-        with open(file_path, 'r') as csv_file:
-            reader = csv.reader(csv_file)
-            # Get the first row from the CSV
-            first_row = next(reader)
-            # Take the first 10 characters from the second row to get the date
-            date_from_csv = first_row[1][:10]
-
-        print(f'Date from CSV: {date_from_csv}')
-
-        return JsonResponse({'date': date_from_csv})
+        # Rest of your code...
 
     except RateTable.DoesNotExist:
+        # Print debug information
+        print(f'No rate data available for animal: {animal}, rate_type: {rate_type}')
         return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
     except Exception as e:
-        # Log the exception to help with debugging
-        logger.exception("Error in lastratedate_api view")
-        return JsonResponse({'error': 'Internal Server Error. Please check server logs for details.'}, status=500)
+        # Print debug information
+        print(f'Internal Server Error: {e}')
+        return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
+
