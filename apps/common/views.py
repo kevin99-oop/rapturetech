@@ -547,15 +547,13 @@ def download_rate_table(request, rate_table_id):
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from apps.common.models import RateTable
 
 @csrf_exempt
+@login_required
 def lastratedate_api(request):
     try:
-        # Check if the user is authenticated
-        if not request.user.is_authenticated:
-            return JsonResponse({'error': 'User not authenticated.'}, status=401)
-
         user = request.user
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
