@@ -567,7 +567,7 @@ def lastratedate_api(request):
         start_date = latest_rate.start_date.strftime('%Y-%m-%d')
 
         # Return a proper JSON response with the date field
-        response_data = {'date': start_date, 'filename': f'{latest_rate.animal_type}_{latest_rate.rate_type}.csv'}
+        response_data = {'date': start_date}
         return JsonResponse(response_data)
 
     except RateTable.DoesNotExist:
