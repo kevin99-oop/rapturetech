@@ -550,6 +550,7 @@ def download_rate_table(request, rate_table_id):
 @permission_classes([IsAuthenticated])
 def lastratedate_api(request):
     print(f'User authenticated: {request.user.is_authenticated}')
+    print(f'Request headers: {request.headers}')
 
     try:
         # Get the latest RateTable entry for the logged-in user
