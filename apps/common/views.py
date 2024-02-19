@@ -562,12 +562,19 @@ def lastratedate_api(request):
             'animal': latest_rate.animal,
             'rate_type': latest_rate.rate_type,
             'start_date': latest_rate.start_date.strftime('%Y-%m-%d'),
+
             # Add more fields as needed
         }
+        print(f'response_data: {response_data}')
+
         return JsonResponse(response_data)
     except RateTable.DoesNotExist:
+        print(f'Error is: {e}')
+
         return JsonResponse({'error': 'No rate data available for the user.'}, status=404)
     except Exception as e:
+        print(f'Error : {e}')
+
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
 
 import csv
