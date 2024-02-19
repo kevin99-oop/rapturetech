@@ -551,7 +551,8 @@ from apps.common.models import RateTable
 
 from django.contrib.auth.decorators import login_required
 
-@login_required
+@csrf_exempt
+
 def lastratedate_api(request):
     try:
         # Get the latest RateTable entry for the logged-in user
