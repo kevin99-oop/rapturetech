@@ -545,28 +545,34 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
+import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from apps.common.models import RateTable
 
 @csrf_exempt
 def lastratedate_api(request):
-    print("View called!")  # Add this line
-
     try:
+        # Get the parameters from the request
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
-        # Retrieve the latest RateTable entry for the specified animal and rate_type
-        latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('uploaded_at')
+        # Check if both animal and rate_type are provided
+        if animal and rate_type:
+            # Retrieve the latest RateTable entry for the specified animal and rate_type
+            latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('uploaded_at')
 
-        # Get the latest start_date from the retrieved RateTable entry
-        latest_start_date = latest_rate.start_date.strftime('%Y-%m-%d')
-
-        return JsonResponse({'date': latest_start_date})
+            # Check if start_date is available
+            if latest_rate.start_date:
+                start_date = latest_rate.start_date.strftime('%Y-%m-%d')
+                return JsonResponse({'date': start_date})
+            else:
+                return JsonResponse({'error': 'No start_date available for the specified animal and rate_type.'}, status=404)
+        else:
+            return JsonResponse({'error': 'Please provide both animal and rate_type parameters.'}, status=400)
 
     except RateTable.DoesNotExist:
-        return JsonResponse({'error': f'No rate data available for animal: {animal}, rate_type: {rate_type}'}, status=404)
+        return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
     except Exception as e:
         # Provide more specific error information for debugging
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
