@@ -545,15 +545,8 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from apps.common.models import RateTable
-from django.contrib.auth.decorators import login_required
-from rest_framework.decorators import permission_classes
-from rest_framework.permissions import IsAuthenticated
-
 @csrf_exempt
-@login_required
+@login_required(login_url=None)
 @permission_classes([IsAuthenticated])
 def lastratedate_api(request):
     print(f'User authenticated: {request.user.is_authenticated}')
