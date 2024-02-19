@@ -555,11 +555,11 @@ def lastratedate_api(request):
         animal_type = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
-        # Retrieve the latest RateTable entry for the specified animal_type and rate_type
-        latest_rate = RateTable.objects.filter(animal_type=animal_type, rate_type=rate_type).latest('uploaded_at')
+        # Retrieve the latest start_date for the specified animal_type and rate_type
+        latest_rate = RateTable.objects.filter(animal_type=animal_type, rate_type=rate_type).latest('start_date')
 
-        # Get the latest uploaded_at date
-        date_from_rate_table = latest_rate.uploaded_at.strftime('%Y-%m-%d')
+        # Format the latest start_date
+        date_from_rate_table = latest_rate.start_date.strftime('%Y-%m-%d')
 
         return JsonResponse({'date': date_from_rate_table})
 

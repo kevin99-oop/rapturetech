@@ -64,7 +64,3 @@ class ConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = Config
         fields = '__all__'
-class RateTableSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RateTable
-        fields = ['start_date']
