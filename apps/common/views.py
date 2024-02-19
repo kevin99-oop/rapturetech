@@ -548,33 +548,34 @@ def download_rate_table(request, rate_table_id):
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from apps.common.models import RateTable
-from django.contrib.auth.decorators import login_required
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 @csrf_exempt
-@login_required
+@permission_classes([IsAuthenticated])
 def lastratedate_api(request):
-    print(f'User authenticated: {request.user.is_authenticated}')
+    if request.method == 'GET':
+        try:
+            # Get the latest RateTable entry for the logged-in user
+            latest_rate = RateTable.objects.filter(user=request.user).latest('start_date')
+            # Modify the response as needed based on your requirements
+            response_data = {
+                'animal': latest_rate.animal_type,  # Assuming the field name is animal_type
+                'rate_type': latest_rate.rate_type,
+                'start_date': latest_rate.start_date.strftime('%Y-%m-%d'),
 
-    try:
-        # Get the latest RateTable entry for the logged-in user
-        latest_rate = RateTable.objects.filter(user=request.user).latest('start_date')
-        # Modify the response as needed based on your requirements
-        response_data = {
-            'animal': latest_rate.animal_type,  # Assuming the field name is animal_type
-            'rate_type': latest_rate.rate_type,
-            'start_date': latest_rate.start_date.strftime('%Y-%m-%d'),
+                # Add more fields as needed
+            }
+            print(f'response_data: {response_data}')
 
-            # Add more fields as needed
-        }
-        print(f'response_data: {response_data}')
-
-        return JsonResponse(response_data)
-    except RateTable.DoesNotExist as e:
-        print(f'Error: {e}')
-        return JsonResponse({'error': 'No rate data available for the user.'}, status=404)
-    except Exception as e:
-        print(f'Error: {e}')
-        return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
+            return JsonResponse(response_data)
+        except RateTable.DoesNotExist as e:
+            print(f'Error: {e}')
+            return JsonResponse({'error': 'No rate data available for the user.'}, status=404)
+        except Exception as e:
+            print(f'Error: {e}')
+            return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
+    return JsonResponse({'error': 'Invalid request method.'}, status=400)
 
 import csv
 from django.http import JsonResponse
