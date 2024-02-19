@@ -555,6 +555,9 @@ from apps.common.models import RateTable
 @csrf_exempt
 def lastratedate_api(request):
     try:
+        # Get the logged-in user
+        user = request.user
+
         animal_type = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
@@ -577,7 +580,7 @@ def lastratedate_api(request):
         return JsonResponse({'date': date_from_csv})
 
     except RateTable.DoesNotExist:
-        return JsonResponse({'error': 'No rate data available for the specified animal_type and rate_type.'}, status=404)
+        return JsonResponse({'error': f'No rate data available for animal_type: {animal_type}, rate_type: {rate_type}.'}, status=404)
     except Exception as e:
         # Provide more specific error information for debugging
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
