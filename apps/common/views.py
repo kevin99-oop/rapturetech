@@ -545,37 +545,48 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
+import logging
+import csv
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from apps.common.models import RateTable
-from rest_framework.decorators import permission_classes
-from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_list_or_404
+from .models import RateTable  # Replace with your actual model
+from rest_framework.decorators import api_view
 
-@csrf_exempt
-@permission_classes([IsAuthenticated])
+logger = logging.getLogger(__name__)
+
+@api_view(['GET'])
 def lastratedate_api(request):
-    if request.method == 'GET':
-        try:
-            # Get the latest RateTable entry for the logged-in user
-            latest_rate = RateTable.objects.filter(user=request.user).latest('start_date')
-            # Modify the response as needed based on your requirements
-            response_data = {
-                'animal': latest_rate.animal_type,  # Assuming the field name is animal_type
-                'rate_type': latest_rate.rate_type,
-                'start_date': latest_rate.start_date.strftime('%Y-%m-%d'),
+    try:
+        animal = request.GET.get('animal')
+        rate_type = request.GET.get('rate_type')
 
-                # Add more fields as needed
-            }
-            print(f'response_data: {response_data}')
+        # Assuming the CSV file is stored in the 'rate_tables/' directory
+        rate_entries = get_list_or_404(RateTable, animal_type=animal, rate_type=rate_type)
 
-            return JsonResponse(response_data)
-        except RateTable.DoesNotExist as e:
-            print(f'Error: {e}')
-            return JsonResponse({'error': 'No rate data available for the user.'}, status=404)
-        except Exception as e:
-            print(f'Error: {e}')
-            return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
-    return JsonResponse({'error': 'Invalid request method.'}, status=400)
+        if not rate_entries:
+            return JsonResponse({'error': f'No rate data found for animal: {animal}, rate_type: {rate_type}'}, status=404)
+
+        # Get the latest RateTable entry based on start_date
+        latest_rate = max(rate_entries, key=lambda entry: entry.start_date)
+
+        # Generate file path using os.path.join with the latest RateTable entry
+        file_path = latest_rate.csv_file.path
+
+        # Open the CSV file and read just the first line
+        with open(file_path, 'r') as csv_file:
+            reader = csv.reader(csv_file, delimiter='\t')  # Assuming it's tab-separated
+            # Get the first row from the CSV
+            first_row = next(reader)
+            # Take the first 10 characters from the first row to get the date
+            date_from_csv = first_row[0][:10]
+
+        logger.info(f'Date from CSV: {date_from_csv}')
+
+        return JsonResponse({'date': date_from_csv})
+
+    except Exception as e:
+        logger.exception(f'Error processing lastratedate_api: {e}')
+        return JsonResponse({'error': 'Internal Server Error'}, status=500)
 
 import csv
 from django.http import JsonResponse
