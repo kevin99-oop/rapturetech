@@ -545,52 +545,35 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
-import logging
-import csv
 from django.http import JsonResponse
-from apps.common.models import RateTable  # Replace with your actual model
+from django.shortcuts import get_object_or_404
+from apps.common.models import RateTable
 from rest_framework.decorators import api_view
 
-logger = logging.getLogger(__name__)
-
 @api_view(['GET'])
-def lastratedate_api(request):
+def lastratedate_api(request, animal, rate_type):
     try:
-        animal = request.GET.get('animal')
-        rate_type = request.GET.get('rate_type')
+        # Get the latest RateTable entry for the specified animal and rate_type
+        latest_rate = get_object_or_404(
+            RateTable, animal_type=animal, rate_type=rate_type
+        )
 
-        # Filter RateTable entries based on animal_type and rate_type
-        rate_entries = RateTable.objects.filter(animal_type=animal, rate_type=rate_type)
+        # Modify the response as needed based on your requirements
+        response_data = {
+            'animal': latest_rate.animal_type,  # Assuming the field name is animal_type
+            'rate_type': latest_rate.rate_type,
+            'start_date': latest_rate.start_date.strftime('%Y-%m-%d'),
 
-        # Check if any entries were found
-        if not rate_entries.exists():
-            raise RateTable.DoesNotExist
+            # Add more fields as needed
+        }
 
-        # Get the latest RateTable entry based on start_date
-        latest_rate = rate_entries.latest('start_date')
-
-        # Generate file path using os.path.join with the latest RateTable entry
-        file_path = latest_rate.csv_file.path
-
-        # Open the CSV file and read just the first line
-        with open(file_path, 'r') as csv_file:
-            reader = csv.reader(csv_file, delimiter='\t')  # Assuming it's tab-separated
-            # Get the first row from the CSV
-            first_row = next(reader)
-            # Take the first 10 characters from the first row to get the date
-            date_from_csv = first_row[0][:10]
-
-        logger.info(f'Date from CSV: {date_from_csv}')
-
-        return JsonResponse({'date': date_from_csv})
+        return JsonResponse(response_data)
 
     except RateTable.DoesNotExist:
-        logger.warning('No RateTable matches the given query.')
         return JsonResponse({'error': 'No matching RateTable entry found.'}, status=404)
-
     except Exception as e:
-        logger.exception(f'Error processing lastratedate_api: {e}')
-        return JsonResponse({'error': 'Internal Server Error'}, status=500)
+        return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
+
 
 
 import csv
