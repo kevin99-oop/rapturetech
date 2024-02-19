@@ -566,6 +566,7 @@ def lastratedate_api(request):
 
         # Return a proper JSON response with the date field
         response_data = {'date': start_date}
+        print(response_data)
         return JsonResponse(response_data)
 
     except RateTable.DoesNotExist:
@@ -575,6 +576,7 @@ def lastratedate_api(request):
         import traceback
         traceback.print_exc()
         return JsonResponse({'error': f'Internal Server Error: {str(e)}'}, status=500)
+
 
 import csv
 from django.http import JsonResponse
