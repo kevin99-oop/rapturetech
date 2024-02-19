@@ -547,11 +547,12 @@ def download_rate_table(request, rate_table_id):
 
 import os
 import csv
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from apps.common.models import RateTable
 from django.contrib.auth.models import AnonymousUser
+from django.utils.functional import SimpleLazyObject
 
 @csrf_exempt
 def lastratedate_api(request):
@@ -560,7 +561,9 @@ def lastratedate_api(request):
         user = request.user
 
         # Force evaluation of lazy object to get the actual user
-        user = user._wrapped if hasattr(user, '_wrapped') else user
+        if isinstance(user, SimpleLazyObject):
+            user._setup()
+            user = user._wrapped
 
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
@@ -581,13 +584,16 @@ def lastratedate_api(request):
 
         print(f'Date from CSV: {date_from_csv}')
 
-        return JsonResponse({'date': date_from_csv})
+        # Create a JSON response with the date
+        response_data = {'date': date_from_csv}
+        return JsonResponse(response_data)
 
     except RateTable.DoesNotExist:
         return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
     except Exception as e:
         # Provide more specific error information for debugging
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
+
 
 
 
