@@ -553,6 +553,8 @@ from django.contrib.auth.decorators import login_required
 @csrf_exempt
 @login_required
 def lastratedate_api(request):
+    print(f'User authenticated: {request.user.is_authenticated}')
+
     try:
         # Get the latest RateTable entry for the logged-in user
         latest_rate = RateTable.objects.filter(user=request.user).latest('start_date')
