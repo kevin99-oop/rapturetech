@@ -558,6 +558,10 @@ def lastratedate_api(request):
         # Get the logged-in user
         user = request.user
 
+        # Ensure that the user is authenticated
+        if not user.is_authenticated:
+            return JsonResponse({'error': 'Unauthorized'}, status=401)
+
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
