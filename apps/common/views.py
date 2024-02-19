@@ -548,8 +548,7 @@ def download_rate_table(request, rate_table_id):
 import logging
 import csv
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from .models import RateTable  # Replace with your actual model
+from apps.common.models import RateTable  # Replace with your actual model
 from rest_framework.decorators import api_view
 
 logger = logging.getLogger(__name__)
@@ -560,8 +559,15 @@ def lastratedate_api(request):
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
+        # Filter RateTable entries based on animal_type and rate_type
+        rate_entries = RateTable.objects.filter(animal_type=animal, rate_type=rate_type)
+
+        # Check if any entries were found
+        if not rate_entries.exists():
+            raise RateTable.DoesNotExist
+
         # Get the latest RateTable entry based on start_date
-        latest_rate = get_object_or_404(RateTable, animal_type=animal, rate_type=rate_type)
+        latest_rate = rate_entries.latest('start_date')
 
         # Generate file path using os.path.join with the latest RateTable entry
         file_path = latest_rate.csv_file.path
@@ -585,6 +591,7 @@ def lastratedate_api(request):
     except Exception as e:
         logger.exception(f'Error processing lastratedate_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
+
 
 import csv
 from django.http import JsonResponse
