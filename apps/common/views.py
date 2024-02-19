@@ -566,15 +566,18 @@ def lastratedate_api(request):
         # Extract the start date from the latest RateTable entry
         start_date = latest_rate.start_date.strftime('%Y-%m-%d')
 
-        return JsonResponse({'date': start_date})
+        response_data = {'date': start_date}
+        return JsonResponse(response_data)
 
     except RateTable.DoesNotExist:
         return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
+
     except Exception as e:
         # Print the exception traceback in the console for debugging
         import traceback
         traceback.print_exc()
-        return JsonResponse({'error': f'Internal Server Error: {str(e)}'}, status=500)
+        response_data = {'error': f'Internal Server Error: {str(e)}'}
+        return JsonResponse(response_data, status=500)
 
 
 
