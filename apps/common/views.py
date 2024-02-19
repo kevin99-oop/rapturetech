@@ -548,6 +548,7 @@ def download_rate_table(request, rate_table_id):
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from apps.common.models import RateTable
+from apps.common.serializers import RateTableSerializer
 from django.contrib.auth.decorators import login_required
 
 @csrf_exempt
@@ -561,12 +562,12 @@ def lastratedate_api(request):
         # Retrieve the latest RateTable entry for the specified animal and rate_type
         latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type, user=user).latest('start_date')
 
-        # Extract the start date from the latest RateTable entry
-        start_date = latest_rate.start_date.strftime('%Y-%m-%d')
+        # Use the serializer to convert the model instance to a dictionary
+        serializer = RateTableSerializer(latest_rate)
+        serialized_data = serializer.data
 
         # Return a proper JSON response with the date field
-        response_data = {'date': start_date}
-        print(response_data)
+        response_data = {'date': serialized_data['start_date']}
         return JsonResponse(response_data)
 
     except RateTable.DoesNotExist:
