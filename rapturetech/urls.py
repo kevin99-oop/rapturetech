@@ -6,7 +6,7 @@ from apps.common.views import (
     HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView,
     ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,
     DRECViewSet, NtpDatetimeView, dpudetails, edit_dpu,upload_customer_csv,download_latest_csv,
-    get_cid_range,get_cust_info,customer_list,config_api,download_config_by_st_id,upload_rate_table,rate_table_list,download_rate_table,lastratedate_api, ratesitem_api
+    get_cid_range,get_cust_info,customer_list,config_api,download_config_by_st_id,upload_rate_table,rate_table_list,download_rate_table,lastratedate_api
 
 )
 from django.contrib.auth import views as auth_views
@@ -75,7 +75,7 @@ urlpatterns = [
     path('download-rate-table/<int:rate_table_id>/', download_rate_table, name='download_rate_table'),
 
     path('api/lastratedate/', lastratedate_api, name='lastratedate_api'),
-    path('api/ratesitem/', ratesitem_api, name='ratesitem_api'),
+    #path('api/ratesitem/', ratesitem_api, name='ratesitem_api'),
 
 ]
 
