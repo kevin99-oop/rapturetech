@@ -545,79 +545,39 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
-def lastratedate_api(request):
-    if request.method == 'POST':
-        # Assuming the CSV data is sent in the request body
-        csv_data = request.body.decode('utf-8')
-
-        if csv_data:
-            # Split CSV lines and get the first line
-            first_line = csv_data.splitlines()[0]
-            
-            # Extract date from the first column (assuming it's in DD-MM-YYYY format)
-            date_str = first_line.split(',')[0].strip()
-
-            try:
-                # Convert the date string to a datetime object
-                date_obj = datetime.strptime(date_str, '%d-%m-%Y').date()
-                
-                # Format the date as a string in "YYYY-MM-DD" format
-                formatted_date = date_obj.strftime('%Y-%m-%d')
-
-                # Return the date as a JSON response
-                return JsonResponse({'date': formatted_date})
-            except ValueError:
-                return JsonResponse({'error': 'Invalid date format in CSV.'}, status=400)
-        else:
-            return JsonResponse({'error': 'CSV data not provided.'}, status=400)
-
-    return JsonResponse({'error': 'Invalid request method.'}, status=405)
-
 import csv
+import os
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import get_object_or_404
-from .models import RateTable
+from django.conf import settings
+from apps.common.models import RateTable
 
 @csrf_exempt
-def ratesitem_api(request):
+def lastratedate_api(request):
     try:
-        # Get the logged-in user
-        user = request.user
-
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
-        item = request.GET.get('item')
 
-        # Retrieve the latest RateTable entry for the logged-in user and specified animal and rate_type
-        latest_rate = RateTable.objects.filter(user=user, animal_type=animal, rate_type=rate_type).latest('start_date')
+        # Retrieve the latest RateTable entry for the specified animal and rate_type
+        latest_rate = RateTable.objects.filter(animal=animal, rate_type=rate_type).latest('start_date')
 
         # Generate file path using os.path.join with the latest RateTable entry
-        file_path = latest_rate.csv_file.path
+        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', f'{latest_rate.animal}_{latest_rate.rate_type}.csv')
 
-        # Read CSV file
-        with open(file_path, newline='') as csvfile:
-            reader = csv.reader(csvfile)
-            data = [row for row in reader]
+        # Open the CSV file and read the first row
+        with open(file_path, 'r') as csv_file:
+            reader = csv.reader(csv_file)
+            # Get the first row from the CSV
+            first_row = next(reader)
+            # Take the first 10 characters from the second row to get the date
+            date_from_csv = first_row[1][:10]
 
-        # Extract date and values
-        date_row = data[0]
-        values_row = data[int(float(item))]  # Assuming 'item' is the row number
+        print(f'Date from CSV: {date_from_csv}')
 
-        # Extract the first 10 characters from the date
-        date = date_row[0][:10]
-
-        # Format output
-        output_data = {
-            "date": date,
-            "values": values_row,  # You may want to use a more descriptive key
-            "filename": f'{latest_rate.animal_type}_{latest_rate.rate_type}.csv'
-        }
-
-        return JsonResponse(output_data)
+        return JsonResponse({'date': date_from_csv})
 
     except RateTable.DoesNotExist:
-        return JsonResponse({'error': 'No rate data available for the user.'}, status=404)
+        return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
     except Exception as e:
         # Provide more specific error information for debugging
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
