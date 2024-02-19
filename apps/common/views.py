@@ -547,11 +547,11 @@ def download_rate_table(request, rate_table_id):
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
 from apps.common.models import RateTable
+from django.contrib.auth.decorators import login_required
 
 @csrf_exempt
-@login_required
+@login_required(login_url=None)
 def lastratedate_api(request):
     try:
         user = request.user
@@ -575,7 +575,6 @@ def lastratedate_api(request):
         import traceback
         traceback.print_exc()
         return JsonResponse({'error': f'Internal Server Error: {str(e)}'}, status=500)
-
 
 import csv
 from django.http import JsonResponse
