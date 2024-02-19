@@ -561,17 +561,11 @@ def lastratedate_api(request):
         animal_type = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
-        print(f'Animal Type: {animal_type}, Rate Type: {rate_type}')
-
         # Retrieve the latest RateTable entry for the specified animal_type and rate_type
         latest_rate = RateTable.objects.filter(animal_type=animal_type, rate_type=rate_type).latest('start_date')
 
-        print(f'Latest Rate Table Entry: {latest_rate}')
-
         # Generate file path using os.path.join with the latest RateTable entry
         file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', f'{latest_rate.animal_type}_{latest_rate.rate_type}.csv')
-
-        print(f'File Path: {file_path}')
 
         # Open the CSV file and read just the first line
         with open(file_path, 'r') as csv_file:
