@@ -547,10 +547,13 @@ def download_rate_table(request, rate_table_id):
 
 import csv
 import os
+import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from apps.common.models import RateTable
+
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def lastratedate_api(request):
@@ -579,5 +582,6 @@ def lastratedate_api(request):
     except RateTable.DoesNotExist:
         return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
     except Exception as e:
-        # Provide more specific error information for debugging
-        return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
+        # Log the exception to help with debugging
+        logger.exception("Error in lastratedate_api view")
+        return JsonResponse({'error': 'Internal Server Error. Please check server logs for details.'}, status=500)
