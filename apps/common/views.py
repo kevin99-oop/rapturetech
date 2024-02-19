@@ -545,35 +545,37 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
+import csv
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+import os
 from apps.common.models import RateTable
-from rest_framework.decorators import api_view
+from django.contrib.auth.decorators import login_required
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
+@csrf_exempt
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def lastratedate_api(request, animal, rate_type):
     try:
-        # Get the latest RateTable entry for the specified animal and rate_type
-        latest_rate = get_object_or_404(
-            RateTable, animal_type=animal, rate_type=rate_type
-        )
+        # Construct the file path based on animal and rate_type
+        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{animal}_{rate_type}.csv')
 
-        # Modify the response as needed based on your requirements
-        response_data = {
-            'animal': latest_rate.animal_type,  # Assuming the field name is animal_type
-            'rate_type': latest_rate.rate_type,
-            'start_date': latest_rate.start_date.strftime('%Y-%m-%d'),
+        # Open the CSV file and read just the first line
+        with open(file_path, 'r') as csv_file:
+            reader = csv.reader(csv_file, delimiter='\t')  # Assuming it's tab-separated
+            # Get the first row from the CSV
+            first_row = next(reader)
+            # Take the first 10 characters from the first row to get the date
+            date_from_csv = first_row[0][:10]
 
-            # Add more fields as needed
-        }
+        return JsonResponse({'date': date_from_csv})
 
-        return JsonResponse(response_data)
-
-    except RateTable.DoesNotExist:
-        return JsonResponse({'error': 'No matching RateTable entry found.'}, status=404)
     except Exception as e:
+        # Handle exceptions appropriately
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
-
 
 
 import csv
