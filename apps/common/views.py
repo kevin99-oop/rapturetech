@@ -549,6 +549,7 @@ import logging
 import csv
 from django.http import JsonResponse
 from django.shortcuts import get_list_or_404
+from django.http import Http404
 from .models import RateTable  # Replace with your actual model
 from rest_framework.decorators import api_view
 
@@ -561,9 +562,9 @@ def lastratedate_api(request):
         rate_type = request.GET.get('rate_type')
 
         # Assuming the CSV file is stored in the 'rate_tables/' directory
-        rate_entries = get_list_or_404(RateTable, animal_type=animal, rate_type=rate_type)
-
-        if not rate_entries:
+        try:
+            rate_entries = get_list_or_404(RateTable, animal_type=animal, rate_type=rate_type)
+        except Http404:
             return JsonResponse({'error': f'No rate data found for animal: {animal}, rate_type: {rate_type}'}, status=404)
 
         # Get the latest RateTable entry based on start_date
