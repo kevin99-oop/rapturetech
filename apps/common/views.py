@@ -563,6 +563,10 @@ def lastratedate_api(request):
 
         print(f'Animal Type: {animal_type}, Rate Type: {rate_type}')
 
+        # Count entries for the specified animal_type and rate_type
+        entry_count = RateTable.objects.filter(animal_type=animal_type, rate_type=rate_type).count()
+        print(f'Entry count: {entry_count}')
+
         # Retrieve the latest RateTable entry for the specified animal_type and rate_type
         latest_rate = RateTable.objects.filter(animal_type=animal_type, rate_type=rate_type).latest('start_date')
 
