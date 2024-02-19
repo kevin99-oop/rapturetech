@@ -558,8 +558,11 @@ from rest_framework.permissions import IsAuthenticated
 @csrf_exempt
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def lastratedate_api(request, animal, rate_type):
+def lastratedate_api(request):
     try:
+        animal = request.GET.get('animal')
+        rate_type = request.GET.get('rate_type')
+
         # Construct the file path based on animal and rate_type
         file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{animal}_{rate_type}.csv')
 
