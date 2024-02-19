@@ -545,41 +545,45 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
+import csv
+import os
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 from apps.common.models import RateTable
-from django.contrib.auth.decorators import login_required
 
 @csrf_exempt
-@login_required
 def lastratedate_api(request):
     try:
-        # Force evaluation of lazy object to get the actual user
-        user = request.user._wrapped if hasattr(request.user, '_wrapped') else request.user
+        # Get the logged-in user
+        user = request.user
 
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
         # Retrieve the latest RateTable entry for the specified animal and rate_type
-        latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type, user=user).latest('start_date')
+        latest_rate = RateTable.objects.filter(animal=animal, rate_type=rate_type).latest('start_date')
 
-        # Extract the start date from the latest RateTable entry
-        start_date = latest_rate.start_date.strftime('%Y-%m-%d')
+        # Generate file path using os.path.join with the latest RateTable entry
+        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', f'{latest_rate.animal}_{latest_rate.rate_type}.csv')
 
-        response_data = {'date': start_date}
-        return JsonResponse(response_data)
+        # Open the CSV file and read just the first line
+        with open(file_path, 'r') as csv_file:
+            reader = csv.reader(csv_file, delimiter='\t')  # Assuming it's tab-separated
+            # Get the first row from the CSV
+            first_row = next(reader)
+            # Take the first 10 characters from the first row to get the date
+            date_from_csv = first_row[0][:10]
 
+        print(f'Date from CSV: {date_from_csv}')
+
+        return JsonResponse({'date': date_from_csv})
 
     except RateTable.DoesNotExist:
         return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
-
     except Exception as e:
-        # Print the exception traceback in the console for debugging
-        import traceback
-        traceback.print_exc()
-        response_data = {'error': f'Internal Server Error: {str(e)}'}
-        return JsonResponse(response_data, status=500)
-
+        # Provide more specific error information for debugging
+        return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
 
 
 
