@@ -563,22 +563,12 @@ def lastratedate_api(request):
         rate_type = request.GET.get('rate_type')
 
         # Retrieve the latest RateTable entry for the specified animal and rate_type
-        latest_rate = RateTable.objects.filter(animal=animal, rate_type=rate_type).latest('start_date')
+        latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type, user=user).latest('start_date')
 
-        # Generate file path using os.path.join with the latest RateTable entry
-        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', f'{latest_rate.animal}_{latest_rate.rate_type}.csv')
+        # Extract the start date from the latest RateTable entry
+        start_date = latest_rate.start_date.strftime('%Y-%m-%d')
 
-        # Open the CSV file and read just the first line
-        with open(file_path, 'r') as csv_file:
-            reader = csv.reader(csv_file, delimiter='\t')  # Assuming it's tab-separated
-            # Get the first row from the CSV
-            first_row = next(reader)
-            # Take the first 10 characters from the first row to get the date
-            date_from_csv = first_row[0][:10]
-
-        print(f'Date from CSV: {date_from_csv}')
-
-        return JsonResponse({'date': date_from_csv})
+        return JsonResponse({'date': start_date})
 
     except RateTable.DoesNotExist:
         return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
