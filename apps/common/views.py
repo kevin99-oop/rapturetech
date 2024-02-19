@@ -549,7 +549,7 @@ import logging
 import csv
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from apps.common.models import RateTable  # Replace with your actual model
+from .models import RateTable  # Replace with your actual model
 from rest_framework.decorators import api_view
 
 logger = logging.getLogger(__name__)
@@ -577,6 +577,10 @@ def lastratedate_api(request):
         logger.info(f'Date from CSV: {date_from_csv}')
 
         return JsonResponse({'date': date_from_csv})
+
+    except RateTable.DoesNotExist:
+        logger.warning('No RateTable matches the given query.')
+        return JsonResponse({'error': 'No matching RateTable entry found.'}, status=404)
 
     except Exception as e:
         logger.exception(f'Error processing lastratedate_api: {e}')
