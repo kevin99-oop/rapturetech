@@ -551,7 +551,7 @@ from apps.common.models import RateTable
 from django.contrib.auth.decorators import login_required
 
 @csrf_exempt
-@login_required
+@permission_classes([IsAuthenticated])
 def lastratedate_api(request):
     print(f'User authenticated: {request.user.is_authenticated}')
 
