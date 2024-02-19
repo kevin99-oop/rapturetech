@@ -545,7 +545,6 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
-import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from apps.common.models import RateTable
@@ -553,26 +552,64 @@ from apps.common.models import RateTable
 @csrf_exempt
 def lastratedate_api(request):
     try:
-        # Get the parameters from the request
+        # Get the latest RateTable entry for the logged-in user
+        latest_rate = RateTable.objects.filter(user=request.user).latest('start_date')
+
+        # Modify the response as needed based on your requirements
+        response_data = {
+            'animal': latest_rate.animal_type,
+            'rate_type': latest_rate.rate_type,
+            'start_date': latest_rate.start_date.strftime('%Y-%m-%d'),
+            # Add more fields as needed
+        }
+        return JsonResponse(response_data)
+
+    except RateTable.DoesNotExist:
+        return JsonResponse({'error': 'No rate data available for the user.'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
+import csv
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from apps.common.models import RateTable
+import os
+
+@csrf_exempt
+def ratesitem_api(request):
+    try:
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
+        date = request.GET.get('date')
+        item = request.GET.get('item')
 
-        # Check if both animal and rate_type are provided
-        if animal and rate_type:
-            # Retrieve the latest RateTable entry for the specified animal and rate_type
-            latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('uploaded_at')
+        # Get the latest RateTable entry for the specified animal and rate_type
+        latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('start_date')
 
-            # Check if start_date is available
-            if latest_rate.start_date:
-                start_date = latest_rate.start_date.strftime('%Y-%m-%d')
-                return JsonResponse({'date': start_date})
+        # Construct the file path based on the latest RateTable entry
+        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{latest_rate.animal_type}_{latest_rate.rate_type}.csv')
+
+        # Open the CSV file and read the data from the specified row (date) and column (item)
+        with open(file_path, 'r') as csv_file:
+            reader = csv.reader(csv_file)
+            header = next(reader)  # Skip the header row
+            date_index = header.index('Date')  # Assuming 'Date' is the header for the date column
+            item_index = int(float(item) * 10)  # Assuming items are in increments of 0.1
+
+            for row in reader:
+                if row[date_index] == date:
+                    row_data = row[item_index]
+                    break
             else:
-                return JsonResponse({'error': 'No start_date available for the specified animal and rate_type.'}, status=404)
-        else:
-            return JsonResponse({'error': 'Please provide both animal and rate_type parameters.'}, status=400)
+                return JsonResponse({'error': f'Data not found for date {date} and item {item}'}, status=404)
+
+        # Create a JSON response with the row data
+        response_data = {'row': row_data}
+        return JsonResponse(response_data)
 
     except RateTable.DoesNotExist:
         return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
     except Exception as e:
-        # Provide more specific error information for debugging
-        return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
+        # Handle exceptions appropriately
+        print(f'Error in ratesitem_api: {e}')
+        return JsonResponse({'error': 'Internal Server Error'}, status=500)
