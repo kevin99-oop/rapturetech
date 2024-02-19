@@ -577,6 +577,8 @@ def lastratedate_api(request):
         return JsonResponse({'error': f'Internal Server Error: {str(e)}'}, status=500)
 
 
+
+
 import csv
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
