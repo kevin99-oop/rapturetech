@@ -545,6 +545,7 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
+import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from apps.common.models import RateTable
@@ -555,16 +556,17 @@ def lastratedate_api(request):
         animal_type = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
 
-        # Retrieve the latest start_date for the specified animal_type and rate_type
-        latest_rate = RateTable.objects.filter(animal_type=animal_type, rate_type=rate_type).latest('start_date')
+        try:
+            # Retrieve the latest RateTable entry for the specified animal_type and rate_type
+            latest_rate = RateTable.objects.filter(animal_type=animal_type, rate_type=rate_type).latest('uploaded_at')
+            latest_start_date = latest_rate.start_date.strftime('%Y-%m-%d')
+            return JsonResponse({'date': latest_start_date})
 
-        # Format the latest start_date
-        date_from_rate_table = latest_rate.start_date.strftime('%Y-%m-%d')
+        except RateTable.DoesNotExist:
+            # No matching entry found in RateTable
+            error_message = f'No rate data available for animal: {animal_type}, rate_type: {rate_type}'
+            return JsonResponse({'error': error_message}, status=404)
 
-        return JsonResponse({'date': date_from_rate_table})
-
-    except RateTable.DoesNotExist:
-        return JsonResponse({'error': f'No rate data available for animal_type: {animal_type}, rate_type: {rate_type}'}, status=404)
     except Exception as e:
         # Provide more specific error information for debugging
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
