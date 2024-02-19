@@ -76,7 +76,6 @@ urlpatterns = [
 
     path('api/lastratedate/', lastratedate_api, name='lastratedate_api'),
     #path('api/ratesitem/', ratesitem_api, name='ratesitem_api'),
-
 ]
 
 # Serve media files during development
