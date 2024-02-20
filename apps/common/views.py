@@ -565,6 +565,7 @@ def lastratedate_api(request):
 
         # Ensure you use request.user for the user instance
         user = request.user
+        print(f'User: {user}')
 
         # Assuming the CSV files are stored in the 'rate_tables/' directory
         file_pattern = f'{animal[0]}{rate_type}.csv'
