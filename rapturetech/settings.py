@@ -195,3 +195,9 @@ EMAIL_PORT = 587  # Use the appropriate port for your SMTP server
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'kevinpandya18@gnu.ac.in'
 EMAIL_HOST_PASSWORD = 'JACK@99kevin281099'
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+CSP_DEFAULT_SRC = ("'self'",)
+SECURE_REFERRER_POLICY = 'same-origin'
+SESSION_COOKIE_SECURE = True
