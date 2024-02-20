@@ -638,29 +638,29 @@ def ratesitem_api(request):
             raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
 
 
-    # Open the CSV file and read the data from the specified row (date) and column (item)
-    with open(file_path, 'r') as csv_file:
-        reader = csv.reader(csv_file)
-        header = next(reader, None)  # Use next(reader, None) to handle cases where the CSV has no header
-        if header is None:
-            return JsonResponse({'error': 'CSV file has no header'}, status=500)
+        # Open the CSV file and read the data from the specified row (date) and column (item)
+        with open(file_path, 'r') as csv_file:
+            reader = csv.reader(csv_file)
+            header = next(reader, None)  # Use next(reader, None) to handle cases where the CSV has no header
+            if header is None:
+                return JsonResponse({'error': 'CSV file has no header'}, status=500)
 
-        # Assuming 'Date' is the header for the date column
-        date_index = header.index('Date') if 'Date' in header else None
-        if date_index is None:
-            return JsonResponse({'error': "'Date' column not found in CSV header"}, status=500)
+            # Assuming 'Date' is the header for the date column
+            date_index = header.index('Date') if 'Date' in header else None
+            if date_index is None:
+                return JsonResponse({'error': "'Date' column not found in CSV header"}, status=500)
 
-        item_index = int(float(item) * 10)  # Assuming items are in increments of 0.1
+            item_index = int(float(item) * 10)  # Assuming items are in increments of 0.1
 
-        for row in reader:
-            if date_index < len(row) and row[date_index] == date:
-                if item_index < len(row):
-                    row_data = row[item_index]
-                    break
-                else:
-                    return JsonResponse({'error': f'Item index {item_index} out of range in CSV'}, status=500)
-        else:
-            return JsonResponse({'error': f'Data not found for date {date} and item {item}'}, status=404)
+            for row in reader:
+                if date_index < len(row) and row[date_index] == date:
+                    if item_index < len(row):
+                        row_data = row[item_index]
+                        break
+                    else:
+                        return JsonResponse({'error': f'Item index {item_index} out of range in CSV'}, status=500)
+            else:
+                return JsonResponse({'error': f'Data not found for date {date} and item {item}'}, status=404)
 
         # Create a JSON response with the row data
         response_data = {'row': row_data}
