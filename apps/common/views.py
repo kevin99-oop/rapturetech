@@ -1085,13 +1085,14 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
+
+
 import csv
 import os
 import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-from .models import RateTable  # Import your RateTable model
 
 logger = logging.getLogger(__name__)
 
@@ -1114,31 +1115,18 @@ def lastratedate_api(request):
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
 
-        # Fetch the latest record from the database
-        latest_record = RateTable.objects.filter(
-            csv_file__icontains=file_pattern
-        ).order_by('-uploaded_at').first()
-
-        # Extract the start date from the latest record
-        date_from_db = latest_record.start_date if latest_record else None
-
-        # Initialize date_from_csv as None
-        date_from_csv = None
-
-        if os.path.exists(file_path):
-            # Open the CSV file and read just the first line
-            with open(file_path, 'r') as csv_file:
-                reader = csv.reader(csv_file, delimiter='\t')  # Assuming it's tab-separated
-                # Get the first row from the CSV
-                first_row = next(reader)
-                # Take the first 10 characters from the first row to get the date
-                date_from_csv = first_row[0][:10]
+        # Open the CSV file and read just the first line
+        with open(file_path, 'r') as csv_file:
+            reader = csv.reader(csv_file, delimiter='\t')  # Assuming it's tab-separated
+            # Get the first row from the CSV
+            first_row = next(reader)
+            # Take the first 10 characters from the first row to get the date
+            date_from_csv = first_row[0][:10]
 
         print(f'Date from CSV: {date_from_csv}')
-        print(f'Start Date from Database: {date_from_db}')
 
-        # Return both the date from the CSV and the start date from the database
-        return JsonResponse({'date_from_csv': date_from_csv, 'start_date_from_db': date_from_db, 'file_path': file_path})
+        # Return both the date and the file path
+        return JsonResponse({'date': date_from_csv, 'file_path': file_path})
 
     except FileNotFoundError as e:
         # Log the error
@@ -1149,7 +1137,6 @@ def lastratedate_api(request):
         # Log the error
         logger.exception(f'Error in lastratedate_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
-
 
 import csv
 from django.http import JsonResponse
