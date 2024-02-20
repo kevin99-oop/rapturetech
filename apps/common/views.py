@@ -618,7 +618,8 @@ def ratesitem_api(request):
         file_path_relative = latest_rate.csv_file.url
 
         # Construct the absolute file path
-        file_path = os.path.join(settings.MEDIA_ROOT, file_path_relative.lstrip('/'))
+        # Construct the absolute file path based on the animal and rate_type
+        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{animal.upper()}_{rate_type}.csv')
 
         # Print the file path for debugging
         print(f'File path: {file_path}')
