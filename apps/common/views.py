@@ -632,6 +632,7 @@ def ratesitem_api(request):
         with open(file_path, newline='') as csvfile:
             reader = csv.reader(csvfile)
             data = [row for row in reader]
+        print(f'File path: {file_path}')
 
         # Extract date and values
         date_row = data[0]
