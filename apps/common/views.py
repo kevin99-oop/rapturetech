@@ -595,14 +595,11 @@ def lastratedate_api(request):
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
 
 import csv
-import os
-import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from apps.common.models import RateTable
-
-logger = logging.getLogger(__name__)
+import os
 
 @csrf_exempt
 def ratesitem_api(request):
@@ -616,39 +613,29 @@ def ratesitem_api(request):
         latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('start_date')
 
         # Construct the file path based on the latest RateTable entry
-        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{animal[0]}{rate_type}.csv')
-
-        # Print the file path for debugging
-        print(f'File path: {file_path}')
-
-
-        # Extract the file name from the database (e.g., 'rate_tables/CSNF_1.csv')
-        file_name = os.path.basename(latest_rate.csv_file.name)
-
-        # Log the file name for debugging
-        logger.info(f'File name: {file_name}')
-
-        # Construct the file path based on the file name
-
-        # Log the file path for debugging
-        logger.info(f'File path: {file_path}')
-
-        # Check if the file exists
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
-
+        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{latest_rate.animal_type}_{latest_rate.rate_type}.csv')
 
         # Open the CSV file and read the data from the specified row (date) and column (item)
         with open(file_path, 'r') as csv_file:
             reader = csv.reader(csv_file)
-            header = next(reader)  # Skip the header row
-            date_index = header.index('Date')  # Assuming 'Date' is the header for the date column
+            header = next(reader, None)  # Use next(reader, None) to handle cases where the CSV has no header
+            if header is None:
+                return JsonResponse({'error': 'CSV file has no header'}, status=500)
+
+            # Assuming 'Date' is the header for the date column
+            date_index = header.index('Date') if 'Date' in header else None
+            if date_index is None:
+                return JsonResponse({'error': "'Date' column not found in CSV header"}, status=500)
+
             item_index = int(float(item) * 10)  # Assuming items are in increments of 0.1
 
             for row in reader:
-                if row[date_index] == date:
-                    row_data = row[item_index]
-                    break
+                if date_index < len(row) and row[date_index] == date:
+                    if item_index < len(row):
+                        row_data = row[item_index]
+                        break
+                    else:
+                        return JsonResponse({'error': f'Item index {item_index} out of range in CSV'}, status=500)
             else:
                 return JsonResponse({'error': f'Data not found for date {date} and item {item}'}, status=404)
 
@@ -656,14 +643,9 @@ def ratesitem_api(request):
         response_data = {'row': row_data}
         return JsonResponse(response_data)
 
-    except FileNotFoundError as e:
-        # Log the error
-        logger.error(f'FileNotFoundError in ratesitem_api: {e}')
-        return JsonResponse({'error': 'CSV file not found'}, status=404)
-
     except RateTable.DoesNotExist:
         return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
     except Exception as e:
-        # Log the error
-        logger.exception(f'Error in ratesitem_api: {e}')
+        # Handle exceptions appropriately
+        print(f'Error in ratesitem_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
