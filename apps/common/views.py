@@ -1121,7 +1121,7 @@ def lastratedate_api(request):
 
         # Get the start_date from the latest record
         if latest_record:
-            start_date_from_db = latest_record.start_date
+            start_date_from_db = latest_record.start_date.strftime('%Y-%m-%d')
         else:
             start_date_from_db = None
 
