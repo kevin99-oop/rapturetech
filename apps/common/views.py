@@ -596,11 +596,11 @@ def lastratedate_api(request):
 
 # views.py
 # views.py
+# views.py
 import csv
 import os
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.conf import settings
 from .models import RateTable
 
 @csrf_exempt
@@ -613,6 +613,10 @@ def ratesitem_api(request):
 
         # Get the latest RateTable entry for the specified animal and rate_type
         latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('start_date')
+
+        # Print for debugging
+        print(f'Latest RateTable entry: {latest_rate}')
+        print(f'CSV file path in the database: {latest_rate.csv_file.path}')
 
         # Construct the file path based on the latest RateTable entry
         file_path = latest_rate.csv_file.path
