@@ -558,6 +558,10 @@ def lastratedate_api(request):
         animal = request.GET.get('animal', '')
         rate_type = request.GET.get('rate_type', '')
 
+        print(f'User: {user}')
+        print(f'Animal: {animal}')
+        print(f'Rate Type: {rate_type}')
+
         # Modify the animal value if needed
         if animal == 'BUFFALOW':
             animal = 'BUFFALO'
@@ -574,10 +578,13 @@ def lastratedate_api(request):
         return JsonResponse(response_data)
 
     except RateTable.DoesNotExist as e:
+        print(f'Error: {e}')
         return JsonResponse({'error': 'No matching RateTable entry found for the user.'}, status=404)
 
     except Exception as e:
+        print(f'Error: {e}')
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
+
 
 
 import csv
