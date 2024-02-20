@@ -621,7 +621,6 @@ def ratesitem_api(request):
         # Print the file path for debugging
         print(f'File path: {file_path}')
 
-
         # Extract the file name from the database (e.g., 'rate_tables/CSNF_1.csv')
         file_name = os.path.basename(latest_rate.csv_file.name)
 
@@ -636,7 +635,6 @@ def ratesitem_api(request):
         # Check if the file exists
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
-
 
         # Open the CSV file and read the data from the specified row (date) and column (item)
         with open(file_path, 'r') as csv_file:
