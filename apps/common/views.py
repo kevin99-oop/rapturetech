@@ -1106,27 +1106,34 @@ def lastratedate_api(request):
         if animal == 'BUFFALOW':
             animal = 'BUFFALO'
 
-        # Query the RateTable model to get the latest record based on uploaded_at
+        # Assuming the CSV files are stored in the 'rate_tables/' directory
+        file_pattern = f'{animal[0]}{rate_type}.csv'
+        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', file_pattern)
+
+        # Check if the file exists
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
+
+        # Get the latest record from the database
         latest_record = RateTable.objects.filter(
             csv_file__icontains=f"{animal[0]}{rate_type}.csv"
         ).order_by('-start_date').first()
 
-        # Check if the record exists
-        if not latest_record:
-            raise FileNotFoundError(f"Record not found for {animal}_{rate_type}")
+        # Get the start_date from the latest record
+        if latest_record:
+            start_date_from_db = latest_record.start_date
+        else:
+            start_date_from_db = None
 
-        # Extract the recent uploaded date from the latest record
-        date_from_csv = latest_record.uploaded_at.strftime("%Y-%m-%d")
+        print(f'Start date from DB: {start_date_from_db}')
 
-        print(f'date: {date_from_csv}')
-
-        # Return both the date and the file path
-        return JsonResponse({'date': date_from_csv, 'file_path': latest_record.csv_file.path})
+        # Return both the start_date and the file path
+        return JsonResponse({'start_date': start_date_from_db, 'file_path': file_path})
 
     except FileNotFoundError as e:
         # Log the error
         logger.error(f'FileNotFoundError in lastratedate_api: {e}')
-        return JsonResponse({'error': 'Record not found'}, status=404)
+        return JsonResponse({'error': 'CSV file not found'}, status=404)
 
     except Exception as e:
         # Log the error
