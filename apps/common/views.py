@@ -595,12 +595,12 @@ def lastratedate_api(request):
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
 
 # views.py
-# views.py
 import csv
-import os
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import RateTable
+from django.conf import settings
+import os
+from apps.common.models import RateTable  # Import your RateTable model
 
 @csrf_exempt
 def ratesitem_api(request):
@@ -613,26 +613,20 @@ def ratesitem_api(request):
         # Get the latest RateTable entry for the specified animal and rate_type
         latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('start_date')
 
-        # Print for debugging
-        print(f'Latest RateTable entry: {latest_rate}')
-        print(f'CSV file path in the database: {latest_rate.csv_file.path}')
-
         # Construct the file path based on the latest RateTable entry
-        file_path = latest_rate.csv_file.path
+        file_path = os.path.join(settings.MEDIA_ROOT, latest_rate.csv_file.name)
+
+        # Print the file path for debugging
         print(f'File path: {file_path}')
 
         # Check if the file exists
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
 
-        # Additional debugging
-        print(f'File exists: {os.path.exists(file_path)}')
-
         # Read CSV file
         with open(file_path, newline='') as csvfile:
             reader = csv.reader(csvfile)
             data = [row for row in reader]
-        print(f'File path: {file_path}')
 
         # Extract date and values
         date_row = data[0]
@@ -652,7 +646,7 @@ def ratesitem_api(request):
         return JsonResponse({'error': 'CSV file not found'}, status=404)
 
     except RateTable.DoesNotExist:
-        return JsonResponse({'error': f'No rate data available for {animal} and {rate_type}.'}, status=404)
+        return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
 
     except Exception as e:
         # Log the error
