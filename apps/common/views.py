@@ -542,28 +542,42 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
 
-@api_view(['GET'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def lastratedate_api(request, animal, rate_type):
+
+import csv
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+import os
+
+@csrf_exempt
+def lastratedate_api(request):
     try:
-        # Fetch the rate table object for the given user, animal, and rate type
-        rate_table = get_object_or_404(RateTable, user=request.user, animal_type=animal, rate_type=rate_type)
+        animal = request.GET.get('animal', '')
+        rate_type = request.GET.get('rate_type', '')
+        print(f'Animal: {animal}')
+        print(f'Rate Type: {rate_type}')
+        if animal == 'BUFFALOW':
+                    animal = 'BUFFALO'
+        # Assuming the CSV file is stored in the 'rate_files/' directory
+        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{animal}_{rate_type}.csv')
 
-        # Get the start_date from the rate table
-        start_date = rate_table.start_date if rate_table.start_date else None
+        # Open the CSV file and read just the first line
+        with open(file_path, 'r') as csv_file:
+            reader = csv.reader(csv_file, delimiter='\t')  # Assuming it's tab-separated
+            # Get the first row from the CSV
+            first_row = next(reader)
+            # Take the first 10 characters from the first row to get the date
+            date_from_csv = first_row[0][:10]
 
-        # Prepare the JSON response with the start_date
-        response_data = {'date': str(start_date) if start_date else None}
-        return JsonResponse(response_data)
+        print(f'Date from CSV: {date_from_csv}')
+
+        return JsonResponse({'date': date_from_csv})
+
     except Exception as e:
-        logger.exception(f'Error processing lastratedate_api: {e}')
-        return JsonResponse({'error': f'Internal Server Error'}, status=500)
-
+        # Handle exceptions appropriately
+        print(f'Error in lastratedate_api: {e}')
+        return JsonResponse({'error': 'Internal Server Error'}, status=500)
 
 
 import csv
