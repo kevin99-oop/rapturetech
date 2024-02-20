@@ -614,10 +614,12 @@ def ratesitem_api(request):
 
         # Construct the file path based on the latest RateTable entry
         file_path = os.path.join(settings.MEDIA_ROOT, latest_rate.csv_file.name)
-
+        
         # Print the file path for debugging
         print(f'File path: {file_path}')
-
+        print(f'Latest RateTable entry: {latest_rate}')
+        print(f'CSV file path in the database: {latest_rate.csv_file.name}')
+        print(f'File path: {file_path}')
         # Check if the file exists
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
