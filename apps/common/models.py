@@ -101,6 +101,8 @@ class RateTable(models.Model):
 
     def __str__(self):
         return f'{self.user.username} - {self.animal_type} - {self.rate_type}'
+
+    
     @property
     def csv_file_path(self):
         return self.csv_file.path if self.csv_file else ''
