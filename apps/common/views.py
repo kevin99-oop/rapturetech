@@ -595,8 +595,6 @@ def lastratedate_api(request):
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
 
 # views.py
-# views.py
-# views.py
 import csv
 import os
 from django.http import JsonResponse
