@@ -570,17 +570,26 @@ def lastratedate_api(request):
         if not latest_rate:
             raise FileNotFoundError(f"No RateTable entry found for {animal}_{rate_type}")
 
-        date_from_csv = latest_rate.start_date.strftime('%d-%m-%Y')
+        # Extract file name from the CSV file path
+        file_name = os.path.basename(latest_rate.csv_file.name)
+
+        # Open the CSV file and read just the first line
+        with open(latest_rate.csv_file.path, 'r') as csv_file:
+            reader = csv.reader(csv_file, delimiter='\t')  # Assuming it's tab-separated
+            # Get the first row from the CSV
+            first_row = next(reader)
+            # Take the first 10 characters from the first row to get the date
+            date_from_csv = first_row[0][:10]
 
         print(f'Date from CSV: {date_from_csv}')
 
         # Return both the date and the file path
-        return JsonResponse({'date': date_from_csv, 'file_path': latest_rate.csv_file.url})
+        return JsonResponse({'date': date_from_csv, 'file_name': file_name})
 
     except FileNotFoundError as e:
         # Log the error
         logger.error(f'FileNotFoundError in lastratedate_api: {e}')
-        return JsonResponse({'error': 'RateTable entry not found'}, status=404)
+        return JsonResponse({'error': 'CSV file not found'}, status=404)
 
     except Exception as e:
         # Log the error
@@ -601,6 +610,9 @@ def ratesitem_api(request):
         if not latest_rate:
             raise FileNotFoundError(f"No RateTable entry found for {animal}_{rate_type}")
 
+        # Extract file name from the CSV file path
+        file_name = os.path.basename(latest_rate.csv_file.name)
+
         # Read CSV file
         with open(latest_rate.csv_file.path, newline='') as csvfile:
             reader = csv.reader(csvfile)
@@ -614,7 +626,7 @@ def ratesitem_api(request):
         date = date_row[0][:10]
 
         # Format output
-        output_data = {"row": ",".join(values_row)}
+        output_data = {"row": ",".join(values_row), "file_name": file_name}
 
         return JsonResponse(output_data)
 
@@ -623,5 +635,5 @@ def ratesitem_api(request):
 
     except Exception as e:
         # Handle other exceptions appropriately
-        print(f'Error in ratesitem_api: {e}')
+        logger.exception(f'Error in ratesitem_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
