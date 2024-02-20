@@ -581,6 +581,7 @@ def lastratedate_api(request):
 
         print(f'Date from CSV: {date_from_csv}')
 
+        # Return both the date and the file path
         return JsonResponse({'date': date_from_csv, 'file_path': file_path})
 
     except FileNotFoundError as e:
