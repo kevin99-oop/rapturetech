@@ -457,9 +457,6 @@ from django.contrib import messages
 # views.py
 from django.core.exceptions import ValidationError
 
-# views.py
-from django.core.exceptions import ValidationError
-
 def upload_rate_table(request):
     if request.method == 'POST':
         form = UploadRateTableForm(request.POST, request.FILES)
@@ -545,39 +542,40 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
-from rest_framework.decorators import authentication_classes, permission_classes
-from rest_framework.authentication import TokenAuthentication
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from apps.common.models import RateTable
+from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 
-@csrf_exempt
-@authentication_classes([TokenAuthentication])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def lastratedate_api(request):
-    try:
-        # Extract parameters from the request query parameters
-        animal = request.GET.get('animal', '')
-        rate_type = request.GET.get('rate_type', '')
+    # Get the parameters from the request
+    animal = request.GET.get('animal', None)
+    rate_type = request.GET.get('rate_type', None)
 
-        # Get the latest RateTable entry for the logged-in user
-        latest_rate = RateTable.objects.filter(user=request.user, animal_type=animal, rate_type=rate_type).latest('start_date')
+    if animal and rate_type:
+        try:
+            # Retrieve the latest RateTable entry based on user, animal, and rate_type
+            latest_rate = RateTable.objects.filter(user=request.user, animal_type=animal, rate_type=rate_type).latest('start_date')
 
-        # Modify the response as needed based on your requirements
-        response_data = {
-            'animal': latest_rate.animal_type,
-            'rate_type': latest_rate.rate_type,
-            'start_date': latest_rate.start_date.strftime('%Y-%m-%d'),
-            # Add more fields as needed
-        }
-        print(f'response_data: {response_data}')
+            # Prepare the response data with the start_date
+            response_data = {
+                'animal': latest_rate.animal_type,
+                'rate_type': latest_rate.rate_type,
+                'start_date': latest_rate.start_date.strftime('%Y-%m-%d'),
+            }
 
-        return JsonResponse(response_data)
-    except RateTable.DoesNotExist as e:
-        print(f'Error: {e}')
-        return JsonResponse({'error': 'No rate data available for the user.'}, status=404)
-    except Exception as e:
-        print(f'Error: {e}')
-        return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
+            return JsonResponse(response_data)
 
+        except RateTable.DoesNotExist:
+            return JsonResponse({'error': 'No matching RateTable entry found for the user.'}, status=404)
+
+        except Exception as e:
+            return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
+
+    return JsonResponse({'error': 'Invalid parameters. Please provide both animal and rate_type.'}, status=400)
 
 
 import csv
