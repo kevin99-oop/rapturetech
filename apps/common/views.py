@@ -1086,6 +1086,7 @@ def download_rate_table(request, rate_table_id):
     return HttpResponse(status=404)
 
 import os
+import csv
 import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -1114,8 +1115,13 @@ def lastratedate_api(request):
         if not latest_record:
             raise FileNotFoundError(f"Record not found for {animal}_{rate_type}")
 
+        # Extract the recent uploaded date from the latest record
+        date_from_csv = latest_record.uploaded_at.strftime("%Y-%m-%d")
+
+        print(f'date: {date_from_csv}')
+
         # Return both the date and the file path
-        return JsonResponse({'date': latest_record.start_date.strftime('%Y-%m-%d'), 'file_path': latest_record.csv_file.path})
+        return JsonResponse({'date': date_from_csv, 'file_path': latest_record.csv_file.path})
 
     except FileNotFoundError as e:
         # Log the error
@@ -1138,6 +1144,7 @@ from apps.common.models import RateTable
 def ratesitem_api(request):
     try:
         animal = request.GET.get('animal')
+        date = request.GET.get('date')
         rate_type = request.GET.get('rate_type')
         item = request.GET.get('item')
 
@@ -1150,16 +1157,20 @@ def ratesitem_api(request):
         if not latest_record:
             raise FileNotFoundError(f"Record not found for {animal}_{rate_type}")
 
-        # Read CSV file
+        # Extract data from the latest record
         with open(latest_record.csv_file.path, newline='') as csvfile:
             reader = csv.reader(csvfile)
             data = [row for row in reader]
 
-        # Extract values from the latest record
-        values_row = data[int(float(item))]
+        # Extract date and values
+        date_row = data[0]
+        values_row = data[int(float(item))]  # Assuming 'item' is the row number
+
+        # Extract the first 10 characters from the date
+        date_from_csv = date_row[0][:10]
 
         # Format output
-        output_data = {"row": ",".join(values_row)}
+        output_data = {"date": date_from_csv, "row": ",".join(values_row)}
 
         return JsonResponse(output_data)
 
@@ -1169,4 +1180,4 @@ def ratesitem_api(request):
     except Exception as e:
         # Handle other exceptions appropriately
         print(f'Error in ratesitem_api: {e}')
-        return JsonResp
+        return JsonResponse({'error': 'Internal Server Error'}, status=500)
