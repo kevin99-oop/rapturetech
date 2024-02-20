@@ -543,37 +543,41 @@ def download_rate_table(request, rate_table_id):
     return HttpResponse(status=404)
 
 
-
 import csv
 import os
 import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
+
+from apps.common.models import RateTable  # Make sure to import your RateTable model
 
 logger = logging.getLogger(__name__)
 
 @csrf_exempt
+@login_required
 def lastratedate_api(request):
     try:
+        user = request.user
         animal = request.GET.get('animal', '')
         rate_type = request.GET.get('rate_type', '')
+        print(f'User: {user}')
         print(f'Animal: {animal}')
         print(f'Rate Type: {rate_type}')
 
         if animal == 'BUFFALOW':
             animal = 'BUFFALO'
 
-        # Assuming the CSV files are stored in the 'rate_tables/' directory
-        file_pattern = f'{animal[0]}{rate_type}.csv'
-        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', file_pattern)
+        # Fetch the latest RateTable entry for the given user, animal, and rate type
+        latest_rate_table = RateTable.objects.filter(user=user, animal_type=animal, rate_type=rate_type).order_by('-start_date').first()
 
-        # Check if the file exists
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
+        # Check if the RateTable entry exists
+        if not latest_rate_table:
+            raise FileNotFoundError(f"No matching RateTable entry found for user {user}, animal {animal}, and rate type {rate_type}")
 
         # Open the CSV file and read just the first line
-        with open(file_path, 'r') as csv_file:
+        with open(latest_rate_table.csv_file.path, 'r') as csv_file:
             reader = csv.reader(csv_file, delimiter='\t')  # Assuming it's tab-separated
             # Get the first row from the CSV
             first_row = next(reader)
