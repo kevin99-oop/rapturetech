@@ -594,13 +594,15 @@ def lastratedate_api(request):
         logger.exception(f'Error in lastratedate_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
 
-
 import csv
+import os
+import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from apps.common.models import RateTable
-import os
+
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def ratesitem_api(request):
@@ -610,11 +612,21 @@ def ratesitem_api(request):
         date = request.GET.get('date')
         item = request.GET.get('item')
 
+        # Convert BSNF/CSNF to BSNF.csv/CSNF.csv
+        rate_type_csv = f'{rate_type}.csv'
+
         # Get the latest RateTable entry for the specified animal and rate_type
         latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('start_date')
 
         # Construct the file path based on the latest RateTable entry
-        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{latest_rate.animal_type}_{latest_rate.rate_type}.csv')
+        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{latest_rate.animal_type}_{rate_type_csv}')
+
+        # Log the file path for debugging
+        logger.info(f'File path: {file_path}')
+
+        # Check if the file exists
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
 
         # Open the CSV file and read the data from the specified row (date) and column (item)
         with open(file_path, 'r') as csv_file:
@@ -634,9 +646,14 @@ def ratesitem_api(request):
         response_data = {'row': row_data}
         return JsonResponse(response_data)
 
+    except FileNotFoundError as e:
+        # Log the error
+        logger.error(f'FileNotFoundError in ratesitem_api: {e}')
+        return JsonResponse({'error': 'CSV file not found'}, status=404)
+
     except RateTable.DoesNotExist:
         return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
     except Exception as e:
-        # Handle exceptions appropriately
-        print(f'Error in ratesitem_api: {e}')
+        # Log the error
+        logger.exception(f'Error in ratesitem_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
