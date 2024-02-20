@@ -93,11 +93,11 @@ class Config(models.Model):
 
 class RateTable(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    animal_type = models.CharField(max_length=1)
-    rate_type = models.CharField(max_length=3)
+    animal_type = models.CharField(max_length=100)
+    rate_type = models.CharField(max_length=100)
     csv_file = models.FileField(upload_to='rate_tables/')
     start_date = models.DateField(null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"RateTable for {self.user.username} - {self.id}"
+        return f'{self.user.username} - {self.animal_type} - {self.rate_type}'
