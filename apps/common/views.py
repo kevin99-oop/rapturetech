@@ -594,7 +594,6 @@ def lastratedate_api(request):
         logger.exception(f'Error in lastratedate_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
 
-# views.py
 import csv
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
