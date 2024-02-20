@@ -1085,6 +1085,16 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
+import csv
+import os
+import logging
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+import datetime
+
+logger = logging.getLogger(__name__)
+
 @csrf_exempt
 def lastratedate_api(request):
     try:
@@ -1110,12 +1120,15 @@ def lastratedate_api(request):
             # Skip header
             next(reader)
             # Get the latest date from the remaining rows
-            latest_date = max(row[0][:10] for row in reader)
+            latest_date = max(row[0] for row in reader)
 
-        print(f'Latest date from CSV: {latest_date}')
+        # Parse the latest date with the correct format
+        latest_date_parsed = datetime.datetime.strptime(latest_date, '%d-%m-%Y').strftime('%Y-%m-%d')
+
+        print(f'Latest date from CSV: {latest_date_parsed}')
 
         # Return the latest date and the file path
-        return JsonResponse({'latest_date': latest_date, 'file_path': file_path})
+        return JsonResponse({'latest_date': latest_date_parsed, 'file_path': file_path})
 
     except FileNotFoundError as e:
         # Log the error
