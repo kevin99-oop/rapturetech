@@ -552,6 +552,14 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
+import os
+import logging
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+
+logger = logging.getLogger(__name__)
+
 @csrf_exempt
 def lastratedate_api(request):
     try:
@@ -581,7 +589,6 @@ def lastratedate_api(request):
 
         print(f'Date from CSV: {date_from_csv}')
 
-        # Return both the date and the file path
         return JsonResponse({'date': date_from_csv, 'file_path': file_path})
 
     except FileNotFoundError as e:
@@ -593,6 +600,7 @@ def lastratedate_api(request):
         # Log the error
         logger.exception(f'Error in lastratedate_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
+
 import os
 import logging
 from django.http import JsonResponse
