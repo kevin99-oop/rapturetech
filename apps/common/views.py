@@ -1085,7 +1085,6 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
-
 import csv
 import os
 import logging
