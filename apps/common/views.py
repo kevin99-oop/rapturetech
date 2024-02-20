@@ -1091,7 +1091,6 @@ import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -1119,16 +1118,18 @@ def lastratedate_api(request):
             reader = csv.reader(csv_file, delimiter='\t')  # Assuming it's tab-separated
             # Skip header
             next(reader)
-            # Get the latest date from the remaining rows
-            latest_date = max(row[0] for row in reader)
+            # Get the first and last dates from the remaining rows
+            first_date = None
+            last_date = None
+            for row in reader:
+                if not first_date:
+                    first_date = row[0]
+                last_date = row[0]
 
-        # Parse the latest date with the correct format
-        latest_date_parsed = datetime.datetime.strptime(latest_date, '%d-%m-%Y').strftime('%Y-%m-%d')
+        print(f'Start Date from CSV: {first_date}')
 
-        print(f'Latest date from CSV: {latest_date_parsed}')
-
-        # Return the latest date and the file path
-        return JsonResponse({'latest_date': latest_date_parsed, 'file_path': file_path})
+        # Return both the start date and the recent date along with the file path
+        return JsonResponse({'start_date': first_date, 'recent_date': last_date, 'file_path': file_path})
 
     except FileNotFoundError as e:
         # Log the error
