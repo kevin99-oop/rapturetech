@@ -624,9 +624,13 @@ def ratesitem_api(request):
         # Construct the file path based on the file name
         file_path = os.path.join(settings.MEDIA_ROOT, file_name)
 
+        # Log the file path for debugging
+        logger.info(f'File path: {file_path}')
+
         # Check if the file exists
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
+
 
         # Open the CSV file and read the data from the specified row (date) and column (item)
         with open(file_path, 'r') as csv_file:
