@@ -644,7 +644,7 @@ def ratesitem_api(request):
         return JsonResponse({'error': 'CSV file not found'}, status=404)
 
     except RateTable.DoesNotExist:
-        return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
+        return JsonResponse({'error': f'No rate data available for {animal} and {rate_type}.'}, status=404)
 
     except Exception as e:
         # Log the error
