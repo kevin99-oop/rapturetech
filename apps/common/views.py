@@ -542,48 +542,27 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.decorators import authentication_classes, permission_classes
-from apps.common.models import RateTable
 from rest_framework.permissions import IsAuthenticated
 
-@csrf_exempt
+@api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def lastratedate_api(request):
+def lastratedate_api(request, animal, rate_type):
     try:
-        user = request.user
-        animal = request.GET.get('animal', '')
-        rate_type = request.GET.get('rate_type', '')
+        # Fetch the rate table object for the given user, animal, and rate type
+        rate_table = get_object_or_404(RateTable, user=request.user, animal_type=animal, rate_type=rate_type)
 
-        print(f'User: {user}')
-        print(f'Animal: {animal}')
-        print(f'Rate Type: {rate_type}')
+        # Get the start_date from the rate table
+        start_date = rate_table.start_date if rate_table.start_date else None
 
-        # Modify the animal value if needed
-        if animal == 'BUFFALOW':
-            animal = 'BUFFALO'
-
-        latest_rate = RateTable.objects.filter(user=user, animal_type=animal, rate_type=rate_type).latest('start_date')
-
-        response_data = {
-            'animal': latest_rate.animal_type,
-            'rate_type': latest_rate.rate_type,
-            'start_date': latest_rate.start_date.strftime('%Y-%m-%d'),
-            # Add more fields as needed
-        }
-
+        # Prepare the JSON response with the start_date
+        response_data = {'date': str(start_date) if start_date else None}
         return JsonResponse(response_data)
-
-    except RateTable.DoesNotExist as e:
-        print(f'Error: {e}')
-        return JsonResponse({'error': 'No matching RateTable entry found for the user.'}, status=404)
-
     except Exception as e:
-        print(f'Error: {e}')
-        return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
+        logger.exception(f'Error processing lastratedate_api: {e}')
+        return JsonResponse({'error': f'Internal Server Error'}, status=500)
 
 
 
