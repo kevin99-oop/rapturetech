@@ -549,7 +549,8 @@ import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-from .models import RateTable  # Assuming your model is named RateTable
+from django.core.files import File
+from .models import RateTable
 
 logger = logging.getLogger(__name__)
 
@@ -564,17 +565,14 @@ def lastratedate_api(request):
         if animal == 'BUFFALOW':
             animal = 'BUFFALO'
 
-        # Fetch the latest uploaded rate table entry
-        latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).order_by('-uploaded_at').first()
+        # Get the latest RateTable entry for the specified animal and rate_type
+        latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('uploaded_at')
 
-        if not latest_rate:
-            raise FileNotFoundError(f"No RateTable entry found for {animal}_{rate_type}")
-
-        # Extract file name from the CSV file path
-        file_name = os.path.basename(latest_rate.csv_file.name)
+        # Get the file path from the latest RateTable entry
+        file_path = latest_rate.csv_file.path
 
         # Open the CSV file and read just the first line
-        with open(latest_rate.csv_file.path, 'r') as csv_file:
+        with open(file_path, 'r') as csv_file:
             reader = csv.reader(csv_file, delimiter='\t')  # Assuming it's tab-separated
             # Get the first row from the CSV
             first_row = next(reader)
@@ -583,18 +581,27 @@ def lastratedate_api(request):
 
         print(f'Date from CSV: {date_from_csv}')
 
-        # Return both the date and the file name
-        return JsonResponse({'date': date_from_csv, 'file_name': file_name})
+        # Return both the date and the file path
+        return JsonResponse({'date': date_from_csv, 'file_path': file_path})
 
-    except FileNotFoundError as e:
-        # Log the error
-        logger.error(f'FileNotFoundError in lastratedate_api: {e}')
-        return JsonResponse({'error': 'CSV file not found'}, status=404)
+    except RateTable.DoesNotExist:
+        return JsonResponse({'error': f'No RateTable entry found for {animal}_{rate_type}'}, status=404)
 
     except Exception as e:
         # Log the error
         logger.exception(f'Error in lastratedate_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
+
+import csv
+import os
+import logging
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from django.core.files import File
+from .models import RateTable
+
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def ratesitem_api(request):
@@ -604,17 +611,17 @@ def ratesitem_api(request):
         rate_type = request.GET.get('rate_type')
         item = request.GET.get('item')
 
-        # Fetch the latest uploaded rate table entry
-        latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).order_by('-uploaded_at').first()
+        if animal == 'BUFFALOW':
+            animal = 'BUFFALO'
 
-        if not latest_rate:
-            raise FileNotFoundError(f"No RateTable entry found for {animal}_{rate_type}")
+        # Get the latest RateTable entry for the specified animal, rate_type, and date
+        latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type, uploaded_at__date=date).latest('uploaded_at')
 
-        # Extract file name from the CSV file path
-        file_name = os.path.basename(latest_rate.csv_file.name)
+        # Get the file path from the latest RateTable entry
+        file_path = latest_rate.csv_file.path
 
         # Read CSV file
-        with open(latest_rate.csv_file.path, newline='') as csvfile:
+        with open(file_path, newline='') as csvfile:
             reader = csv.reader(csvfile)
             data = [row for row in reader]
 
@@ -623,15 +630,15 @@ def ratesitem_api(request):
         values_row = data[int(float(item))]  # Assuming 'item' is the row number
 
         # Extract the first 10 characters from the date
-        date = date_row[0][:10]
+        date_from_csv = date_row[0][:10]
 
         # Format output
-        output_data = {"row": ",".join(values_row), "file_name": file_name}
+        output_data = {"row": ",".join(values_row), "date_from_csv": date_from_csv}
 
         return JsonResponse(output_data)
 
-    except FileNotFoundError as e:
-        return JsonResponse({'error': f'CSV file not found for {animal}_{rate_type}'}, status=404)
+    except RateTable.DoesNotExist:
+        return JsonResponse({'error': f'No RateTable entry found for {animal}_{rate_type} on {date}'}, status=404)
 
     except Exception as e:
         # Handle other exceptions appropriately
