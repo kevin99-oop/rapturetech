@@ -599,62 +599,44 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import os
-from apps.common.models import RateTable
 
 @csrf_exempt
 def ratesitem_api(request):
     try:
         animal = request.GET.get('animal')
-        rate_type = request.GET.get('rate_type')
         date = request.GET.get('date')
+        rate_type = request.GET.get('rate_type')
         item = request.GET.get('item')
 
-        # Get the latest RateTable entry for the specified animal and rate_type
-        latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('start_date')
-
-        # Construct the file path based on the latest RateTable entry
-        file_name = f'{animal}_{rate_type}.csv'
-        file_path_relative = os.path.join('rate_tables', file_name)
-
-        # Full file path
-        full_file_path = os.path.join(settings.MEDIA_ROOT, file_path_relative)
+        # Assuming the CSV file is stored in the 'rate_tables/' directory
+        file_name = f'{animal[0]}{rate_type}.csv'
+        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', file_name)
 
         # Check if the file exists
-        if not os.path.exists(full_file_path):
+        if not os.path.exists(file_path):
             raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
 
-        # Open the CSV file and read the data from the specified row (date) and column (item)
-        with open(full_file_path, 'r') as csv_file:
-            reader = csv.reader(csv_file)
-            date_found = False
+        # Read CSV file
+        with open(file_path, newline='') as csvfile:
+            reader = csv.reader(csvfile)
+            data = [row for row in reader]
 
-            for row in reader:
-                if row and row[0] == date:  # Assuming the date is in the first column
-                    date_found = True
-                    item_index = int(float(item) * 10) + 1  # Assuming items are in increments of 0.1 and starting from the second column
+        # Extract date and values
+        date_row = data[0]
+        values_row = data[int(float(item))]  # Assuming 'item' is the row number
 
-                    if item_index < len(row):
-                        row_data = row[item_index]
-                        break
-                    else:
-                        return JsonResponse({'error': f'Item index {item_index} out of range in CSV'}, status=500)
+        # Extract the first 10 characters from the date
+        date = date_row[0][:10]
 
-            if not date_found:
-                return JsonResponse({'error': f'Data not found for date {date}'}, status=404)
+        # Format output
+        output_data = {"row": ",".join(values_row)}
 
-        # Create a JSON response with the row data
-        response_data = {'row': row_data}
-        return JsonResponse(response_data)
+        return JsonResponse(output_data)
 
     except FileNotFoundError as e:
-        # Log the error
-        logger.error(f'FileNotFoundError in ratesitem_api: {e}')
-        return JsonResponse({'error': 'CSV file not found'}, status=404)
-
-    except RateTable.DoesNotExist:
-        return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
+        return JsonResponse({'error': f'CSV file not found for {animal}_{rate_type}'}, status=404)
 
     except Exception as e:
-        # Log the error
-        logger.exception(f'Error in ratesitem_api: {e}')
+        # Handle other exceptions appropriately
+        print(f'Error in ratesitem_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
