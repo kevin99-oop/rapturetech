@@ -552,13 +552,18 @@ from rest_framework.permissions import IsAuthenticated
 @csrf_exempt
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def lastratedate_api(request, animal, rate_type):
+def lastratedate_api(request):
     try:
+        # Extract parameters from the request query parameters
+        animal = request.GET.get('animal', '')
+        rate_type = request.GET.get('rate_type', '')
+
         # Get the latest RateTable entry for the logged-in user
         latest_rate = RateTable.objects.filter(user=request.user, animal_type=animal, rate_type=rate_type).latest('start_date')
+
         # Modify the response as needed based on your requirements
         response_data = {
-            'animal': latest_rate.animal_type,  # Assuming the field name is animal_type
+            'animal': latest_rate.animal_type,
             'rate_type': latest_rate.rate_type,
             'start_date': latest_rate.start_date.strftime('%Y-%m-%d'),
             # Add more fields as needed
@@ -572,6 +577,7 @@ def lastratedate_api(request, animal, rate_type):
     except Exception as e:
         print(f'Error: {e}')
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
+
 
 
 import csv
