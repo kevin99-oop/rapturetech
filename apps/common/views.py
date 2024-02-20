@@ -600,7 +600,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import os
 from apps.common.models import RateTable  # Import your RateTable model
+import logging
 
+logger = logging.getLogger(__name__)
 @csrf_exempt
 def ratesitem_api(request):
     try:
