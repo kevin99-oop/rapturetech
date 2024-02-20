@@ -1094,7 +1094,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
-
 # Existing import statements...
 
 @csrf_exempt
