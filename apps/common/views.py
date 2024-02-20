@@ -615,8 +615,8 @@ def ratesitem_api(request):
         latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('start_date')
 
         # Construct the file path based on the latest RateTable entry
-        file_name = f'{animal}_{rate_type}.csv'
-        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', file_name)
+        file_pattern = f'{animal[0]}{rate_type}.csv'
+        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', file_pattern)
 
         # Print the file path for debugging
         print(f'File path: {file_path}')
