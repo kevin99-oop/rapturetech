@@ -545,13 +545,13 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from apps.common.models import RateTable
-from django.contrib.auth.decorators import login_required
+from rest_framework.decorators import authentication_classes, permission_classes
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 @csrf_exempt
-@login_required
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def lastratedate_api(request, animal, rate_type):
     try:
         # Get the latest RateTable entry for the logged-in user
@@ -572,7 +572,6 @@ def lastratedate_api(request, animal, rate_type):
     except Exception as e:
         print(f'Error: {e}')
         return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
-
 
 
 import csv
