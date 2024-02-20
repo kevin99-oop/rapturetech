@@ -556,7 +556,6 @@ from apps.common.models import RateTable  # Make sure to import your RateTable m
 logger = logging.getLogger(__name__)
 
 @csrf_exempt
-@login_required
 def lastratedate_api(request):
     try:
         user = request.user
