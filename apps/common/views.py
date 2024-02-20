@@ -545,10 +545,13 @@ def download_rate_table(request, rate_table_id):
 
 
 import csv
+import os
+import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-import os
+
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def lastratedate_api(request):
@@ -557,10 +560,17 @@ def lastratedate_api(request):
         rate_type = request.GET.get('rate_type', '')
         print(f'Animal: {animal}')
         print(f'Rate Type: {rate_type}')
+
         if animal == 'BUFFALOW':
-                    animal = 'BUFFALO'
-        # Assuming the CSV file is stored in the 'rate_files/' directory
-        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{animal}_{rate_type}.csv')
+            animal = 'BUFFALO'
+
+        # Assuming the CSV files are stored in the 'rate_tables/' directory
+        file_pattern = f'{animal[0]}{rate_type}.csv'
+        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', file_pattern)
+
+        # Check if the file exists
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
 
         # Open the CSV file and read just the first line
         with open(file_path, 'r') as csv_file:
@@ -574,10 +584,16 @@ def lastratedate_api(request):
 
         return JsonResponse({'date': date_from_csv})
 
+    except FileNotFoundError as e:
+        # Log the error
+        logger.error(f'FileNotFoundError in lastratedate_api: {e}')
+        return JsonResponse({'error': 'CSV file not found'}, status=404)
+
     except Exception as e:
-        # Handle exceptions appropriately
-        print(f'Error in lastratedate_api: {e}')
+        # Log the error
+        logger.exception(f'Error in lastratedate_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
+
 
 
 import csv
