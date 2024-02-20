@@ -1085,16 +1085,6 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
-import os
-import csv
-import logging
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.conf import settings
-from apps.common.models import RateTable
-
-logger = logging.getLogger(__name__)
-
 @csrf_exempt
 def lastratedate_api(request):
     try:
@@ -1114,21 +1104,18 @@ def lastratedate_api(request):
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
 
-        # Get the latest record from the database
-        latest_record = RateTable.objects.filter(
-            csv_file__icontains=f"{animal[0]}{rate_type}.csv"
-        ).order_by('-start_date').first()
+        # Open the CSV file and read all lines
+        with open(file_path, 'r') as csv_file:
+            reader = csv.reader(csv_file, delimiter='\t')  # Assuming it's tab-separated
+            # Skip header
+            next(reader)
+            # Get the latest date from the remaining rows
+            latest_date = max(row[0][:10] for row in reader)
 
-        # Get the start_date from the latest record
-        if latest_record:
-            start_date_from_db = latest_record.start_date.strftime('%Y-%m-%d')
-        else:
-            start_date_from_db = None
+        print(f'Latest date from CSV: {latest_date}')
 
-        print(f'Start date from DB: {start_date_from_db}')
-
-        # Return both the start_date and the file path
-        return JsonResponse({'start_date': start_date_from_db, 'file_path': file_path})
+        # Return the latest date and the file path
+        return JsonResponse({'latest_date': latest_date, 'file_path': file_path})
 
     except FileNotFoundError as e:
         # Log the error
