@@ -593,7 +593,6 @@ def lastratedate_api(request):
         # Log the error
         logger.exception(f'Error in lastratedate_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
-
 import os
 import logging
 from django.http import JsonResponse
@@ -609,21 +608,20 @@ def ratesitem_api(request):
     try:
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
+        date = request.GET.get('date')
+        item = request.GET.get('item')
 
         # Call lastratedate_api to get the date and file path
         lastratedate_response = lastratedate_api(request)
         date_from_csv = lastratedate_response.get('date')
         file_path = lastratedate_response.get('file_path')
 
-        # Get the latest RateTable entry for the specified animal and rate_type
-        latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('start_date')
+        # Check if the file path is available
+        if not file_path:
+            raise FileNotFoundError(f"CSV file path not found for {animal}_{rate_type}")
 
         # Print the file path for debugging
         print(f'File path: {file_path}')
-
-        # Check if the file exists
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
 
         # Open the CSV file and read the data from the specified row (date) and column (item)
         with open(file_path, 'r') as csv_file:
@@ -633,7 +631,7 @@ def ratesitem_api(request):
             for row in reader:
                 if row and row[0] == date_from_csv:  # Assuming the date is in the first column
                     date_found = True
-                    item_index = int(float(request.GET.get('item')) * 10) + 1  # Assuming items are in increments of 0.1 and starting from the second column
+                    item_index = int(float(item) * 10) + 1  # Assuming items are in increments of 0.1 and starting from the second column
 
                     if item_index < len(row):
                         row_data = row[item_index]
@@ -653,8 +651,6 @@ def ratesitem_api(request):
         logger.error(f'FileNotFoundError in ratesitem_api: {e}')
         return JsonResponse({'error': 'CSV file not found'}, status=404)
 
-    except RateTable.DoesNotExist:
-        return JsonResponse({'error': 'No rate data available for the specified animal and rate_type.'}, status=404)
     except Exception as e:
         # Log the error
         logger.exception(f'Error in ratesitem_api: {e}')
