@@ -618,6 +618,8 @@ def ratesitem_api(request):
         # Construct the file path based on the latest RateTable entry
         file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{animal[0]}{rate_type}.csv')
 
+        # Print the file path for debugging
+        print(f'File path: {file_path}')
 
 
         # Extract the file name from the database (e.g., 'rate_tables/CSNF_1.csv')
