@@ -1085,7 +1085,6 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
-import csv
 import os
 import logging
 from django.http import JsonResponse
@@ -1108,8 +1107,7 @@ def lastratedate_api(request):
 
         # Query the RateTable model to get the latest record based on uploaded_at
         latest_record = RateTable.objects.filter(
-            animal_type=animal,
-            rate_type=rate_type
+            csv_file__icontains=f"{animal[0]}{rate_type}.csv"
         ).order_by('-uploaded_at').first()
 
         # Check if the record exists
@@ -1129,6 +1127,13 @@ def lastratedate_api(request):
         logger.exception(f'Error in lastratedate_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
 
+import os
+import csv
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from apps.common.models import RateTable
+
 @csrf_exempt
 def ratesitem_api(request):
     try:
@@ -1138,8 +1143,7 @@ def ratesitem_api(request):
 
         # Query the RateTable model to get the latest record based on uploaded_at
         latest_record = RateTable.objects.filter(
-            animal_type=animal,
-            rate_type=rate_type
+            csv_file__icontains=f"{animal[0]}{rate_type}.csv"
         ).order_by('-uploaded_at').first()
 
         # Check if the record exists
@@ -1151,12 +1155,8 @@ def ratesitem_api(request):
             reader = csv.reader(csvfile)
             data = [row for row in reader]
 
-        # Extract date and values
-        date_row = data[0]
-        values_row = data[int(float(item))]  # Assuming 'item' is the row number
-
-        # Extract the first 10 characters from the date
-        date = date_row[0][:10]
+        # Extract values from the latest record
+        values_row = data[int(float(item))]
 
         # Format output
         output_data = {"row": ",".join(values_row)}
@@ -1169,4 +1169,4 @@ def ratesitem_api(request):
     except Exception as e:
         # Handle other exceptions appropriately
         print(f'Error in ratesitem_api: {e}')
-        return JsonResponse({'error': 'Internal Server Error'}, status=500)
+        return JsonResp
