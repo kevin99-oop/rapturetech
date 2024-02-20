@@ -599,7 +599,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import os
-from apps.common.models import RateTable  # Make sure to import your RateTable model
+from apps.common.models import RateTable
 
 @csrf_exempt
 def ratesitem_api(request):
@@ -613,18 +613,18 @@ def ratesitem_api(request):
         latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('start_date')
 
         # Construct the file path based on the latest RateTable entry
-        file_name = f'{animal[0]}{rate_type}.csv'
-        file_path_relative = os.path.join(settings.MEDIA_ROOT, 'rate_tables', file_name)
+        file_name = f'{animal}_{rate_type}.csv'
+        file_path_relative = os.path.join('rate_tables', file_name)
 
-        # Print the file path for debugging
-        print(f'File path: {file_path_relative}')
+        # Full file path
+        full_file_path = os.path.join(settings.MEDIA_ROOT, file_path_relative)
 
         # Check if the file exists
-        if not os.path.exists(file_path_relative):
+        if not os.path.exists(full_file_path):
             raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
 
         # Open the CSV file and read the data from the specified row (date) and column (item)
-        with open(file_path_relative, 'r') as csv_file:
+        with open(full_file_path, 'r') as csv_file:
             reader = csv.reader(csv_file)
             date_found = False
 
