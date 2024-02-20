@@ -543,40 +543,41 @@ def download_rate_table(request, rate_table_id):
     return HttpResponse(status=404)
 
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.decorators import authentication_classes, permission_classes
 from apps.common.models import RateTable
-from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 
-@api_view(['GET'])
+@csrf_exempt
+@authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def lastratedate_api(request):
-    # Get the parameters from the request
-    animal = request.GET.get('animal', None)
-    rate_type = request.GET.get('rate_type', None)
-    if animal == 'BUFFALOW':
+    try:
+        user = request.user
+        animal = request.GET.get('animal', '')
+        rate_type = request.GET.get('rate_type', '')
+
+        # Modify the animal value if needed
+        if animal == 'BUFFALOW':
             animal = 'BUFFALO'
-    if animal and rate_type:
-        try:
-            # Retrieve the latest RateTable entry based on user, animal, and rate_type
-            latest_rate = RateTable.objects.filter(user=request.user, animal_type=animal, rate_type=rate_type).latest('start_date')
 
-            # Prepare the response data with the start_date
-            response_data = {
-                'animal': latest_rate.animal_type,
-                'rate_type': latest_rate.rate_type,
-                'start_date': latest_rate.start_date.strftime('%Y-%m-%d'),
-            }
+        latest_rate = RateTable.objects.filter(user=user, animal_type=animal, rate_type=rate_type).latest('start_date')
 
-            return JsonResponse(response_data)
+        response_data = {
+            'animal': latest_rate.animal_type,
+            'rate_type': latest_rate.rate_type,
+            'start_date': latest_rate.start_date.strftime('%Y-%m-%d'),
+            # Add more fields as needed
+        }
 
-        except RateTable.DoesNotExist:
-            return JsonResponse({'error': 'No matching RateTable entry found for the user.'}, status=404)
+        return JsonResponse(response_data)
 
-        except Exception as e:
-            return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
+    except RateTable.DoesNotExist as e:
+        return JsonResponse({'error': 'No matching RateTable entry found for the user.'}, status=404)
 
-    return JsonResponse({'error': 'Invalid parameters. Please provide both animal and rate_type.'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': f'Internal Server Error: {e}'}, status=500)
 
 
 import csv
