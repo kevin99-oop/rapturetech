@@ -1120,8 +1120,10 @@ def lastratedate_api(request):
         ).order_by('-uploaded_at').first()
 
         # Extract the start date from the latest record
-        date_from_csv = None
         date_from_db = latest_record.start_date if latest_record else None
+
+        # Initialize date_from_csv as None
+        date_from_csv = None
 
         if os.path.exists(file_path):
             # Open the CSV file and read just the first line
