@@ -549,7 +549,7 @@ import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-from .models import RateTable  # Import your RateTable model
+from apps.common.models import RateTable  # Import your RateTable model
 
 logger = logging.getLogger(__name__)
 
