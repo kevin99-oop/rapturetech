@@ -612,17 +612,17 @@ def ratesitem_api(request):
         date = request.GET.get('date')
         item = request.GET.get('item')
 
-        # Convert BSNF/CSNF to BSNF.csv/CSNF.csv
-        rate_type_csv = f'{rate_type}.csv'
-
         # Get the latest RateTable entry for the specified animal and rate_type
         latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('start_date')
 
-        # Construct the file path based on the latest RateTable entry
-        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{latest_rate.animal_type}_{rate_type_csv}')
+        # Extract the file name from the database (e.g., 'rate_tables/CSNF_1.csv')
+        file_name = os.path.basename(latest_rate.csv_file.name)
 
-        # Log the file path for debugging
-        logger.info(f'File path: {file_path}')
+        # Log the file name for debugging
+        logger.info(f'File name: {file_name}')
+
+        # Construct the file path based on the file name
+        file_path = os.path.join(settings.MEDIA_ROOT, file_name)
 
         # Check if the file exists
         if not os.path.exists(file_path):
