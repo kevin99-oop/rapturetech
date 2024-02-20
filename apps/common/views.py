@@ -542,14 +542,13 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
-
 import csv
 import os
 import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-from django.core.files import File
+from django.core.exceptions import ObjectDoesNotExist
 from .models import RateTable
 
 logger = logging.getLogger(__name__)
@@ -559,14 +558,15 @@ def lastratedate_api(request):
     try:
         animal = request.GET.get('animal', '')
         rate_type = request.GET.get('rate_type', '')
-        print(f'Animal: {animal}')
-        print(f'Rate Type: {rate_type}')
 
         if animal == 'BUFFALOW':
             animal = 'BUFFALO'
 
         # Get the latest RateTable entry for the specified animal and rate_type
-        latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('uploaded_at')
+        try:
+            latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('uploaded_at')
+        except ObjectDoesNotExist:
+            raise FileNotFoundError(f"No RateTable entry found for {animal}_{rate_type}")
 
         # Get the file path from the latest RateTable entry
         file_path = latest_rate.csv_file.path
@@ -579,18 +579,21 @@ def lastratedate_api(request):
             # Take the first 10 characters from the first row to get the date
             date_from_csv = first_row[0][:10]
 
-        print(f'Date from CSV: {date_from_csv}')
+        logger.info(f'Date from CSV: {date_from_csv}')
 
         # Return both the date and the file path
         return JsonResponse({'date': date_from_csv, 'file_path': file_path})
 
-    except RateTable.DoesNotExist:
-        return JsonResponse({'error': f'No RateTable entry found for {animal}_{rate_type}'}, status=404)
+    except FileNotFoundError as e:
+        # Log the error
+        logger.error(f'FileNotFoundError in lastratedate_api: {e}')
+        return JsonResponse({'error': 'CSV file not found'}, status=404)
 
     except Exception as e:
         # Log the error
         logger.exception(f'Error in lastratedate_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
+
 
 import csv
 import os
