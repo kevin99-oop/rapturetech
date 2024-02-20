@@ -551,12 +551,13 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
-
 import os
 import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+from apps.common.models import RateTable
+import csv
 
 logger = logging.getLogger(__name__)
 
@@ -572,7 +573,7 @@ def lastratedate_api(request):
             animal = 'BUFFALO'
 
         # Assuming the CSV files are stored in the 'rate_tables/' directory
-        file_pattern = f'{animal[0]}{rate_type}.csv'
+        file_pattern = f'{animal}{rate_type}.csv'
         file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', file_pattern)
 
         # Check if the file exists
@@ -589,7 +590,7 @@ def lastratedate_api(request):
 
         print(f'Date from CSV: {date_from_csv}')
 
-        return JsonResponse({'date': date_from_csv, 'file_path': file_path})
+        return JsonResponse({'date': date_from_csv})
 
     except FileNotFoundError as e:
         # Log the error
@@ -600,6 +601,7 @@ def lastratedate_api(request):
         # Log the error
         logger.exception(f'Error in lastratedate_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
+
 
 import os
 import logging
