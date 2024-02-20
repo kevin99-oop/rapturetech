@@ -554,7 +554,8 @@ def lastratedate_api(request):
     # Get the parameters from the request
     animal = request.GET.get('animal', None)
     rate_type = request.GET.get('rate_type', None)
-
+    if animal == 'BUFFALOW':
+            animal = 'BUFFALO'
     if animal and rate_type:
         try:
             # Retrieve the latest RateTable entry based on user, animal, and rate_type
