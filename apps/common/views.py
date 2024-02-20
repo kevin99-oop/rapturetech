@@ -612,17 +612,20 @@ def ratesitem_api(request):
         item = request.GET.get('item')
 
         # Get the latest RateTable entry for the specified animal and rate_type
-        latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('uploaded_at')
+        # Get the latest RateTable entry for the specified animal and rate_type
+        latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('start_date')
 
-        # Construct the absolute file path based on the latest RateTable entry
-        file_path = os.path.join(settings.MEDIA_ROOT, latest_rate.csv_file.name)
+        # Construct the file path based on the latest RateTable entry
+        file_path_relative = latest_rate.csv_file.name  # Use the name attribute to get the relative path
 
-        # Print the file path for debugging
+        # Construct the absolute file path
+        file_path = os.path.join(settings.MEDIA_ROOT, file_path_relative)
         print(f'File path: {file_path}')
 
         # Check if the file exists
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
+
 
         # Open the CSV file and read the data from the specified row (date) and column (item)
         with open(file_path, 'r') as csv_file:
