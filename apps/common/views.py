@@ -1113,23 +1113,18 @@ def lastratedate_api(request):
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
 
-        # Open the CSV file and read all lines
+        # Open the CSV file and read just the first line
         with open(file_path, 'r') as csv_file:
             reader = csv.reader(csv_file, delimiter='\t')  # Assuming it's tab-separated
-            # Skip header
-            next(reader)
-            # Get the first and last dates from the remaining rows
-            first_date = None
-            last_date = None
-            for row in reader:
-                if not first_date:
-                    first_date = row[0]
-                last_date = row[0]
+            # Get the first row from the CSV
+            first_row = next(reader)
+            # Extract the date from the first row
+            date_from_csv = first_row[0][:10]
 
-        print(f'Start Date from CSV: {first_date}')
+        print(f'Start Date from CSV: {date_from_csv}')
 
         # Return both the start date and the recent date along with the file path
-        return JsonResponse({'start_date': first_date, 'recent_date': last_date, 'file_path': file_path})
+        return JsonResponse({'start_date': date_from_csv, 'recent_date': date_from_csv, 'file_path': file_path})
 
     except FileNotFoundError as e:
         # Log the error
