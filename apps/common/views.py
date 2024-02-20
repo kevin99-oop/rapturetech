@@ -595,6 +595,7 @@ def lastratedate_api(request):
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
 
 # views.py
+# views.py
 import csv
 import os
 from django.http import JsonResponse
@@ -623,6 +624,9 @@ def ratesitem_api(request):
         # Check if the file exists
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
+
+        # Additional debugging
+        print(f'File exists: {os.path.exists(file_path)}')
 
         # Read CSV file
         with open(file_path, newline='') as csvfile:
