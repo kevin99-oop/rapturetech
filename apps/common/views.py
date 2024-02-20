@@ -542,7 +542,6 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
-User
 
 import csv
 import os
@@ -582,7 +581,7 @@ def lastratedate_api(request):
 
         print(f'Date from CSV: {date_from_csv}')
 
-        return JsonResponse({'date': date_from_csv})
+        return JsonResponse({'date': date_from_csv, 'file_path': file_path})
 
     except FileNotFoundError as e:
         # Log the error
@@ -609,14 +608,14 @@ def ratesitem_api(request):
     try:
         animal = request.GET.get('animal')
         rate_type = request.GET.get('rate_type')
-        date = request.GET.get('date')
-        item = request.GET.get('item')
+
+        # Call lastratedate_api to get the date and file path
+        lastratedate_response = lastratedate_api(request)
+        date_from_csv = lastratedate_response.get('date')
+        file_path = lastratedate_response.get('file_path')
 
         # Get the latest RateTable entry for the specified animal and rate_type
         latest_rate = RateTable.objects.filter(animal_type=animal, rate_type=rate_type).latest('start_date')
-
-        # Construct the file path based on the latest RateTable entry
-        file_path = os.path.join(settings.MEDIA_ROOT, f'rate_tables/{animal[0]}{rate_type}.csv')
 
         # Print the file path for debugging
         print(f'File path: {file_path}')
@@ -631,9 +630,9 @@ def ratesitem_api(request):
             date_found = False
 
             for row in reader:
-                if row and row[0] == date:  # Assuming the date is in the first column
+                if row and row[0] == date_from_csv:  # Assuming the date is in the first column
                     date_found = True
-                    item_index = int(float(item) * 10) + 1  # Assuming items are in increments of 0.1 and starting from the second column
+                    item_index = int(float(request.GET.get('item')) * 10) + 1  # Assuming items are in increments of 0.1 and starting from the second column
 
                     if item_index < len(row):
                         row_data = row[item_index]
@@ -642,7 +641,7 @@ def ratesitem_api(request):
                         return JsonResponse({'error': f'Item index {item_index} out of range in CSV'}, status=500)
 
             if not date_found:
-                return JsonResponse({'error': f'Data not found for date {date}'}, status=404)
+                return JsonResponse({'error': f'Data not found for date {date_from_csv}'}, status=404)
 
         # Create a JSON response with the row data
         response_data = {'row': row_data}
