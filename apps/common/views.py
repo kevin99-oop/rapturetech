@@ -1109,7 +1109,7 @@ def lastratedate_api(request):
         # Query the RateTable model to get the latest record based on uploaded_at
         latest_record = RateTable.objects.filter(
             csv_file__icontains=f"{animal[0]}{rate_type}.csv"
-        ).order_by('-uploaded_at').first()
+        ).order_by('-start_date').first()
 
         # Check if the record exists
         if not latest_record:
@@ -1133,12 +1133,11 @@ def lastratedate_api(request):
         logger.exception(f'Error in lastratedate_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
 
-import os
 import csv
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-from apps.common.models import RateTable
+import os
 
 @csrf_exempt
 def ratesitem_api(request):
@@ -1148,17 +1147,16 @@ def ratesitem_api(request):
         rate_type = request.GET.get('rate_type')
         item = request.GET.get('item')
 
-        # Query the RateTable model to get the latest record based on uploaded_at
-        latest_record = RateTable.objects.filter(
-            csv_file__icontains=f"{animal[0]}{rate_type}.csv"
-        ).order_by('-uploaded_at').first()
+        # Assuming the CSV file is stored in the 'rate_tables/' directory
+        file_name = f'{animal[0]}{rate_type}.csv'
+        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', file_name)
 
-        # Check if the record exists
-        if not latest_record:
-            raise FileNotFoundError(f"Record not found for {animal}_{rate_type}")
+        # Check if the file exists
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
 
-        # Extract data from the latest record
-        with open(latest_record.csv_file.path, newline='') as csvfile:
+        # Read CSV file
+        with open(file_path, newline='') as csvfile:
             reader = csv.reader(csvfile)
             data = [row for row in reader]
 
@@ -1167,17 +1165,18 @@ def ratesitem_api(request):
         values_row = data[int(float(item))]  # Assuming 'item' is the row number
 
         # Extract the first 10 characters from the date
-        date_from_csv = date_row[0][:10]
+        date = date_row[0][:10]
 
         # Format output
-        output_data = {"date": date_from_csv, "row": ",".join(values_row)}
+        output_data = {"row": ",".join(values_row)}
 
         return JsonResponse(output_data)
 
     except FileNotFoundError as e:
-        return JsonResponse({'error': f'Record not found for {animal}_{rate_type}'}, status=404)
+        return JsonResponse({'error': f'CSV file not found for {animal}_{rate_type}'}, status=404)
 
     except Exception as e:
         # Handle other exceptions appropriately
         print(f'Error in ratesitem_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
+
