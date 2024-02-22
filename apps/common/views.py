@@ -1096,38 +1096,39 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 @csrf_exempt
 def lastratedate_api(request):
     try:
         animal = request.GET.get('animal', '')
         rate_type = request.GET.get('rate_type', '')
+        user = request.user
         print(f'Animal: {animal}')
         print(f'Rate Type: {rate_type}')
+        print(f'User id  {user.id}')
 
-        if animal == 'BUFFALOW':
-            animal = 'BUFFALO'
+        if animal == 'BUFFALO':
+            animal = 'BUFFALOW'
 
-        # Assuming the CSV files are stored in the 'rate_tables/' directory
-        file_pattern = f'{animal[0]}{rate_type}.csv'
-        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', file_pattern)
+        csv_file_object = RateTable.objects.filter(rate_type= rate_type,animal_type= animal, user=user.id ).order_by("-uploaded_at") # get the latest csv file object
 
-        # Check if the file exists
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
+        if len(csv_file_object) > 0:
+            file_path = csv_file_object[0].csv_file.path
+            print("In if")
+            # Check if the file exists
+            if not os.path.exists(file_path):
+                print("in 2nd if error one")
+                raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
 
-        # Open the CSV file and read just the first line
-        with open(file_path, 'r') as csv_file:
-            reader = csv.reader(csv_file, delimiter='\t')  # Assuming it's tab-separated
-            # Get the first row from the CSV
-            first_row = next(reader)
-            # Take the first 10 characters from the first row to get the date
-            date_from_csv = first_row[0][:10]
 
-        print(f'Date from CSV: {date_from_csv}')
-
-        # Return both the date and the file path
-        return JsonResponse({'date': date_from_csv, 'file_path': file_path})
-
+            Response_obj = {'date': csv_file_object[0].start_date, 'file_path': file_path, 'id': csv_file_object[0].id }
+            print(Response_obj)
+            # Return both the date and the file path
+            return JsonResponse(Response_obj)
+        else:
+            logger.error(f'FileNotFoundError in lastratedate_api: {e}')
+            return JsonResponse({'error': 'No csv found' })
     except FileNotFoundError as e:
         # Log the error
         logger.error(f'FileNotFoundError in lastratedate_api: {e}')
@@ -1144,6 +1145,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import os
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 @csrf_exempt
 def ratesitem_api(request):
     try:
@@ -1151,34 +1154,42 @@ def ratesitem_api(request):
         date = request.GET.get('date')
         rate_type = request.GET.get('rate_type')
         item = request.GET.get('item')
+        user = request.user
+        print( animal, date, rate_type, item, user.username, user.id )
+        if animal == 'BUFFALO':
+            animal = 'BUFFALOW'
 
-        # Assuming the CSV file is stored in the 'rate_tables/' directory
-        file_name = f'{animal[0]}{rate_type}.csv'
-        file_path = os.path.join(settings.MEDIA_ROOT, 'rate_tables', file_name)
+        csv_file_object = RateTable.objects.filter(rate_type= rate_type,animal_type= animal, user=user.id).order_by("-uploaded_at") # get the latest csv file object
+        print("before if")
+        if len(csv_file_object) > 0:
+            file_path = csv_file_object[0].csv_file.path
+            print("file path:",file_path)
+            # Check if the file exists
+            if not os.path.exists(file_path):
+                logger.error(f'FileNotFoundError in lastratedate_api: {e}')
+                raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}") 
+                
+            # Read CSV file
+            with open(file_path, newline='') as csvfile:
+                reader = csv.reader(csvfile)
+                data = [row for row in reader]
+            # Extract date and values
+            # date_row = data[0]
 
-        # Check if the file exists
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
+            for data_row in data:
+                if data_row[0] == item:
+                    print(data_row)
+                    values_row = data_row
+                    break
+            # Format output
+            output_data = {"row": ",".join(values_row)}
 
-        # Read CSV file
-        with open(file_path, newline='') as csvfile:
-            reader = csv.reader(csvfile)
-            data = [row for row in reader]
+            return JsonResponse(output_data)
 
-        # Extract date and values
-        date_row = data[0]
-        values_row = data[int(float(item))]  # Assuming 'item' is the row number
-
-        # Extract the first 10 characters from the date
-        date = date_row[0][:10]
-
-        # Format output
-        output_data = {"row": ",".join(values_row)}
-
-        return JsonResponse(output_data)
-
+        else:
+            return JsonResponse({'error': f'CSV file not found for {animal}_{rate_type} and {user.username}'}, status=404)
     except FileNotFoundError as e:
-        return JsonResponse({'error': f'CSV file not found for {animal}_{rate_type}'}, status=404)
+        return JsonResponse({'error': f'CSV file not found for {animal}_{rate_type} and {user.username}'}, status=404)
 
     except Exception as e:
         # Handle other exceptions appropriately
