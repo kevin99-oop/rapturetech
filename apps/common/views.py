@@ -438,7 +438,7 @@ from apps.common.models import RateTable
 from django.http import HttpResponse
 
 # apps/common/views.py
-from datetime import datetime
+from datetime import datetime, date
 from django.shortcuts import render, redirect, get_object_or_404
 from apps.common.forms import UploadRateTableForm
 from apps.common.models import RateTable
@@ -1085,8 +1085,6 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
-
-
 import csv
 import os
 import logging
@@ -1122,7 +1120,7 @@ def lastratedate_api(request):
                 raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
 
 
-            Response_obj = {'date': csv_file_object[0].start_date, 'file_path': file_path, 'id': csv_file_object[0].id }
+            Response_obj = {'date': csv_file_object[0].start_date.strftime('%d-%m-%Y'), 'file_path': file_path, 'id': csv_file_object[0].id }
             print(Response_obj)
             # Return both the date and the file path
             return JsonResponse(Response_obj)
@@ -1145,22 +1143,23 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import os
 
+# http://0.0.0.0:84/api/ratesitem/?animal=COW&date=24-02-2024&rate_type=CLR&item=20
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @csrf_exempt
 def ratesitem_api(request):
     try:
         animal = request.GET.get('animal')
-        date = request.GET.get('date')
+        date_str = request.GET.get('date').split("-")
         rate_type = request.GET.get('rate_type')
         item = request.GET.get('item')
         user = request.user
-        print( animal, date, rate_type, item, user.username, user.id )
-        if animal == 'BUFFALO':
-            animal = 'BUFFALOW'
-
-        csv_file_object = RateTable.objects.filter(rate_type= rate_type,animal_type= animal, user=user.id).order_by("-uploaded_at") # get the latest csv file object
+        print( animal, date_str, rate_type, item, user.username, user.id )
+        print
+        date_obj = date(int(date_str[2]), int(date_str[1]),int(date_str[0]))
+        csv_file_object = RateTable.objects.filter(rate_type= rate_type,animal_type= animal, user=user.id, start_date=date_obj).order_by("-uploaded_at") # get the latest csv file object
         print("before if")
+        print(date_obj)
         if len(csv_file_object) > 0:
             file_path = csv_file_object[0].csv_file.path
             print("file path:",file_path)
@@ -1175,12 +1174,16 @@ def ratesitem_api(request):
                 data = [row for row in reader]
             # Extract date and values
             # date_row = data[0]
-
+            
+            values_row = None
             for data_row in data:
+                
                 if data_row[0] == item:
-                    print(data_row)
+                    
                     values_row = data_row
                     break
+            if not values_row:
+                return JsonResponse({'error': f'Item not found in CSV {animal}_{rate_type} and {item}'}, status=404)
             # Format output
             output_data = {"row": ",".join(values_row)}
 
