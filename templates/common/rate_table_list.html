@@ -192,10 +192,10 @@
     {% for rate_table in rate_tables %}
     <tr>
         <td>{{ rate_table.user.username }}</td>
-        <td>{{ rate_table.uploaded_at }}</td>
+        <td>{{ rate_table.uploaded_at|date:"d-m-Y"  }}</td>
         <td>{{ rate_table.animal_type }}</td>
         <td>{{ rate_table.rate_type }}</td>
-        <td>{{ rate_table.start_date}}</td>
+        <td>{{ rate_table.start_date|date:"d-m-Y" }}</td>
         <td><a href="{% url 'download_rate_table' rate_table.id %}" download>Download</a></td>
     </tr>
     {% endfor %}

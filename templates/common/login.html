@@ -2,7 +2,7 @@
 {% load crispy_forms_tags %}
 {% load widget_tweaks %}
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -12,7 +12,6 @@
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="{% static 'register/fonts/icomoon/style.css'%}">
-
   <link rel="stylesheet" href="{% static 'register/css/owl.carousel.min.css'%}">
 
   <!-- Bootstrap CSS -->
@@ -21,7 +20,7 @@
   <!-- Style -->
   <link rel="stylesheet" href="{% static 'register/css/style.css'%}">
 
-  <title>RaptureTech Login </title>
+  <title>RaptureTech Login</title>
 </head>
 
 <body>
@@ -45,13 +44,16 @@
             <div class="mb-5 text-center">
               <h3 class="fw-bold mt-3">Welcome</h3>
             </div>
-            <form action="#" method="post">
+            {% if messages %}
+            {% for message in messages %}
+            <div id="errorMessage" class="alert alert-danger mb-4">
+              {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            <!-- Your existing form code -->
+            <form id="loginForm" method="post" action="{% url 'login' %}">
               {% csrf_token %}
-              {% if user.error %}
-                <div class="alert alert-danger mb-4">
-                  {{ user.error }}
-                </div>
-              {% endif %}
               <div class="form-group last mb-4">
                 <label for="username">Username</label>
                 <input type="text" class="form-control" name="username" id="inputEmail" required>
@@ -61,9 +63,11 @@
                 <input type="password" class="form-control" name="password" id="inputPass" required>
               </div>
               <div class="d-flex mb-5 align-items-center">
-                <span class="ml-auto"><a href="{% url 'password_reset' %}" class="forgot-pass">Forgot Password?</a></span>
+                <span class="ml-auto"><a href="{% url 'password_reset' %}" class="forgot-pass">Forgot
+                    Password?</a></span>
               </div>
-              <button type="submit" style="opacity: 1 !important;" class="btn btn-pill text-white btn-block btn-primary">Login</button>
+              <button type="submit" style="opacity: 1 !important;"
+                class="btn btn-pill text-white btn-block btn-primary">Login</button>
               <div class="d-flex mt-5 align-items-center justify-content-center">
                 <span class="text-center"><a href="{% url 'register' %}" class="forgot-pass">Sign Up</a></span>
               </div>
@@ -78,10 +82,12 @@
       </div>
     </div>
   </div>
+
+
+
   <script src="{% static 'register/js/jquery-3.3.1.min.js'%}"></script>
   <script src="{% static 'register/js/popper.min.js'%}"></script>
   <script src="{% static 'register/js/bootstrap.min.js'%}"></script>
-  <script src="{% static 'register/js/main.js'%}"></script>
   <script src="{% static 'register/js/main.js'%}"></script>
 </body>
 

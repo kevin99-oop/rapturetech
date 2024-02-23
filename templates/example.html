@@ -189,57 +189,57 @@
     </div>
 
 
-    <div class="row mt-4" id="divID">
-        <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
-            <div class="card">
-                <div class="card-header pb-0 p-3">
-                    <div class="d-flex justify-content-between">
-                        <h6 class="mb-2">Total Summary Record </h6>
-                    </div>
+    <!-- Total Summary Record -->
+<div class="row mt-4" id="divID">
+    <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
+        <div class="card">
+            <div class="card-header pb-0 p-3">
+                <div class="d-flex justify-content-between">
+                    <h6 class="mb-2">Total Summary Record</h6>
                 </div>
-                <div class="table-responsive">
-                    <table class="table align-items-center table table-striped table-hover rounded table-responsive">
-                        <thead>
-                            <tr>
-                                <th>Station ID</th>
-                                <th>Location</th>
-                                <th>Societ</th>
-                                <th>Date</th>
-                                <th>Shift</th>
-                                <th>FAT Avg</th>
-                                <th>SNF Avg</th>
-                                <th>CLR Avg</th>
-                                <th>Water Avg</th>
-                                <th>Total Ltr.</th>
-                                <th>Total Amt.</th>
-                                <th>Total Cust.</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for record in summary_data %}
+            </div>
+            <div class="table-responsive">
+                <table class="table align-items-center table table-striped table-hover rounded table-responsive">
+                    <thead>
                         <tr>
-                            <p>Total Records: {{ total_summary.total_records }}</p>
-                            <p>Total Amount: {{ total_summary.total_amount }}</p>
-                            <td>{{ record.ST_ID__location }}</td>
-                            <td>{{ record.ST_ID__society }}</td>
-                            <td>{{ record.RecordingDate }}</td>
-                            <td>{{ record.SHIFT }}</td>
-                            <td>{{ record.fat_avg }}</td>
-                            <td>{{ record.snf_avg }}</td>
-                            <td>{{ record.clr_avg }}</td>
-                            <td>{{ record.water_avg }}</td>
-                            <td>{{ record.total_ltr }}</td>
-                            <td>{{ record.total_amt }}</td>
-                            <td>{{ record.total_cust }}</td>
+                            <th>Station ID</th>
+                            <th>Location</th>
+                            <th>Society</th>
+                            <th>Date</th>
+                            <th>Shift</th>
+                            <th>FAT Avg</th>
+                            <th>SNF Avg</th>
+                            <th>CLR Avg</th>
+                            <th>Water Avg</th>
+                            <th>Total Ltr.</th>
+                            <th>Total Amt.</th>
+                            <th>Total Cust.</th>
                         </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in summary_data %}
+                            <tr>
+                                <td>{{ record.ST_ID__st_id }}</td>
+                                <td>{{ record.ST_ID__location }}</td>
+                                <td>{{ record.ST_ID__society }}</td>
+                                <td>{{ record.RecordingDate }}</td>
+                                <td>{{ record.SHIFT }}</td>
+                                <td>{{ record.fat_avg }}</td>
+                                <td>{{ record.snf_avg }}</td>
+                                <td>{{ record.clr_avg }}</td>
+                                <td>{{ record.water_avg }}</td>
+                                <td>{{ record.total_ltr }}</td>
+                                <td>{{ record.total_amt }}</td>
+                                <td>{{ record.total_cust }}</td>
+                            </tr>
                         {% endfor %}
-                        
-                        </tbody>
-                    </table>
-                </div>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+</div>
+
 
 
     <div class="row mt-4">

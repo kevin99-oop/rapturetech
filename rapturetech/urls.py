@@ -4,7 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from apps.common.views import (
     HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView,
-    ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,
+    ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,CustomLoginView,custom_logout,
     DRECViewSet, NtpDatetimeView, dpudetails, edit_dpu,upload_customer_csv,download_latest_csv,
     get_cid_range,get_cust_info,customer_list,config_api,download_config_by_st_id,upload_rate_table,rate_table_list,download_rate_table,lastratedate_api,ratesitem_api
 
@@ -24,8 +24,12 @@ urlpatterns = [
     path('api/ntpdatetime/', NtpDatetimeView.as_view(), name='ntp_datetime_api'),
 
     # Authentication URLs
-    path('login/', auth_views.LoginView.as_view(template_name='common/login.html'), name="login"),
-    path('logout/', auth_views.LogoutView.as_view(), name="logout"),
+    #path('login/', auth_views.LoginView.as_view(template_name='common/login.html'), name="login"),
+    path('login/', CustomLoginView.as_view(), name='login'),
+
+    #path('logout/', auth_views.LogoutView.as_view(), name="logout"),
+    path('logout/', custom_logout, name='logout'),
+
     path('dashboard/', DashboardView.as_view(), name="dashboard"),
     path('change-password/', auth_views.PasswordChangeView.as_view(
         template_name='common/change-password.html', success_url='/'), name='change-password'),

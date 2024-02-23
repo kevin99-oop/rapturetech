@@ -41,16 +41,35 @@
     button:hover {
         background-color: #45a049;
     }
-    .messages{
+
+    .messages {
         color: red;
         list-style-type: none !important;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    text-align: center;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        text-align: center;
+    }
 
+    /* New styles for image upload */
+    .image-upload-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .image-upload-container img {
+        max-width: 200px;
+        max-height: 200px;
+        margin-right: 20px;
+    }
+
+    .image-upload-container input[type="file"] {
+        width: 70%;
     }
 </style>
+
 <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl " id="navbarBlur"
     data-scroll="false">
     <div class="container-fluid py-1 px-3">
