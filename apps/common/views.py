@@ -82,9 +82,33 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     # DashboardView class definition ...
     template_name = 'example.html'
     login_url = reverse_lazy('home')
+    def get(self, request, *args, **kwargs):
+        # Assuming you have a user object, you can get the DPUs associated with that user
+        user = self.request.user  # Adjust this line based on your authentication setup
+        user_dpus = DPU.objects.filter(user=user)
 
-    def summary_view(request):
-        summary_data = DREC.objects.values('ST_ID__st_id', 'ST_ID__location', 'ST_ID__society', 'RecordingDate', 'SHIFT').annotate(
+        # Calculate total fat for each user and store in a list of tuples (st_id, total_fat)
+        total_fat_list = []
+        for dpu in user_dpus:
+            total_fat = DREC.objects.filter(ST_ID=dpu).aggregate(Sum('FAT'))['FAT__sum'] or 0
+            total_fat_list.append((dpu.st_id, total_fat))
+
+        context = {
+            'total_fat_list': total_fat_list,
+            # Add other context variables as needed
+        }
+
+        return render(request, self.template_name, context)
+    def get(self, request, *args, **kwargs):
+        user = self.request.user
+        active_dpu_list = DPU.objects.filter(user=user)
+        drec_data = DREC.objects.filter(ST_ID__user=user)
+        society_customer_count = DREC.objects.filter(ST_ID__user=user).values(
+            'ST_ID__society').annotate(customer_count=Count('CUST_ID', distinct=True))
+
+        summary_data = DREC.objects.filter(ST_ID__user=user).values(
+            'ST_ID__st_id', 'ST_ID__location', 'ST_ID__society', 'RecordingDate', 'SHIFT'
+        ).annotate(
             fat_avg=Avg('FAT'),
             snf_avg=Avg('SNF'),
             clr_avg=Avg('CLR'),
@@ -93,23 +117,33 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             total_amt=Sum('Amount'),
             total_cust=Sum('CSR_NO')
         )
-        print(summary_data)
-    def get_context_data(self, **kwargs):
-        user = self.request.user
-        active_dpu_list = DPU.objects.filter(user=user)
-        drec_data = DREC.objects.filter(ST_ID__user=user)
-        society_customer_count = DREC.objects.filter(ST_ID__user=user).values(
-            'ST_ID__society').annotate(customer_count=Count('CUST_ID', distinct=True))
+
         context = {
             'active_dpu_list': active_dpu_list,
             'drec_data': drec_data,
             'society_customer_count': society_customer_count,
-            'last_updated': timezone.now(),  # Add a timestamp
+            'summary_data': summary_data,
+            'last_updated': timezone.now(),
         }
-        return context
-      # Retrieve records based on your filtering condition
+
+        return render(request, self.template_name, context)
     
-    
+# views.py
+from django.http import JsonResponse
+from django.shortcuts import render
+
+def index(request):
+    return render(request, 'index.html')
+
+def get_data(request):
+    # Simulate fetching updated data from a source
+    updated_data = fetch_updated_data()
+
+    return JsonResponse({'data': updated_data})
+
+def fetch_updated_data():
+    # Simulate fetching updated data from a source (replace this with your actual data fetching logic)
+    return {'value': 'Updated Value'}
 # User Authentication Views
 class SignUpView(CreateView):
     form_class = SignUpForm
@@ -309,42 +343,48 @@ def upload_customer_csv(request):
     if request.method == 'POST':
         form = UploadCSVForm(request.POST, request.FILES)
         if form.is_valid():
-            csv_file = form.cleaned_data['csv_file']
-            # Extract ST_ID from the first line of the CSV file
-            csv_content = csv_file.read().decode('utf-8')
-            csv_lines = csv_content.splitlines()
-            st_id = csv_lines[0].strip()
-            # Extract CUST_ID range dynamically
-            # Save the CSV file reference with the corresponding user, ST_ID, and dynamic range
             try:
+                csv_file = form.cleaned_data['csv_file']
+                csv_content = csv_file.read().decode('utf-8')
+                csv_lines = csv_content.splitlines()
+                st_id = csv_lines[0].strip()
+
                 Customer.objects.create(
                     user=request.user,
                     st_id=st_id,
                     csv_file=csv_file,
                 )
+
                 messages.success(request, 'CSV file uploaded successfully.')
-                return redirect('upload_customer_csv')
+                return redirect('success_view')  # Redirect to a success view
+
+            except FileNotFoundError:
+                messages.error(request, 'Error processing CSV file: File not found.')
             except Exception as e:
                 messages.error(request, f'Error processing CSV file: {e}')
         else:
-            messages.error(
-                request, 'Invalid form submission. Please check the file format.')
+            messages.error(request, 'Invalid form submission. Please check the file format.')
     else:
         form = UploadCSVForm()
+
     return render(request, 'common/upload_customer_csv.html', {'form': form})
 
 def download_latest_csv(request, st_id):
-    # Get the latest Customer record for the logged-in user and the provided st_id
-    latest_customer = get_object_or_404(Customer.objects.filter(
-        user=request.user, st_id=st_id).order_by('-date_uploaded')[:1])
+    try:
+        latest_customer = get_object_or_404(Customer.objects.filter(
+            user=request.user, st_id=st_id).order_by('-date_uploaded')[:1])
 
-    # Open the CSV file and create an HttpResponse with the file content
-    with open(latest_customer.csv_file.path, 'rb') as csv_file:
-        response = HttpResponse(csv_file.read(), content_type='text/csv')
-        response['Content-Disposition'] = f'attachment; filename="{latest_customer.csv_file.name}"'
-        return response
-    # If there's an issue with the form submission or no st_id is provided, render the form
-    return render(request, 'common/dpudetails.html', {'st_id': st_id})
+        with open(latest_customer.csv_file.path, 'rb') as csv_file:
+            response = HttpResponse(csv_file.read(), content_type='text/csv')
+            response['Content-Disposition'] = f'attachment; filename="{latest_customer.csv_file.name}"'
+            return response
+
+    except FileNotFoundError:
+        messages.error(request, 'CSV file not found.')
+    except Exception as e:
+        messages.error(request, f'Error downloading CSV file: {e}')
+
+    return redirect('error_view')
 logger = logging.getLogger(__name__)
 @api_view(['GET'])
 def get_cid_range(request):

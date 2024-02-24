@@ -63,6 +63,30 @@
         padding: 1px;
         text-align: center;
     }
+    /* Add this to your CSS file or in a <style> tag in your HTML */
+ul.messages {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+ul.messages li {
+    padding: 10px;
+    margin: 10px 0;
+}
+
+li.error {
+    background-color: #FFD2D2;
+    border: 1px solid #FF6363;
+    color: #FF0000;
+}
+
+li.success {
+    background-color: #D2FFD2;
+    border: 1px solid #63FF63;
+    color: #008000;
+}
+
 </style>
 <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl " id="navbarBlur"
     data-scroll="false">
@@ -163,7 +187,13 @@
                     <div class="row">
                         <div class="col-sm-6">
                             <h5 class="text-white mt-2">Upload Customer CSV</h5>
-
+                            {% if messages %}
+                            <ul class="messages">
+                              {% for message in messages %}
+                                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                              {% endfor %}
+                            </ul>
+                          {% endif %}
                         </div>
                         <div class="col-md-6">
                         </div>

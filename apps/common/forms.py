@@ -48,7 +48,7 @@ class UserForm(forms.ModelForm):
             'last_name', 
             'email',
         ]
-
+    
 # ProfileForm is a form for updating user profile information
 class ProfileForm(forms.ModelForm):
     class Meta:

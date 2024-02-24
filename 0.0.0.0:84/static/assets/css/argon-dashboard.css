@@ -10581,7 +10581,7 @@ fieldset:disabled .btn {
 }
 
 .bg-primary {
-  background-color: #002E86 !important;
+  background-color: #eee !important;
 }
 
 .bg-secondary {
@@ -20854,8 +20854,11 @@ fieldset:disabled .btn {
 }
 
 .card .card-body {
+  border-radius: 10px;
+  color: white;
   font-family: "Open Sans", sans-serif;
   padding: 1.5rem;
+  background: #002e86;
 }
 
 .card.card-plain {

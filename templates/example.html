@@ -40,7 +40,7 @@
                 <li class="nav-item dropdown pe-2 px-3 d-flex align-items-center">
                     <a href="javascript:;" class="nav-link text-white p-0" id="dropdownMenuButton"
                         data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa fa-user cursor-pointer"></i>
+                        <i class="fa fa-user cursor-pointer"><span class="mx-2">{{user.username}}</span></i>
                     </a>
                     <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4"
                         aria-labelledby="dropdownMenuButton">
@@ -94,8 +94,9 @@
                                 <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Fat</p>
 
                                 <p class="mb-0">
-                                    <span class="text-success text-lg font-weight-bolder">+55%</span>
-
+                                    <span class="text-success text-lg font-weight-bolder">
+                                     sd
+                                    </span>
                                 </p>
                             </div>
                         </div>
@@ -118,7 +119,7 @@
                                 <p class="text-sm mb-0 text-uppercase font-weight-bold">Total SNF</p>
 
                                 <p class="mb-0">
-                                    <span class="text-success text-lg font-weight-bolder">+55%</span>
+                                    <span class="text-success text-lg font-weight-bolder">{{ total_snf }}</span>
 
                                 </p>
 
@@ -251,7 +252,7 @@
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table align-items-center table table-striped table-hover rounded table-responsive">
+                    <table id="your-table-id" class="table align-items-center table table-striped table-hover rounded table-responsive">
                         <thead>
                             <tr>
                                 <th>St ID</th>
@@ -289,7 +290,6 @@
                                 <td>{{ drec.QT }}</td>
                                 <td>{{ drec.Amount }}</td>
                                 <td>{{ drec.CAmount }}</td>
-
                             </tr>
                             {% endfor %}
                             {% endfor %}
@@ -324,15 +324,13 @@
     </div>
 </footer> -->
 <script>
-    // Function to refresh the table content
-    function refreshTable() {
-        $("#myRefreshDiv").load(location.href + " #myRefreshDiv");
+    // Function to refresh the tables every 5 seconds
+    function refreshTables() {
+        // Reload the entire page to refresh both tables
+        location.reload();
     }
 
-    // Set interval to refresh the table every 5 seconds
-    $(document).ready(function () {
-        setInterval(refreshTable, 5000);
-    });
+    // Call the refreshTables function every 5 seconds
+    setInterval(refreshTables, 5000);
 </script>
-
 {% endblock content %}
