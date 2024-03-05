@@ -1,4 +1,4 @@
-{% extends 'base2.html' %}
+{% extends 'base.html' %}
 
 {% load crispy_forms_tags %}
 
@@ -7,7 +7,7 @@
 <!-- Begin Page Content -->
 <div class="container-fluid">
 
-    <!-- Page Heading -->
+    <!-- Page Heading
     <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl " id="navbarBlur"
     data-scroll="false">
     <div class="container-fluid py-1 px-3">
@@ -46,7 +46,7 @@
                 <li class="nav-item dropdown pe-2 px-3 d-flex align-items-center">
                     <a href="javascript:;" class="nav-link text-white p-0" id="dropdownMenuButton"
                         data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa fa-user cursor-pointer"></i>
+                        <i class="fa fa-user cursor-pointer"><span class="mx-2 ">{{user.username}}</span></i>
                     </a>
                     <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4"
                         aria-labelledby="dropdownMenuButton">
@@ -87,7 +87,7 @@
         </div>
     </div>
 </nav>
-
+ -->
     <!-- Main Content Here -->
     <div class="card o-hidden border-0 shadow-lg my-5">
         <div class="card-body p-0">
@@ -103,10 +103,43 @@
                         
                         <form method="POST" enctype="multipart/form-data">
                             {% csrf_token %}
-                            {{user_form }}
-                            {{profile_form }}
-                            <button type="submit" class="btn btn-success btn-block">Update</button>
+                        
+                            <!-- Username -->
+                            <div class="form-group">
+                                
+                                <label for="{{ user_form.username.id_for_label }}">Username</label>
+                                
+                                <input type="text" class="form-control" id="{{ user_form.username.id_for_label }}" name="{{ user_form.username.name }}" value="{{ user_form.username.value }}" placeholder="Enter username" readonly>
+                            </div>
+                        
+                            <!-- First Name -->
+                            <div class="form-group">
+                                <label for="{{ user_form.first_name.id_for_label }}">First Name</label>
+                                <input type="text" class="form-control" id="{{ user_form.first_name.id_for_label }}" name="{{ user_form.first_name.name }}" value="{{ user_form.first_name.value }}" placeholder="Enter first name">
+                            </div>
+                        
+                            <!-- Last Name -->
+                            <div class="form-group">
+                                <label for="{{ user_form.last_name.id_for_label }}">Last Name</label>
+                                <input type="text" class="form-control" id="{{ user_form.last_name.id_for_label }}" name="{{ user_form.last_name.name }}" value="{{ user_form.last_name.value }}" placeholder="Enter last name">
+                            </div>
+                        
+                            <!-- Email Address -->
+                            <div class="form-group">
+                                <label for="{{ user_form.email.id_for_label }}">Email Address</label>
+                                <input type="email" class="form-control" id="{{ user_form.email.id_for_label }}" name="{{ user_form.email.name }}" value="{{ user_form.email.value }}" placeholder="Enter email address">
+                            </div>
+                        
+                            <!-- Phone Number -->
+                            <div class="form-group">
+                                <label for="{{ profile_form.phone_number.id_for_label }}">Phone Number</label>
+                                <input type="text" class="form-control" id="{{ profile_form.phone_number.id_for_label }}" name="{{ profile_form.phone_number.name }}" value="{{ profile_form.phone_number.value }}" placeholder="Enter phone number">
+                            </div>
+                            <div class="d-grid gap-2 col-6 mx-auto">
+                                <button type="submit" class="btn btn-success btn-block align-self-center text-center ">Update</button>
+                            </div>
                         </form>
+                        
                         <hr>
                         <div class="text-center">
                             <!-- Back link -->

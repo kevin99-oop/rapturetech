@@ -22,8 +22,11 @@
     <!-- CSS Files -->
     <link id="pagestyle" href="{% static 'assets/css/argon-dashboard.css' %}" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-
-    <style>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.10/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.10/js/jquery.dataTables.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+<style>
         /* Hide the "Powered by Google Translate" text */
         .goog-logo-link,
         .goog-logo {
@@ -183,6 +186,27 @@
     <script src="{% static 'assets/js/plugins/perfect-scrollbar.min.js'%}"></script>
     <script src="{% static 'assets/js/plugins/smooth-scrollbar.min.js'%}"></script>
     <script src="{% static 'assets/js/plugins/chartjs.min.js'%}"></script>
+        <!-- Bootstrap core JavaScript-->
+        <script src="{% static 'vendor/jquery/jquery.min.js'%}"></script>
+        <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js'%}"></script>
+    
+        <!-- Core plugin JavaScript-->
+        <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js'%}"></script>
+    
+        <!-- Custom scripts for all pages-->
+        <script src="{% static 'js/sb-admin-2.min.js'%}"></script>
+    
+        <!-- Page level plugins -->
+        <script src="{% static 'vendor/datatables/jquery.dataTables.min.js'%}"></script>
+        <script src="{% static 'vendor/datatables/dataTables.bootstrap4.min.js'%}"></script>
+    
+        <!-- Page level custom scripts -->
+        <script src="{% static 'js/demo/datatables-demo.js'%}"></script>
+
+        <!-- Custom styles for this page -->
+        <link href="{% static 'vendor/datatables/dataTables.bootstrap4.min.css'%}" rel="stylesheet">
+        
+    
     <script>
         var ctx1 = document.getElementById("chart-line").getContext("2d");
 

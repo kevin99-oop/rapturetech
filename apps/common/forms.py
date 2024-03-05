@@ -97,3 +97,4 @@ class UploadRateTableForm(forms.ModelForm):
         # Perform any additional validation for the RateTable CSV file if needed
 
         return csv_file
+

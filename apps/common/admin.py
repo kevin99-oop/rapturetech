@@ -1,5 +1,5 @@
 from django.contrib import admin
-from apps.common.models import DREC,DPU,Customer,Config,RateTable
+from apps.common.models import DREC,DPU,Customer,Config,RateTable,CustomerList
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
@@ -20,9 +20,31 @@ class DRECAdmin(admin.ModelAdmin):
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
     # Define the fields to be displayed in the Customer admin interface
-    list_display = ('user', 'st_id', 'csv_file',)
+    list_display = ('user', 'st_id', 'csv_file','date_uploaded')
     search_fields = ('user__username', 'st_id')
 
+class CustomerListAdmin(admin.ModelAdmin):
+    list_display = ('user', 'st_id', 'cust_id', 'name', 'mobile', 'adhaar', 'bank_ac', 'ifsc')
+    list_filter = ('user', 'st_id', 'cust_id')
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+
+        # Apply additional filtering based on user, st_id, cust_id
+        user_id = request.user.id
+        st_id = request.GET.get('st_id', None)
+        cust_id = request.GET.get('cust_id', None)
+
+        if st_id:
+            queryset = queryset.filter(st_id=st_id)
+        if cust_id:
+            queryset = queryset.filter(cust_id=cust_id)
+        if not request.user.is_superuser:
+            queryset = queryset.filter(user_id=user_id)
+
+        return queryset
+
+admin.site.register(CustomerList, CustomerListAdmin)
 # Admin for Config model
 @admin.register(Config)
 class ConfigAdmin(admin.ModelAdmin):

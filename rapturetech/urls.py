@@ -4,7 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from apps.common.views import (
     HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView,
-    ShiftreportView, UserRegistrationView, UserLoginView, add_dpu, active_dpu,CustomLoginView,custom_logout,
+    shift_report,ledger_report ,UserRegistrationView, UserLoginView, add_dpu, active_dpu,CustomLoginView,custom_logout,
     DRECViewSet, NtpDatetimeView, dpudetails, edit_dpu,upload_customer_csv,download_latest_csv,
     get_cid_range,get_cust_info,customer_list,config_api,download_config_by_st_id,upload_rate_table,rate_table_list,download_rate_table,lastratedate_api,ratesitem_api
 
@@ -56,7 +56,8 @@ urlpatterns = [
 
     path('profile-update/', ProfileUpdateView.as_view(), name='profile-update'),
     path('profile/', ProfileView.as_view(), name='profile'),
-    path('shift_report/', ShiftreportView.as_view(), name='shift_report'),
+    path('shift_report/', shift_report, name='shift_report'),
+    path('ledger/', ledger_report, name='ledger_report'),
 
     # DPU-related URLs
     path('add_dpu/', add_dpu, name='add_dpu'),
@@ -68,7 +69,7 @@ urlpatterns = [
     path('download_latest_csv/<str:st_id>/', download_latest_csv, name='download_latest_csv'),
     path('api/cidrange/', get_cid_range, name='get_cid_range'),
     path('api/cust_info/', get_cust_info, name='get_cust_info'),
-    path('customer_list/', customer_list, name='customer_list'),
+    path('customer-list/<str:st_id>/', customer_list, name='customer-list'),
     #/config_file
     path('api/config/', config_api, name='config-api'),
     path('download/<str:st_id>/', download_config_by_st_id, name='download_config_by_st_id'),

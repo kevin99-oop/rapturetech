@@ -1,0 +1,395 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
+
+<!-- DataTables JS -->
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
+
+<!-- TableExport library -->
+<script type="text/javascript" src="https://unpkg.com/tableexport@5.2.3/dist/js/tableexport.min.js"></script>
+
+<!-- jsPDF library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
+<script src="    https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
+<style>
+    .multi-collapse { animation: fadeIn 1s; }
+
+</style>
+
+<div class="container-fluid mt-5">
+    <!-- Main Content Here -->
+    <div class="row">
+        <div class="col-xl-3 col-md-3 col-sm-6 mb-xl-0 mb-5">
+            <div class="card">
+                <div class="card-body p-3">
+                    <div class="numbers">
+                        <form method="post" id="reportForm" action="{% url 'ledger_report' %}">
+                            {% csrf_token %}
+                            <label for="location">
+                                Location:
+                            </label>
+                            <p class="float-end fw-bold">
+                                Total - <code><strong>{{ total_locations }}</strong></code>
+                            </p>
+                            <select name="location" id="location" class="form-select rounded">
+                                {% for loc in locations %}
+                                    <option value="{{ loc }}" {% if selected_location == loc %}selected{% endif %}>{{ loc }}</option>
+                                {% endfor %}
+                            </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-3 col-sm-6 mb-xl-0 mb-5">
+            <div class="card">
+                <div class="card-body p-3">
+                    <div class="numbers">
+                        <label for="dpu">
+                            DPU:
+                        </label>
+                        <p class="float-end fw-bold">
+                            Total - <code><strong>{{ total_dpus }}</strong></code>
+                        </p>
+                        <select name="dpu" id="dpu" class="form-select">
+                            {% for d in dpus %}
+                                <option value="{{ d }}" {% if selected_dpu == d %}selected{% endif %}>{{ d }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-3 col-sm-6 mb-xl-0 mb-5">
+            <div class="card">
+                <div class="card-body p-3">
+                    <div class="numbers">
+                        <label for="society">
+                            Society:
+                        </label>
+                        <p class="float-end fw-bold">
+                            Total - <code><strong>{{ total_societies }}</strong></code>
+                        </p>
+                        <select name="society" id="society" class="form-select">
+                            {% for s in societies %}
+                                <option value="{{ s }}" {% if selected_society == s %}selected{% endif %}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-3 col-sm-6 mb-xl-0 mb-5">
+            <div class="card">
+                <div class="card-body p-3">
+                    <div class="numbers">
+                        <label for="start_id">
+                            Start ID:
+                        </label>
+                        <select name="start_id" id="start_id" class="form-select">
+                            {% for cust_id in customer_ids %}
+                                <option value="{{ cust_id }}" {% if selected_start_id == cust_id %}selected{% endif %}>{{ cust_id }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-xl-3 col-md-3 col-sm-6 mb-xl-0 mb-5">
+                <div class="card">
+                    <div class="card-body p-3">
+                        <label for="end_id">
+                            End ID:
+                        </label>
+                        <select name="end_id" id="end_id" class="form-select">
+                            {% for cust_id in customer_ids %}
+                                <option value="{{ cust_id }}" {% if selected_end_id == cust_id %}selected{% endif %}>{{ cust_id }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-3 col-sm-6 mb-xl-0 mb-5">
+                <div class="card">
+                    <div class="card-body p-3">
+                        <label for="start_date">Start Date:</label>
+                        <input type="date" name="start_date" id="start_date" value="{{ selected_start_date }}" class="form-control" required>
+        
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-3 col-sm-6 mb-xl-0 mb-5">
+                <div class="card">
+                    <div class="card-body p-3">
+                        <div class="numbers">
+                                        
+                        <label for="end_date">End Date:</label>
+                        <input type="date" name="end_date" id="end_date" value="{{ selected_end_date }}" class="form-control" required>
+                    
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-3 col-sm-6 mb-xl-0 mb-5">
+                <div class="col-12">
+                    <form>
+                        <div class="col-12 mb-3 mx-4 ">
+                            <button type="submit" class="btn btn-success w-100">Generate Report</button>
+                            <p class="mt-2">
+                                <a class="btn btn-primary cols" data-toggle="collapse" href="#multiCollapseExample1" role="button" aria-expanded="true" aria-controls="multiCollapseExample1">Ledger Report</a>
+                                <button class="btn btn-primary cols float-end" type="button" data-toggle="collapse" data-target="#multiCollapseExample2" aria-expanded="false" aria-controls="multiCollapseExample2">Payment Report</button>                            
+                            </p>
+                        </div>
+                    </form>                               
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Summary Record -->
+    <div class="row mt-4" id="divID">
+        <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
+            <div class="card collapse multi-collapse show" id="multiCollapseExample1">
+                <div class="card-header pb-0 p-3">
+                    <div class="d-flex justify-content-between">
+                        <h6 class="mb-2">
+                            Ledger Table
+                        </h6>
+                        <div class="float-end">                    
+                            <button class="btn btn-primary btn-sm" onclick="exportToCsvAndPdf(['ledger_summary_data', 'ledger_detail_data'], 'ledger_report', 'csv')">CSV</button>
+                            <button class="btn btn-primary btn-sm" onclick="exportToCsvAndPdf(['ledger_summary_data', 'ledger_detail_data'], 'ledger_report', 'pdf')">PDF</button>
+    
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive card-body">
+                    {% if ledger_summary_data %}
+                    {% for summary_data_entry in ledger_summary_data %}
+                    <h2>
+                        Customer {{ summary_data_entry.CUST_ID }} Details
+                    </h2> 
+                    <!-- Table 1: Summary Data -->
+                    <table id="ledger_summary_data" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 mt-3">
+                        <thead class="table-title text-white text-center rounded">
+                            <tr>
+                                <th>Customer</th>
+                                <th>Root</th>
+                                <th>Society</th>
+                                <th>DPU</th>
+                                <th>Total QT</th>
+                                <th>Total Amount</th>
+                                <th>Total CAmount</th>
+                                <th>Avg. FAT</th>
+                            </tr>
+                        </thead>
+                        <tbody class="align-items-center text-center">
+                            <tr>
+                                <td>{{ summary_data_entry.CUST_ID }}</td>
+                                <td>{{ summary_data_entry.ST_ID__location }}</td>
+                                <td>{{ summary_data_entry.ST_ID__society }}</td>
+                                <td>{{ summary_data_entry.ST_ID__st_id }}</td>
+                                <td>{{ summary_data_entry.TotalQT }}</td>
+                                <td>{{ summary_data_entry.TotalAmount }}</td>
+                                <td>{{ summary_data_entry.TotalCAmount }}</td>
+                                <td>{{ summary_data_entry.AvgFAT }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+        
+                    <!-- Table 2: Detail Data -->
+                    <table id="ledger_detail_data" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 mt-5 mb-5">
+                        <thead class="table-title text-white text-center rounded">
+                            <tr>
+                                <th>Date</th>
+                                <th>SHIFT</th>
+                                <th>MType</th>
+                                <th>FAT</th>
+                                <th>SNF</th>
+                                <th>CLR</th>
+                                <th>WATER</th>
+                                <th>QT</th>
+                                <th>RATE</th>
+                                <th>Amount</th>
+                                <th>CAmount</th>
+                            </tr>
+                        </thead>
+                        <tbody class="align-items-center text-center">
+                            {% for entry in ledger_detail_data %}
+                                {% if entry.CUST_ID == summary_data_entry.CUST_ID %}
+                                    <tr>
+                                        <td>{{ entry.RecordingDate|date:"d-m-Y" }}</td>
+                                        <td>{{ entry.SHIFT }}</td>
+                                        <td>{{ entry.MType }}</td>
+                                        <td>{{ entry.FAT }}</td>
+                                        <td>{{ entry.SNF }}</td>
+                                        <td>{{ entry.CLR }}</td>
+                                        <td>{{ entry.WATER }}</td>
+                                        <td>{{ entry.QT }}</td>
+                                        <td>{{ entry.RATE }}</td>
+                                        <td>{{ entry.Amount }}</td>
+                                        <td>{{ entry.CAmount }}</td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endfor %}
+                {% else %}
+                <p class="text-center">No data available for the selected filters.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</div>
+
+        <!-- HTML code for summary and detail tables -->
+
+        <!-- New Table for Payment Summary Data -->
+        <div class="row mt-4">
+            <div class="col-lg-12 mb-lg-0 mb-5">
+                <div class="card collapse multi-collapse" id="multiCollapseExample2">
+                    <div class="card-header pb-0 p-3">
+                        <div class="d-flex justify-content-between">
+                            <h6 class="mb-2">
+                                Payment Summary Table
+                            </h6>
+                            <div class="float-end">                    
+                                <button class="btn btn-primary btn-sm" onclick="exportToCsvAndPdf(['payment_table_info', 'payment_table_data'], 'ledger_report_payment', 'csv')">CSV</button>
+                                <button class="btn btn-primary btn-sm" onclick="exportToCsvAndPdf(['payment_table_info', 'payment_table_data'], 'ledger_report_payment', 'pdf')">PDF</button>
+        
+        
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive card-body">
+                        {% if payment_summary_data %}
+                            <!-- Payment Summary Data Table -->
+                            <table id="payment_table_info" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 mt-3">
+                                <thead class="table-title text-white text-center rounded">
+                                    <tr>
+                                        <th>Location</th>
+                                        <th>DPU</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Grand Total Qt.</th>
+                                        <th>Grand Total Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="align-items-center text-center">
+                                    <tr>
+                                        <td>{{ selected_location }}</td>
+                                        <td>{{ selected_dpu }}</td>
+                                        <td>{{ selected_start_date }}</td>
+                                        <td>{{ selected_end_date }}</td>                                        
+                                        <td>{{ payment_summary_data.GrandTotalQT }}</td>
+                                        <td>{{ payment_summary_data.GrandTotalAmount }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <!-- Customer Payment Summary Table -->
+                            <table id="payment_table_data" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 mt-5">
+                                <thead class="table-title text-white text-center rounded">
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>No. of Shifts</th>
+                                        <th>Total QT.</th>
+                                        <th>Total Amount</th>
+                                        <th>Total CAmount</th>
+                                        <th>Avg. FAT</th>
+                                        <th>Avg. RATE</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="align-items-center text-center">
+                                    {% for entry in payment_summary_data.CustomerData %}
+                                        <tr>
+                                            <td>{{ entry.CUST_ID }}</td>
+                                            <td>{{ entry.NoOfShifts }}</td>
+                                            <td>{{ entry.TotalQT }}</td>
+                                            <td>{{ entry.TotalAmount }}</td>
+                                            <td>{{ entry.TotalCAmount }}</td>
+                                            <td>{{ entry.AvgFAT }}</td>
+                                            <td>{{ entry.AvgRATE }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <p class="text-center">No data available for the selected filters.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+
+
+        <script>
+            function exportToCsvAndPdf(tableIds, fileNamePrefix, format) {
+                const username = '{{ user.username }}';
+                const csvData = [];
+                const pdf = new jsPDF();
+        
+                tableIds.forEach((tableId, index) => {
+                    const table = document.getElementById(tableId);
+                    const rows = table.querySelectorAll('tr');
+                    const tableData = [];
+        
+                    rows.forEach((row) => {
+                        const rowData = [];
+                        const cells = row.querySelectorAll('td, th');
+                        cells.forEach((cell) => {
+                            rowData.push(cell.innerText);
+                        });
+                        tableData.push(rowData.join(','));
+                    });
+        
+                    csvData.push(tableData.join('\n'));
+        
+                    if (index > 0) {
+                        pdf.addPage();  // Add a new page for each additional table in PDF
+                    }
+        
+                    pdf.autoTable({ html: `#${tableId}` });
+                });
+        
+                const fullFileName = `${username}_${fileNamePrefix}`;
+        
+                if (format === 'csv') {
+                    const csvBlob = new Blob([csvData.join('\n')], { type: 'text/csv' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(csvBlob);
+                    link.download = `${fullFileName}.csv`;
+                    link.click();
+                } else if (format === 'pdf') {
+                    pdf.save(`${fullFileName}.pdf`);
+                }
+            }
+        </script>
+        
+<script>
+    $(document).ready(function() {
+        $('.cols').click(function() {
+            var targetCollapse = $($(this).data('target'));
+                $('.collapse.multi-collapse').not(targetCollapse).removeClass('show');
+            });
+        });
+</script>
+
+{% endblock content %}
+
+
+    

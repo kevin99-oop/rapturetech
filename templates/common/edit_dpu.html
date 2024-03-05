@@ -1,4 +1,4 @@
-{% extends 'base2.html' %}
+{% extends 'base.html' %}
 
 {% block content %}
 
@@ -71,6 +71,7 @@
         cursor: pointer;
     }
 </style>
+<!--
 <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl " id="navbarBlur"
     data-scroll="false">
     <div class="container-fluid py-1 px-3">
@@ -84,10 +85,7 @@
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
             <div class="ms-md-auto pe-md-3 d-flex align-items-center">
-                <div class="input-group">
-                    <span class="input-group-text text-body"><i class="fas fa-search" aria-hidden="true"></i></span>
-                    <input type="text" class="form-control" placeholder="Type here...">
-                </div>
+             
             </div>
             <ul class="navbar-nav  justify-content-end">
                 <li class="nav-item d-flex align-items-center">
@@ -109,7 +107,7 @@
                 <li class="nav-item dropdown pe-2 px-3 d-flex align-items-center">
                     <a href="javascript:;" class="nav-link text-white p-0" id="dropdownMenuButton"
                         data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa fa-user cursor-pointer"></i>
+                        <i class="fa fa-user cursor-pointer"><span class="mx-2 ">{{user.username}}</span></i> <i class="fa fa-angle-down "></i>
                     </a>
                     <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4"
                         aria-labelledby="dropdownMenuButton">
@@ -149,75 +147,87 @@
             </ul>
         </div>
     </div>
-</nav>
+</nav>-->
 <div class="container-fluid mt-5">
-
-
-
-    <!-- Main Content Here -->
-
     <div class="card o-hidden border-0 shadow-lg mt-5">
-
         <div class="row container">
             <div class="col-lg-12 my-5 ">
                 <h2>Edit DPU</h2>
 
-                <form method="post" action="" id="editDpuForm" onsubmit="return confirmDeactivation()">
+                <form method="post" action="{% url 'edit_dpu' st_id=dpu.st_id %}" id="editDpuForm">
                     {% csrf_token %}
                     {{ form.as_p }}
 
-                    <button type="submit">Save Changes</button>
-                </form>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        Launch demo modal
+                    </button>
+                
+                    <a href="{% url 'active_dpu' %}">Back to Active DPUs</a>
 
-                <a href="{% url 'active_dpu' %}">Back to Active DPUs</a>
-
-                <div id="confirmationPopup" class="popup">
-                    <div class="popup-content">
-                        <p>Are you sure you want to deactivate this DPU?</p>
-                        <button onclick="cancelDeactivation()">Cancel</button>
-                        <button onclick="confirmDeactivation()" type="submit">Confirm</button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p id="modal-message">Do you want to change the DPU details?</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" id="saveChangesBtn" class="btn btn-primary">Save Changes</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-
+                </form>
             </div>
-
         </div>
-
-
-
     </div>
-
-    <!-- /.container-fluid -->
 </div>
 
-
-
-
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var formChanged = false;
 
-    $(document).ready(function () {
-        $('#editDpuForm').submit(function (event) {
-            event.preventDefault();
+        // Function to handle form changes
+        function handleFormChanges() {
+            formChanged = true;
+        }
 
-            // Your existing confirmation script...
-            var confirmationPopup = confirmDeactivation();
+        // Add event listeners for form changes
+        var formInputs = document.querySelectorAll('#editDpuForm input, #editDpuForm select');
+        formInputs.forEach(function (input) {
+            input.addEventListener('change', handleFormChanges);
+        });
 
-            $.ajax({
-                type: 'POST',
-                url: $(this).attr('action'),
-                data: $(this).serialize(),
-                success: function (response) {
-                    if (response.status_changed) {
-                        confirmationPopup.style.display = 'block';
-                    } else {
-                        window.location.href = '{% url "active_dpu" %}';
-                    }
-                },
-                error: function (error) {
-                    console.log('Error:', error);
-                }
-            });
+        // Show the modal when the "Save Changes" button is clicked
+        document.getElementById('saveChangesBtn').addEventListener('click', function () {
+            // Check if the form is changed or if "Deactivated" is selected
+            if (formChanged) {
+                document.getElementById('modal-message').innerText = 'Do you want to change the DPU details?';
+            } else if (document.querySelector('select[name="status"]').value === 'deactivated') {
+                document.getElementById('modal-message').innerText = 'Do you want to deactivate the DPU?';
+            } else {
+                document.getElementById('modal-message').innerText = 'No changes made.';
+            }
+
+            // Show the modal
+            var myModal = new bootstrap.Modal(document.getElementById('exampleModal'));
+            myModal.show();
+        });
+
+        // Redirect to active_dpu and show success message when the modal is closed
+        var modalElement = document.getElementById('exampleModal');
+        modalElement.addEventListener('hidden.bs.modal', function () {
+            if (formChanged) {
+                // If changes are made, redirect to active_dpu with a success message
+                window.location.href = "{% url 'active_dpu' %}?success=1";
+            }
         });
     });
 </script>
+
 {% endblock %}

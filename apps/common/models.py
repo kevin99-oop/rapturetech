@@ -5,6 +5,7 @@ from rest_framework.authtoken.models import Token
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.core.exceptions import ValidationError
 
 # Signal to create a Token for a user upon registration
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
@@ -67,14 +68,61 @@ class DREC(models.Model):
 
     def __str__(self):
         return f"DREC for {self.ST_ID.user.username}'s DPU - {self.ST_ID.st_id}"
-
-# Model representing Customer and associated CSV file upload
+    
+        
+    def save(self, *args, **kwargs):
+            # Check the status of the associated DPU
+            if self.ST_ID.status == 'deactivated':
+                raise ValidationError("Cannot save DREC. DPU is deactivated. Activate the DPU from the admin.")
+            
+            super().save(*args, **kwargs)
 class Customer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    st_id = models.CharField(max_length=50)
+    st_id = models.ForeignKey(DPU, on_delete=models.CASCADE, related_name='customers')
     csv_file = models.FileField(upload_to='csv_files/')
     date_uploaded = models.DateTimeField(auto_now=True)
-    
+
+    def __str__(self):
+        return f"Customer CSV for {self.user.username} - {self.st_id}"
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['st_id']),
+            # Add more indexes as needed
+        ]
+
+class CustomerList(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    st_id = models.CharField(max_length=20)  # Assuming st_id can be up to 20 characters
+    cust_id = models.IntegerField()
+    name = models.CharField(max_length=255)
+    mobile = models.CharField(max_length=15)
+    adhaar = models.CharField(max_length=20)
+    bank_ac = models.CharField(max_length=30)
+    ifsc = models.CharField(max_length=20)
+
+    def __str__(self):
+        return f"{self.st_id} - {self.name}"
+    def __str__(self):
+        return self.name
+
+    @classmethod
+    def create_from_csv_line(cls, user, st_id, csv_line):
+        data = csv_line.split(',')
+        cust_id, name, mobile, adhaar, bank_ac, ifsc = data
+
+        return cls.objects.create(
+            user=user,
+            st_id=st_id,
+            cust_id=cust_id,
+            name=name,
+            mobile=mobile,
+            adhaar=adhaar,
+            bank_ac=bank_ac,
+            ifsc=ifsc,
+        )
+
 # Model representing Configurations
 class Config(models.Model):
     user = models.CharField(max_length=255)  # Change this field based on your user model
@@ -106,3 +154,5 @@ class RateTable(models.Model):
     @property
     def csv_file_path(self):
         return self.csv_file.path if self.csv_file else ''
+    
+
