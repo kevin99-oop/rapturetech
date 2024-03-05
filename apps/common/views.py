@@ -220,8 +220,6 @@ def total_dpus(request):
     dpu_names = ', '.join(dpu.st_id for dpu in dpus)
     return {'total_dpus': total_dpus, 'dpu_names': dpu_names}
 
-
-
 def index(request):
     return render(request, 'index.html')
 
