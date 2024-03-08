@@ -76,6 +76,7 @@ class DREC(models.Model):
                 raise ValidationError("Cannot save DREC. DPU is deactivated. Activate the DPU from the admin.")
             
             super().save(*args, **kwargs)
+
 class Customer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     st_id = models.ForeignKey(DPU, on_delete=models.CASCADE, related_name='customers')

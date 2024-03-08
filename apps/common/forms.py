@@ -71,10 +71,8 @@ class UploadCSVForm(forms.ModelForm):
 
     def clean_csv_file(self):
         csv_file = self.cleaned_data['csv_file']
-
-        # Perform any additional validation for the CSV file if needed
-
         return csv_file
+    
     
 # CustomerForm is a form for handling customer-related data
 class CustomerForm(forms.ModelForm):
@@ -97,4 +95,5 @@ class UploadRateTableForm(forms.ModelForm):
         # Perform any additional validation for the RateTable CSV file if needed
 
         return csv_file
+
 

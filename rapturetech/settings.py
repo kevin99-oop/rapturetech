@@ -38,6 +38,7 @@ DEFAULT_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'templates',
+     'related_select',
     'apps',
     'rest_framework',
     'rest_framework.authtoken', 

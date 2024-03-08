@@ -3,7 +3,6 @@ import csv
 import datetime
 import logging
 import os
-
 # Django Imports
 from django.views import View
 from django.utils import timezone
@@ -19,12 +18,10 @@ from django.views.generic import TemplateView, CreateView, View
 from django.http import HttpResponseRedirect, JsonResponse, Http404, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404, get_list_or_404
 from django.contrib.auth.views import LoginView
-
 # Apps Common Imports
 from apps.common.models import DREC, DPU, Customer, Config, RateTable
 from apps.common.forms import SignUpForm, UserForm, ProfileForm, DPUForm, UploadCSVForm, UploadRateTableForm
 from apps.common.serializers import UserSerializer, LoginSerializer, DRECSerializer
-
 # Django Rest Framework Imports
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -33,7 +30,6 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
-
 # Views Imports
 from datetime import datetime
 from django.http import JsonResponse
@@ -41,44 +37,42 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.contrib.auth import logout
 from django.urls import reverse
-    
 # views.py
 from django.http import JsonResponse
 from django.shortcuts import render
 from apps.common.models import CustomerList  # Replace 'your_app' with the actual name of your Django app
-
 from django.shortcuts import render, redirect, get_object_or_404
 from apps.common.forms import UploadRateTableForm
 from apps.common.models import RateTable
 from django.http import HttpResponse
-
 from datetime import datetime, date
 from django.shortcuts import render, redirect, get_object_or_404
 from apps.common.forms import UploadRateTableForm
 from apps.common.models import RateTable
 from django.http import HttpResponse
-import csv
-
 from datetime import datetime
 from django.shortcuts import render, redirect
 from apps.common.forms import UploadRateTableForm
 from apps.common.models import RateTable
 from django.http import HttpResponse
-import csv
-from django.contrib import messages
 
+from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from apps.common.models import RateTable
 from collections import defaultdict
-    
 from django.shortcuts import render
 from .models import DPU, DREC
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.db.models import Count, Sum, Avg
 from datetime import datetime
+
 # Common Views
+
+def index(request):
+    return render(request, 'index.html')
+
 class HomeView(TemplateView):
     # HomeView class definition ...
     template_name = 'common/index.html'
@@ -103,6 +97,7 @@ class CustomLoginView(LoginView):
         # Customize this function if needed (e.g., redirecting to a different page on successful login)
         response = super().form_valid(form)
         return response
+
 def custom_logout(request):
     # Perform any additional logout-related actions if needed
     # For example, you can log additional information, invalidate session data, etc.
@@ -112,7 +107,6 @@ def custom_logout(request):
 
     # Redirect to the desired page after logout
     return redirect(reverse('home'))  # Replace 'home' with the name of your home URL pattern
-
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'example.html'
@@ -208,30 +202,19 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'total_customer_count': total_customer_count,
             'total_dpus': total_dpus,
             'dpu_list': ', '.join(dpu.st_id for dpu in active_dpu_list),
-
         }
-
         return render(request, self.template_name, context)
 
-def total_dpus(request):
-    user = getattr(request, 'user', None)
-    dpus = DPU.objects.filter(user=user)
-    total_dpus = dpus.count() if user and user.is_authenticated else 0
-    dpu_names = ', '.join(dpu.st_id for dpu in dpus)
-    return {'total_dpus': total_dpus, 'dpu_names': dpu_names}
-
-def index(request):
-    return render(request, 'index.html')
 
 def get_data(request):
     # Simulate fetching updated data from a source
     updated_data = fetch_updated_data()
-
     return JsonResponse({'data': updated_data})
 
 def fetch_updated_data():
     # Simulate fetching updated data from a source (replace this with your actual data fetching logic)
     return {'value': 'Updated Value'}
+
 # User Authentication Views
 class SignUpView(CreateView):
     form_class = SignUpForm
@@ -242,12 +225,11 @@ class UserRegistrationView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (permissions.AllowAny,)
-
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         # Render the registration template after a successful registration
         return render(request, 'common/register.html', {'message': 'Registration successful!'})
-
+    
 class UserLoginView(APIView):
     def post(self, request, *args, **kwargs):
         try:
@@ -262,7 +244,6 @@ class UserLoginView(APIView):
             if serializer.is_valid():
                 username = serializer.validated_data['username']
                 password = serializer.validated_data['password']
-
                 # Add your authentication logic here (e.g., using Django's built-in authentication)
                 user = authenticate(
                     request, username=username, password=password)
@@ -305,20 +286,16 @@ class ProfileUpdateView(LoginRequiredMixin, TemplateView):
             profile_form.save()
             messages.success(request, 'Your profile was successfully updated!')
             return HttpResponseRedirect(reverse_lazy('profile'))
-
         context = self.get_context_data(
             user_form=user_form,
             profile_form=profile_form
         )
-
         return self.render_to_response(context)
-
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
 
 @login_required
 def add_dpu(request):
-
     if request.method == 'POST':
         form = DPUForm(request.POST)
         if form.is_valid():
@@ -329,17 +306,12 @@ def add_dpu(request):
             return redirect('active_dpu')
     else:
         form = DPUForm()
-    
-
-
     return render(request, 'common/add_dpu.html', {'form': form})
-
 
 def active_dpu(request):
     active_dpu_list = DPU.objects.filter(user=request.user)
     return render(request, 'common/active_dpu.html', {'active_dpu_list': active_dpu_list})
-
-
+    
 class DRECViewSet(viewsets.ModelViewSet):
     queryset = DREC.objects.all()
     serializer_class = DRECSerializer
@@ -369,7 +341,6 @@ class DRECViewSet(viewsets.ModelViewSet):
 
         super().save(*args, **kwargs)
 
-
 class NtpDatetimeView(View):
     def get(self, request, *args, **kwargs):
         # Get the current system date and time
@@ -387,26 +358,21 @@ class NtpDatetimeView(View):
 def dpudetails(request, dpuid):
     dpu = get_object_or_404(DPU, st_id=dpuid)
     drecs = dpu.drecs.all()  # Use the correct related name
-
     context = {
         'dpu': dpu,
         'drecs': drecs,
     }
  # Fetch DPU based on dpu_id
     dpu = DPU.objects.get(st_id=dpuid)
-
     # Fetch customer names for the specific DPU
     customer_list = CustomerList.objects.filter(st_id=dpuid)
-
     # Fetch DREC entries for the specific DPU
     drecs = DREC.objects.filter(ST_ID=dpu)
-
     context = {
         'dpu': dpu,
         'customer_list': customer_list,
         'drecs': drecs,
     }
-    
     return render(request, 'common/dpudetails.html', context)
 
 def edit_dpu(request, st_id):
@@ -439,6 +405,10 @@ def extract_cust_id_range(csv_file):
 
     return start_range, end_range
 
+from django.db import connection
+import logging
+
+logger = logging.getLogger(__name__)
 
 def upload_customer_csv(request):
     if request.method == 'POST':
@@ -452,18 +422,22 @@ def upload_customer_csv(request):
                 # Fetch the first 10 characters from the top-left cell as st_id
                 st_id = csv_lines[0][:10].strip()
 
+                print(st_id)
+
                 # Fetch the corresponding DPU instance
                 dpu_instance = DPU.objects.get(st_id=st_id)
-
+                print("429", dpu_instance)
                 # Check if CSV file for the given st_id already exists
                 existing_customer = Customer.objects.filter(user=request.user, st_id=dpu_instance).first()
-
+                print("432")
                 if existing_customer:
+                    print("in if")
                     # Update the existing CSV file with the new data
                     existing_customer.csv_file = csv_file
                     existing_customer.save()
                     messages.success(request, 'CSV file updated successfully.')
                 else:
+                    print("else")
                     # Create a new Customer instance with the CSV file and associated DPU
                     Customer.objects.create(
                         user=request.user,
@@ -471,42 +445,49 @@ def upload_customer_csv(request):
                         csv_file=csv_file,
                     )
                     messages.success(request, 'CSV file uploaded successfully.')
-
+                print("448")
                 # Process the CSV content and save data to CustomerList model
                 process_csv_content(request.user, st_id, csv_lines)
-
+                print("451")
                 # Redirect to customer-list with st_id parameter
                 return redirect('customer-list', st_id=st_id)
 
             except FileNotFoundError:
+                logger.error('Error processing CSV file: File not found.')
                 messages.error(request, 'Error processing CSV file: File not found.')
             except DPU.DoesNotExist:
+                logger.error(f'DPU with st_id {st_id} does not exist.')
                 messages.error(request, f'DPU with st_id {st_id} does not exist.')
             except Exception as e:
+                logger.error(f'Error processing CSV file: {e}')
                 messages.error(request, f'Error processing CSV file: {e}')
         else:
+            logger.error('Invalid form submission. Please check the file format.')
             messages.error(request, 'Invalid form submission. Please check the file format.')
     else:
         form = UploadCSVForm()
 
-    return render(request, 'common/upload_customer_csv.html', {'form': form})
+    # Log the SQL queries
+    logger.info(connection.queries)
 
+    return render(request, 'common/upload_customer_csv.html', {'form': form})
 
 def process_csv_content(user, st_id, csv_lines):
     # Skip the header row
     header = csv_lines.pop(0)
-
     # Get the list of existing cust_id values for the given st_id
+    print("479")
     existing_cust_ids = CustomerList.objects.filter(user=user, st_id=st_id).values_list('cust_id', flat=True)
-
+    print("481")
     # Iterate through the remaining lines and create, update, or delete CustomerList instances
     for line in csv_lines:
         data = line.split(',')
-
+        print("485")
         # Check if the line has the expected number of values
         if len(data) != 6:
             # Log or handle the error accordingly
             print(f"Error processing CSV file row: {line}")
+
             continue
 
         cust_id, name, mobile, adhaar, bank_ac, ifsc = data
@@ -517,8 +498,9 @@ def process_csv_content(user, st_id, csv_lines):
 
         # Check if CustomerList instance with the same cust_id and st_id exists
         existing_customer = CustomerList.objects.filter(user=user, st_id=st_id, cust_id=cust_id).first()
-
+        print("501")
         if existing_customer:
+            print("503")
             # Update the existing instance with the new data
             existing_customer.name = name
             existing_customer.mobile = mobile
@@ -538,10 +520,10 @@ def process_csv_content(user, st_id, csv_lines):
                 bank_ac=bank_ac,
                 ifsc=ifsc,
             )
-
+        print("523")
     # Delete rows that are in the database but not in the CSV file
     CustomerList.objects.filter(user=user, st_id=st_id).exclude(cust_id__in=existing_cust_ids).delete()
-
+    print("526")
 def customer_list(request, st_id):
     # Fetch the customer list for the given st_id
     customer_list = CustomerList.objects.filter(st_id=st_id)
@@ -569,6 +551,7 @@ def download_latest_csv(request, st_id):
     return redirect('error_view')
 
 logger = logging.getLogger(__name__)
+
 @api_view(['GET'])
 def get_cid_range(request):
     dpuid = request.GET.get('dpuid', '')
@@ -748,7 +731,6 @@ def rate_table_list(request):
 
     return render(request, 'common/rate_table_list.html', context)
 
-
 # Import the logging module
 def download_rate_table(request, rate_table_id):
     # Fetch the rate table object by ID
@@ -770,7 +752,6 @@ def download_rate_table(request, rate_table_id):
 
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
-
 
 logger = logging.getLogger(__name__)
 
@@ -884,6 +865,12 @@ import logging
 logger = logging.getLogger(__name__)
 from django.db.models import Count
 
+from django.http import JsonResponse
+from django.shortcuts import render
+from .models import DPU, DREC, CustomerList
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Sum, Avg
+from datetime import datetime
 @login_required
 def shift_report(request):
     # Fetch dynamic values for dropdowns from the database
@@ -892,11 +879,19 @@ def shift_report(request):
     societies = DPU.objects.filter(user=request.user).values_list('society', flat=True).distinct()
     shifts = DREC.objects.filter(ST_ID__user=request.user).values_list('SHIFT', flat=True).distinct()
 
-
     # Count distinct locations, dpus, and societies
     total_locations = DPU.objects.filter(user=request.user).values('location').distinct().count()
     total_dpus = DPU.objects.filter(user=request.user).count()
     total_societies = DPU.objects.filter(user=request.user).values('society').distinct().count()
+    customer_list = CustomerList.objects.filter(user=request.user)
+
+    # Get initial data for dropdowns
+    initial_data = {
+        'locations': list(locations),
+        'dpus': list(dpus),
+        'societies': list(societies),
+    }
+
     context = {
         'locations': locations,
         'dpus': dpus,
@@ -905,6 +900,8 @@ def shift_report(request):
         'total_locations': total_locations,
         'total_dpus': total_dpus,
         'total_societies': total_societies,
+        'initial_data': initial_data,  # Include initial data in the context
+        'customer_list': customer_list,  # Include customer list in the context
     }
 
     if request.method == 'POST':
@@ -913,13 +910,7 @@ def shift_report(request):
         society = request.POST.get('society')
         shift = request.POST.get('shift')
         start_date_str = request.POST.get('start_date')
-
-        
-        # Parse the start date from the string to a datetime object
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else None
-
-
-
 
         # Replace the following lines with your actual data retrieval logic
         summary_data = get_summary_data(location, dpu, society, shift, start_date)
@@ -934,10 +925,19 @@ def shift_report(request):
             'summary_data': summary_data,
             'detail_data': detail_data,
         })
-    
-    
 
     return render(request, 'common/shift_report.html', context)
+
+def get_dpus_by_location(request):
+    location = request.GET.get('location')
+    dpus = DPU.objects.filter(user=request.user, location=location).values_list('st_id', flat=True).distinct()
+    return JsonResponse(list(dpus), safe=False)
+
+def get_societies_by_dpu(request):
+    location = request.GET.get('location')
+    dpu = request.GET.get('dpu')
+    societies = DPU.objects.filter(user=request.user, location=location, st_id=dpu).values_list('society', flat=True).distinct()
+    return JsonResponse(list(societies), safe=False)
 
 def get_summary_data(location, dpu, society, shift, start_date):
     # Replace this function with your actual data retrieval logic for summary data
@@ -955,6 +955,8 @@ def get_summary_data(location, dpu, society, shift, start_date):
         TotalCAmount=Sum('CAmount'),
         AvgFAT=Avg('FAT'),
         AvgSNF=Avg('SNF'),
+        AvgCLR=Avg('CLR'),
+
     )
 
     return summary_data
@@ -962,6 +964,7 @@ def get_summary_data(location, dpu, society, shift, start_date):
 def get_detail_data(location, dpu, society, shift, start_date):
     # Replace this function with your actual data retrieval logic for detail data
     # Example: Querying detailed data
+
     detail_data = DREC.objects.filter(
         ST_ID__location=location,
         ST_ID__st_id=dpu,
@@ -980,6 +983,8 @@ def get_detail_data(location, dpu, society, shift, start_date):
         'Amount',
         'CAmount',
     )
+
+  
 
     return detail_data
     

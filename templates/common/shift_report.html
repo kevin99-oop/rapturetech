@@ -106,7 +106,11 @@
                 <div class="card">
                     <div class="card-body p-3">
                         <div class="numbers">
+                           
                                     <form method="post" action="{% url 'shift_report' %}">
+                                        {% csrf_token %}
+                                        {{ form.location }}
+                                        {{ form.dpu }}
                                         {% csrf_token %}
                                         <!-- Dropdowns for selecting filters -->
                                         <label for="location" class="text-sm mb-0 text-uppercase fw-bold">Root</label>
@@ -192,6 +196,9 @@
                                         <div class="col-12 mb-3 mt-3">
                                             <button type="submit" class="btn btn-success">Generate Shift Report</button>
                                         </div>
+                                            <!-- Hidden input to store the selected DPU value -->
+    <input type="hidden" name="selected_dpu" id="selected_dpu">
+
                                     </form>
                                    
                                 </div>
@@ -230,6 +237,7 @@
                             <th>Total CAmount</th>
                             <th>Avg.FAT</th>
                             <th>Avg.SNF</th>
+                            <th>Avg.CLR</th>  
                         </tr>
                     </thead>
                     <tbody class=" align-items-center text-center">
@@ -245,6 +253,8 @@
                             <td>{{ summary_data.TotalCAmount }}</td>
                             <td>{{ summary_data.AvgFAT }}</td>
                             <td>{{ summary_data.AvgSNF }}</td>
+                            <td>{{ summary_data.AvgCLR }}</td>  
+
                         </tr>
                     </tbody>
                 </table>
@@ -273,6 +283,8 @@
                     <thead class="text-white text-center rounded table-title">
                         <tr>
                             <th>CUST_ID</th>
+                            <th>Customer Name</th>  <!-- Add the header for Customer Name -->
+
                             <th>MType</th>
                             <th>FAT</th>
                             <th>SNF</th>
@@ -288,6 +300,13 @@
                         {% for record in detail_data %}
                             <tr>
                                 <td>{{ record.CUST_ID }}</td>
+                                <td>
+                                    {% for customer in customer_list %}
+                                        {% if customer.cust_id == record.CUST_ID and customer.st_id == selected_st_id %}
+                                            {{ customer.name }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
                                 <td>{{ record.MType }}</td>
                                 <td>{{ record.FAT }}</td>
                                 <td>{{ record.SNF }}</td>
@@ -361,7 +380,119 @@
     new DataTable('#detailTable_report');
 
 </script>
-    {% endblock content %}
+<!-- JavaScript to update the hidden input with the selected DPU value -->
+<script>
+    function getSelectedDPU() {
+        // Get the selected DPU from the dropdown
+        var selectedDPU = document.getElementById('dpu').value;
+
+        // Update the hidden input with the selected DPU value
+        document.getElementById('selected_dpu').value = selectedDPU;
+
+        // Continue with the form submission
+        return true;
+    }
+
+
+
+
+    
+</script>
+<!-- Add this script to handle AJAX requests -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const locationSelect = document.getElementById('id_location');
+      const dpuSelect = document.getElementById('id_dpu');
+      const societySelect = document.getElementById('id_society');
+  
+      locationSelect.addEventListener('change', function () {
+        const selectedLocation = locationSelect.value;
+  
+        fetch(`/get_dpus_by_location/?location=${selectedLocation}`)
+          .then(response => response.json())
+          .then(data => {
+            // Update DPU dropdown options
+            dpuSelect.innerHTML = '';
+            data.forEach(dpu => {
+              const option = document.createElement('option');
+              option.value = dpu;
+              option.text = dpu;
+              dpuSelect.add(option);
+            });
+  
+            // Trigger change event to update the Society dropdown based on the selected DPU
+            dpuSelect.dispatchEvent(new Event('change'));
+          });
+      });
+  
+      dpuSelect.addEventListener('change', function () {
+        const selectedLocation = locationSelect.value;
+        const selectedDpu = dpuSelect.value;
+  
+        fetch(`/get_societies_by_dpu/?location=${selectedLocation}&dpu=${selectedDpu}`)
+          .then(response => response.json())
+          .then(data => {
+            // Update Society dropdown options
+            societySelect.innerHTML = '';
+            data.forEach(society => {
+              const option = document.createElement('option');
+              option.value = society;
+              option.text = society;
+              societySelect.add(option);
+            });
+          });
+      });
+    });
+  </script>
+  
+  <!-- ... (existing form code) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const locationSelect = document.getElementById('id_location');
+      const dpuSelect = document.getElementById('id_dpu');
+      const societySelect = document.getElementById('id_society');
+  
+      locationSelect.addEventListener('change', function () {
+        const selectedLocation = locationSelect.value;
+  
+        fetch(`/get_dpus_by_location/?location=${selectedLocation}`)
+          .then(response => response.json())
+          .then(data => {
+            // Update DPU dropdown options
+            dpuSelect.innerHTML = '';
+            data.forEach(dpu => {
+              const option = document.createElement('option');
+              option.value = dpu;
+              option.text = dpu;
+              dpuSelect.add(option);
+            });
+  
+            // Trigger change event to update the Society dropdown based on the selected DPU
+            dpuSelect.dispatchEvent(new Event('change'));
+          });
+      });
+  
+      dpuSelect.addEventListener('change', function () {
+        const selectedLocation = locationSelect.value;
+        const selectedDpu = dpuSelect.value;
+  
+        fetch(`/get_societies_by_dpu/?location=${selectedLocation}&dpu=${selectedDpu}`)
+          .then(response => response.json())
+          .then(data => {
+            // Update Society dropdown options
+            societySelect.innerHTML = '';
+            data.forEach(society => {
+              const option = document.createElement('option');
+              option.value = society;
+              option.text = society;
+              societySelect.add(option);
+            });
+          });
+      });
+    });
+  </script>
+  
+{% endblock content %}
 
 
     

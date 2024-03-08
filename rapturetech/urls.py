@@ -6,7 +6,8 @@ from apps.common.views import (
     HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView,
     shift_report,ledger_report ,UserRegistrationView, UserLoginView, add_dpu, active_dpu,CustomLoginView,custom_logout,
     DRECViewSet, NtpDatetimeView, dpudetails, edit_dpu,upload_customer_csv,download_latest_csv,
-    get_cid_range,get_cust_info,customer_list,config_api,download_config_by_st_id,upload_rate_table,rate_table_list,download_rate_table,lastratedate_api,ratesitem_api
+    get_cid_range,get_cust_info,customer_list,config_api,download_config_by_st_id,
+    upload_rate_table,rate_table_list,download_rate_table,lastratedate_api,ratesitem_api,get_dpus_by_location,get_societies_by_dpu
 
 )
 from django.contrib.auth import views as auth_views
@@ -33,7 +34,6 @@ urlpatterns = [
     path('dashboard/', DashboardView.as_view(), name="dashboard"),
     path('change-password/', auth_views.PasswordChangeView.as_view(
         template_name='common/change-password.html', success_url='/'), name='change-password'),
-
     # Forget Password URLs
     path('password-reset/',
          auth_views.PasswordResetView.as_view(
@@ -53,12 +53,13 @@ urlpatterns = [
          auth_views.PasswordResetCompleteView.as_view(
              template_name='common/password-reset/password_reset_complete.html'
          ), name='password_reset_complete'),
-
     path('profile-update/', ProfileUpdateView.as_view(), name='profile-update'),
     path('profile/', ProfileView.as_view(), name='profile'),
     path('shift_report/', shift_report, name='shift_report'),
-    path('ledger/', ledger_report, name='ledger_report'),
+    path('get_dpus_by_location/', get_dpus_by_location, name='get_dpus_by_location'),
+    path('get_societies_by_dpu/', get_societies_by_dpu, name='get_societies_by_dpu'),
 
+    path('ledger/', ledger_report, name='ledger_report'),
     # DPU-related URLs
     path('add_dpu/', add_dpu, name='add_dpu'),
     path('active_dpu/', active_dpu, name='active_dpu'),
@@ -73,14 +74,13 @@ urlpatterns = [
     #/config_file
     path('api/config/', config_api, name='config-api'),
     path('download/<str:st_id>/', download_config_by_st_id, name='download_config_by_st_id'),
-
     # Add other URLs as needed
     path('upload_rate_table/', upload_rate_table, name='upload_rate_table'),
     path('rate_table_list/', rate_table_list, name='rate_table_list'),
     path('download-rate-table/<int:rate_table_id>/', download_rate_table, name='download_rate_table'),
-
     path('api/lastratedate/', lastratedate_api, name='lastratedate_api'),
     path('api/ratesitem/', ratesitem_api, name='ratesitem_api'),
+
 ]
 
 # Serve media files during development

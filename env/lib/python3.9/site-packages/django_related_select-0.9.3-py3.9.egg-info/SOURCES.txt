@@ -1,0 +1,12 @@
+MANIFEST.in
+setup.cfg
+setup.py
+django_related_select.egg-info/PKG-INFO
+django_related_select.egg-info/SOURCES.txt
+django_related_select.egg-info/dependency_links.txt
+django_related_select.egg-info/requires.txt
+django_related_select.egg-info/top_level.txt
+related_select/__init__.py
+related_select/fields.py
+related_select/views.py
+related_select/static/django-related-select.js
