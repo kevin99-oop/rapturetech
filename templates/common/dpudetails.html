@@ -64,84 +64,7 @@
         text-align: center;
     }
 </style>
-<!-- 
-<nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl " id="navbarBlur"
-    data-scroll="false">
-    <div class="container-fluid py-1 px-3">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
-                <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="javascript:;">Home</a>
-                </li>
-                <li class="breadcrumb-item text-sm text-white active" aria-current="page">Dpu Detail</li>
-            </ol>
 
-        </nav>
-        <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
-            <div class="ms-md-auto pe-md-3 d-flex align-items-center">
-               
-            </div>
-            <ul class="navbar-nav  justify-content-end">
-                <li class="nav-item d-flex align-items-center">
-                    <a href="{% url 'logout' %}" class="nav-link text-white font-weight-bold px-0">
-                        <i class="fa fa-sign-out me-sm-1"></i>
-                        <span class="d-sm-inline d-none">Logout</span>
-                    </a>
-                </li>
-                <li class="nav-item d-xl-none ps-3 d-flex align-items-center ">
-                    <a href="javascript:;" class="nav-link text-white p-0" id="iconNavbarSidenav">
-                        <div class="sidenav-toggler-inner">
-                            <i class="sidenav-toggler-line bg-white"></i>
-                            <i class="sidenav-toggler-line bg-white"></i>
-                            <i class="sidenav-toggler-line bg-white"></i>
-                        </div>
-                    </a>
-                </li>
-
-                <li class="nav-item dropdown pe-2 px-3 d-flex align-items-center">
-                    <a href="javascript:;" class="nav-link text-white p-0" id="dropdownMenuButton"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa fa-user cursor-pointer"><span class="mx-2 ">{{user.username}}</span></i> <i class="fa fa-angle-down "></i>
-                    </a>
-                    <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4"
-                        aria-labelledby="dropdownMenuButton">
-                        <li class="mb-2">
-                            <a class="dropdown-item border-radius-md" href="{% url 'profile' %}">
-                                <div class="d-flex py-1">
-                                    <div class="my-auto">
-                                        <i class="fa fa-user cursor-pointer pe-3" class="avatar avatar-sm  me-3 "></i>
-                                    </div>
-                                    <div class="d-flex flex-column justify-content-center">
-                                        <h6 class="text-sm font-weight-normal mb-1">
-                                            <span class="font-weight-bold">Profile</span>
-                                        </h6>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a class="dropdown-item border-radius-md" href="{% url 'change-password'%}">
-                                <div class="d-flex py-1">
-                                    <div class="my-auto">
-                                        <i class="fa fa-key cursor-pointer pe-3" class="avatar avatar-sm  me-3 "></i>
-                                    </div>
-                                    <div class="d-flex flex-column justify-content-center">
-                                        <h6 class="text-sm font-weight-normal mb-1">
-                                            <span class="font-weight-bold">Change Password</span>
-                                        </h6>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-
-
-                </li>
-            </ul>
-            </li>
-            </ul>
-        </div>
-    </div>
-</nav>
-Begin Page Content -->
 <div class="container-fluid mt-5">
 
 
@@ -174,7 +97,7 @@ Begin Page Content -->
                     <ul>
                         <li><strong>Society:</strong> {{ dpu.society }}</li>
                         <li><strong>SID:</strong> {{ dpu.st_id }}</li>
-                        <li><strong>Date:</strong> {{ dpu.date|date:"d-m-Y H:i:s" }}</li>
+                        <li><strong>Dpu Created On:</strong> {{ dpu.date|date:"d-m-Y H:i:s" }}</li>
                         <!-- Add more details as needed -->
                     </ul>
                 </div>
@@ -197,16 +120,15 @@ Begin Page Content -->
                         </tr>
                     </thead>
                     <tbody>
-                        
                         {% for drec in drecs %}
                         <tr class="align-items-center text-align-center rounded">
                             <td>{{ drec.CUST_ID }}</td>
                             {% for customer in customer_list %}
                             {% if customer.cust_id == drec.CUST_ID %}
-                               <td>{{ customer.name }}</td> 
+                                <td>{{ customer.name }}</td> 
                             {% endif %}
-                        {% endfor %}                           
-                         <td>{{ drec.SHIFT }}</td>
+                            {% endfor %}                           
+                            <td>{{ drec.SHIFT }}</td>
                             <td>{{ drec.MType }}</td>
                             <td>{{ drec.FAT }}</td>
                             <td>{{ drec.SNF }}</td>
@@ -217,7 +139,8 @@ Begin Page Content -->
                             <td>{{ drec.Amount }}</td>
                             <td>{{ drec.CAmount }}</td>
                         </tr>
-                        {% endfor %}
+                    {% endfor %}
+                    
                     </tbody>
                 </table>
             </div>

@@ -65,8 +65,10 @@ from django.shortcuts import render
 from .models import DPU, DREC
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.db.models import Count, Sum, Avg
+from django.db.models import Count, Sum, Avg, Max
 from datetime import datetime
+from operator import itemgetter
+from operator import attrgetter
 
 # Common Views
 
@@ -106,88 +108,114 @@ def custom_logout(request):
     logout(request)
 
     # Redirect to the desired page after logout
-    return redirect(reverse('home'))  # Replace 'home' with the name of your home URL pattern
+    return redirect(reverse('home'))  # Replace 'home' with the name of your home URL pattern{    login_url = reverse_lazy('home')}
+from collections import defaultdict
+from django.shortcuts import render
+from django.views import View
+from django.utils import timezone
+from django.db.models import Avg
+from .models import DPU, DREC, CustomerList
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.http import JsonResponse
+from django.urls import reverse_lazy
+from datetime import datetime
+from collections import Counter
 
-class DashboardView(LoginRequiredMixin, TemplateView):
+@method_decorator([login_required, never_cache, ensure_csrf_cookie], name='dispatch')
+class DashboardView(TemplateView):
     template_name = 'example.html'
     login_url = reverse_lazy('home')
+    
+    def get_drec_data(self, user):
+                return DREC.objects.filter(ST_ID__user=user).order_by('-created_at')
 
-    def get(self, request, *args, **kwargs):
-        user = self.request.user
 
-        # Get the active DPU list for the user
-        active_dpu_list = DPU.objects.filter(user=user)
+    def calculate_averages(self, records):
+        total_fat = sum(record.FAT for record in records)
+        total_snf = sum(record.SNF for record in records)
+        total_clr = sum(record.CLR for record in records)
+        total_water = sum(record.WATER for record in records)
+        total_ltr = sum(record.QT for record in records)
+        total_amt = sum(record.Amount for record in records)
 
-        # Fetch DREC data for the user
-        drec_data = DREC.objects.filter(ST_ID__user=user)
+        total_cust_set = {(record.CUST_ID, record.CSR_NO) for record in records}
+        total_cust = len(total_cust_set)
 
-        # Fetch customer_list for the logged-in user
-        customer_list = CustomerList.objects.filter(user=user)
+        avg_fat = round(total_fat / len(records), 2) if len(records) > 0 else 0.0
+        avg_snf = round(total_snf / len(records), 2) if len(records) > 0 else 0.0
+        avg_clr = round(total_clr / len(records), 2) if len(records) > 0 else 0.0
+        avg_water = round(total_water / len(records), 2) if len(records) > 0 else 0.0
 
-        # Calculate summary data with grouped averages and sums for each st_id
-        # Group the data by ST_ID
+        return avg_fat, avg_snf, avg_clr, avg_water, total_ltr, total_amt, total_cust
+
+    def prepare_summary_data(self, drec_data, active_dpu_list):
         grouped_data = defaultdict(list)
+        latest_records = {}
+
         for drec in drec_data:
             key = drec.ST_ID.st_id
             grouped_data[key].append(drec)
 
-        # Calculate averages and sums for each ST_ID
+            # Track the latest record for each ST_ID
+            if key not in latest_records or drec.RecordingDate > latest_records[key].RecordingDate:
+                latest_records[key] = drec
+
         summary_data = []
         for st_id, records in grouped_data.items():
-            total_fat = sum(record.FAT for record in records)
-            total_snf = sum(record.SNF for record in records)
-            total_clr = sum(record.CLR for record in records)
-            total_water = sum(record.WATER for record in records)
-            total_ltr = sum(record.QT for record in records)
-            total_amt = sum(record.Amount for record in records)
+            # Use the latest record from the tracked records
+            latest_record = latest_records.get(st_id)
 
-              # Calculate total_cust for each ST_ID
-            total_cust_set = set()
-            for record in records:
-                total_cust_set.add((record.CUST_ID, record.CSR_NO))
+            if latest_record:
+                avg_fat, avg_snf, avg_clr, avg_water, total_ltr, total_amt, total_cust = self.calculate_averages(records)
 
-            total_cust = len(total_cust_set)
+                summary_data.append({
+                    'ST_ID__st_id': st_id,
+                    'ST_ID__location': latest_record.ST_ID.location,
+                    'ST_ID__society': latest_record.ST_ID.society,
+                    'RecordingDate': latest_record.RecordingDate,
+                    'SHIFT': latest_record.SHIFT,
+                    'avg_fat': avg_fat,
+                    'avg_snf': avg_snf,
+                    'avg_clr': avg_clr,
+                    'avg_water': avg_water,
+                    'total_ltr': total_ltr,
+                    'total_amt': total_amt,
+                    'total_cust': total_cust,
+                    'latest_record': latest_record,
+                })
 
-            # Find the latest record for date and shift
-            latest_record = max(records, key=lambda x: (x.RecordingDate, x.SHIFT))
-            date = latest_record.RecordingDate
-            shift = latest_record.SHIFT
+        # Sort by RecordingDate and SHIFT in descending order
 
-            # Calculate averages
-            avg_fat = total_fat / len(records)
-            avg_snf = total_snf / len(records)
-            avg_clr = total_clr / len(records)
-            avg_water = total_water / len(records)
+        return summary_data
 
-            summary_data.append({
-                'ST_ID__st_id': st_id,
-                'ST_ID__location': latest_record.ST_ID.location,
-                'ST_ID__society': latest_record.ST_ID.society,
-                'RecordingDate': date,
-                'SHIFT': shift,
-                'avg_fat': round(avg_fat, 2),
-                'avg_snf': round(avg_snf, 2),
-                'avg_clr': round(avg_clr, 2),
-                'avg_water': round(avg_water, 2),
-                'total_ltr': total_ltr,
-                'total_amt': total_amt,
-                'total_cust': total_cust,
-            })
+    def get_customer_list(self, user):
+        return CustomerList.objects.filter(user=user)
 
-        # Calculate average FAT, SNF, and CLR from DREC data for the entire user
-        avg_fat = DREC.objects.filter(ST_ID__user=request.user).aggregate(avg_fat=Avg('FAT'))['avg_fat']
-        avg_fat = round(avg_fat, 2) if avg_fat is not None else None
+    def calculate_global_averages(self, user):
+        avg_fat = DREC.objects.filter(ST_ID__user=user).aggregate(avg_fat=Avg('FAT'))['avg_fat']
+        avg_snf = DREC.objects.filter(ST_ID__user=user).aggregate(avg_snf=Avg('SNF'))['avg_snf']
+        avg_clr = DREC.objects.filter(ST_ID__user=user).aggregate(avg_clr=Avg('CLR'))['avg_clr']
 
-        avg_snf = DREC.objects.filter(ST_ID__user=request.user).aggregate(avg_snf=Avg('SNF'))['avg_snf']
-        avg_snf = round(avg_snf, 2) if avg_snf is not None else None
+        return (
+            round(avg_fat, 2) if avg_fat is not None else None,
+            round(avg_snf, 2) if avg_snf is not None else None,
+            round(avg_clr, 2) if avg_clr is not None else None
+        )
 
-        avg_clr = DREC.objects.filter(ST_ID__user=request.user).aggregate(avg_clr=Avg('CLR'))['avg_clr']
-        avg_clr = round(avg_clr, 2) if avg_clr is not None else None
+    def get(self, request, *args, **kwargs):
+        user = self.request.user
+        drec_data = self.get_drec_data(user)
+        active_dpu_list = DPU.objects.filter(user=user)
+        summary_data = self.prepare_summary_data(drec_data, active_dpu_list)
+        customer_list = self.get_customer_list(user)
+        avg_fat, avg_snf, avg_clr = self.calculate_global_averages(user)
+            # Calculate the count of MType 'B' and 'C'
+        mtype_counts = Counter(drec.MType for drec in drec_data)
 
-        # Count total customer lists for the logged-in user
         total_customer_count = CustomerList.objects.filter(user=request.user).count()
-
-        # Count total DPUs for the logged-in user
         total_dpus = DPU.objects.filter(user=request.user).count()
 
         context = {
@@ -202,18 +230,17 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'total_customer_count': total_customer_count,
             'total_dpus': total_dpus,
             'dpu_list': ', '.join(dpu.st_id for dpu in active_dpu_list),
+             'mtype_b_count': mtype_counts['B'],
+            'mtype_c_count': mtype_counts['C'],
+
         }
+
         return render(request, self.template_name, context)
 
 
-def get_data(request):
-    # Simulate fetching updated data from a source
-    updated_data = fetch_updated_data()
-    return JsonResponse({'data': updated_data})
 
-def fetch_updated_data():
-    # Simulate fetching updated data from a source (replace this with your actual data fetching logic)
-    return {'value': 'Updated Value'}
+
+
 
 # User Authentication Views
 class SignUpView(CreateView):
@@ -375,6 +402,8 @@ def dpudetails(request, dpuid):
     }
     return render(request, 'common/dpudetails.html', context)
 
+
+
 def edit_dpu(request, st_id):
     dpu = get_object_or_404(DPU, st_id=st_id)
 
@@ -421,23 +450,16 @@ def upload_customer_csv(request):
 
                 # Fetch the first 10 characters from the top-left cell as st_id
                 st_id = csv_lines[0][:10].strip()
-
-                print(st_id)
-
                 # Fetch the corresponding DPU instance
                 dpu_instance = DPU.objects.get(st_id=st_id)
-                print("429", dpu_instance)
                 # Check if CSV file for the given st_id already exists
                 existing_customer = Customer.objects.filter(user=request.user, st_id=dpu_instance).first()
-                print("432")
                 if existing_customer:
-                    print("in if")
                     # Update the existing CSV file with the new data
                     existing_customer.csv_file = csv_file
                     existing_customer.save()
                     messages.success(request, 'CSV file updated successfully.')
                 else:
-                    print("else")
                     # Create a new Customer instance with the CSV file and associated DPU
                     Customer.objects.create(
                         user=request.user,
@@ -445,10 +467,8 @@ def upload_customer_csv(request):
                         csv_file=csv_file,
                     )
                     messages.success(request, 'CSV file uploaded successfully.')
-                print("448")
                 # Process the CSV content and save data to CustomerList model
                 process_csv_content(request.user, st_id, csv_lines)
-                print("451")
                 # Redirect to customer-list with st_id parameter
                 return redirect('customer-list', st_id=st_id)
 
@@ -476,13 +496,10 @@ def process_csv_content(user, st_id, csv_lines):
     # Skip the header row
     header = csv_lines.pop(0)
     # Get the list of existing cust_id values for the given st_id
-    print("479")
     existing_cust_ids = CustomerList.objects.filter(user=user, st_id=st_id).values_list('cust_id', flat=True)
-    print("481")
     # Iterate through the remaining lines and create, update, or delete CustomerList instances
     for line in csv_lines:
         data = line.split(',')
-        print("485")
         # Check if the line has the expected number of values
         if len(data) != 6:
             # Log or handle the error accordingly
@@ -498,9 +515,7 @@ def process_csv_content(user, st_id, csv_lines):
 
         # Check if CustomerList instance with the same cust_id and st_id exists
         existing_customer = CustomerList.objects.filter(user=user, st_id=st_id, cust_id=cust_id).first()
-        print("501")
         if existing_customer:
-            print("503")
             # Update the existing instance with the new data
             existing_customer.name = name
             existing_customer.mobile = mobile
@@ -520,10 +535,9 @@ def process_csv_content(user, st_id, csv_lines):
                 bank_ac=bank_ac,
                 ifsc=ifsc,
             )
-        print("523")
     # Delete rows that are in the database but not in the CSV file
     CustomerList.objects.filter(user=user, st_id=st_id).exclude(cust_id__in=existing_cust_ids).delete()
-    print("526")
+    
 def customer_list(request, st_id):
     # Fetch the customer list for the given st_id
     customer_list = CustomerList.objects.filter(st_id=st_id)
@@ -558,21 +572,16 @@ def get_cid_range(request):
     try:
         # Fetch all Customer entries for the given dpuid
         customer_entries = get_list_or_404(Customer, st_id=dpuid)
-
         if not customer_entries:
             return JsonResponse({'error': f'No CSV file found for dpuid: {dpuid}'}, status=404)
-
         # Get the latest Customer entry based on id
         latest_customer = max(customer_entries, key=lambda entry: entry.id)
-
         # Retrieve the CSV file path from the latest_customer model
         csv_file_path = latest_customer.csv_file.path
-
         # Read CSV data and calculate start and end range
         with open(csv_file_path, 'r') as file:
             # Skip the header row
             next(file)
-
             reader = csv.DictReader(file)
             cust_ids = [int(row['CUST_ID']) for row in reader]
         # Calculate start and end range
@@ -863,8 +872,6 @@ import logging
 
 # Get an instance of the logger
 logger = logging.getLogger(__name__)
-from django.db.models import Count
-
 from django.http import JsonResponse
 from django.shortcuts import render
 from .models import DPU, DREC, CustomerList
@@ -877,7 +884,8 @@ def shift_report(request):
     locations = DPU.objects.filter(user=request.user).values_list('location', flat=True).distinct()
     dpus = DPU.objects.filter(user=request.user).values_list('st_id', flat=True).distinct()
     societies = DPU.objects.filter(user=request.user).values_list('society', flat=True).distinct()
-    shifts = DREC.objects.filter(ST_ID__user=request.user).values_list('SHIFT', flat=True).distinct()
+    shifts = DREC.objects.filter(ST_ID__user=request.user, SHIFT__in=['M', 'E']).values_list('SHIFT', flat=True).distinct()
+
 
     # Count distinct locations, dpus, and societies
     total_locations = DPU.objects.filter(user=request.user).values('location').distinct().count()
@@ -914,7 +922,8 @@ def shift_report(request):
 
         # Replace the following lines with your actual data retrieval logic
         summary_data = get_summary_data(location, dpu, society, shift, start_date)
-        detail_data = get_detail_data(location, dpu, society, shift, start_date)
+        detail_data = get_detail_data(request, location, dpu, society, shift, start_date)
+
 
         context.update({
             'selected_location': location,
@@ -961,7 +970,7 @@ def get_summary_data(location, dpu, society, shift, start_date):
 
     return summary_data
 
-def get_detail_data(location, dpu, society, shift, start_date):
+def get_detail_data(request, location, dpu, society, shift, start_date):
     # Replace this function with your actual data retrieval logic for detail data
     # Example: Querying detailed data
 
@@ -984,10 +993,14 @@ def get_detail_data(location, dpu, society, shift, start_date):
         'CAmount',
     )
 
-  
+    # Fetch customer names for the given st_id and update detail_data
+    st_id_customer_names = {customer.cust_id: customer.name for customer in CustomerList.objects.filter(user=request.user, st_id=dpu)}
+
+    for record in detail_data:
+        record['CustomerName'] = st_id_customer_names.get(record['CUST_ID'], '')
 
     return detail_data
-    
+
 # ledger code
 from django.shortcuts import render
 from django.db.models import Sum, Avg
@@ -1008,6 +1021,9 @@ def ledger_report(request):
     total_locations = DPU.objects.filter(user=request.user).values('location').distinct().count()
     total_dpus = DPU.objects.filter(user=request.user).count()
     total_societies = DPU.objects.filter(user=request.user).values('society').distinct().count()
+    customer_list = CustomerList.objects.filter(user=request.user)
+
+
     context = {
         'locations': locations,
         'dpus': dpus,
@@ -1016,6 +1032,8 @@ def ledger_report(request):
         'total_locations': total_locations,
         'total_dpus': total_dpus,
         'total_societies': total_societies,
+        'customer_list': customer_list,  # Include customer list in the context
+
     }
 
     if request.method == 'POST':
@@ -1090,11 +1108,16 @@ def get_ledger_summary_data(location, dpu, society, start_id, end_id, start_date
             TotalCAmount=Sum('CAmount'),
             AvgFAT=Avg('FAT'),
             AvgSNF=Avg('SNF'),
+            AvgCLR=Avg('CLR'),
+
         ).order_by('CUST_ID').first()
 
         if summary_data:
             # If summary_data is not None, add the cust_id to the summary_data dictionary
             summary_data['CUST_ID'] = cust_id
+             # Add customer name to the summary_data
+            customer_name = CustomerList.objects.filter(cust_id=cust_id).values_list('name', flat=True).first()
+            summary_data['CustomerName'] = customer_name
 
             # Append the summary_data to the list
             summary_data_list.append(summary_data)
@@ -1124,6 +1147,8 @@ from django.db.models import Count, Avg
 from django.db.models import Count, Avg, Sum
 from django.db.models import Count, Avg, Sum
 
+from django.db.models import F
+
 def get_payment_summary_data(location, dpu, start_date, end_date, start_id, end_id):
     payment_data = DREC.objects.filter(
         ST_ID__location=location,
@@ -1145,8 +1170,17 @@ def get_payment_summary_data(location, dpu, start_date, end_date, start_id, end_
         TotalAmount=Sum('Amount'),
         TotalCAmount=Sum('CAmount'),
         AvgFAT=Avg('FAT'),
-        AvgRATE=Avg('RATE')
+        AvgSNF=Avg('SNF'),
+        AvgCLR=Avg('CLR'),
+        AvgRATE=Avg('RATE'),
+        
     ).order_by('CUST_ID')
+
+    # Iterate through the customer data and add customer name
+    for entry in customer_data:
+        cust_id = entry['CUST_ID']
+        customer_name = CustomerList.objects.filter(cust_id=cust_id).values_list('name', flat=True).first()
+        entry['CustomerName'] = customer_name
 
     payment_summary_data['CustomerData'] = list(customer_data)
 

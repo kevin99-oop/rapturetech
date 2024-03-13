@@ -47,6 +47,7 @@ class DREC(models.Model):
     FlagEdited = models.CharField(max_length=255, default="", blank=True)
     MType = models.CharField(max_length=255,null=True, default=None)
     RecordingDate = models.DateField(null=True, default=None)
+    RecordingTime = models.CharField(max_length=255, default="0000")
     SHIFT = models.CharField(max_length=255,null=True, default=None)
     FAT = models.FloatField(null=True, default=None)
     FAT_UNIT = models.CharField(max_length=255, default="", blank=True)
@@ -65,10 +66,14 @@ class DREC(models.Model):
     CREV = models.IntegerField(null=True, default=None)
     END_TAG = models.CharField(max_length=255, default="", blank=True)
     dpuid = models.CharField(max_length=255, default="", blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
 
     def __str__(self):
         return f"DREC for {self.ST_ID.user.username}'s DPU - {self.ST_ID.st_id}"
-    
+    class Meta:
+        ordering = ['-created_at']
+
         
     def save(self, *args, **kwargs):
             # Check the status of the associated DPU

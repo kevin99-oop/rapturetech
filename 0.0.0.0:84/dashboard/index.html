@@ -1,0 +1,2451 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="apple-touch-icon" sizes="76x76" href="/static/assets/img/rapturetech_logo.jpeg">
+  <link rel="icon" type="image/png" href="/static/assets/img/rapturetech_logo.jpeg">
+  <title>
+    RaptureTech Private Limited
+  </title>
+  <!-- plugins:css -->
+  <link rel="stylesheet" href="/static/assets/new/vendors/feather/feather.css">
+  <link rel="stylesheet" href="/static/assets/new/vendors/mdi/css/materialdesignicons.min.css">
+  <link rel="stylesheet" href="/static/assets/new/vendors/ti-icons/css/themify-icons.css">
+  <link rel="stylesheet" href="/static/assets/new/vendors/typicons/typicons.css">
+  <link rel="stylesheet" href="/static/assets/new/vendors/simple-line-icons/css/simple-line-icons.css">
+  <link rel="stylesheet" href="/static/assets/new/vendors/css/vendor.bundle.base.css">
+  <!-- endinject -->
+  <!-- Plugin css for this page -->
+  <link rel="stylesheet" href="/static/assets/new/js/select.dataTables.min.css">
+  <link rel="stylesheet" href="/static/assets/new/css/maps/vertical-layout-light/style.css.map">
+  <!-- End plugin css for this page -->
+  <!-- inject:css -->
+  <link rel="stylesheet" href="/static/assets/new/css/vertical-layout-light/style.css">
+  <!-- endinject -->
+
+  <link rel="stylesheet" href="https://cdn.datatables.net/2.0.1/css/dataTables.bootstrap5.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://cdn.datatables.net/2.0.1/js/dataTables.js"></script>
+  <script src="https://cdn.datatables.net/2.0.1/js/dataTables.bootstrap4.js"></script>
+
+</head>
+<style>
+  .navbar .navbar-brand-wrapper .navbar-brand img {
+    width: 120%!important;
+    height: auto !important;
+  }
+
+  .table-title {
+    padding-bottom: 1px;
+    background: #002d86;
+    color: #fff !important;
+    padding: 16px 30px;
+    margin: -20px -25px 10px;
+    border-radius: 3px 3px 0 0;
+  }
+  /* Add a class to the tooltip container for styling */
+  .tooltip-container {
+    z-index: 1051; /* Set a higher z-index */
+}
+.tooltip .tooltip-inner {
+  position:absolute;
+  margin-top:30%;
+  
+}
+/* Adjust the tooltip arrow for better visibility */
+.tooltip.bs-tooltip-auto[x-placement^="bottom"] .arrow::before,
+.tooltip.bs-tooltip-bottom .arrow::before {
+    border-bottom-color: #343a40; /* Tooltip arrow color */
+}/* Adjust the tooltip arrow for better visibility */
+.tooltip-inner {
+    background-color: #343a40; /* Tooltip background color */
+    color: #ffffff; /* Tooltip text color */
+}
+
+.tooltip.bs-tooltip-auto[x-placement^="bottom"] .arrow::before,
+.tooltip.bs-tooltip-bottom .arrow::before {
+    border-bottom-color: #343a40; /* Tooltip arrow color */
+}
+.main-panel{
+  background-color: #f3f5f7;
+}
+</style>
+
+<body>
+
+
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex align-items-top flex-row rounded">
+      <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
+        <div class="me-3">
+          <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-bs-toggle="minimize">
+            <span class="icon-menu"></span>
+          </button>
+        </div>
+        <div>
+          <a class="navbar-brand brand-logo" href="/dashboard/">
+            <img src="/static/assets/img/rapturetech_logo-nobg.png" alt="logo" />
+          </a>
+          <a class="navbar-brand brand-logo-mini" href="/dashboard/">
+            <img src="/static/assets/img/rapturetech_logo-nobg.png" alt="logo" />
+          </a>
+        </div>
+      </div>
+      <div class="navbar-menu-wrapper d-flex align-items-top">
+        <ul class="navbar-nav">
+          <li class="nav-item font-weight-semibold d-none d-lg-block ms-0">
+            <h3 class="welcome" id="greeting">Greetings, </h3>
+            <h3 class="welcome-sub-text "> <span class="text-danger fw-bold">kevin</span></h3>
+          </li>
+        </ul>
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item d-none d-lg-block">
+            TOTAL DPU:- <code class="fw-bold" data-bs-toggle="tooltip" data-bs-placement="bottom" title="DAIRY00012, DAIRY00002, KEVIN00012">3</code>
+        </li>
+          <li class="nav-item dropdown d-none d-lg-block">
+            Time:- <span id="clock" class="fw-bold"></span>
+            
+          </li>
+          <li class="nav-item d-none d-lg-block">
+            <div id="datepicker-popup" class="input-group date datepicker navbar-date-picker">
+              <span class="input-group-addon input-group-prepend border-right">
+                <span class="icon-calendar input-group-text calendar-icon"></span>
+              </span>
+              <input type="text" class="form-control fw-bold" disabled>
+            </div>
+          </li>
+         
+        
+         
+          <li class="nav-item dropdown d-none d-lg-block user-dropdown">
+            <a class="nav-link" id="UserDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="mdi mdi-account cursor-pointer"></i><i class="mdi mdi-chevron-down"></i>
+              <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown">
+                <div class="dropdown-header text-">
+                  <p class="mb-1  font-weight-semibold">Username:- kevin</p>
+                </div>
+                <a class="dropdown-item" href="/profile/">
+                  <i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2"></i> My
+                  Profile</a>
+
+                <a class="dropdown-item" href="/logout/"><i
+                    class="dropdown-item-icon mdi mdi-power text-primary me-2"></i>Sign Out</a>
+              </div>
+          </li>
+        </ul>
+        <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button"
+          data-bs-toggle="offcanvas">
+          <span class="mdi mdi-menu"></span>
+        </button>
+      </div>
+    </nav>
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper rounded">
+      <!-- partial:partials/_sidebar.html -->
+      <nav class="sidebar sidebar-offcanvas rounded " id="sidebar">
+        <ul class="nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard/">
+              <i class="mdi mdi-view-dashboard mdi-grid-large menu-icon"></i>
+              <span class="menu-title">Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item nav-category">Reports</li>
+          <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false"
+              aria-controls="ui-basic">
+              <i class="menu-icon mdi mdi-file-check"></i>
+              <span class="menu-title">Reports</span>
+              <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="ui-basic">
+              <ul class="nav flex-column sub-menu">
+                <li class="nav-item"> <a class="nav-link" href="/shift_report/">Shift Report</a></li>
+                <li class="nav-item"> <a class="nav-link" href="/ledger/">Ledger</a></li>
+              </ul>
+            </div>
+          </li>
+          <li class="nav-item nav-category">Service</li>
+          <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#form-elements" aria-expanded="false"
+              aria-controls="form-elements">
+              <i class="menu-icon mdi mdi mdi-memory"></i>
+              <span class="menu-title">DPU</span>
+              <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="form-elements">
+              <ul class="nav flex-column sub-menu">
+                <li class="nav-item"><a class="nav-link" href="/add_dpu/">Add DPU</a></li>
+                <li class="nav-item"><a class="nav-link" href="/active_dpu/">DPU List</a></li>
+
+              </ul>
+            </div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#charts" aria-expanded="false" aria-controls="charts">
+              <i class="menu-icon mdi mdi-chart-line"></i>
+              <span class="menu-title">Rate Table</span>
+              <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="charts">
+              <ul class="nav flex-column sub-menu">
+                <li class="nav-item"> <a class="nav-link" href="/upload_rate_table/">Rate Table Upload</a>
+                </li>
+                <li class="nav-item"> <a class="nav-link" href="/rate_table_list/">Rate Table List</a></li>
+              </ul>
+            </div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#tables" aria-expanded="false" aria-controls="tables">
+              <i class="menu-icon mdi mdi-table"></i>
+              <span class="menu-title">Customer</span>
+              <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="tables">
+              <ul class="nav flex-column sub-menu">
+                <li class="nav-item"> <a class="nav-link" href="/upload_customer_csv/">Add Customer</a></li>
+                <li class="nav-item"> <a class="nav-link" href="/active_dpu/">Customer List</a></li>
+
+              </ul>
+            </div>
+          </li>
+
+
+          <li class="nav-item nav-category">help</li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <i class="menu-icon mdi mdi-file-document"></i>
+              <span class="menu-title">Documentation</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <!-- partial -->
+      <div class="main-panel rounded">
+        <main class="main-content position-relative border-radius-lg  rounded ">
+
+
+
+          
+<!-- Add these CDN links to your base HTML file -->
+
+<div class="container-fluid py-4">
+    
+    <div class="row">
+        
+        <div class="col-xl-2 col-sm-2 col-md-2 mb-xl-0 mb-4">
+            <div class="card">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-uppercase font-weight-bold">Avg Fat</p>
+
+                                <p class="mb-0">
+                                    <span class="text-success text-lg font-weight-bolder fw-bold">
+                                        21.41</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+
+                            <div class="icon icon-shape bg-gradient-primary shadow-primary text-center rounded-circle">
+                                <i class="fa fa-tint text-lg opacity-10" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-sm-2 col-md-2 mb-xl-0 mb-4">
+            <div class="card">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-uppercase font-weight-bold">Avg. SNF</p>
+
+                                <p class="mb-0">
+                                    <span class="text-success text-lg font-weight-bolder fw-bold">1.37</span>
+
+                                </p>
+
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-danger shadow-danger text-center rounded-circle">
+                                <i class="ni ni-world text-lg opacity-10" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <div class="col-xl-2 col-sm-2 col-md-2 mb-xl-0 mb-4">
+            <div class="card">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-uppercase font-weight-bold">Avg. CLR</p>
+
+                                <p class="mb-0">
+                                    <span class="text-success text-lg font-weight-bolder fw-bold">1.68</span>
+
+                                </p>
+
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-success shadow-success text-center rounded-circle">
+                                <i class="ni ni-paper-diploma text-lg opacity-10" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+            <div class="col-xl-2 col-sm-2 col-md-2 mb-xl-0 mb-4">
+            <div class="card">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-uppercase font-weight-bold">Total Cust</p>
+
+                                <p class="mb-0">
+
+                                    <span class="text-success text-lg font-weight-bolder fw-bold">   82                                    </span>
+                                </p>
+
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-warning shadow-warning text-center rounded-circle">
+                                <i class="fa fa-users text-lg opacity-10" aria-hidden="true"></i>
+
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+            </div>
+         
+            </div>
+        
+    </div>
+
+
+    <!-- Total Summary Record -->
+<div class="row mt-4" id="divID">
+    <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
+        <div class="card">
+            <div class="card-header text-align-center text-center pb-0 p-3">
+                <div class="d-flex justify-content-between align-items-center text-center text-align-center">
+                    <h6 class="mb-2 text-center align-items-center text-align-center">Total Summary Record</h6>
+                </div>
+            </div>
+            <div class="table-responsive card-body">
+                <table id="summary_table" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100">
+                    <thead class=" text-white text-center rounded table-title">
+                        <tr>
+                            <th>Station ID</th>
+                            <th>Location</th>
+                            <th>Society</th>
+                            <th>Date</th>
+                            <th>Shift</th>
+                            <th>FAT Avg</th>
+                            <th>SNF Avg</th>
+                            <th>CLR Avg</th>
+                            <th>Water Avg</th>
+                            <th>Total Ltr.</th>
+                            <th>Total Amt.</th>
+                            <th>Total Cust.</th>
+                        </tr>
+                    </thead>
+                    <tbody class="align-items-center text-center"  >
+                        
+                        <tr class="align-items-center text-align-center">
+                            <td>DAIRY00012</td>
+                            <td>ahmedabad</td>
+                            <td>kk</td>
+                            <td>05-03-2024</td>
+                            <td>E</td>
+                            <td>1.17</td>
+                            <td>1.17</td>
+                            <td>1.17</td>
+                            <td>1.17</td>
+                            <td>7.0</td>
+                            <td>17.0</td>
+                            <td>6</td>
+                        </tr>
+                    
+                        <tr class="align-items-center text-align-center">
+                            <td>DAIRY00002</td>
+                            <td>ahmedabad</td>
+                            <td>kb</td>
+                            <td>06-03-2024</td>
+                            <td>M</td>
+                            <td>2.37</td>
+                            <td>1.9</td>
+                            <td>2.93</td>
+                            <td>1.2</td>
+                            <td>22.0</td>
+                            <td>13.0</td>
+                            <td>3</td>
+                        </tr>
+                    
+                        <tr class="align-items-center text-align-center">
+                            <td>KEVIN00012</td>
+                            <td>baroda new</td>
+                            <td>SAURASHT</td>
+                            <td>05-03-2024</td>
+                            <td>M</td>
+                            <td>200.0</td>
+                            <td>1.0</td>
+                            <td>1.0</td>
+                            <td>1.0</td>
+                            <td>1.0</td>
+                            <td>1.0</td>
+                            <td>1</td>
+                        </tr>
+                    
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+              
+
+  <!-- Add these links in your head section -->
+  
+<div class="row mt-4">
+    <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
+        <div class="card">
+            <div class="card-header pb-0 p-3">
+                <div class="d-flex justify-content-between">
+                    <h6 class="mb-2">Live Records</h6>
+                </div>
+            </div>
+            <div class="table-responsive card-body pagination" >
+                <table id="live_table" class="table align-items-center table table-striped table-hover rounded table-responsive w-100 " >
+                    <thead class="table-title text-white text-center rounded">
+                        <tr>
+                            <th>St ID</th>
+                            <th>Root</th>
+                            <th>Society</th>
+                            <th>Date</th>
+                            <th>Shift</th>
+                            <th>Cust. ID</th>
+                            <th>Name</th>
+                            <th>FAT</th>
+                            <th>SNF</th>
+                            <th>CLR</th>
+                            <th>Water</th>
+                            <th>Ltr. Qty </th>
+                            <th>Amt</th>
+                            <th>Cum. Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center" id="tableBody">
+                        
+                            
+                                <tr>
+                                    <td>DAIRY00012</td>
+                                    <td>ahmedabad</td>
+                                    <td>kk</td>
+                                    <td>02-03-2024</td>
+                                    <td>M</td>
+                                    <td>1</td>
+                                    <td>
+                                        
+                                        
+                                            kevin new
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                                                       
+                                    </td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>11.0</td>
+                                    <td>1.0</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td>DAIRY00012</td>
+                                    <td>ahmedabad</td>
+                                    <td>kk</td>
+                                    <td>02-03-2024</td>
+                                    <td>E</td>
+                                    <td>2</td>
+                                    <td>
+                                        
+                                        
+                                    
+                                        
+                                            kevin 2
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                                                       
+                                    </td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td>DAIRY00012</td>
+                                    <td>ahmedabad</td>
+                                    <td>kk</td>
+                                    <td>02-03-2024</td>
+                                    <td>M</td>
+                                    <td>3</td>
+                                    <td>
+                                        
+                                        
+                                    
+                                        
+                                    
+                                        
+                                            Sanjay 3
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                                                       
+                                    </td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td>DAIRY00012</td>
+                                    <td>ahmedabad</td>
+                                    <td>kk</td>
+                                    <td>02-03-2024</td>
+                                    <td>E</td>
+                                    <td>1</td>
+                                    <td>
+                                        
+                                        
+                                            kevin new
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                                                       
+                                    </td>
+                                    <td>2.0</td>
+                                    <td>2.0</td>
+                                    <td>2.0</td>
+                                    <td>2.0</td>
+                                    <td>2.0</td>
+                                    <td>2.0</td>
+                                    <td>2.0</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td>DAIRY00012</td>
+                                    <td>ahmedabad</td>
+                                    <td>kk</td>
+                                    <td>28-02-2024</td>
+                                    <td>M</td>
+                                    <td>10</td>
+                                    <td>
+                                        
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                            PARAS 10
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                                                       
+                                    </td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td>DAIRY00012</td>
+                                    <td>ahmedabad</td>
+                                    <td>kk</td>
+                                    <td>05-03-2024</td>
+                                    <td>E</td>
+                                    <td>9</td>
+                                    <td>
+                                        
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                            PARAS 9
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                                                       
+                                    </td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                </tr>
+                            
+                        
+                            
+                                <tr>
+                                    <td>DAIRY00002</td>
+                                    <td>ahmedabad</td>
+                                    <td>kb</td>
+                                    <td>04-03-2024</td>
+                                    <td>M</td>
+                                    <td>7</td>
+                                    <td>
+                                        
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                            PARAS 7
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                                                       
+                                    </td>
+                                    <td>5.1</td>
+                                    <td>3.7</td>
+                                    <td>6.8</td>
+                                    <td>1.6</td>
+                                    <td>20.0</td>
+                                    <td>11.0</td>
+                                    <td>1.0</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td>DAIRY00002</td>
+                                    <td>ahmedabad</td>
+                                    <td>kb</td>
+                                    <td>05-03-2024</td>
+                                    <td>E</td>
+                                    <td>1</td>
+                                    <td>
+                                        
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                            NewCUSt
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                                                       
+                                    </td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                </tr>
+                            
+                                <tr>
+                                    <td>DAIRY00002</td>
+                                    <td>ahmedabad</td>
+                                    <td>kb</td>
+                                    <td>06-03-2024</td>
+                                    <td>M</td>
+                                    <td>10</td>
+                                    <td>
+                                        
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                            PARAS 10
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                                                       
+                                    </td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                </tr>
+                            
+                        
+                            
+                                <tr>
+                                    <td>KEVIN00012</td>
+                                    <td>baroda new</td>
+                                    <td>SAURASHT</td>
+                                    <td>05-03-2024</td>
+                                    <td>M</td>
+                                    <td>1</td>
+                                    <td>
+                                        
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                                                       
+                                    </td>
+                                    <td>200.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                    <td>1.0</td>
+                                </tr>
+                            
+                        
+                    </tbody>
+                </table>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</div>
+<script>
+
+</script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+
+<script>
+var lastTimestamp = null;
+
+function refreshLiveTable() {
+    // Make an AJAX request to get the latest data and timestamp
+    $.ajax({
+        url: '/get_data/',
+        method: 'GET',
+        dataType: 'json',
+        success: function (response) {
+            var latestTimestamp = response.timestamp;
+
+            // Compare timestamps
+            if (lastTimestamp !== null && lastTimestamp !== latestTimestamp) {
+                // Update the table only if the timestamps are different
+                $('#tableBody').load(location.href + ' #tableBody > *');
+            }
+
+            // Update the last timestamp
+            lastTimestamp = latestTimestamp;
+        },
+        error: function (error) {
+            console.error('Error fetching latest data:', error);
+        }
+    });
+}
+
+// Auto-refresh the div every 5 seconds (5000 milliseconds)
+setInterval(refreshLiveTable, 5000);
+</script>
+
+
+
+
+
+
+        </main>
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+       
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+  <script>
+    function getGreeting() {
+      const currentTime = new Date();
+      const hours = currentTime.getHours();
+
+      if (hours >= 5 && hours < 12) {
+        return "Good Morning";
+      } else if (hours >= 12 && hours < 18) {
+        return "Good Afternoon";
+      } else {
+        return "Good Evening";
+      }
+    }
+
+    const greetingElement = document.getElementById("greeting");
+    greetingElement.innerText = getGreeting();
+  </script>
+  <script>
+    var span = document.getElementById('clock');
+
+    function time() {
+      var d = new Date();
+      var s = d.getSeconds();
+      var m = d.getMinutes();
+      var h = d.getHours();
+      span.textContent =
+        ("0" + h).substr(-2) + ":" + ("0" + m).substr(-2) + ":" + ("0" + s).substr(-2);
+    }
+
+    setInterval(time, 1);
+  </script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl, { container: 'body' });
+      });
+  });
+</script>
+  <!-- plugins:js -->
+  <script src="/static/assets/new/vendors/js/vendor.bundle.base.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page -->
+  <script src="/static/assets/new/vendors/chart.js/Chart.min.js"></script>
+  <script src="/static/assets/new/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
+  <script src="/static/assets/new/vendors/progressbar.js/progressbar.min.js"></script>
+
+  <!-- End plugin js for this page -->
+  <!-- inject:js -->
+  <script src="/static/assets/new/js/off-canvas.js"></script>
+  <script src="/static/assets/new/js/hoverable-collapse.js"></script>
+  <script src="/static/assets/new/js/template.js"></script>
+  <script src="/static/assets/new/js/settings.js"></script>
+  <script src="/static/assets/new/js/todolist.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="/static/assets/new/js/dashboard.js"></script>
+  <script src="/static/assets/new/js/Chart.roundedBarCharts.js"></script>
+  <!-- End custom js for this page-->
+ 
+</body>
+
+</html>

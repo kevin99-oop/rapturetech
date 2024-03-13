@@ -15,10 +15,15 @@ admin.site.register(DPU)
 # Admin for DREC model
 @admin.register(DREC)
 class DRECAdmin(admin.ModelAdmin):
-    # Define the fields to be displayed in the DREC admin interface
-    list_display = ('REC_TYPE', 'SLIP_TYPE', 'ST_ID', 'CUST_ID', 'RecordingDate', 'SHIFT', 'QT', 'Amount', 'CAmount', 'dpuid')
-    search_fields = ['ST_ID', 'CUST_ID']  # Add fields you want to search on
-
+  # Display all fields in the admin interface
+    list_display = (
+        'REC_TYPE', 'SLIP_TYPE', 'ST_ID', 'CUST_ID', 'TotalFileRecord', 'FlagEdited',
+        'MType', 'RecordingDate', 'RecordingTime', 'SHIFT', 'FAT', 'FAT_UNIT',
+        'SNF', 'SNF_UNIT', 'CLR', 'CLR_UNIT', 'WATER', 'WATER_UNIT', 'QT',
+        'QT_UNIT', 'RATE', 'Amount', 'CAmount', 'CSR_NO', 'CREV', 'END_TAG',
+        'dpuid', 'created_at'
+    )
+    search_fields = ['ST_ID__st_id', 'CUST_ID']  # Add fields you want to search on
 # Admin for Customer model
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
