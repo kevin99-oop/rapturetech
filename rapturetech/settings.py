@@ -38,7 +38,7 @@ DEFAULT_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'templates',
-     'related_select',
+    'related_select',
     'apps',
     'rest_framework',
     'rest_framework.authtoken', 
@@ -182,8 +182,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    
-    # Add any additional backends as needed
+    #'apps.common.auth_backends.CustomAuthenticationBackend',  # Adjust this import path as per your project structure
+
 ]
 
 # File storage settings

@@ -163,9 +163,9 @@ Begin Page Content -->
                     </div>
                 </div>
 
-                <table id="customerTable" class="table table-striped table-hover rounded table-responsive">
+                <table id="customerTable" class="table table-striped table-hover rounded table-responsive text-center text-align-center">
                     <thead>
-                        <tr>
+                        <tr class="align-items-center text-align-center">
                             <th>CUST_ID</th>
                             <th>NAME</th>
                             <th>MOBILE</th>
@@ -174,10 +174,10 @@ Begin Page Content -->
                             <th>IFSC</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="fw-bold">
                         {% for customer in customer_list %}
-                            <tr>
-                                <td>{{ customer.cust_id }}</td>
+                        <tr class="align-items-center text-align-center rounded fw-bold">                               
+                             <td>{{ customer.cust_id }}</td>
                                 <td>{{ customer.name }}</td>
                                 <td>{{ customer.mobile }}</td>
                                 <td>{{ customer.adhaar }}</td>

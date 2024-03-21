@@ -1,7 +1,9 @@
-{% extends 'base.html' %}
+{% extends 'common/super_admin/super_admin_base.html' %}
 {% load static %}
+
+{% load crispy_forms_tags %}
+
 {% block content %}
-<!-- Add these CDN links to your base HTML file -->
 <head>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
@@ -348,7 +350,7 @@
         <script>
         function refreshTable() {
             $.ajax({
-                url: '{% url "dashboard" %}',
+                url: '{% url "user_dashboard" %}',
                 type: 'GET',
                 dataType: 'html',
                 success: function (data) {
@@ -369,4 +371,5 @@
 
 </div>
 
-{% endblock content %}
+
+{% endblock content %}Superadmin

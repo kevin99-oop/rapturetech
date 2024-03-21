@@ -1,0 +1,55 @@
+{% extends 'common/user/user_base.html' %}
+{% load static %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="container-fluid mt-5">
+    <!-- Page Heading -->
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Main Content Here -->
+    <div class=" ">
+        <div class="row ">
+            <div class="col-lg-3 my-5">
+            </div>
+            <div class="col-lg-9 my-5">
+                <div class="card o-hidden border-0 shadow-lg my-5 col-lg-7 mt-5">
+                    <div class="card-body">
+                        {% if dpu %}
+                        <h4>Profile Information of {{dpu.st_id}}</h4>
+                        <p class="card-description fw-bold">
+                            <strong>ST ID:- <code class="fw-bold">{{dpu.st_id}}</code> </strong>
+                        </p>
+
+                        <p class="card-description fw-bold">
+                           <strong> Root:- <code class="fw-bold">{{dpu.location}}</code></strong>
+                        </p>
+                        <p class="card-description fw-bold">
+                            <strong>Society:- <code class="fw-bold">{{ dpu.society }}</code></strong>
+                        </p>
+                        <p class="card-description fw-bold">
+                            <strong>Mobile Number:-<code class="fw-bold"> {{dpu.mobile_number}} </code></strong>
+                        </p>
+                        <p class="card-description fw-bold">
+                            <strong>Owner:- <code class="fw-bold">{{dpu.owner}} </code></strong>
+                        </p>
+                        <p class="card-description fw-bold">
+                            <strong>Created On:-<code class="fw-bold">{{dpu.date}}</code></strong> </p>
+                    </div>
+                    {% else %}
+                    <p>No DPU associated with this user.</p>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.container-fluid -->
+</div>
+{% endblock content %}

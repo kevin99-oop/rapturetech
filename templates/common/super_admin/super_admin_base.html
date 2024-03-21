@@ -123,10 +123,10 @@
           </button>
         </div>
         <div>
-          <a class="navbar-brand brand-logo" href="{% url 'dashboard' %}">
+          <a class="navbar-brand brand-logo" href="{% url 'user_dashboard' %}">
             <img src="{% static 'assets/img/rapturetech_logo-nobg.png'%}" alt="logo" />
           </a>
-          <a class="navbar-brand brand-logo-mini" href="{% url 'dashboard' %}">
+          <a class="navbar-brand brand-logo-mini" href="{% url 'user_dashboard' %}">
             <img src="{% static 'assets/img/rapturetech_logo-nobg.png'%}" alt="logo" />
           </a>
         </div>
@@ -139,15 +139,10 @@
           </li>
         </ul>
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item d-none d-lg-block">
-            TOTAL DPU:- <code class="fw-bold" data-bs-toggle="tooltip" data-bs-placement="bottom"
-              title="{{ dpu_list }}">{{ total_dpus }}</code>
-          </li>
           <li class="nav-item dropdown d-none d-lg-block">
             Time:- <span id="clock" class="fw-bold text-danger"></span>
 
           </li>
-
           <li class="nav-item d-none d-lg-block">
             <div class="input-group date datepicker navbar-date-picker">
               <span class="input-group-addon input-group-prepend border-right">
@@ -221,7 +216,7 @@
       <nav class="sidebar sidebar-offcanvas rounded " id="sidebar">
         <ul class="nav">
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'dashboard' %}">
+            <a class="nav-link" href="{% url 'user_dashboard' %}">
               <i class="mdi mdi-view-dashboard mdi-grid-large menu-icon"></i>
               <span class="menu-title">Dashboard</span>
             </a>
@@ -302,7 +297,8 @@
 
 
 
-          {% block content %} {% endblock content %}
+          {% block content %} 
+          {% endblock content %}
 
 
 
