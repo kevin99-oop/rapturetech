@@ -172,7 +172,7 @@
                                         <tbody class="align-items-center text-center fw-bold" >
                                             {% for record in summary_data %}
                                             <tr class="align-items-center text-align-center">
-                                                <td><a href="{% url 'user_dpudetails' st_id=record.ST_ID__st_id  %}" class="text-dark">{{ record.ST_ID__st_id  }}</a></td>
+                                                <td><a href="{% url 'dpudetails' st_id=record.ST_ID__st_id  %}" class="text-dark">{{ record.ST_ID__st_id  }}</a></td>
                                                 <td>{{ record.ST_ID__location }}</td>
                                                 <td>{{ record.ST_ID__society }}</td>
                                                 <td>{{ record.RecordingDate|date:"d-m-Y" }}</td>

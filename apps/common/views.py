@@ -21,6 +21,7 @@ from django.db import connection
 from django.db.models.functions import Round
 import string
 import random
+from django.contrib.auth.views import LoginView
 
 
 # Django Imports
@@ -69,29 +70,40 @@ class HomeView(TemplateView):
         context['book_list'] = self.request.user
         return context
 
-class CustomLoginView(FormView):
+
+class CustomLoginView(LoginView):
     template_name = 'common/login.html'
-    form_class = CustomLoginForm
-    redirect_authenticated_user = True
-   
+
     def form_invalid(self, form):
-        messages.error(self.request, "Invalid username or password.")
-        return super().form_invalid(form)
+        response = super().form_invalid(form)
+        messages.error(self.request, 'Invalid username or password. Please try again.')
+        return response
 
     def form_valid(self, form):
-        user = form.get_user()
+        # Customize this function if needed (e.g., redirecting to a different page on successful login)
+        response = super().form_valid(form)
+        
+        return response
 
-        if user:
-            login(self.request, user)
 
-            if user.is_superuser:
-                return redirect('super_dashboard')
-            elif user.is_staff:
-                return redirect('dashboard')
-            else:
-                return redirect('user_dashboard')
-
-        return super().form_invalid(form)
+def custom_login(request):
+    template_name = 'common/login.html'
+    
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('dashboard')  # Redirect to the dashboard after successful login
+        else:
+            # Handle invalid login credentials
+            # You can add a message here if needed
+            messages.error(request, "Invalid User name or Password")
+            return render(request, template_name)  # You can render the template again or redirect to the same login page
+    else:
+        return render(request, template_name)   
 
 
 
@@ -108,10 +120,11 @@ def super_dashboard(request):
     return render(request, 'common/super_admin/super_dashboard.html')
 
 #This dashboard is for Mandli Main who manage all the st_id and all 
-@method_decorator([login_required, ensure_csrf_cookie, staff_member_required], name='dispatch')
+@method_decorator([login_required, ensure_csrf_cookie], name='dispatch')
 class DashboardView(TemplateView):
     template_name = 'example.html'
-    login_url = reverse_lazy('home')
+    print("125")
+    # login_url = reverse_lazy('home')
     
     def get_drec_data(self, user):
                 return DREC.objects.filter(ST_ID__user=user).order_by('-created_at')
@@ -204,9 +217,9 @@ class DashboardView(TemplateView):
         user = self.request.user
         drec_data = self.get_drec_data(user)
       # Check if the user is not staff or super admin
-        if not user.is_staff and not user.is_superuser:
-            messages.error(request, "You are not authorized to access this page.")
-            return redirect('home')  # Assuming 'home' is the URL name for the homepage
+        # if not user.is_staff and not user.is_superuser:
+        #     messages.error(request, "You are not authorized to access this page.")
+        #     return redirect('home')  # Assuming 'home' is the URL name for the homepage
 
         active_dpu_list = DPU.objects.filter(user=user)
         summary_data = self.prepare_summary_data(drec_data, active_dpu_list)
@@ -239,11 +252,14 @@ class DashboardView(TemplateView):
             'recording_dates': recording_dates,
             'top_10_latest_records': top_10_latest_records,
         }
-                # Redirect non-staff users to the home page
-        if not user.is_staff:
-            return redirect('home')
-      
+        # Redirect non-staff users to the home page
+        # if not user.is_staff:
+        #     return redirect('home')
+        print("Dashboard")      
         return render(request, self.template_name, context)
+
+
+
 # #St_id User Mobile login User
 # @login_required(login_url='/custom-login/')  # Specify a custom login URL
 # def user_dashboard(request):
@@ -455,6 +471,9 @@ def add_dpu(request):
             # Redirect to the user's dashboard or any other page
             return redirect('active_dpu')
     else:
+        if not request.user.is_staff and not request.user.is_superuser:
+            messages.error(request, 'You are not authorised to add DPU')
+            return redirect("dashboard")
         form = DPUForm()
     return render(request, 'common/add_dpu.html', {'form': form})
 
@@ -465,7 +484,7 @@ def active_dpu(request):
     # for Staff user    
     elif request.user.is_staff and not request.user.is_superuser:   
         active_dpu_list = DPU.objects.filter(user=request.user)
-    # for no staff no super user (Normal user)  
+    # for no staff no super user (Normal)  
     elif not request.user.is_staff and not request.user.is_superuser:
         user_id = request.user.id
         active_dpu_list = DPU.objects.filter(dpu_user=user_id)
@@ -1035,17 +1054,38 @@ def ratesitem_api(request):
 @login_required
 def shift_report(request):
     # Fetch dynamic values for dropdowns from the database
-    locations = DPU.objects.filter(user=request.user).values_list('location', flat=True).distinct()
-    dpus = DPU.objects.filter(user=request.user).values_list('st_id', flat=True).distinct()
-    societies = DPU.objects.filter(user=request.user).values_list('society', flat=True).distinct()
-    shifts = DREC.objects.filter(ST_ID__user=request.user, SHIFT__in=['M', 'E']).values_list('SHIFT', flat=True).distinct()
+
+    # staff and super user
+    if request.user.is_staff or request.user.is_superuser:
+        locations = DPU.objects.filter(user=request.user).values_list('location', flat=True).distinct()
+        dpus = DPU.objects.filter(user=request.user).values_list('st_id', flat=True).distinct()
+        societies = DPU.objects.filter(user=request.user).values_list('society', flat=True).distinct()
+        shifts = DREC.objects.filter(ST_ID__user=request.user, SHIFT__in=['M', 'E']).values_list('SHIFT', flat=True).distinct()
 
 
-    # Count distinct locations, dpus, and societies
-    total_locations = DPU.objects.filter(user=request.user).values('location').distinct().count()
-    total_dpus = DPU.objects.filter(user=request.user).count()
-    total_societies = DPU.objects.filter(user=request.user).values('society').distinct().count()
-    customer_list = CustomerList.objects.filter(user=request.user)
+        # Count distinct locations, dpus, and societies
+        total_locations = DPU.objects.filter(user=request.user).values('location').distinct().count()
+        total_dpus = DPU.objects.filter(user=request.user).count()
+        total_societies = DPU.objects.filter(user=request.user).values('society').distinct().count()
+        customer_list = CustomerList.objects.filter(user=request.user)
+
+    else:
+        # normal user
+        print("before if else")
+        locations = DPU.objects.filter(dpu_user=request.user.id).values_list('location', flat=True).distinct()
+        dpus = DPU.objects.filter(dpu_user=request.user.id).values_list('st_id', flat=True).distinct()
+        societies = DPU.objects.filter(dpu_user=request.user.id).values_list('society', flat=True).distinct()
+        shifts = DREC.objects.filter(ST_ID__dpu_user=request.user.id, SHIFT__in=['M', 'E']).values_list('SHIFT', flat=True).distinct()
+
+        print(locations, dpus, societies, shifts)
+
+        # Count distinct locations, dpus, and societies
+        total_locations = DPU.objects.filter(user=request.user).values('location').distinct().count()
+        total_dpus = DPU.objects.filter(user=request.user).count()
+        total_societies = DPU.objects.filter(user=request.user).values('society').distinct().count()
+        customer_list = CustomerList.objects.filter(user=request.user)
+
+
 
     # Get initial data for dropdowns
     initial_data = {
@@ -1074,6 +1114,7 @@ def shift_report(request):
         start_date_str = request.POST.get('start_date')
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else None
 
+        print("sgnons")
         # Replace the following lines with your actual data retrieval logic
         summary_data = get_summary_data(location, dpu, society, shift, start_date)
         detail_data = get_detail_data(request, location, dpu, society, shift, start_date)
@@ -1088,18 +1129,28 @@ def shift_report(request):
             'summary_data': summary_data,
             'detail_data': detail_data,
         })
-
+    print("sgnons ", context)
     return render(request, 'common/shift_report.html', context)
 
 def get_dpus_by_location(request):
     location = request.GET.get('location')
-    dpus = DPU.objects.filter(user=request.user, location=location).values_list('st_id', flat=True).distinct()
+    print("calling in location")
+    if request.user.is_staff or request.user.is_superuser:
+        print("location if")
+        dpus = DPU.objects.filter(user=request.user, location=location).values_list('st_id', flat=True).distinct()
+    else:  
+        print("location else")  
+        dpus = DPU.objects.filter(dpu_user=request.user.id, location=location).values_list('st_id', flat=True).distinct()
     return JsonResponse(list(dpus), safe=False)
 
 def get_societies_by_dpu(request):
     location = request.GET.get('location')
     dpu = request.GET.get('dpu')
-    societies = DPU.objects.filter(user=request.user, location=location, st_id=dpu).values_list('society', flat=True).distinct()
+    if request.user.is_staff or request.user.is_superuser:
+        societies = DPU.objects.filter(user=request.user, location=location, st_id=dpu).values_list('society', flat=True).distinct()
+    else:    
+        societies = DPU.objects.filter(dpu_user=request.user.id, location=location, st_id=dpu).values_list('society', flat=True).distinct()    
+    
     return JsonResponse(list(societies), safe=False)
 
 def get_summary_data(location, dpu, society, shift, start_date):

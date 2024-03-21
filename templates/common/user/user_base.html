@@ -196,7 +196,7 @@
                 <div class="dropdown-header text-">
                   <p class="mb-1  font-weight-semibold">Username:- {{user.username}}</p>
                 </div>
-                <a class="dropdown-item fw-6" href="{% url 'user_profile' %}">
+                <a class="dropdown-item fw-6" href="{% url 'profile' %}">
                   <i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2 "></i> My
                   Profile</a>
 
@@ -233,7 +233,7 @@
             </a>
             <div class="collapse" id="ui-basic">
               <ul class="nav flex-column sub-menu">
-                <li class="nav-item"> <a class="nav-link" href="{% url 'user_shift_report' %}">Shift Report</a></li>
+                <li class="nav-item"> <a class="nav-link" href="{% url 'shift_report' %}">Shift Report</a></li>
                 <li class="nav-item"> <a class="nav-link" href="{% url 'ledger_report' %}">Ledger</a></li>
               </ul>
             </div>

@@ -44,7 +44,7 @@ urlpatterns = [
     #All dashboard for super_admin, admin, and user 
     #path('super/dashboard/', super_dashboard, name='super_dashboard'),
     path('dashboard/', DashboardView.as_view(), name="dashboard"),
-   # path('user/dashboard/', user_dashboard, name='user_dashboard'),
+    # path('user/dashboard/', user_dashboard, name='user_dashboard'),
 
     path('change-password/', auth_views.PasswordChangeView.as_view(
         template_name='common/change-password.html', success_url='/'), name='change-password'),

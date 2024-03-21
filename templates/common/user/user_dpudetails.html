@@ -84,7 +84,7 @@
                                 {% csrf_token %}
                                 <input type="submit" class="btn btn-success" value="Download Latest Customer .CSV file">
                             </form>
-                            <a href="{% url 'user_customer_list' st_id=dpu.st_id %}" class="btn btn-success ml-2">
+                            <a href="{% url 'customer_list' st_id=dpu.st_id %}" class="btn btn-success ml-2">
                                 <i class="fa fa-users small-logos" aria-hidden="true"></i>
                                Customer List
                             </a>
