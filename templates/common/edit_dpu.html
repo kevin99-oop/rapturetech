@@ -75,6 +75,7 @@
         <div class="row container">
             <div class="col-lg-12 my-5 ">
                 <h2>Edit DPU</h2>
+                {% if request.user.is_staff or request.user.is_superuser  %}
 
                 <form method="post" action="{% url 'edit_dpu' st_id=dpu.st_id %}" id="editDpuForm">
                     {% csrf_token %}
@@ -106,6 +107,7 @@
                         </div>
                     </div>
                 </form>
+                {%endif%}
             </div>
         </div>
     </div>

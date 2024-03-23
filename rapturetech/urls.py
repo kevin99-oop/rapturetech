@@ -14,10 +14,6 @@ from apps.common.views import (
 from django.contrib.auth import views as auth_views
 from rest_framework.authtoken.views import obtain_auth_token
 
-from django.core.exceptions import PermissionDenied
-
-
-
 # def is_staff_or_admin(user):
 #     return user.is_staff or user.is_superuser
 

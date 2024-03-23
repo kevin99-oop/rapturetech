@@ -21,8 +21,8 @@
                     <div class="numbers">
                         <form method="post" id="reportForm" action="{% url 'ledger_report' %}" onsubmit="handleFormSubmit()">
                             {% csrf_token %}
-                            <label for="location">
-                                Location:
+                            <label for="location" class="text-sm mb-0 text-uppercase fw-bold">
+                                Root
                             </label>
                             <p class="float-end fw-bold">
                                 Total - <code><strong>{{ total_locations }}</strong></code>
@@ -43,8 +43,8 @@
             <div class="card rounded">
                 <div class="card-body p-3">
                     <div class="numbers">
-                        <label for="dpu">
-                            DPU:
+                        <label for="dpu" class="text-sm mb-0 text-uppercase fw-bold">
+                            DPU
                         </label>
                         <p class="float-end fw-bold">
                             Total - <code><strong>{{ total_dpus }}</strong></code>
@@ -65,8 +65,8 @@
             <div class="card">
                 <div class="card-body p-3">
                     <div class="numbers">
-                        <label for="society">
-                            Society:
+                        <label for="society" class="text-sm mb-0 text-uppercase fw-bold">
+                            Society
                         </label>
                         <p class="float-end fw-bold">
                             Total - <code><strong>{{ total_societies }}</strong></code>
@@ -89,12 +89,12 @@
                 <div class="card">
                     <div class="card-body p-3">
                         <div class="numbers">
-                            <label for="start_id">
-                                Start ID:
+                            <label for="start_id" class="text-sm mb-0 text-uppercase fw-bold">
+                                Start ID
                             </label>
                             <select name="start_id" id="start_id" class="form-select" required>
                                 {% for cust_id in customer_ids %}
-                                    <option value="{{ cust_id }}" {% if selected_start_id == cust_id %}selected{% endif %}>{{ cust_id }}</option>
+                                    <option value="{{ cust_id }}" {% if start_id == cust_id %}selected{% endif %}>{{ cust_id }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -104,21 +104,21 @@
             <div class="col-xl-2 col-md-2 col-sm-5 mb-xl-0 mb-5">
                 <div class="card">
                     <div class="card-body p-3">
-                        <label for="end_id">
-                            End ID:
+                        <label for="end_id" class="text-sm mb-0 text-uppercase fw-bold">
+                            End ID
                         </label>
                         <select name="end_id" id="end_id" class="form-select">
                             {% for cust_id in customer_ids %}
-                                <option value="{{ cust_id }}" {% if selected_end_id == cust_id %}selected{% endif %}>{{ cust_id }}</option>
+                                <option value="{{ cust_id }}" {% if end_id == selected_cust_id %}selected{% endif %}>{{ cust_id }}</option>
                             {% endfor %}
                         </select>
                     </div>
                 </div>
             </div>
-            <div class="col-xl-2 col-md-2 col-sm-5 mb-xl-0 mb-5">
-                <div class="card">
+            <div class="col-xl-2 col-md-2 col-sm-5 mb-xl-0 mb-5 ">
+                <div class="card mx-2">
                     <div class="card-body p-3">
-                        <label for="start_date">Start Date:</label>
+                        <label for="start_date" class="text-sm mb-0 text-uppercase fw-bold">Start Date</label>
                         <input type="date" name="start_date" id="start_date" value="{{ selected_start_date }}" class="form-control" required>
                     </div>
                 </div>
@@ -128,7 +128,7 @@
                     <div class="card-body p-3">
                         <div class="numbers">
                                         
-                        <label for="end_date">End Date:</label>
+                        <label for="end_date" class="text-sm mb-0 text-uppercase fw-bold">End Date</label>
                         <input type="date" name="end_date" id="end_date" value="{{ selected_end_date }}"  class="form-control" required>
                     
                         </div>
@@ -139,7 +139,7 @@
                 <div class="col-12">
                     <form>
                         <div class="col-12 mb-3 mx-4 mt-3">
-                            <button type="submit" class="btn btn-success w-100 submitButton" id="submitButton">Generate Report</button>
+                            <button type="submit" class="btn btn-success w-100 submitButton fw-bold" id="submitButton">Generate Report</button>
                             <p class="mt-2">
                             </p>
                         </div>
@@ -150,10 +150,10 @@
     </div>
     <ul class="nav nav-tabs  mt-4 rounded" id="myTab" role="tablist">
         <li class="nav-item rounded" role="presentation">
-          <button class="nav-link active rounded" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Ledger Report</button>
+          <button class="nav-link active rounded fw-bold" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Ledger Report</button>
         </li>
         <li class="nav-item rounded" role="presentation">
-          <button class="nav-link rounded" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Payment Report</button>
+          <button class="nav-link rounded fw-bold" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Payment Report</button>
         </li>
       
       </ul>
@@ -165,7 +165,7 @@
             <div class="card collapse multi-collapse show rounded" >
                 <div class="card-header pb-0 p-3">
                     <div class="d-flex justify-content-between">
-                        <h6 class="mb-2">
+                        <h6 class="mb-2 fw-bold">
                             Ledger Table
                         </h6>
                         <div class="float-end">                    
@@ -177,12 +177,18 @@
                 </div>
                 <div class="table-responsive card-body">
                     {% if ledger_summary_data %}
-                    {% for summary_data_entry in ledger_summary_data %}
+                    {% for summary_data_entry in ledger_summary_data|dictsort:"CUST_ID" %}
+            
                     <h4>
-                       Name:-  <strong>{{ summary_data_entry.CustomerName }} </strong> Id:- <strong>{{ summary_data_entry.CUST_ID }} </strong> 
+                       Customer Name:-  <strong class="text-danger">{{ summary_data_entry.CustomerName }} </strong> Customer Id:- <strong class="text-danger">{{ summary_data_entry.CUST_ID }} </strong> 
                     </h4> 
+                    <hr/>
+                    <h5 class="text-center fw-bold">
+                    Summary Report 
+                    </h5> 
+                    <hr/>
                     <!-- Table 1: Summary Data -->
-                    <table id="ledger_summary_data" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 mt-3">
+                    <table id="ledger_summary_data" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 mt-3 fw-bold">
                         <thead class="table-title text-white text-center rounded">
                             <tr>
                                 <th>Customer</th>
@@ -216,7 +222,13 @@
                     </table>
         
                     <!-- Table 2: Detail Data -->
-                    <table id="ledger_detail_data" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 mt-5 mb-5">
+                    <hr/>
+                    <h5 class="text-center fw-bold">
+                        Detail Report 
+                    </h5> 
+                    <hr/>
+
+                    <table id="ledger_detail_data" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 mb-5 fw-bold">
                         <thead class="table-title text-white text-center rounded bg-success">
                             <tr>
                                 <th>Date</th>
@@ -251,7 +263,7 @@
                                 {% endif %}
                             {% endfor %}
                         </tbody>
-                    </table>
+                                            </table>
                 {% endfor %}
                 {% else %}
                 <p class="text-center">No data available for the selected filters.</p>
@@ -268,7 +280,7 @@
                     <div class="card rounded" >
                         <div class="card-header pb-0 p-3">
                             <div class="d-flex justify-content-between">
-                                <h6 class="mb-2">
+                                <h6 class="mb-2 fw-bold">
                                     Payment Summary Table
                                 </h6>
                                 <div class="float-end">                    
@@ -280,7 +292,12 @@
                         <div class="table-responsive card-body">
                             {% if payment_summary_data %}
                                 <!-- Payment Summary Data Table -->
-                                <table id="payment_table_info" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 mt-3 rounded">
+                                <hr/>
+                                <h5 class="text-center fw-bold">
+                                    Summary Report 
+                                </h5> 
+                                <hr/>
+                                <table id="payment_table_info" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 rounded fw-bold">
                                     <thead class="table-title text-white text-center rounded">
                                         <tr>
                                             <th>Location</th>
@@ -303,7 +320,12 @@
                                     </tbody>
                                 </table>
                                 <!-- Customer Payment Summary Table -->
-                                <table id="payment_table_data" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 mt-5 rounded">
+                                <hr/>
+                                <h5 class="text-center fw-bold">
+                                    Detail Report 
+                                </h5> 
+                                <hr/>
+                                <table id="payment_table_data" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 mt-5 rounded fw-bold">
                                     <thead class="table-title text-white text-center rounded bg-success">
                                         <tr>
                                             <th>Customer</th>
@@ -397,28 +419,35 @@
         </script>
         
         <script>
-            function updateDropdowns(selectedLocation) {
-                // Fetch st_ids and societies based on the selected location
-                fetch(`/get_st_ids_and_societies_by_location/?location=${selectedLocation}`)
+            function updateDpusByLocation(selectedLocation) {
+                // Fetch DPUs based on the selected location
+                fetch(`/get_dpus_by_location/?location=${selectedLocation}`)
                     .then(response => response.json())
                     .then(data => {
-                        const stIdDropdown = document.getElementById('st_id');
-                        const societyDropdown = document.getElementById('society');
-        
-                        // Clear existing options
-                        stIdDropdown.innerHTML = "";
-                        societyDropdown.innerHTML = "";
-        
-                        // Populate st_id dropdown
-                        data.st_ids.forEach(stId => {
+                        const dpuDropdown = document.getElementById('dpu');
+                        dpuDropdown.innerHTML = "";  // Clear existing options
+                        // Populate DPU dropdown
+                        data.forEach(dpu => {
                             const option = document.createElement('option');
-                            option.value = stId;
-                            option.text = stId;
-                            stIdDropdown.add(option);
+                            option.value = dpu;
+                            option.text = dpu;
+                            dpuDropdown.add(option);
                         });
         
+                        // Trigger the change event to update the dependent dropdowns
+                        dpuDropdown.dispatchEvent(new Event('change'));
+                    });
+            }
+        
+            function updateSocietiesByDpu(selectedLocation, selectedDpu) {
+                // Fetch societies based on the selected location and DPU
+                fetch(`/get_societies_by_dpu/?location=${selectedLocation}&dpu=${selectedDpu}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const societyDropdown = document.getElementById('society');
+                        societyDropdown.innerHTML = "";  // Clear existing options
                         // Populate Society dropdown
-                        data.societies.forEach(society => {
+                        data.forEach(society => {
                             const option = document.createElement('option');
                             option.value = society;
                             option.text = society;
@@ -427,18 +456,34 @@
                     });
             }
         
-            document.getElementById('location').addEventListener('change', function() {
+            document.getElementById('location').addEventListener('change', function () {
                 const selectedLocation = this.value;
-                updateDropdowns(selectedLocation);
+                updateDpusByLocation(selectedLocation);
             });
         
-            // Automatically fetch st_ids and societies when the page loads
-            window.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('dpu').addEventListener('change', function () {
                 const selectedLocation = document.getElementById('location').value;
-                updateDropdowns(selectedLocation);
+                const selectedDpu = this.value;
+                updateSocietiesByDpu(selectedLocation, selectedDpu);
+            });
+        
+            document.getElementById('society').addEventListener('change', function () {
+                const selectedLocation = document.getElementById('location').value;
+                const selectedSociety = this.value;
+                fetch(`/get_dpu_by_location_and_society/?location=${selectedLocation}&society=${selectedSociety}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const dpuDropdown = document.getElementById('dpu');
+                        // Find the option with the corresponding value and select it
+                        const selectedOption = [...dpuDropdown.options].find(option => option.value === data.st_id);
+                        if (selectedOption && this.selectedIndex !== 0) { // Auto-select only if society is selected
+                            selectedOption.selected = true;
+                            // Trigger the change event to update dependent dropdowns
+                            dpuDropdown.dispatchEvent(new Event('change'));
+                        }
+                    });
             });
         </script>
-        
 <script>
     function handleLocationChange() {
         const locationDropdown = document.getElementById('location');

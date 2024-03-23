@@ -80,11 +80,8 @@
                             <h5 class="text-white mt-2">{{ dpu.user.username }}'s DPU - {{ dpu.st_id }}</h5>
                         </div>
                         <div class="col-md-6">
-                            <form id="downloadForm" method="post" action="{% url 'download_latest_csv' st_id=dpu.st_id %}">
-                                {% csrf_token %}
-                                <input type="submit" class="btn btn-success" value="Download Latest Customer .CSV file">
-                            </form>
-                            <a href="{% url 'customer-list' st_id=dpu.st_id %}" class="btn btn-success ml-2">
+                           
+                            <a href="{% url 'customer-list' st_id=dpu.st_id %}" class="btn btn-success ml-2 rounded">
                                 <i class="fa fa-users small-logos" aria-hidden="true"></i>
                                Customer List
                             </a>
@@ -99,8 +96,10 @@
                         <li><strong>SID:</strong> {{ dpu.st_id }}</li>
                         <li><strong>Dpu Created On:</strong> {{ dpu.date|date:"d-m-Y H:i:s" }}</li>
                         <!-- Add more details as needed -->
-                        <li><strong>Password:</strong> {{ dpu.plain_password }}</li>
+                        {% if request.user.is_staff or request.user.is_superuser  %}
 
+                        <li><strong>Password:</strong> {{ dpu.plain_password }}</li>
+                        {%endif%}
                     </ul>
                 </div>
     
@@ -153,6 +152,6 @@
 
 <script>
     new DataTable('#dpu_details');
-
 </script>
+
 {% endblock content %}
