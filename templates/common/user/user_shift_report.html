@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'common/user/user_base.html' %}
 {% load static %}
 {% load crispy_forms_tags %}
 {% block content %}
@@ -17,8 +17,6 @@
 <!-- jsPDF library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 
-<script src="    https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.min.js"></script>
 
 
     <!-- Begin Page Content -->
@@ -30,7 +28,7 @@
                     <div class="card-body p-3">
                         <div class="numbers">
                            
-                            <form method="post" action="{% url 'shift_report' %}" >
+                            <form method="post" action="{% url 'user_shift_report' %}" >
                                 {% csrf_token %}                            
                                         <!-- Dropdowns for selecting filters -->
                                         <label for="location" class="text-sm mb-0 text-uppercase fw-bold">Root</label>
@@ -57,7 +55,7 @@
                                         <p class="float-end fw-bold">
                                             Total - <code><strong>{{total_dpus}}</strong></code>
                                         </p>
-                                        <select name="dpu" id="dpu" class="form-select rounded" disabled>
+                                        <select name="dpu" id="dpu" class="form-select rounded" >
                                             <option value="" selected>Select</option>
                                             {% for dpu in dpus %}
                                                 <option value="{{ dpu }}" {% if dpu == selected_dpu %}selected{% endif %}>
@@ -79,7 +77,7 @@
                                         <p class="float-end fw-bold">
                                             Total - <code><strong>{{total_societies}}</strong></code>
                                         </p>
-                                        <select name="society" id="society" class="form-select rounded" disabled>
+                                        <select name="society" id="society" class="form-select rounded" >
                                             <option value="" selected>Select</option>
                                             {% for society in societies %}
                                                 <option value="{{ society }}" {% if society == selected_society %}selected{% endif %}>
@@ -95,10 +93,10 @@
                                 <div class="card">
                                     <div class="card-body p-3">
                                         <div class="numbers">
-                                            <label for="shift" class="text-sm mb-0 text-uppercase fw-bold">Select Shift</label>
+                                            <label for="shift" class="text-sm mb-0 text-uppercase fw-bold">Select Shift:</label>
                                             <select name="shift" class="form-select">
-                                                <option value="M" {% if selected_shift == 'M' %}selected{% endif %}>M</option>
-                                                <option value="E" {% if selected_shift == 'E' %}selected{% endif %}>E</option>
+                                                <option value="M" {% if selected_shift == 'M' %}selected{% endif %}>Morning</option>
+                                                <option value="E" {% if selected_shift == 'E' %}selected{% endif %}>Evening</option>
                                             </select>
                                             </div>
                                         </div>
@@ -109,7 +107,7 @@
                                     <div class="card-body p-3">
                                         <div class="numbers">
                                             <label for="start_date" class="text-sm mb-0 text-uppercase fw-bold">
-                                                Start Date
+                                                Start Date:
                                             </label>
                                             <div class="input-group">
                                                 <input type="date" name="start_date" id="start_date" class="form-control rounded" placeholder="dd/mm/yyyy" value="{{ selected_start_date }}" required>
@@ -122,7 +120,7 @@
                                 <div class="col-12">
                                     <form>
                                         <div class="col-12 mb-3 mt-3">
-                                            <button type="submit" class="btn btn-success fw-bold">Generate Shift Report</button>
+                                            <button type="submit" class="btn btn-success">Generate Shift Report</button>
                                         </div>
                                             <!-- Hidden input to store the selected DPU value -->
                                             <input type="hidden" name="selected_dpu" id="selected_dpu">
@@ -144,18 +142,13 @@
                     <div class="float-end">                    
                         <button class="btn btn-primary btn-sm" onclick="exportToCsvAndPdf(['summaryTable_report', 'detailTable_report'], 'shift_report', 'csv')">CSV</button>
                         <button class="btn btn-primary btn-sm" onclick="exportToCsvAndPdf(['summaryTable_report', 'detailTable_report'], 'shift_report', 'pdf')">PDF</button>
-
-                    </div>
+                    </div>                    
                 </div>
             </div>
             <div class="table-responsive card-body">
                 {% if summary_data %}
                 <!-- Table 1: Summary Data -->
-                <table id="summaryTable_report" class="table align-items-center  table-rwd text-center table table-striped table-hover rounded table-responsive w-100 "    
-                data-toggle="table"
-                data-pagination="true"
-                data-auto-refresh="true"
-                data-auto-refresh-interval="5000">
+                <table id="summaryTable_report" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100">
                     <thead class="text-white text-center rounded table-title">
                         <tr>
                             <th>Location</th>
@@ -163,61 +156,37 @@
                             <th>Society</th>
                             <th>Date</th>
                             <th>Shift</th>
-                            <th>Avg.FAT</th>
-                            <th>Avg.SNF</th>
-                            <th>Avg.CLR</th>  
+                            <th>Total Customer</th>
                             <th>Total QT.</th>
                             <th>Total Amount</th>
                             <th>Total CAmount</th>
-                            <th>Total Customer</th>
+                            <th>Avg.FAT</th>
+                            <th>Avg.SNF</th>
+                            <th>Avg.CLR</th>  
                         </tr>
                     </thead>
-                    <tbody class="fw-bold">
+                    <tbody class=" align-items-center text-center fw-bold">
                         <tr>
                             <td>{{ selected_location }}</td>
-                            <td>{{ selected_dpu }}</td>
+                            <td> {{ selected_dpu }}</td>
                             <td>{{ selected_society }}</td>
-                            <td>{{ selected_start_date }}</td>
+                            <td>{{ selected_start_date}}</td>
                             <td>{{ selected_shift }}</td>
-                            <td>{{ summary_data.AvgFAT }}</td>
-                            <td>{{ summary_data.AvgSNF }}</td>
-                            <td>{{ summary_data.AvgCLR }}</td>  
+                            <td>{{ summary_data.TotalCustomer }}</td>
                             <td>{{ summary_data.TotalQT }}</td>
                             <td>{{ summary_data.TotalAmount }}</td>
                             <td>{{ summary_data.TotalCAmount }}</td>
-                            <td>{{ summary_data.TotalCustomer }}</td>
-                        </tr>  
-                        {% if not request.user.is_staff and not request.user.is_superuser %}
-                        <tr class="align-items-center text-center">
-                            <td colspan="5">Cow Summary</td>
-                            <td>{{ cow_summary_data.AvgFAT }}</td>
-                            <td>{{ cow_summary_data.AvgSNF }}</td>
-                            <td>{{ cow_summary_data.AvgCLR }}</td>
-                            <td>{{ cow_summary_data.TotalLtr }}</td>
-                            <td>{{ cow_summary_data.TotalAmt }}</td>
-                            <td>{{ cow_summary_data.TotalCAmt }}</td>  
-                            <td>{{ cow_summary_data.TotalCust }}</td>
+                            <td>{{ summary_data.AvgFAT }}</td>
+                            <td>{{ summary_data.AvgSNF }}</td>
+                            <td>{{ summary_data.AvgCLR }}</td>  
+
                         </tr>
-                        <tr class="align-items-center text-center">
-                            <td colspan="5">Buffalo Summary</td>
-                            <td>{{ buffalo_summary_data.AvgFAT }}</td>
-                            <td>{{ buffalo_summary_data.AvgSNF }}</td>
-                            <td>{{ buffalo_summary_data.AvgCLR }}</td>
-                            <td>{{ buffalo_summary_data.TotalLtr }}</td>
-                            <td>{{ buffalo_summary_data.TotalAmt }}</td>
-                            <td>{{ buffalo_summary_data.TotalCAmt }}</td> 
-                            <td>{{ buffalo_summary_data.TotalCust }}</td>
-                        </tr>
-                        {% endif %}    
                     </tbody>
-                   
                 </table>
-                
-                {% else %}
+            {% else %}
                 <p>No data available for the selected filters.</p>
-                {% endif %}
+            {% endif %}
             </div>
-            
         </div>
     </div>
 </div>
@@ -233,7 +202,7 @@
                 </div>
             </div>
             <div class="table-responsive card-body">
-                {% if detail_data %}                
+                {% if detail_data %}
                 <!-- Table 1: Summary Data -->
                 <table id="detailTable_report" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100">
                     <thead class="text-white text-center rounded table-title">
@@ -256,7 +225,7 @@
                         {% for record in detail_data %}
                             <tr>
                                 <td>{{ record.CUST_ID }}</td>
-                                <td>{{ record.CustomerName }}</td> <!-- Use the CustomerName here -->
+                                <td>{{ record.CustomerName }}</td> <!-- Display CustomerName -->
                                 <td>{{ record.MType }}</td>
                                 <td>{{ record.FAT }}</td>
                                 <td>{{ record.SNF }}</td>
@@ -280,83 +249,58 @@
     </div>
 </div>
 
-
 <!-- Existing JavaScript for exporting and DataTable initialization -->
 <script>
-    function exportToCsvAndPdf(tableIds, fileNamePrefix, format) {
-        const username = '{{ user.username }}';
-        const csvData = [];
-        const pdf = new jsPDF();
-
-        tableIds.forEach((tableId, index) => {
-            const table = document.getElementById(tableId);
-            const rows = table.querySelectorAll('tr');
-            const tableData = [];
-
-            rows.forEach((row) => {
-                const rowData = [];
-                const cells = row.querySelectorAll('td, th');
-                cells.forEach((cell) => {
-                    rowData.push(cell.innerText);
-                });
-                tableData.push(rowData.join(','));
-            });
-
-            csvData.push(tableData.join('\n'));
-
-            if (index > 0) {
-                pdf.addPage();  // Add a new page for each additional table in PDF
-            }
-
-            pdf.autoTable({ html: `#${tableId}` });
+    $(document).ready(function() {
+        // Initialize DataTables
+        $('#summaryTable_report').DataTable();
+        $('#detailTable_report').DataTable();
+        
+        // Export to CSV
+        $('#csvButton').click(function() {
+            $('#summaryTable_report').tableExport({ type: 'csv', fileName: 'summary_report' });
+            $('#detailTable_report').tableExport({ type: 'csv', fileName: 'detail_report' });
         });
+        
+        // Export to PDF
+        $('#pdfButton').click(function() {
+            $('#summaryTable_report').tableExport({ type: 'pdf', fileName: 'summary_report' });
+            $('#detailTable_report').tableExport({ type: 'pdf', fileName: 'detail_report' });
+        });
+    });
 
-        const fullFileName = `${username}_${fileNamePrefix}`;
+    new DataTable('#summaryTable_report');
+    new DataTable('#detailTable_report');
+</script>
 
-        if (format === 'csv') {
-            const csvBlob = new Blob([csvData.join('\n')], { type: 'text/csv' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(csvBlob);
-            link.download = `${fullFileName}.csv`;
-            link.click();
-        } else if (format === 'pdf') {
-            pdf.save(`${fullFileName}.pdf`);
-        }
-    }
-
-
-    </script>
-<!-- AJAX script to update dependent dropdowns -->
 <!-- AJAX script to update dependent dropdowns -->
 <script>
-    function updateDpusByLocation(selectedLocation) {
-        // Fetch DPUs based on the selected location
-        fetch(`/get_dpus_by_location/?location=${selectedLocation}`)
+    document.getElementById('location').addEventListener('change', () => {
+        const selectedLocation = document.getElementById('location').value;
+        fetch(`/user_get_dpus_by_location/?location=${selectedLocation}`)
             .then(response => response.json())
             .then(data => {
                 const dpuDropdown = document.getElementById('dpu');
-                dpuDropdown.innerHTML = "";  // Clear existing options
-                // Populate DPU dropdown
+                dpuDropdown.innerHTML = "";
                 data.forEach(dpu => {
                     const option = document.createElement('option');
                     option.value = dpu;
                     option.text = dpu;
                     dpuDropdown.add(option);
                 });
-
                 // Trigger the change event to update the dependent dropdowns
                 dpuDropdown.dispatchEvent(new Event('change'));
             });
-    }
+    });
 
-    function updateSocietiesByDpu(selectedLocation, selectedDpu) {
-        // Fetch societies based on the selected location and DPU
-        fetch(`/get_societies_by_dpu/?location=${selectedLocation}&dpu=${selectedDpu}`)
+    document.getElementById('dpu').addEventListener('change', () => {
+        const selectedLocation = document.getElementById('location').value;
+        const selectedDpu = document.getElementById('dpu').value;
+        fetch(`/user_get_societies_by_dpu/?location=${selectedLocation}&dpu=${selectedDpu}`)
             .then(response => response.json())
             .then(data => {
                 const societyDropdown = document.getElementById('society');
-                societyDropdown.innerHTML = "";  // Clear existing options
-                // Populate Society dropdown
+                societyDropdown.innerHTML = "";
                 data.forEach(society => {
                     const option = document.createElement('option');
                     option.value = society;
@@ -364,37 +308,8 @@
                     societyDropdown.add(option);
                 });
             });
-    }
-
-    document.getElementById('location').addEventListener('change', function () {
-        const selectedLocation = this.value;
-        updateDpusByLocation(selectedLocation);
-    });
-
-    document.getElementById('dpu').addEventListener('change', function () {
-        const selectedLocation = document.getElementById('location').value;
-        const selectedDpu = this.value;
-        updateSocietiesByDpu(selectedLocation, selectedDpu);
-    });
-
-    document.getElementById('society').addEventListener('change', function () {
-        const selectedLocation = document.getElementById('location').value;
-        const selectedSociety = this.value;
-        fetch(`/get_dpu_by_location_and_society/?location=${selectedLocation}&society=${selectedSociety}`)
-            .then(response => response.json())
-            .then(data => {
-                const dpuDropdown = document.getElementById('dpu');
-                // Find the option with the corresponding value and select it
-                const selectedOption = [...dpuDropdown.options].find(option => option.value === data.st_id);
-                if (selectedOption && this.selectedIndex !== 0) { // Auto-select only if society is selected
-                    selectedOption.selected = true;
-                    // Trigger the change event to update dependent dropdowns
-                    dpuDropdown.dispatchEvent(new Event('change'));
-                }
-            });
     });
 </script>
-
 
 <!-- Form handling scripts -->
 <script>
@@ -404,14 +319,13 @@
         const societyDropdown = document.getElementById('society');
         const submitButton = document.getElementById('submitButton');
 
-        // Enable or disable the DPU and Society dropdowns based on location selection
-    dpuDropdown.disabled = !locationDropdown.value;
-    societyDropdown.disabled = !locationDropdown.value;
+        dpuDropdown.disabled = !locationDropdown.value;
+        societyDropdown.disabled = !locationDropdown.value;
 
-    // Always enable the submit button
-    submitButton.disabled = false;
+        submitButton.disabled = true;
     }
 </script>
+
 
 {% endblock content %}
 

@@ -6,6 +6,13 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.core.exceptions import ValidationError
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.hashers import make_password
+from django.utils.crypto import get_random_string
+from django.contrib.auth.hashers import make_password
+import string
+import random
+
 
 # Signal to create a Token for a user upon registration
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
@@ -16,10 +23,11 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 # Model representing a DPU (Data Processing Unit)
 class DPU(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    dpu_user = models.IntegerField(default=1)
     location = models.CharField(max_length=255)
     st_id = models.CharField(max_length=50, unique=True, primary_key=True)  # Renamed from dpu_id to st_id
     society = models.CharField(max_length=255)
-    mobile_number = models.CharField(max_length=15)
+    mobile_number = models.CharField(max_length=15,unique=True)
     owner = models.CharField(max_length=255)
     STATUS_CHOICES = [
         ('active', 'Active'),
@@ -27,15 +35,18 @@ class DPU(models.Model):
     ]
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     date = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
+    plain_password = models.CharField(max_length=100)  # Store plain text password
 
     def __str__(self):
         return f"{self.user.username}'s DPU - {self.st_id}"
+
     def get_latest_csv_path(self):
-            try:
-                latest_customer = Customer.objects.filter(st_id=self.st_id).latest('date_uploaded')
-                return latest_customer.csv_file.path
-            except Customer.DoesNotExist:
-                return None
+        try:
+            latest_customer = Customer.objects.filter(st_id=self.st_id).latest('date_uploaded')
+            return latest_customer.csv_file.path
+        except Customer.DoesNotExist:
+            return None
+
 
 # Model representing DREC (Data Recording)
 class DREC(models.Model):

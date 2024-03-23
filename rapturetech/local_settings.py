@@ -16,7 +16,7 @@ DATABASES = {
     }
 }
 
-#DATABASES = {
+# DATABASES = {
 #    'default': {
 #        'ENGINE': 'django.db.backends.postgresql',
 #        'NAME': 'rapturetechdb',
@@ -25,4 +25,4 @@ DATABASES = {
 #        'HOST': 'db-instance-rapturetech.c7msy0kga8dr.ap-south-1.rds.amazonaws.com',
 #        'PORT': '5432'
 #    }
-#}
+# }

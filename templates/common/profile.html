@@ -107,18 +107,27 @@
                 <div class="card o-hidden border-0 shadow-lg my-5 col-lg-7 mt-5">
                     <div class="card-body">
                         <h3>Profile Information</h3>
+                        {% if request.user.is_staff or request.user.is_superuser  %}
                         <p class="card-description fw-bold">
-                            Name:- <code>{{user.first_name}} {{user.last_name}}</code>
+                            Name:- <code class="fw-bold">{{user.first_name}} {{user.last_name}}</code>
                         </p>
-                        <p class="card-description fw-bold"><strong>Userid:- <code>{{user.id}}</code> </strong></p>
+                        {%endif%}
+                        <p class="card-description fw-bold">
+                            <strong>Userid:- <code class="fw-bold">{{user.id}}</code> 
+                            </strong>
+                        </p>
                         <p class="card-description fw-bold"><strong>{{user.first_name}}'s Token:-
-                                <code>{{ token }}</code></strong></p>
-                        <p class="card-description fw-bold"><strong>Username:- <code> {{user.username}} </code></strong>
-                        </p>
-                        <p class="card-description fw-bold"><strong>Emailid:- <code>{{user.email}} </code></strong></p>
+                                <code class="fw-bold">{{ token }}</code></strong></p>
+                        <p class="card-description fw-bold"><strong>Username:- <code class="fw-bold"> {{user.username}} </code></strong>
+                        </p>  {% if request.user.is_staff or request.user.is_superuser  %}
+                        <p class="card-description fw-bold"><strong>Emailid:- <code class="fw-bold">{{user.email}} </code></strong></p>
                         <p class="card-description fw-bold"><strong>Phone Number:-
-                                <code>{{user.profile.phone_number}}</code></strong> </p>
+                                <code class="fw-bold">{{user.profile.phone_number}}</code></strong> </p>
+                                {%endif%}
+                                {% if request.user.is_staff or request.user.is_superuser  %}
+
                         <a href="{% url 'profile-update' %}" class="btn btn-primary rounded shadow-sm float-end">Update Profile</a>
+                        {%endif%}
                     </div>
                 </div>
             </div>

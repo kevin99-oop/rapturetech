@@ -37,6 +37,48 @@ class SignUpForm(UserCreationForm):
             'password1',
             'password2',
         ]
+    def save(self, commit=True):
+        user = super(SignUpForm, self).save(commit=False)
+        user.is_staff = True  # Set the user as staff
+        if commit:
+            user.save()
+        return user
+from django.contrib.auth import authenticate
+from django.core.exceptions import ValidationError
+
+class CustomLoginForm(forms.Form):
+    username = forms.CharField(max_length=100)
+    password = forms.CharField(widget=forms.PasswordInput)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        username = cleaned_data.get('username')
+        password = cleaned_data.get('password')
+
+        # Perform custom validation or authentication logic here
+        user = authenticate(username=username, password=password)
+        if user is None:
+            raise ValidationError('Invalid username or password.')
+
+        # Check user type
+        user_type = self.get_user_type(user)
+        if user_type not in ['super_admin', 'admin', 'user']:
+            raise ValidationError('Invalid user type.')
+
+        cleaned_data['user'] = user
+        cleaned_data['user_type'] = user_type
+        return cleaned_data
+
+    def get_user(self):
+        return self.cleaned_data.get('user')
+
+    def get_user_type(self, user):
+        # Implement your logic to determine the user type here
+        # Replace this with your actual logic to determine the user type
+        # For example, if you have a user_type attribute on your user model:
+        # return user.user_type
+        # Replace this with your actual logic to determine the user type
+        return 'user'  # Placeholder logic
 
 # UserForm is a form for updating user information
 class UserForm(forms.ModelForm):
@@ -95,5 +137,4 @@ class UploadRateTableForm(forms.ModelForm):
         # Perform any additional validation for the RateTable CSV file if needed
 
         return csv_file
-
 

@@ -1,27 +1,37 @@
 # Standard Library Imports
 import csv
-import datetime
 import logging
 import os
-# Django Imports
-from django.views import View
-from django.utils import timezone
-from django.contrib import messages
-from django.urls import reverse_lazy
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
-from django.db.models import Count, Sum, Avg
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
-from django.views.generic import TemplateView, CreateView, View
+from datetime import datetime, date
+from collections import defaultdict, Counter
 from django.http import HttpResponseRedirect, JsonResponse, Http404, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404, get_list_or_404
+from django.urls import reverse_lazy, reverse
+from django.contrib import messages
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, logout
+from django.contrib.auth.decorators import login_required
+from django.views.generic import TemplateView, CreateView, View
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
+from django.utils.decorators import method_decorator
+from django.utils import timezone
+from django.db.models import Count, Sum, Avg
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import connection
+from django.db.models.functions import Round
+import string
+import random
 from django.contrib.auth.views import LoginView
-# Apps Common Imports
-from apps.common.models import DREC, DPU, Customer, Config, RateTable
-from apps.common.forms import SignUpForm, UserForm, ProfileForm, DPUForm, UploadCSVForm, UploadRateTableForm
-from apps.common.serializers import UserSerializer, LoginSerializer, DRECSerializer
+# Django Imports
+from apps.common.models import DREC, DPU, Customer, Config, RateTable, CustomerList
+from apps.common.forms import (
+    SignUpForm,
+    UserForm,
+    ProfileForm,
+    DPUForm,
+    UploadCSVForm,
+    UploadRateTableForm,
+)
 # Django Rest Framework Imports
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -30,48 +40,16 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
+from apps.common.serializers import UserSerializer, LoginSerializer, DRECSerializer
 # Views Imports
-from datetime import datetime
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.conf import settings
-from django.contrib.auth import logout
-from django.urls import reverse
-# views.py
-from django.http import JsonResponse
-from django.shortcuts import render
-from apps.common.models import CustomerList  # Replace 'your_app' with the actual name of your Django app
-from django.shortcuts import render, redirect, get_object_or_404
-from apps.common.forms import UploadRateTableForm
-from apps.common.models import RateTable
-from django.http import HttpResponse
-from datetime import datetime, date
-from django.shortcuts import render, redirect, get_object_or_404
-from apps.common.forms import UploadRateTableForm
-from apps.common.models import RateTable
-from django.http import HttpResponse
-from datetime import datetime
-from django.shortcuts import render, redirect
-from apps.common.forms import UploadRateTableForm
-from apps.common.models import RateTable
-from django.http import HttpResponse
-
-from django.contrib import messages
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
-from apps.common.models import RateTable
-from collections import defaultdict
-from django.shortcuts import render
-from .models import DPU, DREC
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
-from django.db.models import Count, Sum, Avg, Max
-from datetime import datetime
-from operator import itemgetter
-from operator import attrgetter
+from django.contrib.auth import authenticate, login
+from apps.common.forms import CustomLoginForm
+from django.views.generic import FormView
+# ledger code
+from django.contrib.admin.views.decorators import staff_member_required
 
 # Common Views
-
 def index(request):
     return render(request, 'index.html')
 
@@ -86,7 +64,7 @@ class HomeView(TemplateView):
         print(self.request.user.id)
         context['book_list'] = self.request.user
         return context
-    
+
 class CustomLoginView(LoginView):
     template_name = 'common/login.html'
 
@@ -98,41 +76,44 @@ class CustomLoginView(LoginView):
     def form_valid(self, form):
         # Customize this function if needed (e.g., redirecting to a different page on successful login)
         response = super().form_valid(form)
+        
         return response
 
-def custom_logout(request):
-    # Perform any additional logout-related actions if needed
-    # For example, you can log additional information, invalidate session data, etc.
+def custom_login(request):
+    template_name = 'common/login.html'
+    
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('dashboard')  # Redirect to the dashboard after successful login
+        else:
+            # Handle invalid login credentials
+            # You can add a message here if needed
+            messages.error(request, "Invalid User name or Password")
+            return render(request, template_name)  # You can render the template again or redirect to the same login page
+    else:
+        return render(request, template_name)   
 
+def custom_logout(request):
     # Use Django's logout function to log the user out
     logout(request)
-
     # Redirect to the desired page after logout
     return redirect(reverse('home'))  # Replace 'home' with the name of your home URL pattern{    login_url = reverse_lazy('home')}
-from collections import defaultdict
-from django.shortcuts import render
-from django.views import View
-from django.utils import timezone
-from django.db.models import Avg
-from .models import DPU, DREC, CustomerList
-from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.cache import never_cache
-from django.views.decorators.csrf import ensure_csrf_cookie
-from django.http import JsonResponse
-from django.urls import reverse_lazy
-from datetime import datetime
-from collections import Counter
 
-@method_decorator([login_required, never_cache, ensure_csrf_cookie], name='dispatch')
+#superadmin Login
+@login_required
+def super_dashboard(request):
+    # Logic for user dashboard
+    return render(request, 'common/super_admin/super_dashboard.html')
+
+#This dashboard is for Mandli Main who manage all the st_id and all 
+@method_decorator([login_required, ensure_csrf_cookie], name='dispatch')
 class DashboardView(TemplateView):
     template_name = 'example.html'
-    login_url = reverse_lazy('home')
     
-    def get_drec_data(self, user):
-                return DREC.objects.filter(ST_ID__user=user).order_by('-created_at')
-
-
     def calculate_averages(self, records):
         total_fat = sum(record.FAT for record in records)
         total_snf = sum(record.SNF for record in records)
@@ -144,10 +125,13 @@ class DashboardView(TemplateView):
         total_cust_set = {(record.CUST_ID, record.CSR_NO) for record in records}
         total_cust = len(total_cust_set)
 
-        avg_fat = round(total_fat / len(records), 2) if len(records) > 0 else 0.0
-        avg_snf = round(total_snf / len(records), 2) if len(records) > 0 else 0.0
-        avg_clr = round(total_clr / len(records), 2) if len(records) > 0 else 0.0
+        avg_fat = round(total_fat / len(records), 1) if len(records) > 0 else 0.0
+        avg_snf = round(total_snf / len(records), 1) if len(records) > 0 else 0.0
+        avg_clr = round(total_clr / len(records), 1) if len(records) > 0 else 0.0
+        total_ltr = round(sum(record.QT for record in records), 2)
+        total_amt = round(sum(record.Amount for record in records), 2)
         avg_water = round(total_water / len(records), 2) if len(records) > 0 else 0.0
+        
 
         return avg_fat, avg_snf, avg_clr, avg_water, total_ltr, total_amt, total_cust
 
@@ -188,35 +172,122 @@ class DashboardView(TemplateView):
                 })
 
         # Sort by RecordingDate and SHIFT in descending order
-
         return summary_data
 
-    def get_customer_list(self, user):
-        return CustomerList.objects.filter(user=user)
-
     def calculate_global_averages(self, user):
-        avg_fat = DREC.objects.filter(ST_ID__user=user).aggregate(avg_fat=Avg('FAT'))['avg_fat']
-        avg_snf = DREC.objects.filter(ST_ID__user=user).aggregate(avg_snf=Avg('SNF'))['avg_snf']
-        avg_clr = DREC.objects.filter(ST_ID__user=user).aggregate(avg_clr=Avg('CLR'))['avg_clr']
+        if isinstance(user, User):
+            if user.is_staff or user.is_superuser:
+                drec_filter = {'ST_ID__user': user}
+            else:
+                drec_filter = {'ST_ID__dpu_user': user.id}
 
-        return (
-            round(avg_fat, 2) if avg_fat is not None else None,
-            round(avg_snf, 2) if avg_snf is not None else None,
-            round(avg_clr, 2) if avg_clr is not None else None
-        )
+            avg_fat = DREC.objects.filter(**drec_filter).aggregate(avg_fat=Avg('FAT'))['avg_fat']
+            avg_snf = DREC.objects.filter(**drec_filter).aggregate(avg_snf=Avg('SNF'))['avg_snf']
+            avg_clr = DREC.objects.filter(**drec_filter).aggregate(avg_clr=Avg('CLR'))['avg_clr']
+
+            return (
+                round(avg_fat, 1) if avg_fat is not None else None,
+                round(avg_snf, 1) if avg_snf is not None else None,
+                round(avg_clr, 1) if avg_clr is not None else None
+            )
+        else:
+            # Handle the case where user is not an instance of User model
+            return None, None, None
+        
+    def get_recording_dates(self, user):
+        return DREC.objects.filter(ST_ID__user=user).values_list('RecordingDate', flat=True).distinct()
+
+    def get_top_10_latest_records(self, user, st_id):
+        # Retrieve the top 10 latest records for the given ST_ID
+        return DREC.objects.filter(ST_ID__user=user, ST_ID__st_id=st_id).order_by('-RecordingDate', '-SHIFT')[:10]
+    
+    def calculate_cow_summary(self, records):
+        cow_records = [record for record in records if record.MType == 'C']
+        return self.calculate_averages(cow_records)
+
+    def calculate_buffalo_summary(self, records):
+        buffalo_records = [record for record in records if record.MType == 'B']
+        return self.calculate_averages(buffalo_records)
+
+    def prepare_cow_summary_data(self, drec_data, active_dpu_list):
+        cow_summary_data = []
+        for drec in drec_data:
+            if drec.MType == 'C':
+                cow_summary_data.append(drec)
+
+        return self.prepare_summary_data(cow_summary_data, active_dpu_list)
+
+    def prepare_buffalo_summary_data(self, drec_data, active_dpu_list):
+        buffalo_summary_data = []
+        for drec in drec_data:
+            if drec.MType == 'B':
+                buffalo_summary_data.append(drec)
+
+        return self.prepare_summary_data(buffalo_summary_data, active_dpu_list)
 
     def get(self, request, *args, **kwargs):
-        user = self.request.user
-        drec_data = self.get_drec_data(user)
-        active_dpu_list = DPU.objects.filter(user=user)
-        summary_data = self.prepare_summary_data(drec_data, active_dpu_list)
-        customer_list = self.get_customer_list(user)
-        avg_fat, avg_snf, avg_clr = self.calculate_global_averages(user)
-            # Calculate the count of MType 'B' and 'C'
-        mtype_counts = Counter(drec.MType for drec in drec_data)
+        # Check if the user is staff or superuser
+        if request.user.is_staff or request.user.is_superuser:
+            user_column = 'user'
+            dpu_column = 'user'
+            drec_filter_st_dt = "ST_ID__user"
+            customer_filter_col = "st_id__user__in"
+            drec_value = request.user
+        else:
+            user_column = 'dpu_user'
+            dpu_column = 'dpu_user'
+            drec_filter_st_dt = "ST_ID__dpu_user"
+            customer_filter_col = "st_id__dpu_user__in"
+            drec_value = request.user.id
 
-        total_customer_count = CustomerList.objects.filter(user=request.user).count()
-        total_dpus = DPU.objects.filter(user=request.user).count()
+        # Fetch DPU data based on user type
+        active_dpu_list = DPU.objects.filter(**{dpu_column: drec_value})
+
+        # Fetch DREC data based on user type
+        drec_data = DREC.objects.filter(**{drec_filter_st_dt: drec_value}).order_by('-created_at')
+
+        drec_data_cust_ids = drec_data.values_list('CUST_ID').distinct()
+        drec_data_cust_ids = [ i[0] for i in drec_data_cust_ids]
+
+        # Prepare summary data
+        summary_data = self.prepare_summary_data(drec_data, active_dpu_list)
+        
+        # Fetch customer list
+        customer_list = CustomerList.objects.filter( cust_id__in = drec_data_cust_ids  )
+
+        # Calculate global averages
+        avg_fat, avg_snf, avg_clr = self.calculate_global_averages(request.user)
+
+        if request.user.is_staff and request.user.is_superuser:
+            
+            current_users_dary_names = DPU.objects.filter(**{dpu_column: drec_value}).values_list('st_id').distinct()
+            current_users_dary_names = [ i[0] for i in current_users_dary_names]
+            # Get total customer count
+            total_customer_count = CustomerList.objects.filter( st_id__in = current_users_dary_names  ).count()            
+        else:
+            current_users_dary_name = DPU.objects.get(dpu_user = request.user.id).st_id
+            # Get total customer count
+            total_customer_count = CustomerList.objects.filter( st_id =  current_users_dary_name ).count()
+
+        # Get total DPUs
+        total_dpus = active_dpu_list.count()
+
+        # Get top 10 latest records
+        top_10_latest_records = self.get_top_10_latest_records(request.user.id, summary_data[0]['ST_ID__st_id']) if summary_data else None
+
+        # Get recording dates
+        recording_dates = self.get_recording_dates(request.user.id)
+          # Fetch customer names for each record
+                # Prepare cow summary data
+        cow_summary_data = self.prepare_cow_summary_data(drec_data, active_dpu_list)
+        # Calculate cow averages
+        avg_fat_cow, avg_snf_cow, avg_clr_cow, avg_water_cow, total_ltr_cow, total_amt_cow, total_cust_cow = self.calculate_cow_summary(drec_data)
+
+        # Prepare buffalo summary data
+        buffalo_summary_data = self.prepare_buffalo_summary_data(drec_data, active_dpu_list)
+        # Calculate buffalo averages
+        avg_fat_buffalo, avg_snf_buffalo, avg_clr_buffalo, avg_water_buffalo, total_ltr_buffalo, total_amt_buffalo, total_cust_buffalo = self.calculate_buffalo_summary(drec_data)
+
 
         context = {
             'active_dpu_list': active_dpu_list,
@@ -230,22 +301,35 @@ class DashboardView(TemplateView):
             'total_customer_count': total_customer_count,
             'total_dpus': total_dpus,
             'dpu_list': ', '.join(dpu.st_id for dpu in active_dpu_list),
-             'mtype_b_count': mtype_counts['B'],
-            'mtype_c_count': mtype_counts['C'],
+            'recording_dates': recording_dates,
+            'top_10_latest_records': top_10_latest_records,
+            'cow_summary_data': cow_summary_data,
+            'avg_fat_cow': avg_fat_cow,
+            'avg_snf_cow': avg_snf_cow,
+            'avg_clr_cow': avg_clr_cow,
+            'avg_water_cow': avg_water_cow,
+            'total_ltr_cow': total_ltr_cow,
+            'total_amt_cow': total_amt_cow,
+            'total_cust_cow': total_cust_cow,
+            'buffalo_summary_data': buffalo_summary_data,
+            'avg_fat_buffalo': avg_fat_buffalo,
+            'avg_snf_buffalo': avg_snf_buffalo,
+            'avg_clr_buffalo': avg_clr_buffalo,
+            'avg_water_buffalo': avg_water_buffalo,
+            'total_ltr_buffalo': total_ltr_buffalo,
+            'total_amt_buffalo': total_amt_buffalo,
+            'total_cust_buffalo': total_cust_buffalo,
 
+           
         }
 
         return render(request, self.template_name, context)
 
 
-
-
-
-
 # User Authentication Views
 class SignUpView(CreateView):
     form_class = SignUpForm
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('login')
     template_name = 'common/register.html'
 
 class UserRegistrationView(generics.CreateAPIView):
@@ -288,16 +372,49 @@ class UserLoginView(APIView):
             # Handle other exceptions
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR, content_type='application/json')
 
+
+
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'common/profile.html'
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Retrieve the authentication token for the current user
         token, created = Token.objects.get_or_create(user=self.request.user)
         # Add the token to the context
         context['token'] = token.key
-        return context
 
+        # Check if the user is staff or superuser
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            user_column = 'user'
+            dpu_column = 'user'
+            drec_filter_st_dt = "ST_ID__user"
+            drec_value = self.request.user
+        else:
+            user_column = 'dpu_user'
+            dpu_column = 'dpu_user'
+            drec_filter_st_dt = "ST_ID__dpu_user"
+            drec_value = self.request.user.id
+
+        # Add the additional information to the context
+        context['user_column'] = user_column
+        context['dpu_column'] = dpu_column
+        context['drec_filter_st_dt'] = drec_filter_st_dt
+        context['drec_value'] = drec_value
+
+        # Retrieve additional information for dpu_user
+        if not (self.request.user.is_staff or self.request.user.is_superuser):
+            try:
+                dpu_user = DPU.objects.get(dpu_user=self.request.user.id)  # Pass user ID here
+                context['dpu_owner_name'] = dpu_user.owner
+                context['dpu_st_id'] = dpu_user.st_id
+                context['dpu_mobile_number'] = dpu_user.mobile_number
+            except DPU.DoesNotExist:
+                # Handle the case where DPU object does not exist for the user
+                pass
+
+        return context
+    
 class ProfileUpdateView(LoginRequiredMixin, TemplateView):
     user_form = UserForm
     profile_form = ProfileForm
@@ -321,38 +438,60 @@ class ProfileUpdateView(LoginRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
 
+
+def generate_random_password( length=8):
+    characters = string.ascii_letters + string.digits
+    return ''.join(random.choice(characters) for i in range(length))
+
+#admin can do this 
 @login_required
 def add_dpu(request):
     if request.method == 'POST':
         form = DPUForm(request.POST)
         if form.is_valid():
             dpu = form.save(commit=False)
+            password = generate_random_password()
+            print("password : ", password)
+            user = User.objects.create_user(request.POST.get("mobile_number"),  "dummy@gmail.com", password)
+            user.save()
+            dpu.plain_password = password
             dpu.user = request.user
+            dpu.dpu_user = user.id        
             dpu.save()
             # Redirect to the user's dashboard or any other page
             return redirect('active_dpu')
     else:
+        if not request.user.is_staff and not request.user.is_superuser:
+            messages.error(request, 'You are not authorised to add DPU')
+            return redirect("dashboard")
         form = DPUForm()
     return render(request, 'common/add_dpu.html', {'form': form})
 
 def active_dpu(request):
-    active_dpu_list = DPU.objects.filter(user=request.user)
+    # for super user
+    if request.user.is_staff and request.user.is_superuser:
+        active_dpu_list = DPU.objects.filter(user=request.user)
+    # for Staff user    
+    elif request.user.is_staff and not request.user.is_superuser:   
+        active_dpu_list = DPU.objects.filter(user=request.user)
+    # for no staff no super user (Normal)  
+    elif not request.user.is_staff and not request.user.is_superuser:
+        user_id = request.user.id
+        active_dpu_list = DPU.objects.filter(dpu_user=user_id)
+
     return render(request, 'common/active_dpu.html', {'active_dpu_list': active_dpu_list})
     
 class DRECViewSet(viewsets.ModelViewSet):
     queryset = DREC.objects.all()
     serializer_class = DRECSerializer
-    print("perform create before")
 
     def perform_create(self, serializer):
         # You can customize the save process here before calling the super method
         instance = serializer.save()
-        print("perform create")
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
         response.status_code = 200  # Set the status code to 200
-        print("perform create", response)
         return response
 
     def save(self, *args, **kwargs):
@@ -395,14 +534,36 @@ def dpudetails(request, dpuid):
     customer_list = CustomerList.objects.filter(st_id=dpuid)
     # Fetch DREC entries for the specific DPU
     drecs = DREC.objects.filter(ST_ID=dpu)
+    dpu = get_object_or_404(DPU, st_id=dpuid)
+    context = {
+        'dpu': dpu,
+        'drecs': drecs,
+    }
+
     context = {
         'dpu': dpu,
         'customer_list': customer_list,
         'drecs': drecs,
+
     }
     return render(request, 'common/dpudetails.html', context)
 
-
+class UserDpuDetails(TemplateView):
+    template_name = 'common/user/user_dpudetails.html'  # Assuming the template is named 'user_dpudetails.html'
+    
+    def get_context_data(self, **kwargs):
+        st_id = self.kwargs.get('st_id')  # Get st_id from URL
+        dpu = get_object_or_404(DPU, st_id=st_id)
+        
+        customer_list = CustomerList.objects.filter(st_id=st_id)
+        drecs = DREC.objects.filter(ST_ID=dpu)
+        
+        context = {
+            'dpu': dpu,
+            'customer_list': customer_list,
+            'drecs': drecs,
+        }
+        return context
 
 def edit_dpu(request, st_id):
     dpu = get_object_or_404(DPU, st_id=st_id)
@@ -434,7 +595,6 @@ def extract_cust_id_range(csv_file):
 
     return start_range, end_range
 
-from django.db import connection
 import logging
 
 logger = logging.getLogger(__name__)
@@ -537,7 +697,7 @@ def process_csv_content(user, st_id, csv_lines):
             )
     # Delete rows that are in the database but not in the CSV file
     CustomerList.objects.filter(user=user, st_id=st_id).exclude(cust_id__in=existing_cust_ids).delete()
-    
+@login_required
 def customer_list(request, st_id):
     # Fetch the customer list for the given st_id
     customer_list = CustomerList.objects.filter(st_id=st_id)
@@ -563,8 +723,6 @@ def download_latest_csv(request, st_id):
         messages.error(request, f'Error downloading CSV file: {e}')
 
     return redirect('error_view')
-
-logger = logging.getLogger(__name__)
 
 @api_view(['GET'])
 def get_cid_range(request):
@@ -730,9 +888,13 @@ def upload_rate_table(request):
     rate_tables = RateTable.objects.filter(user=request.user)
     return render(request, 'common/rate_table_upload.html', {'form': form, 'rate_tables': rate_tables})
 
+@login_required
 def rate_table_list(request):
     # Fetch all rate tables for the current user
-    rate_tables = RateTable.objects.filter(user=request.user)
+    if request.user.is_staff or request.user.is_superuser:
+        rate_tables = RateTable.objects.filter(user=request.user)
+    else:
+        rate_tables = RateTable.objects.filter()
 
     context = {
         'rate_tables': rate_tables,
@@ -762,8 +924,6 @@ def download_rate_table(request, rate_table_id):
     # If the rate table doesn't belong to the current user, return a 404 response
     return HttpResponse(status=404)
 
-logger = logging.getLogger(__name__)
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @csrf_exempt
@@ -791,7 +951,6 @@ def lastratedate_api(request):
 
 
             Response_obj = {'date': csv_file_object[0].start_date.strftime('%d-%m-%Y'), 'file_path': file_path, 'id': csv_file_object[0].id }
-            print(Response_obj)
             # Return both the date and the file path
             return JsonResponse(Response_obj)
         else:
@@ -818,19 +977,14 @@ def ratesitem_api(request):
         rate_type = request.GET.get('rate_type')
         item = request.GET.get('item')
         user = request.user
-        print(animal, date_str, rate_type, item, user.username, user.id)
-        print
         # Convert date string to date object
         date_obj = date(int(date_str[2]), int(date_str[1]), int(date_str[0]))
         
         # Query the RateTable model for the latest CSV file object
         csv_file_object = RateTable.objects.filter(rate_type=rate_type, animal_type=animal, user=user.id, start_date=date_obj).order_by("-uploaded_at")
         
-        print("before if")
-        print(date_obj)
         if len(csv_file_object) > 0:
             file_path = csv_file_object[0].csv_file.path
-            print("file path:", file_path)
             
             # Check if the file exists
             if not os.path.exists(file_path):
@@ -865,33 +1019,42 @@ def ratesitem_api(request):
 
     except Exception as e:
         # Handle other exceptions appropriately
-        print(f'Error in ratesitem_api: {e}')
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
     
-import logging
 
-# Get an instance of the logger
-logger = logging.getLogger(__name__)
-from django.http import JsonResponse
-from django.shortcuts import render
-from .models import DPU, DREC, CustomerList
-from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Sum, Avg
-from datetime import datetime
 @login_required
 def shift_report(request):
     # Fetch dynamic values for dropdowns from the database
-    locations = DPU.objects.filter(user=request.user).values_list('location', flat=True).distinct()
-    dpus = DPU.objects.filter(user=request.user).values_list('st_id', flat=True).distinct()
-    societies = DPU.objects.filter(user=request.user).values_list('society', flat=True).distinct()
-    shifts = DREC.objects.filter(ST_ID__user=request.user, SHIFT__in=['M', 'E']).values_list('SHIFT', flat=True).distinct()
+
+    # staff and super user
+    if request.user.is_staff or request.user.is_superuser:
+        locations = DPU.objects.filter(user=request.user).values_list('location', flat=True).distinct()
+        dpus = DPU.objects.filter(user=request.user).values_list('st_id', flat=True).distinct()
+        societies = DPU.objects.filter(user=request.user).values_list('society', flat=True).distinct()
+        shifts = DREC.objects.filter(ST_ID__user=request.user, SHIFT__in=['M', 'E']).values_list('SHIFT', flat=True).distinct()
 
 
-    # Count distinct locations, dpus, and societies
-    total_locations = DPU.objects.filter(user=request.user).values('location').distinct().count()
-    total_dpus = DPU.objects.filter(user=request.user).count()
-    total_societies = DPU.objects.filter(user=request.user).values('society').distinct().count()
-    customer_list = CustomerList.objects.filter(user=request.user)
+        # Count distinct locations, dpus, and societies
+        total_locations = DPU.objects.filter(user=request.user).values('location').distinct().count()
+        total_dpus = DPU.objects.filter(user=request.user).count()
+        total_societies = DPU.objects.filter(user=request.user).values('society').distinct().count()
+        customer_list = CustomerList.objects.filter(user=request.user)
+
+    else:
+        # normal user
+        locations = DPU.objects.filter(dpu_user=request.user.id).values_list('location', flat=True).distinct()
+        dpus = DPU.objects.filter(dpu_user=request.user.id).values_list('st_id', flat=True).distinct()
+        societies = DPU.objects.filter(dpu_user=request.user.id).values_list('society', flat=True).distinct()
+        shifts = DREC.objects.filter(ST_ID__dpu_user=request.user.id, SHIFT__in=['M', 'E']).values_list('SHIFT', flat=True).distinct()
+
+
+        # Count distinct locations, dpus, and societies
+        total_locations = DPU.objects.filter(dpu_user=request.user.id).values('location').distinct().count()
+        total_dpus = DPU.objects.filter(dpu_user=request.user.id).count()
+        total_societies = DPU.objects.filter(dpu_user=request.user.id).values('society').distinct().count()
+        customer_list = CustomerList.objects.filter(user=request.user)
+
+
 
     # Get initial data for dropdowns
     initial_data = {
@@ -924,6 +1087,12 @@ def shift_report(request):
         summary_data = get_summary_data(location, dpu, society, shift, start_date)
         detail_data = get_detail_data(request, location, dpu, society, shift, start_date)
 
+        # Calculate summary data for cow and buffalo records
+        cow_records = [record for record in detail_data if record['MType'] == 'C']
+        buffalo_records = [record for record in detail_data if record['MType'] == 'B']
+
+        cow_summary_data = calculate_cow_summary(cow_records)
+        buffalo_summary_data = calculate_buffalo_summary(buffalo_records)
 
         context.update({
             'selected_location': location,
@@ -933,19 +1102,79 @@ def shift_report(request):
             'selected_start_date': start_date_str,
             'summary_data': summary_data,
             'detail_data': detail_data,
+            'cow_summary_data': cow_summary_data,
+            'buffalo_summary_data': buffalo_summary_data,
         })
-
     return render(request, 'common/shift_report.html', context)
+
+def calculate_cow_summary(records):
+    total_fat = sum(record['FAT'] for record in records)
+    total_snf = sum(record['SNF'] for record in records)
+    total_clr = sum(record['CLR'] for record in records)
+    total_water = sum(record['WATER'] for record in records)
+    total_ltr = sum(record['QT'] for record in records)
+    total_amt = sum(record['Amount'] for record in records)
+    total_camt = sum(record['CAmount'] for record in records)
+    total_cust = len(records)
+
+    avg_fat = total_fat / len(records) if records else 0
+    avg_snf = total_snf / len(records) if records else 0
+    avg_clr = total_clr / len(records) if records else 0
+    avg_water = total_water / len(records) if records else 0
+
+    return {
+        'AvgFAT': avg_fat,
+        'AvgSNF': avg_snf,
+        'AvgCLR': avg_clr,
+        'AvgWater': avg_water,
+        'TotalLtr': total_ltr,
+        'TotalAmt': total_amt,
+        'TotalCAmt': total_camt,  # Updated to include TotalCAmt
+        'TotalCust': total_cust,
+    }
+
+def calculate_buffalo_summary(records):
+    total_fat = sum(record['FAT'] for record in records)
+    total_snf = sum(record['SNF'] for record in records)
+    total_clr = sum(record['CLR'] for record in records)
+    total_water = sum(record['WATER'] for record in records)
+    total_ltr = sum(record['QT'] for record in records)
+    total_amt = sum(record['Amount'] for record in records)
+    total_camt = sum(record['CAmount'] for record in records)  # Calculating TotalCAmt
+    total_cust = len(records)
+
+    avg_fat = total_fat / len(records) if records else 0
+    avg_snf = total_snf / len(records) if records else 0
+    avg_clr = total_clr / len(records) if records else 0
+    avg_water = total_water / len(records) if records else 0
+
+    return {
+        'AvgFAT': avg_fat,
+        'AvgSNF': avg_snf,
+        'AvgCLR': avg_clr,
+        'AvgWater': avg_water,
+        'TotalLtr': total_ltr,
+        'TotalAmt': total_amt,
+        'TotalCAmt': total_camt,  # Updated to include TotalCAmt
+        'TotalCust': total_cust,
+    }
 
 def get_dpus_by_location(request):
     location = request.GET.get('location')
-    dpus = DPU.objects.filter(user=request.user, location=location).values_list('st_id', flat=True).distinct()
+    if request.user.is_staff or request.user.is_superuser:
+        dpus = DPU.objects.filter(user=request.user, location=location).values_list('st_id', flat=True).distinct()
+    else:  
+        dpus = DPU.objects.filter(dpu_user=request.user.id, location=location).values_list('st_id', flat=True).distinct()
     return JsonResponse(list(dpus), safe=False)
 
 def get_societies_by_dpu(request):
     location = request.GET.get('location')
     dpu = request.GET.get('dpu')
-    societies = DPU.objects.filter(user=request.user, location=location, st_id=dpu).values_list('society', flat=True).distinct()
+    if request.user.is_staff or request.user.is_superuser:
+        societies = DPU.objects.filter(user=request.user, location=location, st_id=dpu).values_list('society', flat=True).distinct()
+    else:    
+        societies = DPU.objects.filter(dpu_user=request.user.id, location=location, st_id=dpu).values_list('society', flat=True).distinct()    
+    
     return JsonResponse(list(societies), safe=False)
 
 def get_summary_data(location, dpu, society, shift, start_date):
@@ -962,66 +1191,92 @@ def get_summary_data(location, dpu, society, shift, start_date):
         TotalQT=Sum('QT'),
         TotalAmount=Sum('Amount'),
         TotalCAmount=Sum('CAmount'),
-        AvgFAT=Avg('FAT'),
-        AvgSNF=Avg('SNF'),
-        AvgCLR=Avg('CLR'),
-
+        AvgFAT=Round(Avg('FAT'), 1),
+        AvgSNF=Round(Avg('SNF'), 1),
+        AvgCLR=Round(Avg('CLR'), 1),
     )
-
     return summary_data
 
 def get_detail_data(request, location, dpu, society, shift, start_date):
-    # Replace this function with your actual data retrieval logic for detail data
-    # Example: Querying detailed data
+    # Fetch detail data for the current user's DPU and associated customers
+    if request.user.is_staff or request.user.is_superuser:
+        drec_data = DREC.objects.filter(
+            ST_ID__user=request.user,
+            ST_ID__location=location,
+            ST_ID__st_id=dpu,
+            ST_ID__society=society,
+            SHIFT=shift,
+            RecordingDate=start_date,
+        )
+    else:
+        drec_data = DREC.objects.filter(
+            ST_ID__dpu_user=request.user.id,
+            ST_ID__location=location,
+            ST_ID__st_id=dpu,
+            ST_ID__society=society,
+            SHIFT=shift,
+            RecordingDate=start_date,
+        )
 
-    detail_data = DREC.objects.filter(
-        ST_ID__location=location,
-        ST_ID__st_id=dpu,
-        ST_ID__society=society,
-        SHIFT=shift,
-        RecordingDate=start_date,
-    ).values(
-        'CUST_ID',
-        'MType',
-        'FAT',
-        'SNF',
-        'CLR',
-        'WATER',
-        'QT',
-        'RATE',
-        'Amount',
-        'CAmount',
-    )
+    # Fetch unique customer IDs from the detail data
+    customer_ids = drec_data.values_list('CUST_ID', flat=True).distinct()
 
-    # Fetch customer names for the given st_id and update detail_data
-    st_id_customer_names = {customer.cust_id: customer.name for customer in CustomerList.objects.filter(user=request.user, st_id=dpu)}
+    # Fetch customer names for the given customer IDs and the selected st_id
+    customer_names = CustomerList.objects.filter(cust_id__in=customer_ids, st_id=dpu).values('cust_id', 'name')
 
-    for record in detail_data:
-        record['CustomerName'] = st_id_customer_names.get(record['CUST_ID'], '')
+    # Create a dictionary to map customer IDs to customer names
+    customer_name_map = {customer['cust_id']: customer['name'] for customer in customer_names}
+
+    # Iterate over detail data and add customer names
+    detail_data = []
+    for record in drec_data:
+        customer_name = customer_name_map.get(record.CUST_ID, '')
+        record_dict = {
+            'CUST_ID': record.CUST_ID,
+            'MType': record.MType,
+            'FAT': record.FAT,
+            'SNF': record.SNF,
+            'CLR': record.CLR,
+            'WATER': record.WATER,
+            'QT': record.QT,
+            'RATE': record.RATE,
+            'Amount': record.Amount,
+            'CAmount': record.CAmount,
+            'CustomerName': customer_name,
+        }
+        detail_data.append(record_dict)
 
     return detail_data
 
-# ledger code
-from django.shortcuts import render
-from django.db.models import Sum, Avg
-from .models import DPU, DREC, CustomerList
-from datetime import datetime
-from django.contrib.auth.decorators import login_required
+
 
 @login_required
 def ledger_report(request):
     # Fetch dynamic values for dropdowns from the database
-    locations = DPU.objects.filter(user=request.user).values_list('location', flat=True).distinct()
-    dpus = DPU.objects.filter(user=request.user).values_list('st_id', flat=True).distinct()
-    societies = DPU.objects.filter(user=request.user).values_list('society', flat=True).distinct()
+    if request.user.is_staff or request.user.is_superuser:
+        locations = DPU.objects.filter(user=request.user).values_list('location', flat=True).distinct()
+        dpus = DPU.objects.filter(user=request.user).values_list('st_id', flat=True).distinct()
+        societies = DPU.objects.filter(user=request.user).values_list('society', flat=True).distinct()
+                # Count distinct locations, dpus, and societies
+        total_locations = DPU.objects.filter(user=request.user.id).values('location').distinct().count()
+        total_dpus = DPU.objects.filter(user=request.user.id).count()
+        total_societies = DPU.objects.filter(user=request.user.id).values('society').distinct().count()
 
-    # Get distinct customer IDs for the current user
-    customer_ids = CustomerList.objects.filter(user=request.user).values_list('cust_id', flat=True).distinct()
- # Count distinct locations, dpus, and societies
-    total_locations = DPU.objects.filter(user=request.user).values('location').distinct().count()
-    total_dpus = DPU.objects.filter(user=request.user).count()
-    total_societies = DPU.objects.filter(user=request.user).values('society').distinct().count()
-    customer_list = CustomerList.objects.filter(user=request.user)
+    else:
+        locations = DPU.objects.filter(dpu_user=request.user.id).values_list('location', flat=True).distinct()
+        dpus = DPU.objects.filter(dpu_user=request.user.id).values_list('st_id', flat=True).distinct()
+        societies = DPU.objects.filter(dpu_user=request.user.id).values_list('society', flat=True).distinct()
+        total_locations = DPU.objects.filter(dpu_user=request.user.id).values('location').distinct().count()
+        total_dpus = DPU.objects.filter(dpu_user=request.user.id).count()
+        total_societies = DPU.objects.filter(dpu_user=request.user.id).values('society').distinct().count()
+
+        # Get distinct customer IDs for the current user
+    user_dpust_ids = DPU.objects.filter(dpu_user=request.user.id).values_list('st_id', flat=True).distinct()
+        
+        # Fetch customer IDs associated with the user's DPUs
+    customer_ids = CustomerList.objects.filter(st_id__in=user_dpust_ids).values_list('cust_id', flat=True).distinct()
+        
+    # Count distinct locations, dpus, and societies
 
 
     context = {
@@ -1032,8 +1287,7 @@ def ledger_report(request):
         'total_locations': total_locations,
         'total_dpus': total_dpus,
         'total_societies': total_societies,
-        'customer_list': customer_list,  # Include customer list in the context
-
+        'customer_list': customer_list,
     }
 
     if request.method == 'POST':
@@ -1072,7 +1326,6 @@ def ledger_report(request):
 
     return render(request, 'common/ledger_report.html', context)
 
-from django.db.models import Sum, Avg
 
 def get_ledger_summary_data(location, dpu, society, start_id, end_id, start_date, end_date):
     # Get distinct customer IDs within the specified range
@@ -1106,30 +1359,26 @@ def get_ledger_summary_data(location, dpu, society, start_id, end_id, start_date
             TotalQT=Sum('QT'),
             TotalAmount=Sum('Amount'),
             TotalCAmount=Sum('CAmount'),
-            AvgFAT=Avg('FAT'),
-            AvgSNF=Avg('SNF'),
-            AvgCLR=Avg('CLR'),
-
+            AvgFAT=Round(Avg('FAT'), 1),
+            AvgSNF=Round(Avg('SNF'), 1),
+            AvgCLR=Round(Avg('CLR'), 1),
         ).order_by('CUST_ID').first()
 
         if summary_data:
             # If summary_data is not None, add the cust_id to the summary_data dictionary
             summary_data['CUST_ID'] = cust_id
-             # Add customer name to the summary_data
-            customer_name = CustomerList.objects.filter(cust_id=cust_id).values_list('name', flat=True).first()
+            
+            # Add customer name to the summary_data
+            customer_name = CustomerList.objects.filter(cust_id=cust_id, st_id=dpu).values_list('name', flat=True).first()
             summary_data['CustomerName'] = customer_name
 
             # Append the summary_data to the list
             summary_data_list.append(summary_data)
 
-            # Print the values for debugging
-
     return summary_data_list
 
 def get_ledger_detail_data(location, dpu, society, start_id, end_id, start_date, end_date):
-    # Replace this function with your actual data retrieval logic for ledger detail data
-  
-    # Example: Querying detailed data with select_related
+    # Query detailed data with select_related and order by CUST_ID
     detail_data = DREC.objects.filter(
         ST_ID__location=location,
         ST_ID__st_id=dpu,
@@ -1138,16 +1387,9 @@ def get_ledger_detail_data(location, dpu, society, start_id, end_id, start_date,
         CUST_ID__lte=end_id,
         RecordingDate__gte=start_date,
         RecordingDate__lte=end_date
-    ).select_related('ST_ID')
+    ).select_related('ST_ID').order_by('CUST_ID')
 
     return detail_data
-
-from django.db.models import Count, Avg
-
-from django.db.models import Count, Avg, Sum
-from django.db.models import Count, Avg, Sum
-
-from django.db.models import F
 
 def get_payment_summary_data(location, dpu, start_date, end_date, start_id, end_id):
     payment_data = DREC.objects.filter(
@@ -1169,10 +1411,10 @@ def get_payment_summary_data(location, dpu, start_date, end_date, start_id, end_
         TotalQT=Sum('QT'),
         TotalAmount=Sum('Amount'),
         TotalCAmount=Sum('CAmount'),
-        AvgFAT=Avg('FAT'),
-        AvgSNF=Avg('SNF'),
-        AvgCLR=Avg('CLR'),
-        AvgRATE=Avg('RATE'),
+        AvgFAT=Round(Avg('FAT'), 1),
+        AvgSNF=Round(Avg('SNF'), 1),
+        AvgCLR=Round(Avg('CLR'), 1),
+        AvgRATE=Round(Avg('RATE'),2),
         
     ).order_by('CUST_ID')
 

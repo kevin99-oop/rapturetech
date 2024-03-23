@@ -53,7 +53,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.min.js"></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
- 
+
 
 </head>
 <style>
@@ -123,10 +123,10 @@
           </button>
         </div>
         <div>
-          <a class="navbar-brand brand-logo" href="{% url 'dashboard' %}">
+          <a class="navbar-brand brand-logo" href="{% url 'user_dashboard' %}">
             <img src="{% static 'assets/img/rapturetech_logo-nobg.png'%}" alt="logo" />
           </a>
-          <a class="navbar-brand brand-logo-mini" href="{% url 'dashboard' %}">
+          <a class="navbar-brand brand-logo-mini" href="{% url 'user_dashboard' %}">
             <img src="{% static 'assets/img/rapturetech_logo-nobg.png'%}" alt="logo" />
           </a>
         </div>
@@ -151,7 +151,7 @@
               <input type="text" id="dateInput" class="form-control fw-bold text-danger" readonly>
             </div>
           </li>
-<!-- 
+
           <li class="nav-item dropdown">
             <a class="nav-link count-indicator" id="countDropdown" href="#" data-bs-toggle="dropdown"
               aria-expanded="false">
@@ -165,7 +165,7 @@
                 <span class="badge badge-pill badge-primary float-right">View all</span>
               </a>
               <div class="dropdown-divider"></div>
-              Loop through the notifications
+              <!-- Loop through the notifications -->
               <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list pb-0"
                 aria-labelledby="countDropdown">
                 {% for notification in recent_notifications %}
@@ -183,7 +183,7 @@
               </div>
 
             </div>
-          </li> -->
+          </li>
           <li class="nav-item dropdown d-none d-lg-block user-dropdown">
             <a class="nav-link" id="UserDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
               <i class="mdi mdi-account cursor-pointer"></i><i class="mdi mdi-chevron-down"></i>
@@ -194,10 +194,10 @@
                 <a class="dropdown-item fw-6" href="{% url 'profile' %}">
                   <i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2 "></i> My
                   Profile</a>
-                  {% if request.user.is_staff or request.user.is_superuser  %}
+
                 <a class="dropdown-item fw-6" href="{% url 'change-password' %}"><i
                     class="dropdown-item-icon mdi mdi-lock-open text-primary me-2"></i>Change Password</a>
-                {%endif%}
+
                 <a class="dropdown-item fw-6" href="{% url 'logout' %}"><i
                     class="dropdown-item-icon mdi mdi-power text-primary me-2"></i>Sign Out</a>
 
@@ -216,7 +216,7 @@
       <nav class="sidebar sidebar-offcanvas rounded " id="sidebar">
         <ul class="nav">
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'dashboard' %}">
+            <a class="nav-link" href="{% url 'user_dashboard' %}">
               <i class="mdi mdi-view-dashboard mdi-grid-large menu-icon"></i>
               <span class="menu-title">Dashboard</span>
             </a>
@@ -246,9 +246,7 @@
             </a>
             <div class="collapse" id="form-elements">
               <ul class="nav flex-column sub-menu">
-                {% if request.user.is_staff or request.user.is_superuser  %}
                 <li class="nav-item"><a class="nav-link" href="{% url 'add_dpu' %}">Add DPU</a></li>
-                {% endif %}
                 <li class="nav-item"><a class="nav-link" href="{% url 'active_dpu' %}">DPU List</a></li>
 
               </ul>
@@ -262,9 +260,8 @@
             </a>
             <div class="collapse" id="charts">
               <ul class="nav flex-column sub-menu">
-                {% if request.user.is_staff or request.user.is_superuser  %}
-                <li class="nav-item"> <a class="nav-link" href="{% url 'upload_rate_table' %}">Rate Table Upload</a></li>
-                {%endif%}
+                <li class="nav-item"> <a class="nav-link" href="{% url 'upload_rate_table' %}">Rate Table Upload</a>
+                </li>
                 <li class="nav-item"> <a class="nav-link" href="{% url 'rate_table_list' %}">Rate Table List</a></li>
               </ul>
             </div>
@@ -277,10 +274,7 @@
             </a>
             <div class="collapse" id="tables">
               <ul class="nav flex-column sub-menu">
-                {% if request.user.is_staff or request.user.is_superuser  %}
-
                 <li class="nav-item"> <a class="nav-link" href="{% url 'upload_customer_csv' %}">Add Customer</a></li>
-                {%endif%}
                 <li class="nav-item"> <a class="nav-link" href="{% url 'active_dpu' %}">Customer List</a></li>
 
               </ul>
@@ -303,7 +297,8 @@
 
 
 
-          {% block content %} {% endblock content %}
+          {% block content %} 
+          {% endblock content %}
 
 
 

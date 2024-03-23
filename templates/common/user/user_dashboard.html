@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'common/user/user_base.html' %}
 {% load static %}
 {% block content %}
 <!-- Add these CDN links to your base HTML file -->
@@ -12,7 +12,6 @@
 
 <div class="container-fluid py-4">
     <div class="col-sm-12">
-        
         <div class="home-tab">
             <nav>
                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
@@ -27,11 +26,11 @@
                                 Records
                             </a>
                         </li>
-                        <!-- <li class="nav-item">
+                        <li class="nav-item">
                             <a class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
                                 Charts
                             </a>
-                        </li> -->
+                        </li>
                     </ul>
                 </div>
               </nav>
@@ -44,7 +43,7 @@
                                     <div class="row">
                                         <div class="col-8">
                                             <div class="numbers">
-                                                <p class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Average Fat</p>
+                                                <p class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Avg Fat</p>
                 
                                                 <p class="mb-0">
                                                     <span class="text-success text-lg font-weight-bolder fw-bold">
@@ -54,6 +53,9 @@
                                         </div>
                                         <div class="col-4 text-end">
                 
+                                            <div class="icon icon-shape bg-gradient-primary shadow-primary text-center rounded-circle">
+                                                <i class="fa fa-tint text-lg opacity-10" aria-hidden="true"></i>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -65,7 +67,7 @@
                                     <div class="row">
                                         <div class="col-8">
                                             <div class="numbers">
-                                                <p class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Average SNF</p>
+                                                <p class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Avg. SNF</p>
                 
                                                 <p class="mb-0">
                                                     <span class="text-success text-lg font-weight-bolder fw-bold">{{ avg_snf }}</span>
@@ -89,7 +91,7 @@
                                     <div class="row">
                                         <div class="col-8">
                                             <div class="numbers">
-                                                <p class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Average CLR</p>
+                                                <p class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Avg. CLR</p>
                 
                                                 <p class="mb-0">
                                                     <span class="text-success text-lg font-weight-bolder fw-bold">{{ avg_clr }}</span>
@@ -113,7 +115,7 @@
                                     <div class="row">
                                         <div class="col-8">
                                             <div class="numbers">
-                                                <p class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Total Customer</p>
+                                                <p class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Total Cust</p>
                 
                                                 <p class="mb-0">
                 
@@ -148,30 +150,29 @@
                                 <div class="table-responsive card-body rounded">
                                     <table id="summary_table" class="table align-items-center  table-rwd text-center table table-striped table-hover rounded table-responsive w-100"    
                                     data-toggle="table"
-                                    data-pagination="true"
+                                    data-pagination="false"
                                     data-auto-refresh="true"
                                     data-auto-refresh-interval="5000">
                                         <thead class="text-white text-center rounded table-title">
                                             <tr>
                                                 <th>Station ID</th>
-                                                <th>Location</th>
+                                                <th>Root</th>
                                                 <th>Society</th>
                                                 <th>Date</th>
-                                                <th >Shift</th>
-                                                <th>Avgerage FAT</th>
-                                                <th>Avgerage SNF</th>
-                                                <th>Avgerage CLR</th>
-                                                <th>Avgerage Water</th>
-                                                <th>Total Liter</th>
-                                                <th>Total Amount</th>
-                                                <th>Total Customer</th>
+                                                <th>Shift</th>
+                                                <th>Avg. Fat</th>
+                                                <th>Avg. Snf</th>
+                                                <th>Avg. Clr</th>
+                                                <th>Avg. Water</th>
+                                                <th>Total Ltr.</th>
+                                                <th>Total Amt.</th>
+                                                <th>Total Cust.</th>
                                             </tr>
-                                        
                                         </thead>
                                         <tbody class="align-items-center text-center fw-bold" >
                                             {% for record in summary_data %}
-                                            <tr class="align-items-center text-align-center" >
-                                                <td><a href="{% url 'dpudetails' dpuid=record.ST_ID__st_id  %}" class="text-dark">{{ record.ST_ID__st_id  }}</a></td>
+                                            <tr class="align-items-center text-align-center">
+                                                <td><a href="{% url 'dpudetails' st_id=record.ST_ID__st_id  %}" class="text-dark">{{ record.ST_ID__st_id  }}</a></td>
                                                 <td>{{ record.ST_ID__location }}</td>
                                                 <td>{{ record.ST_ID__society }}</td>
                                                 <td>{{ record.RecordingDate|date:"d-m-Y" }}</td>
@@ -185,31 +186,8 @@
                                                 <td>{{ record.total_cust }}</td>
                                             </tr>
                                             {% endfor %}
-                                            {% if not request.user.is_staff and not request.user.is_superuser %}
-
-                                            <tr class="align-items-center text-align-center" >
-                                                <td colspan="5">Cow Summary</td>
-                                                <td>{{ avg_fat_cow }}</td>
-                                                <td>{{ avg_snf_cow }}</td>
-                                                <td>{{ avg_clr_cow }}</td>
-                                                <td>{{ avg_water_cow }}</td>
-                                                <td>{{ total_ltr_cow }}</td>
-                                                <td>{{ total_amt_cow }}</td>
-                                                <td>{{ total_cust_cow }}</td>
-                                            </tr>
-                                            <tr class="align-items-center text-align-center" >
-                                                <td colspan="5">Buffalo Summary</td>
-                                                <td>{{ avg_fat_buffalo }}</td>
-                                                <td>{{ avg_snf_buffalo }}</td>
-                                                <td>{{ avg_clr_buffalo }}</td>
-                                                <td>{{ avg_water_buffalo }}</td>
-                                                <td>{{ total_ltr_buffalo }}</td>
-                                                <td>{{ total_amt_buffalo }}</td>
-                                                <td>{{ total_cust_buffalo }}</td>
-                                            </tr>
-                                            {%endif%}
                                         </tbody>
-                                    </table>    
+                                    </table>         
                                 </div>
                             </div>
                         </div>
@@ -232,7 +210,7 @@
 
                                         <thead class="table-title text-white text-center rounded">
                                             <tr>
-                                                <th>Station Id</th>
+                                                <th>St ID</th>
                                                 <th>Root</th>
                                                 <th>Society</th>
                                                 <th>Date</th>
@@ -244,9 +222,9 @@
                                                 <th>SNF</th>
                                                 <th>CLR</th>
                                                 <th>Water</th>
-                                                <th>Lit. Qt. </th>
-                                                <th>Amount</th>
-                                                <th>Cumulative Amount</th>
+                                                <th>Ltr. Qty </th>
+                                                <th>Amt</th>
+                                                <th>Cum. Amount</th>
                                             </tr>
                                         </thead>
                                         <tbody class="text-center fw-bold" id="tableBody">
@@ -368,7 +346,7 @@
         <script>
         function refreshTable() {
             $.ajax({
-                url: '{% url "dashboard" %}',
+                url: '{% url "user_dashboard" %}',
                 type: 'GET',
                 dataType: 'html',
                 success: function (data) {
