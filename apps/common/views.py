@@ -135,6 +135,7 @@ class DashboardView(TemplateView):
 
         return avg_fat, avg_snf, avg_clr, avg_water, total_ltr, total_amt, total_cust
 
+
     def prepare_summary_data(self, drec_data, active_dpu_list):
         grouped_data = defaultdict(list)
         latest_records = {}
@@ -258,7 +259,7 @@ class DashboardView(TemplateView):
         # Calculate global averages
         avg_fat, avg_snf, avg_clr = self.calculate_global_averages(request.user)
 
-        if request.user.is_staff and request.user.is_superuser:
+        if request.user.is_staff or request.user.is_superuser:
             
             current_users_dary_names = DPU.objects.filter(**{dpu_column: drec_value}).values_list('st_id').distinct()
             current_users_dary_names = [ i[0] for i in current_users_dary_names]
@@ -325,6 +326,48 @@ class DashboardView(TemplateView):
 
         return render(request, self.template_name, context)
 
+class FetchDRECDataView(View):
+    def get(self, request, *args, **kwargs):
+        try:
+            selected_date_str = request.GET.get('selectedDate')
+            selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d').date()
+            
+            drec_data = DREC.objects.filter(RecordingDate=selected_date)
+            drec_data_list = []
+            
+            for drec in drec_data:
+                customer_name = CustomerList.objects.filter(st_id=drec.ST_ID.st_id, cust_id=drec.CUST_ID).values_list('name', flat=True).first()
+                st_id_data = drec.ST_ID
+
+                drec_data_list.append({
+                    'ST_ID': st_id_data.st_id,
+                    'Location': st_id_data.location,
+                    'Society': st_id_data.society,
+                    'REC_TYPE': drec.REC_TYPE,
+                    'SLIP_TYPE': drec.SLIP_TYPE,
+                    'CUST_ID': drec.CUST_ID,                    
+                    'Customer_Name': customer_name if customer_name else 'N/A',
+                    'RecordingDate': drec.RecordingDate.strftime('%Y-%m-%d'),
+                    'RecordingTime': drec.RecordingTime,
+                    'SHIFT': drec.SHIFT,
+                    'FAT': drec.FAT,
+                    'SNF': drec.SNF,
+                    'CLR': drec.CLR,
+                    'WATER': drec.WATER,
+                    'QT': drec.QT,
+                    'RATE': drec.RATE,
+                    'Amount': drec.Amount,
+                    'CAmount': drec.CAmount,
+                    'CSL_NO': drec.CSR_NO,
+                    'CREV': drec.CREV,
+                    'END_TAG': drec.END_TAG,
+                    'dpuid': drec.dpuid,
+                    'created_at': drec.created_at.strftime('%Y-%m-%d %H:%M:%S')
+                })
+
+            return JsonResponse({'drec_data': drec_data_list})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
 
 # User Authentication Views
 class SignUpView(CreateView):
@@ -1020,7 +1063,7 @@ def ratesitem_api(request):
     except Exception as e:
         # Handle other exceptions appropriately
         return JsonResponse({'error': 'Internal Server Error'}, status=500)
-    
+
 
 @login_required
 def shift_report(request):
