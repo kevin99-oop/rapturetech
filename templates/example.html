@@ -27,11 +27,14 @@
                                 Records
                             </a>
                         </li>
-                        <!-- <li class="nav-item">
+                        {% if not request.user.is_staff and not request.user.is_superuser %}
+
+                        <li class="nav-item">
                             <a class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
-                                Charts
+                                Date Filter
                             </a>
-                        </li> -->
+                        </li>
+                        {%endif%}
                     </ul>
                 </div>
               </nav>
@@ -347,14 +350,60 @@
                             </table>
                         </div>
                     </div>
-                </div>
-              
-                </div>
+                </div> 
+              </div>
+              {% if not request.user.is_staff and not request.user.is_superuser %}
+
                 <div class="tab-pane fade text-center" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
-                    <p>
-                        <h3 class="text-danger fw-bold text-center">Under Construction </h3>
-                    </p>
+                <!--Date Filter-->
+                <div class="container-fluid col-lg-12 mb-lg-0 mb-5">
+                    <div class="card shadow rounded" >
+                        <div class="card-header pb-0 p-3">
+                            <div class=" justify-content-between">
+                                <h6 class="mb-2 fw-bold">Date Filter</h6>
+                            </div>
+                        </div>
+                        <div class="table-responsive card-body rounded" >
+                            <div class="d-flex justify-content-center align-items-center">
+                                <div class="text-center">
+                                    <h5>Please select a date:</h5>
+                                    <input type="date" id="selectedDate" class="form-control ">
+                                    <button onclick="fetchDRECData()" class="btn btn-success mt-2">Fetch Data</button>
+                                </div>
+                            </div>
+                            <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack"  
+                            data-toggle="table"
+                            data-pagination="false"
+                            data-auto-refresh="true">
+                                <thead class="table-title text-white text-center rounded">
+                                    <tr>
+                                        <th>St ID</th>
+                                        <th>Root</th>
+                                        <th>Society</th>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Shift</th>
+                                        <th>Cust. ID</th>
+                                        <th>Name</th>
+                                        <th>FAT</th>
+                                        <th>SNF</th>
+                                        <th>CLR</th>
+                                        <th>Water</th>
+                                        <th>Ltr. Qty</th>
+                                        <th>Amt</th>
+                                        <th>Cum. Amount</th> 
+                                        <!-- Add more table headers as needed -->
+                                    </tr>
+                                </thead>
+                                <tbody id="drecDataBody">
+                                    <!-- DREC data will be populated here dynamically using JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>                                         
                 </div>
+                {%endif%}
               </div>
     
      
@@ -362,8 +411,6 @@
       </div>
 
    
-
-
 
         <script>
         function refreshTable() {
@@ -385,8 +432,45 @@
         setInterval(refreshTable, 5000);
 
         </script>
+  <script>
+    function fetchDRECData() {
+    var selectedDate = document.getElementById('selectedDate').value;
+    // Replacing slashes with hyphens in the date format
+    var formattedDate = selectedDate.split('-').reverse().join('-');
+    fetch(`/fetch_drec_data/?selectedDate=${formattedDate}`)
+    .then(response => response.json())
+    .then(data => {
+        var drecDataBody = document.getElementById('drecDataBody');
+        drecDataBody.innerHTML = '';
+        data.drec_data.forEach(item => {
+            var recordingDate = new Date(item.RecordingDate);
+            var formattedDate = recordingDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+            var row = `<tr>
+                <td>${item.ST_ID}</td>
+                <td>${item.Location}</td>
+                <td>${item.Society}</td>
+                <td>${formattedDate}</td>
+                <td>${item.RecordingTime}</td>
+                <td>${item.SHIFT}</td>
+                <td>${item.CUST_ID}</td>
+                <td>${item.Customer_Name}</td>
+                <td>${item.FAT}</td>
+                <td>${item.SNF}</td>
+                <td>${item.CLR}</td>
+                <td>${item.WATER}</td>
+                <td>${item.QT}</td>
+                <td>${item.Amount}</td>
+                <td>${item.CAmount}</td>
+            </tr>`;
+            drecDataBody.innerHTML += row;
+        });
+    })
+    .catch(error => {
+        console.error('Error fetching DREC data:', error);
+    });
+}
 
-
+</script>
 </div>
 
 {% endblock content %}

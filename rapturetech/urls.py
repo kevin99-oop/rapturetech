@@ -9,7 +9,7 @@ from apps.common.views import (
     shift_report,ledger_report ,UserRegistrationView, UserLoginView, add_dpu, active_dpu,CustomLoginView,custom_logout,
     DRECViewSet, NtpDatetimeView, dpudetails, edit_dpu,upload_customer_csv,download_latest_csv,
     get_cid_range,get_cust_info,customer_list,config_api,download_config_by_st_id,
-    upload_rate_table,rate_table_list,download_rate_table,lastratedate_api,ratesitem_api,get_dpus_by_location,get_societies_by_dpu
+    upload_rate_table,rate_table_list,download_rate_table,lastratedate_api,ratesitem_api,get_dpus_by_location,get_societies_by_dpu,FetchDRECDataView
     )
 from django.contrib.auth import views as auth_views
 from rest_framework.authtoken.views import obtain_auth_token
@@ -99,6 +99,7 @@ urlpatterns = [
     path('upload_rate_table/', upload_rate_table, name='upload_rate_table'),
     path('rate_table_list/', rate_table_list, name='rate_table_list'),
     path('download-rate-table/<int:rate_table_id>/', download_rate_table, name='download_rate_table'),
+    path('fetch_drec_data/', FetchDRECDataView.as_view(), name='fetch_drec_data'),
 
 ]
 
