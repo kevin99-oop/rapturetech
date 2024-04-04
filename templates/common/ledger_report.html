@@ -178,11 +178,13 @@
                 <div class="table-responsive card-body">
                     {% if ledger_summary_data %}
                     {% for summary_data_entry in ledger_summary_data|dictsort:"CUST_ID" %}
-            
+                    {% ifchanged summary_data_entry.CustomerName %}
+
                     <h4>
                        Customer Name:-  <strong class="text-danger">{{ summary_data_entry.CustomerName }} </strong> Customer Id:- <strong class="text-danger">{{ summary_data_entry.CUST_ID }} </strong> 
                     </h4> 
-                    <hr/>
+                    <hr/>       
+
                     <h5 class="text-center fw-bold">
                     Summary Report 
                     </h5> 
@@ -263,7 +265,7 @@
                                 {% endif %}
                             {% endfor %}
                         </tbody>
-                                            </table>
+                                            </table> {% endifchanged %}
                 {% endfor %}
                 {% else %}
                 <p class="text-center">No data available for the selected filters.</p>

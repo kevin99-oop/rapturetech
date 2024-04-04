@@ -5,11 +5,13 @@ from django.conf.urls.static import static
 from django.contrib.auth.decorators import user_passes_test
 
 from apps.common.views import (
-    HomeView, SignUpView, DashboardView, ProfileUpdateView, ProfileView,
+    website_products,website_dpu,website_2_in_1_smart_mini_combo,website_all_in_1_smart_combo,website_solar_charger,website_ultrasonic_digital_stirrer,website_ultrasonic_milk_analyzer,
+    website_ultrasonic_digital_stirrer_ss,website_ultrasonic_digital_stirrer_v2,
+    HomeView,SignUpView, DashboardView, ProfileUpdateView, ProfileView,
     shift_report,ledger_report ,UserRegistrationView, UserLoginView, add_dpu, active_dpu,CustomLoginView,custom_logout,
     DRECViewSet, NtpDatetimeView, dpudetails, edit_dpu,upload_customer_csv,download_latest_csv,
     get_cid_range,get_cust_info,customer_list,config_api,download_config_by_st_id,
-    upload_rate_table,rate_table_list,download_rate_table,lastratedate_api,ratesitem_api,get_dpus_by_location,get_societies_by_dpu,FetchDRECDataView
+    upload_rate_table,rate_table_list,download_rate_table,lastratedate_api,ratesitem_api,get_dpus_by_location,get_societies_by_dpu,FetchDRECDataView,custom_404_page
     )
 from django.contrib.auth import views as auth_views
 from rest_framework.authtoken.views import obtain_auth_token
@@ -17,9 +19,21 @@ from rest_framework.authtoken.views import obtain_auth_token
 # def is_staff_or_admin(user):
 #     return user.is_staff or user.is_superuser
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', HomeView.as_view(), name='home'),
+    path('website_products', website_products, name='website_products'),
+
+    path('website_dpu', website_dpu, name='website_dpu'),
+    path('website_2_in_1_smart_mini_combo', website_2_in_1_smart_mini_combo, name='website_2_in_1_smart_mini_combo'),
+    path('website_all_in_1_smart_combo', website_all_in_1_smart_combo, name='website_all_in_1_smart_combo'),
+    path('website_solar_charger', website_solar_charger, name='website_solar_charger'),
+    path('website_ultrasonic_digital_stirrer', website_ultrasonic_digital_stirrer, name='website_ultrasonic_digital_stirrer'),
+    path('website_ultrasonic_digital_stirrer_ss', website_ultrasonic_digital_stirrer_ss, name='website_ultrasonic_digital_stirrer_ss'),
+    path('website_ultrasonic_digital_stirrer_v2', website_ultrasonic_digital_stirrer_v2, name='website_ultrasonic_digital_stirrer_v2'),
+    path('website_ultrasonic_milk_analyzer', website_ultrasonic_milk_analyzer, name='website_ultrasonic_milk_analyzer'),
+
     path('register/', SignUpView.as_view(), name="register"),
 
     # API URLs
@@ -100,8 +114,11 @@ urlpatterns = [
     path('rate_table_list/', rate_table_list, name='rate_table_list'),
     path('download-rate-table/<int:rate_table_id>/', download_rate_table, name='download_rate_table'),
     path('fetch_drec_data/', FetchDRECDataView.as_view(), name='fetch_drec_data'),
+    path('<path:not_found>/', custom_404_page, name='custom_404_page'),
 
 ]
+
+handler404 = custom_404_page
 
 
 # Serve media files during development

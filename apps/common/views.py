@@ -50,20 +50,45 @@ from django.views.generic import FormView
 from django.contrib.admin.views.decorators import staff_member_required
 
 # Common Views
+
+def custom_404_page(request, exception):
+    return render(request, '404.html', status=404)
+
 def index(request):
-    return render(request, 'index.html')
+    return render(request, 'home/index.html')
+
+def website_products(request):
+    return render(request, 'home/products.html') 
+
+def website_dpu(request):
+    return render(request, 'home/dpu.html') 
+
+def website_2_in_1_smart_mini_combo(request):
+    return render(request, 'home/2_in_1_smart_mini_combo.html') 
+
+def website_all_in_1_smart_combo(request):
+    return render(request, 'home/all_in_1_smart_combo.html') 
+
+def website_solar_charger(request):
+    return render(request, 'home/solar_charger.html') 
+
+def website_ultrasonic_digital_stirrer(request):
+    return render(request, 'home/ultrasonic_digital_stirrer.html') 
+
+def website_ultrasonic_digital_stirrer_ss(request):
+    return render(request, 'home/ultrasonic_digital_stirrer_ss.html') 
+
+def website_ultrasonic_digital_stirrer_v2(request):
+    return render(request, 'home/ultrasonic_digital_stirrer_v2.html') 
+
+
+def website_ultrasonic_milk_analyzer(request):
+    return render(request, 'home/ultrasonic_milk_analyzer.html') 
 
 class HomeView(TemplateView):
     # HomeView class definition ...
-    template_name = 'common/index.html'
+    template_name = 'home/index.html'
 
-    def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super().get_context_data(**kwargs)
-        # Add in a QuerySet of all the books
-        print(self.request.user.id)
-        context['book_list'] = self.request.user
-        return context
 
 class CustomLoginView(LoginView):
     template_name = 'common/login.html'
@@ -338,7 +363,6 @@ class FetchDRECDataView(View):
             for drec in drec_data:
                 customer_name = CustomerList.objects.filter(st_id=drec.ST_ID.st_id, cust_id=drec.CUST_ID).values_list('name', flat=True).first()
                 st_id_data = drec.ST_ID
-
                 drec_data_list.append({
                     'ST_ID': st_id_data.st_id,
                     'Location': st_id_data.location,
