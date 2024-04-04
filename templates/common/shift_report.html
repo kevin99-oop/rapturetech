@@ -134,6 +134,64 @@
                     
                           
     </div>
+
+    <!-- Table 2: Detail Data -->
+    <div class="row mt-4" id="divID">
+        <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
+            <div class="card rounded">
+                <div class="card-header pb-0 p-3">
+                    <div class="d-flex justify-content-between">
+                        <h6 class="mb-2">Detail Table</h6>
+                    </div>
+                </div>
+                <div class="table-responsive card-body">
+                    {% if detail_data %}                
+                    <!-- Table 1: Summary Data -->
+                    <table id="detailTable_report" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100">
+                        <thead class="text-white text-center rounded table-title">
+                            <tr>
+                                <th>CUST_ID</th>
+                                <th>Customer Name</th>  <!-- Add the header for Customer Name -->
+    
+                                <th>MType</th>
+                                <th>FAT</th>
+                                <th>SNF</th>
+                                <th>CLR</th>
+                                <th>WATER</th>
+                                <th>QT</th>
+                                <th>RATE</th>
+                                <th>Amount</th>
+                                <th>CAmount</th>
+                            </tr>
+                        </thead>
+                        <tbody class=" align-items-center text-center fw-bold">
+                            {% for record in detail_data %}
+                                <tr>
+                                    <td>{{ record.CUST_ID }}</td>
+                                    <td>{{ record.CustomerName }}</td> <!-- Use the CustomerName here -->
+                                    <td>{{ record.MType }}</td>
+                                    <td>{{ record.FAT }}</td>
+                                    <td>{{ record.SNF }}</td>
+                                    <td>{{ record.CLR }}</td>
+                                    <td>{{ record.WATER }}</td>
+                                    <td>{{ record.QT }}</td>
+                                    <td>{{ record.RATE }}</td>
+                                    <td>{{ record.Amount }}</td>
+                                    <td>{{ record.CAmount }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                  
+                {% else %}
+                    <p>No detailed data available for the selected filters.</p>
+                {% endif %}
+               
+                </div>
+            </div>
+        </div>
+    </div>
+    
         <!-- Total Summary Record -->
 <div class="row mt-4" id="divID">
     <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
@@ -177,7 +235,7 @@
                             <td>{{ selected_location }}</td>
                             <td>{{ selected_dpu }}</td>
                             <td>{{ selected_society }}</td>
-                            <td>{{ selected_start_date }}</td>
+                            <td>{{ selected_start_date}}</td>
                             <td>{{ selected_shift }}</td>
                             <td>{{ summary_data.AvgFAT }}</td>
                             <td>{{ summary_data.AvgSNF }}</td>
@@ -187,7 +245,6 @@
                             <td>{{ summary_data.TotalCAmount }}</td>
                             <td>{{ summary_data.TotalCustomer }}</td>
                         </tr>  
-                        {% if not request.user.is_staff and not request.user.is_superuser %}
                         <tr class="align-items-center text-center">
                             <td colspan="5">Cow Summary</td>
                             <td>{{ cow_summary_data.AvgFAT }}</td>
@@ -208,7 +265,6 @@
                             <td>{{ buffalo_summary_data.TotalCAmt }}</td> 
                             <td>{{ buffalo_summary_data.TotalCust }}</td>
                         </tr>
-                        {% endif %}    
                     </tbody>
                    
                 </table>
@@ -218,64 +274,6 @@
                 {% endif %}
             </div>
             
-        </div>
-    </div>
-</div>
-
-
-<!-- Table 2: Detail Data -->
-<div class="row mt-4" id="divID">
-    <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
-        <div class="card rounded">
-            <div class="card-header pb-0 p-3">
-                <div class="d-flex justify-content-between">
-                    <h6 class="mb-2">Detail Table</h6>
-                </div>
-            </div>
-            <div class="table-responsive card-body">
-                {% if detail_data %}                
-                <!-- Table 1: Summary Data -->
-                <table id="detailTable_report" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100">
-                    <thead class="text-white text-center rounded table-title">
-                        <tr>
-                            <th>CUST_ID</th>
-                            <th>Customer Name</th>  <!-- Add the header for Customer Name -->
-
-                            <th>MType</th>
-                            <th>FAT</th>
-                            <th>SNF</th>
-                            <th>CLR</th>
-                            <th>WATER</th>
-                            <th>QT</th>
-                            <th>RATE</th>
-                            <th>Amount</th>
-                            <th>CAmount</th>
-                        </tr>
-                    </thead>
-                    <tbody class=" align-items-center text-center fw-bold">
-                        {% for record in detail_data %}
-                            <tr>
-                                <td>{{ record.CUST_ID }}</td>
-                                <td>{{ record.CustomerName }}</td> <!-- Use the CustomerName here -->
-                                <td>{{ record.MType }}</td>
-                                <td>{{ record.FAT }}</td>
-                                <td>{{ record.SNF }}</td>
-                                <td>{{ record.CLR }}</td>
-                                <td>{{ record.WATER }}</td>
-                                <td>{{ record.QT }}</td>
-                                <td>{{ record.RATE }}</td>
-                                <td>{{ record.Amount }}</td>
-                                <td>{{ record.CAmount }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-              
-            {% else %}
-                <p>No detailed data available for the selected filters.</p>
-            {% endif %}
-           
-            </div>
         </div>
     </div>
 </div>

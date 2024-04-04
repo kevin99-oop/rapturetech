@@ -1,0 +1,357 @@
+{% load static %}
+
+<!-- component -->
+<!-- This is an example component -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="apple-touch-icon" sizes="76x76" href="{% static 'assets/img/rapturetech_logo.jpeg'%}">
+  <link rel="icon" type="image/png" href="{% static 'assets/img/rapturetech_logo.jpeg'%}">
+
+  <title>RaptureTech Pvt. Ltd.</title>
+
+  <!-- CSS FILES -->
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/tailwindcss@2.0.1/dist/tailwind.min.css'>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap"
+    rel="stylesheet">
+
+  <link href="{% static 'home/css/bootstrap.min.css'%}" rel="stylesheet">
+
+  <link href="{% static 'home/css/bootstrap-icons.css'%}" rel="stylesheet">
+
+  <link href="{% static 'home/css/style.css'%}" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+  <div id="sticky-wrapper" class="sticky-wrapper is-sticky " style="height: 94px;">
+    <nav class="navbar navbar-expand-lg fixed-top">
+      <div class="container">
+        <a class=" d-flex align-items-center" href="{%url 'home'%}">
+          <img src="{% static 'home/images/logo1.png'%}" class="navbar-brand-image logo1" alt="RaptureTech logo">
+
+        </a>
+
+        <div class="d-lg-none ms-auto me-3">
+          <a href="{%url 'register'%}">
+            <img src="{% static 'home/images/cloud-data (1).png'%}" class="" alt="" width="70" height="70">
+          </a>
+        </div>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-lg-auto">
+            <li class="nav-item">
+              <a class="nav-link click-scroll inactive" href="{%url 'home'%}">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link click-scroll inactive" href="{%url 'home'%}">About</a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link click-scroll active" href="{%url 'home'%}">Products</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link click-scroll inactive" href="{%url 'home'%}">Why Us</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link click-scroll inactive" href="{%url 'home'%}">Contact Us</a>
+            </li>
+
+
+            <li class="nav-item">
+              <a class="nav-link click-scroll inactive" href="{%url 'login'%}">Login</a>
+            </li>
+            <a href="{%url 'login'%}">
+
+              <img src="{% static 'home/images/cloud-data (1).png'%}" class="" href="{%url 'login'%}" alt="" width="90"
+                height="90">
+            </a>
+          </ul>
+
+        </div>
+      </div>
+    </nav>
+  </div>
+  <section class=" d-flex justify-content-center align-items-center mt-5" id="section_1" data-aos="fade-up"
+    data-aos-duration="2000">
+    <div class="py-6  mt-5">
+      <!-- Breadcrumbs -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-5" data-aos="fade-right" data-aos-duration="2000">
+        <div class="flex items-center space-x-2 text-gray-400 text-sm">
+          <a href="{%url 'home'%}" class="hover:underline hover:text-gray-600 mx-2">Home</a>
+          <span class="mx-2"> /</span>
+          <a href="{%url 'website_products'%}" class="hover:underline hover:text-gray-600">Products</a>
+          <span class="mx-2"> /</span>
+          <span>DPU</span>
+        </div>
+      </div>
+      <!-- ./ Breadcrumbs -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+        <div class="flex flex-col md:flex-row -mx-4">
+          <div class="md:flex-1 px-4 side">
+            <div x-data="{ image: 'home/images/products/all_in_one/all_in_one_1.png' }" x-cloak>
+              <div class="h-64 md:h-80 rounded-lg bg-gray-100 mb-4">
+                <div x-show="image === 'home/images/products/all_in_one/all_in_one_1.png'"
+                  class="h-64 md:h-80 rounded-lg bg-gray-100 mb-4 flex items-center justify-center">
+                  <img src="{% static 'home/images/products/all_in_one/all_in_one_1.png'%}" alt="Image 1" class="w-75">
+                </div>
+
+                <div x-show="image === 'home/images/products/all_in_one/all_in_one_2.png'"
+                  class="h-64 md:h-80 rounded-lg bg-gray-100 mb-4 flex items-center justify-center">
+                  <img src="{% static 'home/images/products/all_in_one/all_in_one_2.png'%}" alt="Image 2" class="w-75">
+                </div>
+
+                <div x-show="image === 'home/images/products/all_in_one/all_in_one_3.png'"
+                  class="h-64 md:h-80 rounded-lg bg-gray-100 mb-4 flex items-center justify-center">
+                  <img src="{% static 'home/images/products/all_in_one/all_in_one_3.png'%}" alt="Image 3" class="w-75">
+                </div>
+              </div>
+
+              <div class="flex -mx-2 mb-4">
+                <div class="flex-1 px-2">
+                  <img x-on:click="image = 'home/images/products/all_in_one/all_in_one_1.png'"
+                    :class="{ 'ring-2 ring-indigo-300 ring-inset': image === 'home/images/products/all_in_one/all_in_one_1.png' }"
+                    src="{% static 'home/images/products/all_in_one/all_in_one_1.png'%}" alt="Image 1"
+                    class="focus:outline-none w-full rounded-lg bg-gray-100 flex items-center justify-center">
+                </div>
+                <div class="flex-1 px-2">
+                  <img x-on:click="image = 'home/images/products/all_in_one/all_in_one_2.png'"
+                    :class="{ 'ring-2 ring-indigo-300 ring-inset': image === 'home/images/products/all_in_one/all_in_one_2.png' }"
+                    src="{% static 'home/images/products/all_in_one/all_in_one_2.png'%}" alt="Image 2"
+                    class="focus:outline-none w-full rounded-lg bg-gray-100 flex items-center justify-center">
+                </div>
+                <div class="flex-1 px-2">
+                  <img x-on:click="image = 'home/images/products/all_in_one/all_in_one_3.png'"
+                    :class="{ 'ring-2 ring-indigo-300 ring-inset': image === 'home/images/products/all_in_one/all_in_one_3.png' }"
+                    src="{% static 'home/images/products/all_in_one/all_in_one_3.png'%}" alt="Image 3"
+                    class="focus:outline-none w-full rounded-lg  bg-gray-100 flex items-center justify-center">
+                </div>
+              </div>
+
+            </div>
+          </div>
+          <div class="md:flex-1 px-4 " data-aos="fade-left" data-aos-duration="2000">
+            <h2 class="mb-2 leading-tight tracking-tight font-bold text-gray-800 text-2xl md:text-3xl">Data Processor
+              Milk Collection Unit (DPU)</h2>
+            <p class="text-gray-500 text-sm">By <a href="{%url 'home'%}"
+                class="text-primary hover:underline">RaptureTech Pvt Ltd.</a></p>
+
+            <div class="d-flex flex-wrap border-top mt-4 pt-3">
+
+              <div class="mb-4 mb-lg-0">
+                <div class="d-flex flex-wrap align-items-center mb-1">
+                  <span class="custom-block-span">PRODUCT SPECIFICATIONS</span>
+                  <p class="mb-0">
+                  <ul class="list-group mx-4">
+                    <li>
+                      <i class="custom-block-icon bi-link"></i>
+                      <strong> Brand:</strong> RTPL
+                    </li>
+                    <li>
+                      <strong> Model:</strong> DPUV5
+                    </li>
+                    <li>
+                      <strong> Processor:</strong> 64 bit Ultra high speed Armcore Microcontroller
+                    </li>
+                    <li>
+                      <strong> Electronics:</strong> In housed developed Single board Electronics
+                    </li>
+                    <li>
+                      <strong> Technology:</strong> Latest Surface Mount Technology
+                    </li>
+                    <li>
+                      <strong> Power supply: </strong> 12V DC / 3A
+                    </li>
+                    <li>
+                      <strong> Peak Power:</strong> 50W
+                    </li>
+                    <li>
+                      <strong> Operating Environment:</strong> 5 To 55 °C
+                    </li>
+                    <li>
+                      <strong> Net Weight:</strong> 3.0 Kg
+                    </li>
+                    <li>
+                      <strong> Physical Dimension (mm): </strong> 290( L ) X 245(W ) X 160(H)
+                    </li>
+                  </ul>
+                  </p>
+                </div>
+              </div>
+              <div class="d-flex align-items-center ms-lg-auto mt-4">
+                <a href="{%static 'home/images/products/all_in_one/Combo.pdf'%}" class="btn custom-btn" download>Download Pdf</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row md:flex-2 px-4 border-top mt-2 mb-2"data-aos="fade-up"
+        data-aos-duration="2000">
+          <div class="col">
+            <div class="mb-4 mb-lg-0 mt-2">
+              <span
+                class="custom-block-span mb-2 leading-tight tracking-tight font-bold text-gray-800  md:text-1xl">TECHNICAL
+                SPECIFICATION</span>
+              <div class="d-flex flex-wrap  mb-1">
+                <p class="mb-0">
+                <ul class="list-group mx-4 ">
+                  <li>
+                    <i class="custom-block-icon bi-link"></i>
+                    <strong>Display:</strong> 20x4 Jumbo LCD (Blue-White) with Back light
+                  </li>
+                  <li>
+                    <strong>Keypad:</strong> 5x4 Matrix keypad for user's friendly operation
+                  </li>
+                  <li>
+                    <strong> Printer:</strong> Thermal Printer - 2.0" Panel Mounted
+                  </li>
+                  <li>
+                    <strong> RS-232 Input ports:</strong>
+                  <li class="mx-4">1. Milk analyzer </li>
+                  <li class="mx-4">2. External Weighing scale</li>
+                  </li>
+                  <li>
+                    <strong> RS-232 Output ports: </strong>
+                  <li class="mx-4">1. Remote customer display </li>
+                  <li class="mx-4">2. 2G/3G/4G Modem</li>
+                  </li>
+                  <li>
+                    <strong> USB Ports: </strong>
+                  <li class="mx-4">1. USB Keyboard interface </li>
+                  <li class="mx-4">2. USB Keyboard interface</li>
+                  </li>
+
+                </ul>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="mb-4 mb-lg-0 mt-2">
+              <span
+                class="custom-block-span mb-2 leading-tight tracking-tight font-bold text-gray-800  md:text-1xl">Functional
+                Specification</span>
+              <div class="d-flex flex-wrap  mb-1">
+                <p class="mb-0">
+                <ul class="list-group mx-4 ">
+                  <li>
+                    <i class="custom-block-icon bi-link"></i>
+                    <strong>Data Storage:</strong> 1000 Customers per shift
+                  </li>
+                  <li>
+                    <strong>Weighing Scale:</strong> Auto Tare, Ltr. conversion and Adjustable Decimal Point Auto
+                    configurable Baud Rate
+                  </li>
+                  <li>
+                    <strong> Milk Collection Type:</strong> Code base OR Fat limit base
+                  </li>
+                  <li>
+                    <strong> Cumulative Total:</strong>
+                    Cumulative Total in slip , 10 Days / 15 Days / Monthly
+                  </li>
+                  <li>
+                    <strong> Protection: </strong>
+                    Password Protection at various stages
+                  </li>
+                  <li>
+                    <strong> Data & Reports: </strong>
+                    CSV format Export to Pen drive
+                  </li>
+
+                </ul>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+  <footer class="site-footer mt-5"data-aos="fade-down"
+  data-aos-offset="300"
+  data-aos-easing="ease-in-sine">
+      <div class="container">
+          <div class="row">
+
+              <div class="col-lg-6 col-12 me-auto mb-5 mb-lg-0" >
+                  <a class=" d-flex align-items-center" href="index.html">
+                      <img src="{% static 'home/images/logo1.png'%}" class="navbar-brand-image " alt="">
+
+                  </a>
+              </div>
+
+              <div class="col-lg-3 col-12">
+                  <h5 class="site-footer-title mb-4">Join Us</h5>
+
+                  <p class="d-flex border-bottom pb-3 mb-3 me-lg-3">
+                      <span>Mon-Fri</span>
+                      6:00 AM - 6:00 PM
+                  </p>
+
+                  <p class="d-flex me-lg-3">
+                      <span>Sat-Sun</span>
+                      6:30 AM - 8:30 PM
+                  </p>
+                  <br>
+                  <p class="copyright-text">© <script>document.write(new Date().getFullYear())</script>
+                    RaptureTech Pvt. Ltd.</p>
+              </div>
+
+              <div class="col-lg-2 col-12 ms-auto">
+                  <ul class="social-icon mt-lg-5 mt-3 mb-4">
+                      <li class="social-icon-item">
+                          <a href="#" class="social-icon-link bi-instagram"></a>
+                      </li>
+
+                      <li class="social-icon-item">
+                          <a href="#" class="social-icon-link bi-twitter"></a>
+                      </li>
+
+                      <li class="social-icon-item">
+                          <a href="#" class="social-icon-link bi-whatsapp"></a>
+                      </li>
+                  </ul>
+                  <p class="copyright-text">Developed By: <a rel="nofollow" href="" target="_blank">CloudStack
+                          Dynamics</a></p>
+
+              </div>
+
+          </div>
+      </div>
+
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+          <path fill="#063974" fill-opacity="1"
+              d="M0,224L34.3,192C68.6,160,137,96,206,90.7C274.3,85,343,139,411,144C480,149,549,107,617,122.7C685.7,139,754,213,823,240C891.4,267,960,245,1029,224C1097.1,203,1166,181,1234,160C1302.9,139,1371,117,1406,106.7L1440,96L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z">
+          </path>
+      </svg>
+  </footer>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init();
+  </script>
+  <script src='https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.7.3/dist/alpine.min.js'></script>
+
+</body>
+<!-- partial -->
+
+</html>

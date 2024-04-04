@@ -27,14 +27,13 @@
                                 Records
                             </a>
                         </li>
-                        {% if not request.user.is_staff and not request.user.is_superuser %}
+                      
 
                         <li class="nav-item">
                             <a class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
                                 Date Filter
                             </a>
                         </li>
-                        {%endif%}
                     </ul>
                 </div>
               </nav>
@@ -188,7 +187,6 @@
                                                 <td>{{ record.total_cust }}</td>
                                             </tr>
                                             {% endfor %}
-                                            {% if not request.user.is_staff and not request.user.is_superuser %}
 
                                             <tr class="align-items-center text-align-center" >
                                                 <td colspan="5">Cow Summary</td>
@@ -210,7 +208,6 @@
                                                 <td>{{ total_amt_buffalo }}</td>
                                                 <td>{{ total_cust_buffalo }}</td>
                                             </tr>
-                                            {%endif%}
                                         </tbody>
                                     </table>    
                                 </div>
@@ -352,14 +349,13 @@
                     </div>
                 </div> 
               </div>
-              {% if not request.user.is_staff and not request.user.is_superuser %}
 
-                <div class="tab-pane fade text-center" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
+                <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
                 <!--Date Filter-->
                 <div class="container-fluid col-lg-12 mb-lg-0 mb-5">
                     <div class="card shadow rounded" >
                         <div class="card-header pb-0 p-3">
-                            <div class=" justify-content-between">
+                            <div class=" justify-content-start">
                                 <h6 class="mb-2 fw-bold">Date Filter</h6>
                             </div>
                         </div>
@@ -403,15 +399,11 @@
                     </div>
                 </div>                                         
                 </div>
-                {%endif%}
               </div>
     
      
         </div>
       </div>
-
-   
-
         <script>
         function refreshTable() {
             $.ajax({
@@ -433,18 +425,16 @@
 
         </script>
   <script>
-    function fetchDRECData() {
+  function fetchDRECData() {
     var selectedDate = document.getElementById('selectedDate').value;
-    // Replacing slashes with hyphens in the date format
-    var formattedDate = selectedDate.split('-').reverse().join('-');
-    fetch(`/fetch_drec_data/?selectedDate=${formattedDate}`)
+    fetch(`/fetch_drec_data/?selectedDate=${selectedDate}`)
     .then(response => response.json())
     .then(data => {
         var drecDataBody = document.getElementById('drecDataBody');
         drecDataBody.innerHTML = '';
         data.drec_data.forEach(item => {
             var recordingDate = new Date(item.RecordingDate);
-            var formattedDate = recordingDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+            var formattedDate = recordingDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
             var row = `<tr>
                 <td>${item.ST_ID}</td>
                 <td>${item.Location}</td>
@@ -469,6 +459,7 @@
         console.error('Error fetching DREC data:', error);
     });
 }
+
 
 </script>
 </div>

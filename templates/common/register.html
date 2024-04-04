@@ -20,6 +20,7 @@
 
   <!-- Style -->
   <link rel="stylesheet" href="{% static 'register/css/style.css'%}">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
   <title>RaptureTech SignUp</title>
 </head>
@@ -40,7 +41,9 @@
     </div>
     <div class="container">
       <div class="row align-items-center ">
-        <div class="col-md-6 contents order-2 order-lg-1 order-md-1 order-sm-2 px-5">
+        <div class="col-md-6 contents order-2 order-lg-1 order-md-1 order-sm-2 px-5"data-aos="fade-up"
+        data-aos-offset="500"
+        data-aos-easing="ease-in-sine">
           <div class="form-block">
             <div class="mb-5 text-center">
               <h3 class="fw-bold">Sign Up</h3>
@@ -85,7 +88,9 @@
         </div>
 
 
-        <div class="col-md-6 order-1 order-lg-2 order-md-2 order-sm-1">
+        <div class="col-md-6 order-1 order-lg-2 order-md-2 order-sm-1"data-aos="fade-down"
+        data-aos-offset="500"
+        data-aos-easing="ease-in-sine">
           <div class="social-login text-center">
             <img src="{% static 'register/images/logo1.png'%}" alt="Nature" class="responsive">
           </div>
@@ -99,7 +104,10 @@
   <script src="{% static 'register/js/popper.min.js'%}"></script>
   <script src="{% static 'register/js/bootstrap.min.js'%}"></script>
   <script src="{% static 'register/js/main.js'%}"></script>
-  <script src="{% static 'register/js/main.js'%}"></script>
+  <script src="{% static 'register/js/main.js'%}"></script><script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init();
+  </script>
 </body>
 
 </html>

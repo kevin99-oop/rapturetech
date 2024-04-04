@@ -1,0 +1,375 @@
+{% load static %}
+
+<!-- component -->
+<!-- This is an example component -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="apple-touch-icon" sizes="76x76" href="{% static 'assets/img/rapturetech_logo.jpeg'%}">
+  <link rel="icon" type="image/png" href="{% static 'assets/img/rapturetech_logo.jpeg'%}">
+
+  <title>RaptureTech Pvt. Ltd.</title>
+
+  <!-- CSS FILES -->
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/tailwindcss@2.0.1/dist/tailwind.min.css'>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap"
+    rel="stylesheet">
+
+  <link href="{% static 'home/css/bootstrap.min.css'%}" rel="stylesheet">
+
+  <link href="{% static 'home/css/bootstrap-icons.css'%}" rel="stylesheet">
+  <link href="{% static 'home/lib/animate/animate.min.css'%}" rel="stylesheet">
+
+  <link href="{% static 'home/css/style.css'%}" rel="stylesheet">
+  <style>
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-gap: 62px;
+      align-content: center;
+      align-items: normal;
+    }
+
+    .grid>article {
+      border-radius: 20px;
+      box-shadow: 1px 1px 16px 4px rgba(0, 0, 0, 0.3);
+    }
+
+
+    .grid>article img {
+      max-width: 100%;
+      border-radius: 20px;
+    
+
+
+    }
+
+    .grid .text {
+      padding: 20px;
+    }
+
+    .card:hover {
+      transform: scale(1.06);
+      transition: 1.4s;
+      box-shadow: 1px 1px 14px 2px rgb(34, 59, 97);
+    }
+
+    .card img:hover {
+      transform: scale(0.9);
+      transition: 1.4s;
+
+    }
+
+    .our_p {
+
+      margin-top: 5rem;
+    }
+ .border-primary{
+  border-color:rgb(6 57 116)!important;
+ }
+ .btn-primary{
+  background-color: rgb(6 57 116)!important;
+ }
+  </style>
+</head>
+
+<body>
+
+  <div id="sticky-wrapper" class="sticky-wrapper is-sticky mb-5" style="height: 94px;">
+    <nav class="navbar navbar-expand-lg fixed-top">
+      <div class="container">
+        <a class=" d-flex align-items-center" href="{%url 'home'%}">
+          <img src="{% static 'home/images/logo1.png'%}" class="navbar-brand-image logo1" alt="RaptureTech logo">
+
+        </a>
+
+        <div class="d-lg-none ms-auto me-3">
+          <a href="{%url 'register'%}">
+            <img src="{% static 'home/images/cloud-data (1).png'%}" class="" alt="" width="70" height="70">
+          </a>
+        </div>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-lg-auto">
+            <li class="nav-item">
+              <a class="nav-link click-scroll inactive" href="{%url 'home'%}">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link click-scroll inactive" href="{%url 'home'%}">About</a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link click-scroll active" href="{%url 'home'%}">Products</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link click-scroll inactive" href="{%url 'home'%}">Why Us</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link click-scroll inactive" href="{%url 'home'%}">Contact Us</a>
+            </li>
+
+
+            <li class="nav-item">
+              <a class="nav-link click-scroll inactive" href="{%url 'login'%}">Login</a>
+            </li>
+            <a href="{%url 'login'%}">
+
+              <img src="{% static 'home/images/cloud-data (1).png'%}" class="" href="{%url 'login'%}" alt="" width="90"
+                height="90">
+            </a>
+          </ul>
+
+        </div>
+      </div>
+    </nav>
+  </div>
+
+  <section class="events-section section-bg section-padding" id="section_3" data-aos="fade-down"
+    data-aos-easing="linear" data-aos-duration="1500">
+    <div class="container products_section">
+      <div class="row">
+
+        <div class="col-lg-12 col-12 text-center" data-aos="fade-down" data-aos-easing="linear"
+          data-aos-duration="1500">
+          <h2 class="mb-lg-3 our_p">Our Products</h2>
+        </div>
+        
+        <main class="grid py-6 ">
+          <article class=" card">
+            <div class="h-100">
+              <img src="{% static 'home/images/products/uds_ss/ss_str_1.jpeg'%}"
+              alt="Ultrasonic Digital Stirrer">
+            </div>
+            <div class="card-body">
+              <h4>Ultrasonic Digital Stirrer SS</h4>
+              <p class="card-text">Introducing our Ultrasonic Digital Stirrer: A compact, high-speed solution with
+                stainless steel components
+                and automatic start/stop functionality, meeting NDDB norms.</p>
+            </div>
+            <div class="text">
+              <div class="card-footer bg-transparent border-primary"></div>
+              <a href="{%url 'website_ultrasonic_digital_stirrer_ss'%}"
+                class="btn btn-primary btn-block border-top float-end">More Details</a>
+            </div>
+          </article>
+          <article class=" card">
+            <div class="h-100">
+
+            <img src="{% static 'home/images/products/uds_v2/str_3.png'%}"
+              alt="Ultrasonic Digital Stirrer">
+              </div>
+            <div class="card-body">
+              <h4>Ultrasonic Digital Stirrer 2</h4>
+              <p class="card-text">Introducing our Ultrasonic Digital Stirrer: A compact, high-speed solution with
+                stainless steel components
+                and automatic start/stop functionality, meeting NDDB norms.</p>
+            </div>
+            <div class="text">
+              <div class="card-footer bg-transparent border-primary"></div>
+              <a href="{%url 'website_ultrasonic_digital_stirrer_v2'%}"
+                class="btn btn-primary btn-block border-top float-end">More Details</a>
+            </div>
+          </article>
+          <article class=" card">
+            <div class="h-100">
+
+            <img src="{% static 'home/images/products/ultrasonic_digital_STIRRET/UDS1.jpeg'%}"
+              alt="Ultrasonic Digital Stirrer">
+              </div>
+            <div class="card-body">
+              <h4>Ultrasonic Digital Stirrer</h4>
+              <p class="card-text">Introducing our Ultrasonic Digital Stirrer: A compact, high-speed solution with
+                stainless steel components
+                and automatic start/stop functionality, meeting NDDB norms.</p>
+            </div>
+            <div class="text">
+              <div class="card-footer bg-transparent border-primary"></div>
+              <a href="{%url 'website_ultrasonic_digital_stirrer'%}"
+                class="btn btn-primary btn-block border-top float-end">More Details</a>
+            </div>
+          </article>
+          <article class=" card">
+            <div class="h-100">
+
+            <img src="{% static 'home/images/products/analyzer/analyzer_2.jpeg'%}" alt="Ultrasonic Milk Analyzer">
+            </div>
+            <div class="card-body">
+              <h4>Ultrasonic Milk Analyzer</h4>
+              <p class="card-text">Introducing our Ultrasonic Milk Analyzer: Compact, reliable, and cost-effective.
+                Ideal for stationary and
+                mobile setups, it accurately analyzes milk components, enhancing productivity.</p>
+            </div>
+            <div class="text">
+              <div class="card-footer bg-transparent border-primary"></div>
+              <a href="{%url 'website_ultrasonic_milk_analyzer'%}"
+                class="btn btn-primary btn-block border-top float-end">More Details</a>
+            </div>
+          </article>
+          <article class=" card">
+            <div class="h-100 ">
+
+            <img src="{% static 'home/images/products/Mini_Combo/mini_combo_2.jpeg'%}"
+              alt="Two In One Smart Mini Combo RTPL">
+              </div>
+            <div class="card-body">
+              <h4>Two in one smart mini combo RTPL</h4>
+              <p class="card-text">Introducing our Two-In-One Smart Mini Combo RTPL: Compact, versatile, and efficient.
+                Combines Milk
+                Analyzer
+                and Ultrasonic Digital Stirrer in one, enhancing milk collection productivity.
+              </p>
+            </div>
+            <div class="text">
+              <div class="card-footer bg-transparent border-primary"></div>
+              <a href="{%url 'website_2_in_1_smart_mini_combo'%}"
+                class="btn btn-primary btn-block border-top float-end">More Details</a>
+            </div>
+          </article>
+          <article class=" card">
+            <div class="h-100 ">
+
+            <img src="{% static 'home/images/DPU1.jpeg'%}"
+              alt="Data Processor Unit (DPU) Milk Collection">
+              </div>
+            <div class="card-body">
+              <h4>Data Processor Unit (DPU) Milk Collection</h4>
+              <p class="card-text">Introducing RTPL's DPUV5: A high-speed 64-bit Armcore microcontroller unit with
+                advanced surface mount
+                technology. Compact and powerful, it optimizes milk collection processes with precision and efficiency.
+
+              </p>
+            </div>
+            <div class="text">
+              <div class="card-footer bg-transparent border-primary"></div>
+              <a href="{%url 'website_dpu'%}"class="btn btn-primary btn-block border-top float-end">More Details</a>
+            </div>
+          </article>
+          <article class=" card">
+            <div class="h-100 ">
+
+            <img src="{% static 'home/images/products/all_in_one/all_in_one_3.jpeg'%}"
+              alt="ALL IN ONE SMART COMBO RTPL DPMCU">
+              </div>
+              <div class="card-body">
+                <h4>All in one smart combo RTPL DPMCU</h4>
+                <p class="card-text">Introducing RTPL's DPMCU: An all-in-one smart combo unit revolutionizing milk collection. Compact,
+                  reliable, and versatile, it integrates Ultrasonic Digital Stirrer, Milk Analyzer, Data Processor, and
+                  Weighing Scale functionalities, enhancing performance and productivity.
+  
+  
+                </p>
+              </div>
+              <div class="text">
+                <div class="card-footer bg-transparent border-primary"></div>
+                <a href="{%url 'website_all_in_1_smart_combo'%}"
+                  class="btn btn-primary btn-block border-top float-end">More Details</a>
+              </div>
+          </article>
+          <article class=" card">
+            <div class="h-100 ">
+            <img src="{% static 'home/images/products/SOLAR_CHARGE_CONTROLLER/SOLAR_CHARGE_CONTROLLER.png'%}"
+              alt="SOLAR CHARGE CONTROLLER">
+            </div><div class="card-body ">
+              
+                <h4>Solar Charger Controller </h4>
+                <p class="card-text">IntroduIntroducing the Solar Charger Controller: A pivotal component in photovoltaic systems, seamlessly
+                  regulating battery charging and discharging by managing solar power flow.
+                </p>
+              </div>
+              
+              <div class="text">
+                <div class="card-footer bg-transparent border-primary"></div>
+                <a href="{%url 'website_solar_charger'%}"
+                  class="btn btn-primary btn-block border-top float-end">More Details</a>
+              </div>
+          </article>
+        
+        </main>
+      </div>
+    </div>
+  </section>
+
+
+
+
+  <footer class="site-footer mt-5" data-aos="fade-down" data-aos-offset="300" data-aos-easing="ease-in-sine">
+    <div class="container">
+      <div class="row">
+
+        <div class="col-lg-6 col-12 me-auto mb-5 mb-lg-0">
+          <a class=" d-flex align-items-center" href="index.html">
+            <img src="{% static 'home/images/logo1.png'%}" class="navbar-brand-image " alt="">
+
+          </a>
+        </div>
+
+        <div class="col-lg-3 col-12">
+          <h5 class="site-footer-title mb-4">Join Us</h5>
+
+          <p class="d-flex border-bottom pb-3 mb-3 me-lg-3">
+            <span>Mon-Fri</span>
+            6:00 AM - 6:00 PM
+          </p>
+
+          <p class="d-flex me-lg-3">
+            <span>Sat-Sun</span>
+            6:30 AM - 8:30 PM
+          </p>
+          <br>
+          <p class="copyright-text">© <script>document.write(new Date().getFullYear())</script>
+            RaptureTech Pvt. Ltd.</p>
+        </div>
+
+        <div class="col-lg-2 col-12 ms-auto">
+          <ul class="social-icon mt-lg-5 mt-3 mb-4">
+            <li class="social-icon-item">
+              <a href="#" class="social-icon-link bi-instagram"></a>
+            </li>
+
+            <li class="social-icon-item">
+              <a href="#" class="social-icon-link bi-twitter"></a>
+            </li>
+
+            <li class="social-icon-item">
+              <a href="#" class="social-icon-link bi-whatsapp"></a>
+            </li>
+          </ul>
+          <p class="copyright-text">Developed By: <a rel="nofollow" href="" target="_blank">CloudStack
+              Dynamics</a></p>
+
+        </div>
+
+      </div>
+    </div>
+
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+      <path fill="#063974" fill-opacity="1"
+        d="M0,224L34.3,192C68.6,160,137,96,206,90.7C274.3,85,343,139,411,144C480,149,549,107,617,122.7C685.7,139,754,213,823,240C891.4,267,960,245,1029,224C1097.1,203,1166,181,1234,160C1302.9,139,1371,117,1406,106.7L1440,96L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z">
+      </path>
+    </svg>
+  </footer>
+
+  <script src='https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.7.3/dist/alpine.min.js'></script>
+
+</body>
+<!-- partial -->
+
+</html>
