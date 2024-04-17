@@ -271,10 +271,12 @@ class DashboardView(TemplateView):
             customer_filter_col = "st_id__dpu_user__in"
             drec_value = request.user.id
 
-        active_dpu_list = DPU.objects.filter(**{dpu_column: drec_value})
+        active_dpu_list = DPU.objects.filter(**{dpu_column: drec_value}).select_related('user')
 
         # Fetch DREC data based on user type and prefetch related objects
         drec_data = DREC.objects.filter(**{drec_filter_st_dt: drec_value}).order_by('-created_at').select_related('ST_ID__user')
+
+        # Extract distinct CUST_IDs before slicing the queryset
         drec_data_cust_ids = drec_data.values_list('CUST_ID', flat=True).distinct()
 
         # Prepare summary data
@@ -348,27 +350,41 @@ class DashboardView(TemplateView):
         }
 
         return render(request, self.template_name, context)
-
 class FetchDRECDataView(View):
     def get(self, request, *args, **kwargs):
         try:
             selected_date_str = request.GET.get('selectedDate')
             selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d').date()
             
+            # Fetch DREC data for the selected date
             drec_data = DREC.objects.filter(RecordingDate=selected_date)
+
+            # Prefetch related CustomerList objects to reduce database hits
+            drec_data = drec_data.select_related('ST_ID')
+
+            # Fetch customer names using values queryset to reduce data fetched from CustomerList
+            customer_names = CustomerList.objects.filter(
+                st_id__in=drec_data.values_list('ST_ID__st_id', flat=True),
+                cust_id__in=drec_data.values_list('CUST_ID', flat=True)
+            ).values('st_id', 'name')
+
+            # Create a dictionary to map customer names to ST_IDs
+            customer_name_map = {item['st_id']: item['name'] for item in customer_names}
+
             drec_data_list = []
-            
+
             for drec in drec_data:
-                customer_name = CustomerList.objects.filter(st_id=drec.ST_ID.st_id, cust_id=drec.CUST_ID).values_list('name', flat=True).first()
-                st_id_data = drec.ST_ID
+                # Get customer name from the pre-fetched map
+                customer_name = customer_name_map.get(drec.ST_ID.st_id, 'N/A')
+                
                 drec_data_list.append({
-                    'ST_ID': st_id_data.st_id,
-                    'Location': st_id_data.location,
-                    'Society': st_id_data.society,
+                    'ST_ID': drec.ST_ID.st_id,
+                    'Location': drec.ST_ID.location,
+                    'Society': drec.ST_ID.society,
                     'REC_TYPE': drec.REC_TYPE,
                     'SLIP_TYPE': drec.SLIP_TYPE,
-                    'CUST_ID': drec.CUST_ID,                    
-                    'Customer_Name': customer_name if customer_name else 'N/A',
+                    'CUST_ID': drec.CUST_ID,
+                    'Customer_Name': customer_name,
                     'RecordingDate': drec.RecordingDate.strftime('%Y-%m-%d'),
                     'RecordingTime': drec.RecordingTime,
                     'SHIFT': drec.SHIFT,
