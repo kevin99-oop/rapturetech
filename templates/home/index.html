@@ -44,7 +44,7 @@
 <body>
     <main>
 
-        <div id="sticky-wrapper" class="sticky-wrapper is-sticky" style="height: 94px;">
+        <div id="sticky-wrapper" class="sticky-wrapper is-sticky" style="height: 100px;">
             <nav class="navbar navbar-expand-lg">
                 <div class="container">
                     <a class="navbar-brand d-flex align-items-center" href="{%url 'home'%}">
@@ -91,7 +91,7 @@
                             <a href="{%url 'login'%}">
 
                                 <img src="{% static 'home/images/cloud-data (1).png'%}" class="" href="{%url 'login'%}"
-                                    alt="" width="90" height="90">
+                                    alt="" width="80" height="80">
                             </a>
                         </ul>
 
@@ -351,7 +351,8 @@
                                         </div>
 
                                         <div class="d-flex align-items-center ms-lg-auto">
-                                            <a href="{%url 'website_ultrasonic_digital_stirrer'%}" class="btn custom-btn">Show More</a>
+                                            <a href="{%url 'website_ultrasonic_digital_stirrer'%}"
+                                                class="btn custom-btn">Show More</a>
                                         </div>
                                     </div>
                                 </div>
@@ -381,7 +382,8 @@
 
                             <div class="col-lg-6 col-12 order-3 order-lg-0 ">
                                 <div class="custom-block-info mt-2 mt-lg-0">
-                                    <a href="{%url 'website_solar_charger'%}" class="events-title mb-3"> Solar Charger Controller</a>
+                                    <a href="{%url 'website_solar_charger'%}" class="events-title mb-3"> Solar Charger
+                                        Controller</a>
 
                                     <p class="mb-0">
                                         A solar charger controller is a crucial component in photovoltaic systems,
@@ -404,7 +406,10 @@
                                                     <li>
                                                         Model: SCC
                                                     </li>
-                                                   
+                                                    <li>
+                                                        Model: SCC
+                                                    </li>
+
                                                 </ul>
                                                 </p>
                                             </div>
@@ -413,7 +418,8 @@
                                         </div>
 
                                         <div class="d-flex align-items-center ms-lg-auto">
-                                            <a href="{%url 'website_solar_charger'%}" class="btn custom-btn">Show More</a>
+                                            <a href="{%url 'website_solar_charger'%}" class="btn custom-btn">Show
+                                                More</a>
                                         </div>
                                     </div>
                                 </div>
@@ -530,7 +536,7 @@
             <div class="row">
 
                 <div class="col-lg-6 col-12 me-auto mb-5 mb-lg-0">
-                    <a class="navbar-brand d-flex align-items-center" href="index.html">
+                    <a class="navbar-brand d-flex align-items-center" href="{%url 'home'%}">
                         <img src="{% static 'home/images/logo1.png'%}" class="navbar-brand-image " alt="">
 
                     </a>

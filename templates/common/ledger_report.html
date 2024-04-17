@@ -168,9 +168,9 @@
                         <h6 class="mb-2 fw-bold">
                             Ledger Table
                         </h6>
-                        <div class="float-end">                    
-                            <button class="btn btn-primary btn-sm" onclick="exportToCsvAndPdf(['ledger_summary_data', 'ledger_detail_data'], 'ledger_report', 'csv')">CSV</button>
-                            <button class="btn btn-primary btn-sm" onclick="exportToCsvAndPdf(['ledger_summary_data', 'ledger_detail_data'], 'ledger_report', 'pdf')">PDF</button>
+                        <div class="float-end mb-2">                    
+                            <button class="btn btn-primary rounded btn-sm me-2 fw-bold" onclick="exportToCsvAndPdf(['ledger_summary_data', 'ledger_detail_data'], 'ledger_report', 'csv')"><i class="icon-download me-2 mb-1"></i>CSV</button>
+                            <button class="btn btn-primary rounded btn-sm  fw-bold" onclick="exportToCsvAndPdf(['ledger_summary_data', 'ledger_detail_data'], 'ledger_report', 'pdf')"><i class="icon-download me-2 mb-1"></i>PDF</button>
     
                         </div>
                     </div>
@@ -197,7 +197,7 @@
                                 <th>Root</th>
                                 <th>Society</th>
                                 <th>DPU</th>
-                                <th>Total QT</th>
+                                <th>Total Qty.</th>
                                 <th>Total Amount</th>
                                 <th>Total CAmount</th>
                                 <th>Avg. FAT</th>
@@ -212,8 +212,8 @@
                                 <td>{{ summary_data_entry.ST_ID__location }}</td>
                                 <td>{{ summary_data_entry.ST_ID__society }}</td>
                                 <td>{{ summary_data_entry.ST_ID__st_id }}</td>
-                                <td>{{ summary_data_entry.TotalQT }}</td>
-                                <td>{{ summary_data_entry.TotalAmount }}</td>
+                                <td>{{ summary_data_entry.TotalQT }} ltr.</td>
+                                <td>₹ {{ summary_data_entry.TotalAmount }}</td>
                                 <td>{{ summary_data_entry.TotalCAmount }}</td>
                                 <td>{{ summary_data_entry.AvgFAT|floatformat:2 }}</td>
                                 <td>{{ summary_data_entry.AvgSNF|floatformat:2 }}</td>
@@ -240,7 +240,7 @@
                                 <th>SNF</th>
                                 <th>CLR</th>
                                 <th>WATER</th>
-                                <th>QT</th>
+                                <th>Quantity</th>
                                 <th>RATE</th>
                                 <th>Amount</th>
                                 <th>CAmount</th>
@@ -285,9 +285,9 @@
                                 <h6 class="mb-2 fw-bold">
                                     Payment Summary Table
                                 </h6>
-                                <div class="float-end">                    
-                                    <button class="btn btn-primary btn-sm" onclick="exportToCsvAndPdf(['payment_table_info', 'payment_table_data'], 'ledger_report_payment', 'csv')">CSV</button>
-                                    <button class="btn btn-primary btn-sm" onclick="exportToCsvAndPdf(['payment_table_info', 'payment_table_data'], 'ledger_report_payment', 'pdf')">PDF</button>
+                                <div class="float-end mb-2">                    
+                                    <button class="btn btn-primary rounded btn-sm me-2 fw-bold" onclick="exportToCsvAndPdf(['payment_table_info', 'payment_table_data'], 'ledger_report_payment', 'csv')"><i class="icon-download me-2 mb-1"></i>CSV</button>
+                                    <button class="btn btn-primary rounded btn-sm  fw-bold" onclick="exportToCsvAndPdf(['payment_table_info', 'payment_table_data'], 'ledger_report_payment', 'pdf')"><i class="icon-download me-2 mb-1"></i>PDF</button>
                                 </div>
                             </div>
                         </div>
@@ -303,10 +303,10 @@
                                     <thead class="table-title text-white text-center rounded">
                                         <tr>
                                             <th>Location</th>
-                                            <th>DPU</th>
+                                            <th>St. Id</th>
                                             <th>Start Date</th>
                                             <th>End Date</th>
-                                            <th>Grand Total Qt.</th>
+                                            <th>Grand Total Qty.</th>
                                             <th>Grand Total Amount</th>
                                         </tr>
                                     </thead>
@@ -316,8 +316,8 @@
                                             <td>{{ selected_dpu }}</td>
                                             <td>{{ selected_start_date }}</td>
                                             <td>{{ selected_end_date }}</td>                                        
-                                            <td>{{ payment_summary_data.GrandTotalQT }}</td>
-                                            <td>{{ payment_summary_data.GrandTotalAmount }}</td>
+                                            <td>{{ payment_summary_data.GrandTotalQT }} ltr.</td>
+                                            <td>₹ {{ payment_summary_data.GrandTotalAmount }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -330,10 +330,10 @@
                                 <table id="payment_table_data" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 mt-5 rounded fw-bold">
                                     <thead class="table-title text-white text-center rounded bg-success">
                                         <tr>
-                                            <th>Customer</th>
-                                            <th>Name</th>
+                                            <th>Cust. Id</th>
+                                            <th>Customer Name</th>
                                             <th>No. of Shifts</th>
-                                            <th>Total QT.</th>
+                                            <th>Total Qty.</th>
                                             <th>Total Amount</th>
                                             <th>Total CAmount</th>
                                             <th>Avg. FAT</th>
@@ -519,6 +519,3 @@
 </script>
 
 {% endblock content %}
-
-
-    

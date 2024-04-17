@@ -59,8 +59,7 @@ urlpatterns = [
     path('change-password/', auth_views.PasswordChangeView.as_view(
         template_name='common/change-password.html', success_url='/'), name='change-password'),
     # Forget Password URLs
-    path('password-reset/',
-         auth_views.PasswordResetView.as_view(
+    path('password_reset/', auth_views.PasswordResetView.as_view(
              template_name='common/password-reset/password_reset.html',
              subject_template_name='common/password-reset/password_reset_subject.txt',
              email_template_name='common/password-reset/password_reset_email.html',
@@ -77,6 +76,9 @@ urlpatterns = [
          auth_views.PasswordResetCompleteView.as_view(
              template_name='common/password-reset/password_reset_complete.html'
          ), name='password_reset_complete'),
+
+
+         
     #Profile
     path('profile-update/', ProfileUpdateView.as_view(), name='profile-update'),
     path('profile/', ProfileView.as_view(), name='profile'),

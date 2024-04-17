@@ -109,6 +109,53 @@
 
   /* Add this CSS to your existing styles */
 </style>
+<style>
+  /* Hide the "Powered by Google Translate" text */
+  .goog-logo-link,
+  .goog-logo {
+      display: none !important;
+  }
+
+  /* Customize the Google Translate button */
+  .goog-te-combo {
+    background: #e9ecef;
+    font-family: 'Manrope'!important;
+    padding: 8px!important;
+    border-radius: 5px;
+    border: none;
+  }
+
+  /* Customize the dropdown arrow */
+  .goog-te-button img {
+      display: none;
+      /* Hide the default dropdown arrow image */
+  }
+
+  /* Add your custom dropdown arrow, for example, a down-arrow icon */
+  .goog-te-button:after {
+      content: '\25BC';
+      /* Unicode character for a down-arrow */
+      font-size: 12px;
+      color: #555;
+      margin-left: 5px;
+  }
+
+  #google_translate_element {
+      color: transparent;
+  }
+
+  #google_translate_element a {
+      display: none;
+  }
+
+  .goog-logo-link {
+      display: none !important;
+  }
+
+  .goog-te-gadget {
+      color: transparent !important;
+  }
+</style>
 
 <body>
    
@@ -144,7 +191,7 @@
             Time:- <span id="clock" class="fw-bold text-danger"></span>
 
           </li>
-          <li class="nav-item d-none d-lg-block">
+          <li class="nav-item d-none d-lg-block" >
             <div class="input-group date datepicker navbar-date-picker">
               <span class="input-group-addon input-group-prepend border-right">
                 <span class="icon-calendar input-group-text calendar-icon"></span>
@@ -152,6 +199,16 @@
               <input type="text" id="dateInput" class="form-control fw-bold text-danger" readonly>
             </div>
           </li>
+          <li class="nav-item">
+            <div class="nav-link text-dark" id="google_translate_element">
+                <div
+                    class="icon icon-shape icon-sm border-radius-md text-center me-2 mb-3 d-flex align-items-center justify-content-center">
+                    <i class="fa fa-globe text-primary text-sm opacity-10" aria-hidden="true"></i>
+                    </span>
+                </div>
+            </div>
+        </li>
+          
 <!-- 
           <li class="nav-item dropdown">
             <a class="nav-link count-indicator" id="countDropdown" href="#" data-bs-toggle="dropdown"
@@ -185,7 +242,7 @@
 
             </div>
           </li> -->
-          <li class="nav-item dropdown d-none d-lg-block user-dropdown">
+          <li class="nav-item dropdown  user-dropdown">
             <a class="nav-link" id="UserDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
               <i class="mdi mdi-account cursor-pointer"></i><i class="mdi mdi-chevron-down"></i>
               <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown">
@@ -296,6 +353,7 @@
               <span class="menu-title">Documentation</span>
             </a>
           </li>
+      
         </ul>
       </nav>
       <!-- partial -->
@@ -385,7 +443,13 @@
   <script src="{% static 'assets/new/js/dashboard.js'%}"></script>
   <script src="{% static 'assets/new/js/Chart.roundedBarCharts.js'%}"></script>
   <!-- End custom js for this page-->
-
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
+    }
+    </script>
+    
 </body>
 
 </html>

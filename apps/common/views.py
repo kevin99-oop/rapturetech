@@ -48,6 +48,8 @@ from apps.common.forms import CustomLoginForm
 from django.views.generic import FormView
 # ledger code
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.paginator import Paginator
+from decimal import Decimal
 
 # Common Views
 
@@ -111,16 +113,15 @@ def custom_login(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
+        
         if user is not None:
             login(request, user)
             return redirect('dashboard')  # Redirect to the dashboard after successful login
         else:
-            # Handle invalid login credentials
-            # You can add a message here if needed
-            messages.error(request, "Invalid User name or Password")
-            return render(request, template_name)  # You can render the template again or redirect to the same login page
-    else:
-        return render(request, template_name)   
+            messages.error(request, "Invalid username or password")
+    
+    return render(request, template_name)
+
 
 def custom_logout(request):
     # Use Django's logout function to log the user out
@@ -140,6 +141,9 @@ class DashboardView(TemplateView):
     template_name = 'example.html'
     
     def calculate_averages(self, records):
+        if not records:
+            return 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0
+
         total_fat = sum(record.FAT for record in records)
         total_snf = sum(record.SNF for record in records)
         total_clr = sum(record.CLR for record in records)
@@ -147,16 +151,18 @@ class DashboardView(TemplateView):
         total_ltr = sum(record.QT for record in records)
         total_amt = sum(record.Amount for record in records)
 
-        total_cust_set = {(record.CUST_ID, record.CSR_NO) for record in records}
+        # Count unique customer IDs and CSR numbers
+        total_cust_set = Counter((record.CUST_ID, record.CSR_NO) for record in records)
         total_cust = len(total_cust_set)
 
-        avg_fat = round(total_fat / len(records), 1) if len(records) > 0 else 0.0
-        avg_snf = round(total_snf / len(records), 1) if len(records) > 0 else 0.0
-        avg_clr = round(total_clr / len(records), 1) if len(records) > 0 else 0.0
-        total_ltr = round(sum(record.QT for record in records), 2)
-        total_amt = round(sum(record.Amount for record in records), 2)
-        avg_water = round(total_water / len(records), 2) if len(records) > 0 else 0.0
-        
+        # Calculate averages
+        num_records = len(records)
+        avg_fat = round(total_fat / num_records, 1)
+        avg_snf = round(total_snf / num_records, 1)
+        avg_clr = round(total_clr / num_records, 1)
+        avg_water = round(total_water / num_records, 2)
+        total_ltr = round(total_ltr, 2)
+        total_amt = round(total_amt, 2)
 
         return avg_fat, avg_snf, avg_clr, avg_water, total_ltr, total_amt, total_cust
 
@@ -250,52 +256,49 @@ class DashboardView(TemplateView):
                 buffalo_summary_data.append(drec)
 
         return self.prepare_summary_data(buffalo_summary_data, active_dpu_list)
+    
 
     def get(self, request, *args, **kwargs):
-        # Check if the user is staff or superuser
+        # Fetch DPU data based on user type
         if request.user.is_staff or request.user.is_superuser:
-            user_column = 'user'
             dpu_column = 'user'
             drec_filter_st_dt = "ST_ID__user"
             customer_filter_col = "st_id__user__in"
             drec_value = request.user
         else:
-            user_column = 'dpu_user'
             dpu_column = 'dpu_user'
             drec_filter_st_dt = "ST_ID__dpu_user"
             customer_filter_col = "st_id__dpu_user__in"
             drec_value = request.user.id
 
-        # Fetch DPU data based on user type
         active_dpu_list = DPU.objects.filter(**{dpu_column: drec_value})
 
-        # Fetch DREC data based on user type
-        drec_data = DREC.objects.filter(**{drec_filter_st_dt: drec_value}).order_by('-created_at')
-
-        drec_data_cust_ids = drec_data.values_list('CUST_ID').distinct()
-        drec_data_cust_ids = [ i[0] for i in drec_data_cust_ids]
+        # Fetch DREC data based on user type and prefetch related objects
+        drec_data = DREC.objects.filter(**{drec_filter_st_dt: drec_value}).order_by('-created_at').select_related('ST_ID__user')
+        drec_data_cust_ids = drec_data.values_list('CUST_ID', flat=True).distinct()
 
         # Prepare summary data
         summary_data = self.prepare_summary_data(drec_data, active_dpu_list)
-        
-        # Fetch customer list
-        customer_list = CustomerList.objects.filter( cust_id__in = drec_data_cust_ids  )
+
+        # Fetch customer list and prefetch related objects
+        customer_list = CustomerList.objects.filter(cust_id__in=drec_data_cust_ids)
 
         # Calculate global averages
         avg_fat, avg_snf, avg_clr = self.calculate_global_averages(request.user)
 
-        if request.user.is_staff or request.user.is_superuser:
-            
-            current_users_dary_names = DPU.objects.filter(**{dpu_column: drec_value}).values_list('st_id').distinct()
-            current_users_dary_names = [ i[0] for i in current_users_dary_names]
-            # Get total customer count
-            total_customer_count = CustomerList.objects.filter( st_id__in = current_users_dary_names  ).count()            
-        else:
-            current_users_dary_name = DPU.objects.get(dpu_user = request.user.id).st_id
-            # Get total customer count
-            total_customer_count = CustomerList.objects.filter( st_id =  current_users_dary_name ).count()
+        # Paginate the DREC data
+        paginator = Paginator(drec_data, 10)
+        drec_data_page = paginator.get_page(request.GET.get('page'))
 
-        # Get total DPUs
+        # Calculate total customer count
+        if request.user.is_staff or request.user.is_superuser:
+            current_users_dary_names = active_dpu_list.values_list('st_id', flat=True).distinct()
+            total_customer_count = CustomerList.objects.filter(st_id__in=current_users_dary_names).count()
+        else:
+            current_users_dary_name = active_dpu_list.values_list('st_id', flat=True).first()
+            total_customer_count = CustomerList.objects.filter(st_id=current_users_dary_name).count()
+
+        # Calculate total DPUs
         total_dpus = active_dpu_list.count()
 
         # Get top 10 latest records
@@ -303,21 +306,18 @@ class DashboardView(TemplateView):
 
         # Get recording dates
         recording_dates = self.get_recording_dates(request.user.id)
-          # Fetch customer names for each record
-                # Prepare cow summary data
+
+        # Prepare cow summary data and calculate averages
         cow_summary_data = self.prepare_cow_summary_data(drec_data, active_dpu_list)
-        # Calculate cow averages
         avg_fat_cow, avg_snf_cow, avg_clr_cow, avg_water_cow, total_ltr_cow, total_amt_cow, total_cust_cow = self.calculate_cow_summary(drec_data)
 
-        # Prepare buffalo summary data
+        # Prepare buffalo summary data and calculate averages
         buffalo_summary_data = self.prepare_buffalo_summary_data(drec_data, active_dpu_list)
-        # Calculate buffalo averages
         avg_fat_buffalo, avg_snf_buffalo, avg_clr_buffalo, avg_water_buffalo, total_ltr_buffalo, total_amt_buffalo, total_cust_buffalo = self.calculate_buffalo_summary(drec_data)
-
 
         context = {
             'active_dpu_list': active_dpu_list,
-            'drec_data': drec_data,
+            'drec_data': drec_data_page,
             'customer_list': customer_list,
             'summary_data': summary_data,
             'last_updated': timezone.now(),
@@ -345,8 +345,6 @@ class DashboardView(TemplateView):
             'total_ltr_buffalo': total_ltr_buffalo,
             'total_amt_buffalo': total_amt_buffalo,
             'total_cust_buffalo': total_cust_buffalo,
-
-           
         }
 
         return render(request, self.template_name, context)
@@ -556,10 +554,21 @@ class DRECViewSet(viewsets.ModelViewSet):
         # You can customize the save process here before calling the super method
         instance = serializer.save()
 
+    # def create(self, request, *args, **kwargs):
+    #     response = super().create(request, *args, **kwargs)
+
+    #     response.status_code = 200  # Set the status code to 200
+    #     return response
     def create(self, request, *args, **kwargs):
-        response = super().create(request, *args, **kwargs)
-        response.status_code = 200  # Set the status code to 200
-        return response
+        if isinstance(request.data, list):  # Check if the request data is a list
+            serializer = self.get_serializer(data=request.data, many=True)
+        else:
+            serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def save(self, *args, **kwargs):
         # Replace None values with "null"
@@ -1179,15 +1188,16 @@ def calculate_cow_summary(records):
     total_snf = sum(record['SNF'] for record in records)
     total_clr = sum(record['CLR'] for record in records)
     total_water = sum(record['WATER'] for record in records)
-    total_ltr = sum(record['QT'] for record in records)
-    total_amt = sum(record['Amount'] for record in records)
-    total_camt = sum(record['CAmount'] for record in records)
+    total_ltr = round(sum(record['QT'] for record in records), 2)
+    total_amt = round(sum(record['Amount'] for record in records), 2)
+    total_camt = round(sum(record['CAmount'] for record in records), 2)
+
     total_cust = len(records)
 
-    avg_fat = total_fat / len(records) if records else 0
-    avg_snf = total_snf / len(records) if records else 0
-    avg_clr = total_clr / len(records) if records else 0
-    avg_water = total_water / len(records) if records else 0
+    avg_fat = round(total_fat / len(records), 2) if records else 0.00
+    avg_snf = round(total_snf / len(records), 2) if records else 0.00
+    avg_clr = round(total_clr / len(records), 2) if records else 0.00
+    avg_water = round(total_water / len(records), 2) if records else 0.00
 
     return {
         'AvgFAT': avg_fat,
@@ -1205,15 +1215,16 @@ def calculate_buffalo_summary(records):
     total_snf = sum(record['SNF'] for record in records)
     total_clr = sum(record['CLR'] for record in records)
     total_water = sum(record['WATER'] for record in records)
-    total_ltr = sum(record['QT'] for record in records)
-    total_amt = sum(record['Amount'] for record in records)
-    total_camt = sum(record['CAmount'] for record in records)  # Calculating TotalCAmt
+    total_ltr = round(sum(record['QT'] for record in records), 2)
+    total_amt = round(sum(record['Amount'] for record in records), 2)
+    total_camt = round(sum(record['CAmount'] for record in records), 2)
     total_cust = len(records)
 
-    avg_fat = total_fat / len(records) if records else 0
-    avg_snf = total_snf / len(records) if records else 0
-    avg_clr = total_clr / len(records) if records else 0
-    avg_water = total_water / len(records) if records else 0
+    avg_fat = round(total_fat / len(records), 2) if records else 0.00
+    avg_snf = round(total_snf / len(records), 2) if records else 0.00
+    avg_clr = round(total_clr / len(records), 2) if records else 0.00
+    avg_water = round(total_water / len(records), 2) if records else 0.00
+
 
     return {
         'AvgFAT': avg_fat,
@@ -1316,35 +1327,25 @@ def get_detail_data(request, location, dpu, society, shift, start_date):
     return detail_data
 
 
-
 @login_required
 def ledger_report(request):
     # Fetch dynamic values for dropdowns from the database
-    if request.user.is_staff or request.user.is_superuser:
-        locations = DPU.objects.filter(user=request.user).values_list('location', flat=True).distinct()
-        dpus = DPU.objects.filter(user=request.user).values_list('st_id', flat=True).distinct()
-        societies = DPU.objects.filter(user=request.user).values_list('society', flat=True).distinct()
-                # Count distinct locations, dpus, and societies
-        total_locations = DPU.objects.filter(user=request.user.id).values('location').distinct().count()
-        total_dpus = DPU.objects.filter(user=request.user.id).count()
-        total_societies = DPU.objects.filter(user=request.user.id).values('society').distinct().count()
+    dpus_queryset = DPU.objects.filter(user=request.user) if request.user.is_staff or request.user.is_superuser else DPU.objects.filter(dpu_user=request.user.id)
 
-    else:
-        locations = DPU.objects.filter(dpu_user=request.user.id).values_list('location', flat=True).distinct()
-        dpus = DPU.objects.filter(dpu_user=request.user.id).values_list('st_id', flat=True).distinct()
-        societies = DPU.objects.filter(dpu_user=request.user.id).values_list('society', flat=True).distinct()
-        total_locations = DPU.objects.filter(dpu_user=request.user.id).values('location').distinct().count()
-        total_dpus = DPU.objects.filter(dpu_user=request.user.id).count()
-        total_societies = DPU.objects.filter(dpu_user=request.user.id).values('society').distinct().count()
+    # Fetch distinct values using values_list
+    locations = dpus_queryset.values_list('location', flat=True).distinct()
+    dpus = dpus_queryset.values_list('st_id', flat=True).distinct()
+    societies = dpus_queryset.values_list('society', flat=True).distinct()
 
-        # Get distinct customer IDs for the current user
-    user_dpust_ids = DPU.objects.filter(dpu_user=request.user.id).values_list('st_id', flat=True).distinct()
-        
-        # Fetch customer IDs associated with the user's DPUs
-    customer_ids = CustomerList.objects.filter(st_id__in=user_dpust_ids).values_list('cust_id', flat=True).distinct()
-        
-    # Count distinct locations, dpus, and societies
+    # Count total locations, dpus, and societies
+    total_locations = dpus_queryset.values('location').distinct().count()
+    total_dpus = dpus_queryset.count()
+    total_societies = dpus_queryset.values('society').distinct().count()
 
+    # Get customer IDs
+    user_dpu_ids = dpus_queryset.values_list('st_id', flat=True).distinct()
+    customer_ids = list(CustomerList.objects.filter(st_id__in=user_dpu_ids).values_list('cust_id', flat=True).distinct())
+    customer_ids.sort()
 
     context = {
         'locations': locations,
@@ -1354,9 +1355,9 @@ def ledger_report(request):
         'total_locations': total_locations,
         'total_dpus': total_dpus,
         'total_societies': total_societies,
-        'customer_list': customer_list,
     }
 
+    # Handle POST request
     if request.method == 'POST':
         location = request.POST.get('location')
         dpu = request.POST.get('dpu')
@@ -1366,32 +1367,39 @@ def ledger_report(request):
         start_date_str = request.POST.get('start_date')
         end_date_str = request.POST.get('end_date')
 
-        # Parse the start and end dates from the string to datetime objects
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else None
         end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else None
 
-        # Replace the following lines with your actual data retrieval logic
-        
-        summary_data = get_ledger_summary_data(location, dpu, society, start_id, end_id, start_date, end_date)
-        detail_data = get_ledger_detail_data(location, dpu, society, start_id, end_id, start_date, end_date)
-        payment_summary_data = get_payment_summary_data(
-                location, dpu, start_date, end_date, start_id, end_id
-            )
+        # Format dates to 'ddmmyy' format
+        start_date_formatted = start_date.strftime('%d-%m-%Y') if start_date else None
+        end_date_formatted = end_date.strftime('%d-%m-%Y') if end_date else None
+
+
+
+        if all((location, dpu, society, start_id, end_id, start_date, end_date)):
+            summary_data = get_ledger_summary_data(location, dpu, society, start_id, end_id, start_date, end_date)
+            detail_data = get_ledger_detail_data(location, dpu, society, start_id, end_id, start_date, end_date)
+        else:
+            summary_data = []
+            detail_data = []
+
+        payment_summary_data = get_payment_summary_data(location, dpu, start_date, end_date, start_id, end_id)
+
         context.update({
             'selected_location': location,
             'selected_dpu': dpu,
             'selected_society': society,
             'selected_start_id': start_id,
             'selected_end_id': end_id,
-            'selected_start_date': start_date_str,
-            'selected_end_date': end_date_str,
+            'selected_start_date': start_date_formatted,
+            'selected_end_date': end_date_formatted,
             'ledger_summary_data': summary_data,
             'ledger_detail_data': detail_data,
-            'payment_summary_data': payment_summary_data,  # Add payment_summary_data to the context
-
+            'payment_summary_data': payment_summary_data,
         })
 
     return render(request, 'common/ledger_report.html', context)
+
 
 
 def get_ledger_summary_data(location, dpu, society, start_id, end_id, start_date, end_date):
@@ -1423,12 +1431,14 @@ def get_ledger_summary_data(location, dpu, society, start_id, end_id, start_date
             'ST_ID__society',   # Include society in values
             'ST_ID__st_id',     # Include st_id in values
         ).annotate(
-            TotalQT=Sum('QT'),
-            TotalAmount=Sum('Amount'),
-            TotalCAmount=Sum('CAmount'),
-            AvgFAT=Round(Avg('FAT'), 1),
-            AvgSNF=Round(Avg('SNF'), 1),
-            AvgCLR=Round(Avg('CLR'), 1),
+            TotalQT=Round(Sum('QT'), 2),  # Round to 2 decimal places
+            TotalAmount=Round(Sum('Amount'), 2),  # Round to 2 decimal places
+            TotalCAmount=Round(Sum('CAmount'), 2),  # Round to 2 decimal places
+
+            AvgFAT=Round(Avg('FAT'), 2),  # Round to 2 decimal places
+            AvgSNF=Round(Avg('SNF'), 2),  # Round to 2 decimal places
+            AvgCLR=Round(Avg('CLR'), 2),  # Round to 2 decimal places
+            AvgRATE=Round(Avg('RATE'), 2), # Round to 2 decimal places
         ).order_by('CUST_ID').first()
 
         if summary_data:
@@ -1458,6 +1468,8 @@ def get_ledger_detail_data(location, dpu, society, start_id, end_id, start_date,
 
     return detail_data
 
+from django.db.models import OuterRef, Subquery
+
 def get_payment_summary_data(location, dpu, start_date, end_date, start_id, end_id):
     payment_data = DREC.objects.filter(
         ST_ID__location=location,
@@ -1465,31 +1477,30 @@ def get_payment_summary_data(location, dpu, start_date, end_date, start_id, end_
         RecordingDate__range=[start_date, end_date],
         CUST_ID__range=[start_id, end_id]
     )
-
     payment_summary_data = {
-        'GrandTotalQT': payment_data.aggregate(GrandTotalQT=Sum('QT'))['GrandTotalQT'] or 0,
-        'GrandTotalAmount': payment_data.aggregate(GrandTotalAmount=Sum('Amount'))['GrandTotalAmount'] or 0,
+        'GrandTotalQT': Decimal(payment_data.aggregate(GrandTotalQT=Sum('QT'))['GrandTotalQT'] or 0).quantize(Decimal('0.00')),
+        'GrandTotalAmount': Decimal(payment_data.aggregate(GrandTotalAmount=Sum('Amount'))['GrandTotalAmount'] or 0).quantize(Decimal('0.00')),
         'CustomerData': [],
     }
 
-    # Get individual customer data
+    # Subquery to fetch customer name based on CUST_ID and ST_ID
+    customer_name_subquery = CustomerList.objects.filter(
+        cust_id=OuterRef('CUST_ID'),
+        st_id=dpu
+    ).values('name')[:1]
+
+    # Get individual customer data with customer name
     customer_data = payment_data.values('CUST_ID').annotate(
         NoOfShifts=Count('SHIFT'),
-        TotalQT=Sum('QT'),
-        TotalAmount=Sum('Amount'),
-        TotalCAmount=Sum('CAmount'),
-        AvgFAT=Round(Avg('FAT'), 1),
-        AvgSNF=Round(Avg('SNF'), 1),
-        AvgCLR=Round(Avg('CLR'), 1),
-        AvgRATE=Round(Avg('RATE'),2),
-        
+        TotalQT=Round(Sum('QT'), 2),  # Round to 2 decimal places
+        TotalAmount=Round(Sum('Amount'), 2),  # Round to 2 decimal places
+        TotalCAmount=Round(Sum('CAmount'), 2),  # Round to 2 decimal places
+        AvgFAT=Round(Avg('FAT'), 2),  # Round to 2 decimal places
+        AvgSNF=Round(Avg('SNF'), 2),  # Round to 2 decimal places
+        AvgCLR=Round(Avg('CLR'), 2),  # Round to 2 decimal places
+        AvgRATE=Round(Avg('RATE'), 2), # Round to 2 decimal places
+        CustomerName=Subquery(customer_name_subquery)
     ).order_by('CUST_ID')
-
-    # Iterate through the customer data and add customer name
-    for entry in customer_data:
-        cust_id = entry['CUST_ID']
-        customer_name = CustomerList.objects.filter(cust_id=cust_id).values_list('name', flat=True).first()
-        entry['CustomerName'] = customer_name
 
     payment_summary_data['CustomerData'] = list(customer_data)
 

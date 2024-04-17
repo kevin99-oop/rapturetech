@@ -57,7 +57,7 @@
                                         <p class="float-end fw-bold">
                                             Total - <code><strong>{{total_dpus}}</strong></code>
                                         </p>
-                                        <select name="dpu" id="dpu" class="form-select rounded" disabled>
+                                        <select name="dpu" id="dpu" class="form-select rounded" >
                                             <option value="" selected>Select</option>
                                             {% for dpu in dpus %}
                                                 <option value="{{ dpu }}" {% if dpu == selected_dpu %}selected{% endif %}>
@@ -79,7 +79,7 @@
                                         <p class="float-end fw-bold">
                                             Total - <code><strong>{{total_societies}}</strong></code>
                                         </p>
-                                        <select name="society" id="society" class="form-select rounded" disabled>
+                                        <select name="society" id="society" class="form-select rounded" >
                                             <option value="" selected>Select</option>
                                             {% for society in societies %}
                                                 <option value="{{ society }}" {% if society == selected_society %}selected{% endif %}>
@@ -141,7 +141,12 @@
             <div class="card rounded">
                 <div class="card-header pb-0 p-3">
                     <div class="d-flex justify-content-between">
-                        <h6 class="mb-2">Detail Table</h6>
+                        <h6 class="me-2 mt-2 fw-bold">Detail Table</h6>
+                        <div class="float-end  mb-2 ">
+                            <button class="btn btn-primary rounded btn-sm me-2 fw-bold" onclick="exportToCsvAndPdf(['summaryTable_report', 'detailTable_report'], 'shift_report', 'csv')"><i class="icon-download me-2 mb-1"></i>CSV</button>
+                            <button class="btn btn-primary rounded btn-sm fw-bold " onclick="exportToCsvAndPdf(['summaryTable_report', 'detailTable_report'], 'shift_report', 'pdf')"><i class="icon-download me-2 mb-1"></i>PDF</button>
+
+                        </div>
                     </div>
                 </div>
                 <div class="table-responsive card-body">
@@ -152,13 +157,12 @@
                             <tr>
                                 <th>CUST_ID</th>
                                 <th>Customer Name</th>  <!-- Add the header for Customer Name -->
-    
                                 <th>MType</th>
                                 <th>FAT</th>
                                 <th>SNF</th>
                                 <th>CLR</th>
                                 <th>WATER</th>
-                                <th>QT</th>
+                                <th>Quantity</th>
                                 <th>RATE</th>
                                 <th>Amount</th>
                                 <th>CAmount</th>
@@ -174,7 +178,7 @@
                                     <td>{{ record.SNF }}</td>
                                     <td>{{ record.CLR }}</td>
                                     <td>{{ record.WATER }}</td>
-                                    <td>{{ record.QT }}</td>
+                                    <td>{{ record.QT }} ltr</td>
                                     <td>{{ record.RATE }}</td>
                                     <td>{{ record.Amount }}</td>
                                     <td>{{ record.CAmount }}</td>
@@ -198,12 +202,8 @@
         <div class="card rounded">
             <div class="card-header pb-0 p-3">
                 <div class="d-flex justify-content-between">
-                    <h6 class="mb-2">Summary Table</h6>
-                    <div class="float-end">                    
-                        <button class="btn btn-primary btn-sm" onclick="exportToCsvAndPdf(['summaryTable_report', 'detailTable_report'], 'shift_report', 'csv')">CSV</button>
-                        <button class="btn btn-primary btn-sm" onclick="exportToCsvAndPdf(['summaryTable_report', 'detailTable_report'], 'shift_report', 'pdf')">PDF</button>
-
-                    </div>
+                    <h6 class="mb-2 fw-bold">Summary Table</h6>
+                 
                 </div>
             </div>
             <div class="table-responsive card-body">
@@ -224,7 +224,7 @@
                             <th>Avg.FAT</th>
                             <th>Avg.SNF</th>
                             <th>Avg.CLR</th>  
-                            <th>Total QT.</th>
+                            <th>Total Qty.</th>
                             <th>Total Amount</th>
                             <th>Total CAmount</th>
                             <th>Total Customer</th>
@@ -240,8 +240,8 @@
                             <td>{{ summary_data.AvgFAT }}</td>
                             <td>{{ summary_data.AvgSNF }}</td>
                             <td>{{ summary_data.AvgCLR }}</td>  
-                            <td>{{ summary_data.TotalQT }}</td>
-                            <td>{{ summary_data.TotalAmount }}</td>
+                            <td>{{ summary_data.TotalQT }} ltr.</td>
+                            <td>₹ {{ summary_data.TotalAmount }}</td>
                             <td>{{ summary_data.TotalCAmount }}</td>
                             <td>{{ summary_data.TotalCustomer }}</td>
                         </tr>  
@@ -250,8 +250,8 @@
                             <td>{{ cow_summary_data.AvgFAT }}</td>
                             <td>{{ cow_summary_data.AvgSNF }}</td>
                             <td>{{ cow_summary_data.AvgCLR }}</td>
-                            <td>{{ cow_summary_data.TotalLtr }}</td>
-                            <td>{{ cow_summary_data.TotalAmt }}</td>
+                            <td>{{ cow_summary_data.TotalLtr }} ltr.</td>
+                            <td>₹ {{ cow_summary_data.TotalAmt }}</td>
                             <td>{{ cow_summary_data.TotalCAmt }}</td>  
                             <td>{{ cow_summary_data.TotalCust }}</td>
                         </tr>
@@ -260,8 +260,8 @@
                             <td>{{ buffalo_summary_data.AvgFAT }}</td>
                             <td>{{ buffalo_summary_data.AvgSNF }}</td>
                             <td>{{ buffalo_summary_data.AvgCLR }}</td>
-                            <td>{{ buffalo_summary_data.TotalLtr }}</td>
-                            <td>{{ buffalo_summary_data.TotalAmt }}</td>
+                            <td>{{ buffalo_summary_data.TotalLtr }} ltr.</td>
+                            <td>₹ {{ buffalo_summary_data.TotalAmt }}</td>
                             <td>{{ buffalo_summary_data.TotalCAmt }}</td> 
                             <td>{{ buffalo_summary_data.TotalCust }}</td>
                         </tr>
@@ -302,9 +302,7 @@
 
             csvData.push(tableData.join('\n'));
 
-            if (index > 0) {
-                pdf.addPage();  // Add a new page for each additional table in PDF
-            }
+          
 
             pdf.autoTable({ html: `#${tableId}` });
         });
@@ -324,7 +322,6 @@
 
 
     </script>
-<!-- AJAX script to update dependent dropdowns -->
 <!-- AJAX script to update dependent dropdowns -->
 <script>
     function updateDpusByLocation(selectedLocation) {
@@ -392,6 +389,7 @@
             });
     });
 </script>
+
 
 
 <!-- Form handling scripts -->
