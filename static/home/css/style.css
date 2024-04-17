@@ -477,7 +477,7 @@ strong {
 }
 
 .navbar-brand-image {
-  height: 48px;
+  height: 66px;
 }
 
 .navbar-brand-text {
@@ -646,7 +646,6 @@ strong {
 .navbar-toggler .navbar-toggler-icon::after {
   top: 8px;
 }
-
 
 /*---------------------------------------
   HERO        

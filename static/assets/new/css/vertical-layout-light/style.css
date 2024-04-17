@@ -170,7 +170,12 @@
     opacity: 1;
   }
 }
+@media (max-width: 991px){
 
+  .navbar .navbar-menu-wrapper{
+    padding-bottom:  12px!important;;
+  }}
+  
 @-ms-keyframes flash {
   0% {
     opacity: 1;
