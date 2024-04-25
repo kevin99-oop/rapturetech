@@ -354,6 +354,8 @@ class DashboardView(TemplateView):
 
 
         
+
+        
  
 class FetchDRECDataView(View):
     def get(self, request, *args, **kwargs):
