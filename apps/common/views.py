@@ -139,33 +139,153 @@ def super_dashboard(request):
 @method_decorator([login_required, ensure_csrf_cookie], name='dispatch')
 class DashboardView(TemplateView):
     template_name = 'example.html'
+    paginate_by = 10
+    def get(self, request, *args, **kwargs):
+        # Fetch DPU data based on user type
+        active_dpu_list = self.get_active_dpu_list(request.user)
+
+        # Fetch DREC data based on user type and prefetch related objects
+        drec_data = self.get_drec_data(request.user)
+
+        # Extract distinct CUST_IDs before slicing the queryset
+        drec_data_cust_ids = drec_data.values_list('CUST_ID', flat=True).distinct()
+
+        # Prepare summary data
+        summary_data = self.prepare_summary_data(drec_data, active_dpu_list)
+
+        # Fetch customer list
+        customer_list = self.get_customer_list(drec_data_cust_ids)
+
+        # Calculate global averages
+        avg_fat, avg_snf, avg_clr = self.calculate_global_averages(request.user)
+
+        # Paginate the DREC data
+        paginator = Paginator(drec_data, self.paginate_by)
+        drec_data_page = paginator.get_page(request.GET.get('page'))
+
+        # Calculate total customer count
+        total_customer_count = self.calculate_total_customer_count(active_dpu_list)
+
+        # Calculate total DPUs
+        total_dpus = active_dpu_list.count()
+
+        # Get top 10 latest records
+        top_10_latest_records = self.get_top_10_latest_records(request.user.id, summary_data[0]['ST_ID__st_id']) if summary_data else None
+
+        # Get recording dates
+        recording_dates = self.get_recording_dates(request.user.id)
+
+        # Prepare cow summary data and calculate averages
+        cow_summary_data, avg_fat_cow, avg_snf_cow, avg_clr_cow, avg_water_cow, total_ltr_cow, total_amt_cow, total_cust_cow = self.prepare_and_calculate_summary_data(drec_data, active_dpu_list, 'C')
+
+        # Prepare buffalo summary data and calculate averages
+        buffalo_summary_data, avg_fat_buffalo, avg_snf_buffalo, avg_clr_buffalo, avg_water_buffalo, total_ltr_buffalo, total_amt_buffalo, total_cust_buffalo = self.prepare_and_calculate_summary_data(drec_data, active_dpu_list, 'B')
+
+        context = {
+            'active_dpu_list': active_dpu_list,
+            'drec_data': drec_data_page,
+            'customer_list': customer_list,
+            'summary_data': summary_data,
+            'last_updated': timezone.now(),
+            'avg_fat': avg_fat,
+            'avg_snf': avg_snf,
+            'avg_clr': avg_clr,
+            'total_customer_count': total_customer_count,
+            'total_dpus': total_dpus,
+            'dpu_list': ', '.join(dpu.st_id for dpu in active_dpu_list),
+            'recording_dates': recording_dates,
+            'top_10_latest_records': top_10_latest_records,
+            'cow_summary_data': cow_summary_data,
+            'avg_fat_cow': avg_fat_cow,
+            'avg_snf_cow': avg_snf_cow,
+            'avg_clr_cow': avg_clr_cow,
+            'avg_water_cow': avg_water_cow,
+            'total_ltr_cow': total_ltr_cow,
+            'total_amt_cow': total_amt_cow,
+            'total_cust_cow': total_cust_cow,
+            'buffalo_summary_data': buffalo_summary_data,
+            'avg_fat_buffalo': avg_fat_buffalo,
+            'avg_snf_buffalo': avg_snf_buffalo,
+            'avg_clr_buffalo': avg_clr_buffalo,
+            'avg_water_buffalo': avg_water_buffalo,
+            'total_ltr_buffalo': total_ltr_buffalo,
+            'total_amt_buffalo': total_amt_buffalo,
+            'total_cust_buffalo': total_cust_buffalo,
+        }
+
+        return render(request, self.template_name, context)
     
-    def calculate_averages(self, records):
-        if not records:
-            return 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0
+    def get_active_dpu_list(self, user):
+        if user.is_staff or user.is_superuser:
+            return DPU.objects.filter(user=user).select_related('user')
+        else:
+            return DPU.objects.filter(dpu_user=user.id).select_related('user')
 
-        total_fat = sum(record.FAT for record in records)
-        total_snf = sum(record.SNF for record in records)
-        total_clr = sum(record.CLR for record in records)
-        total_water = sum(record.WATER for record in records)
-        total_ltr = sum(record.QT for record in records)
-        total_amt = sum(record.Amount for record in records)
+    def get_drec_data(self, user):
+        if user.is_staff or user.is_superuser:
+            drec_filter = {'ST_ID__user': user}
+        else:
+            drec_filter = {'ST_ID__dpu_user': user.id}
 
-        # Count unique customer IDs and CSR numbers
-        total_cust_set = Counter((record.CUST_ID, record.CSR_NO) for record in records)
-        total_cust = len(total_cust_set)
+        return DREC.objects.filter(**drec_filter).order_by('-created_at').select_related('ST_ID__user')
 
-        # Calculate averages
-        num_records = len(records)
-        avg_fat = round(total_fat / num_records, 1)
-        avg_snf = round(total_snf / num_records, 1)
-        avg_clr = round(total_clr / num_records, 1)
-        avg_water = round(total_water / num_records, 2)
-        total_ltr = round(total_ltr, 2)
-        total_amt = round(total_amt, 2)
+    def get_customer_list(self, drec_data_cust_ids):
+        return CustomerList.objects.filter(cust_id__in=drec_data_cust_ids)
 
-        return avg_fat, avg_snf, avg_clr, avg_water, total_ltr, total_amt, total_cust
+    def calculate_global_averages(self, user):
+        if isinstance(user, User):
+            if user.is_staff or user.is_superuser:
+                drec_filter = {'ST_ID__user': user}
+            else:
+                drec_filter = {'ST_ID__dpu_user': user.id}
 
+            avg_fat = DREC.objects.filter(**drec_filter).aggregate(avg_fat=Avg('FAT'))['avg_fat']
+            avg_snf = DREC.objects.filter(**drec_filter).aggregate(avg_snf=Avg('SNF'))['avg_snf']
+            avg_clr = DREC.objects.filter(**drec_filter).aggregate(avg_clr=Avg('CLR'))['avg_clr']
+
+            return (
+                round(avg_fat, 1) if avg_fat is not None else None,
+                round(avg_snf, 1) if avg_snf is not None else None,
+                round(avg_clr, 1) if avg_clr is not None else None
+            )
+        else:
+            # Handle the case where user is not an instance of User model
+            return None, None, None
+    def calculate_total_customer_count(self, active_dpu_list):
+        if active_dpu_list.exists():
+            if active_dpu_list.first().user.is_staff or active_dpu_list.first().user.is_superuser:
+                return CustomerList.objects.filter(st_id__in=active_dpu_list.values_list('st_id', flat=True).distinct()).count()
+            else:
+                return CustomerList.objects.filter(st_id=active_dpu_list.first().st_id).count()
+        else:
+            return 0
+        
+    
+    def get_top_10_latest_records(self, user, st_id=None, sort_by=None):
+        queryset = DREC.objects.filter(ST_ID__user=user)
+
+        if st_id:
+            queryset = queryset.filter(ST_ID__st_id=st_id)
+
+        if sort_by == 'amount':
+            queryset = queryset.order_by('-Amount', '-RecordingDate', '-SHIFT')
+        elif sort_by == 'liter':
+            queryset = queryset.order_by('-QT', '-RecordingDate', '-SHIFT')
+        else:
+            queryset = queryset.order_by('-RecordingDate', '-SHIFT')
+
+        return queryset[:10]
+
+    
+
+    def get_recording_dates(self, user_id):
+        return DREC.objects.filter(ST_ID__user=user_id).values_list('RecordingDate', flat=True).distinct()
+    
+    def prepare_and_calculate_summary_data(self, drec_data, active_dpu_list, m_type):
+        filtered_records = [record for record in drec_data if record.MType == m_type]
+        summary_data = self.prepare_summary_data(filtered_records, active_dpu_list)
+        averages = self.calculate_averages(filtered_records)
+        return summary_data, *averages
 
     def prepare_summary_data(self, drec_data, active_dpu_list):
         grouped_data = defaultdict(list)
@@ -206,169 +326,72 @@ class DashboardView(TemplateView):
         # Sort by RecordingDate and SHIFT in descending order
         return summary_data
 
-    def calculate_global_averages(self, user):
-        if isinstance(user, User):
-            if user.is_staff or user.is_superuser:
-                drec_filter = {'ST_ID__user': user}
-            else:
-                drec_filter = {'ST_ID__dpu_user': user.id}
-
-            avg_fat = DREC.objects.filter(**drec_filter).aggregate(avg_fat=Avg('FAT'))['avg_fat']
-            avg_snf = DREC.objects.filter(**drec_filter).aggregate(avg_snf=Avg('SNF'))['avg_snf']
-            avg_clr = DREC.objects.filter(**drec_filter).aggregate(avg_clr=Avg('CLR'))['avg_clr']
-
-            return (
-                round(avg_fat, 1) if avg_fat is not None else None,
-                round(avg_snf, 1) if avg_snf is not None else None,
-                round(avg_clr, 1) if avg_clr is not None else None
-            )
-        else:
-            # Handle the case where user is not an instance of User model
-            return None, None, None
         
-    def get_recording_dates(self, user):
-        return DREC.objects.filter(ST_ID__user=user).values_list('RecordingDate', flat=True).distinct()
 
-    def get_top_10_latest_records(self, user, st_id):
-        # Retrieve the top 10 latest records for the given ST_ID
-        return DREC.objects.filter(ST_ID__user=user, ST_ID__st_id=st_id).order_by('-RecordingDate', '-SHIFT')[:10]
-    
-    def calculate_cow_summary(self, records):
-        cow_records = [record for record in records if record.MType == 'C']
-        return self.calculate_averages(cow_records)
+    def calculate_averages(self, records):
+        if not records:
+            return 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0
 
-    def calculate_buffalo_summary(self, records):
-        buffalo_records = [record for record in records if record.MType == 'B']
-        return self.calculate_averages(buffalo_records)
+        total_fat = sum(record.FAT for record in records)
+        total_snf = sum(record.SNF for record in records)
+        total_clr = sum(record.CLR for record in records)
+        total_water = sum(record.WATER for record in records)
+        total_ltr = sum(record.QT for record in records)
+        total_amt = sum(record.Amount for record in records)
 
-    def prepare_cow_summary_data(self, drec_data, active_dpu_list):
-        cow_summary_data = []
-        for drec in drec_data:
-            if drec.MType == 'C':
-                cow_summary_data.append(drec)
+        # Count unique customer IDs and CSR numbers
+        total_cust_set = Counter((record.CUST_ID, record.CSR_NO) for record in records)
+        total_cust = len(total_cust_set)
 
-        return self.prepare_summary_data(cow_summary_data, active_dpu_list)
+        # Calculate averages
+        num_records = len(records)
+        avg_fat = round(total_fat / num_records, 1)
+        avg_snf = round(total_snf / num_records, 1)
+        avg_clr = round(total_clr / num_records, 1)
+        avg_water = round(total_water / num_records, 2)
+        total_ltr = round(total_ltr, 2)
+        total_amt = round(total_amt, 2)
 
-    def prepare_buffalo_summary_data(self, drec_data, active_dpu_list):
-        buffalo_summary_data = []
-        for drec in drec_data:
-            if drec.MType == 'B':
-                buffalo_summary_data.append(drec)
+        return avg_fat, avg_snf, avg_clr, avg_water, total_ltr, total_amt, total_cust
 
-        return self.prepare_summary_data(buffalo_summary_data, active_dpu_list)
-    
 
-    def get(self, request, *args, **kwargs):
-        # Fetch DPU data based on user type
-        if request.user.is_staff or request.user.is_superuser:
-            dpu_column = 'user'
-            drec_filter_st_dt = "ST_ID__user"
-            customer_filter_col = "st_id__user__in"
-            drec_value = request.user
-        else:
-            dpu_column = 'dpu_user'
-            drec_filter_st_dt = "ST_ID__dpu_user"
-            customer_filter_col = "st_id__dpu_user__in"
-            drec_value = request.user.id
-
-        active_dpu_list = DPU.objects.filter(**{dpu_column: drec_value})
-
-        # Fetch DREC data based on user type and prefetch related objects
-        drec_data = DREC.objects.filter(**{drec_filter_st_dt: drec_value}).order_by('-created_at').select_related('ST_ID__user')
-        drec_data_cust_ids = drec_data.values_list('CUST_ID', flat=True).distinct()
-
-        # Prepare summary data
-        summary_data = self.prepare_summary_data(drec_data, active_dpu_list)
-
-        # Fetch customer list and prefetch related objects
-        customer_list = CustomerList.objects.filter(cust_id__in=drec_data_cust_ids)
-
-        # Calculate global averages
-        avg_fat, avg_snf, avg_clr = self.calculate_global_averages(request.user)
-
-        # Paginate the DREC data
-        paginator = Paginator(drec_data, 10)
-        drec_data_page = paginator.get_page(request.GET.get('page'))
-
-        # Calculate total customer count
-        if request.user.is_staff or request.user.is_superuser:
-            current_users_dary_names = active_dpu_list.values_list('st_id', flat=True).distinct()
-            total_customer_count = CustomerList.objects.filter(st_id__in=current_users_dary_names).count()
-        else:
-            current_users_dary_name = active_dpu_list.values_list('st_id', flat=True).first()
-            total_customer_count = CustomerList.objects.filter(st_id=current_users_dary_name).count()
-
-        # Calculate total DPUs
-        total_dpus = active_dpu_list.count()
-
-        # Get top 10 latest records
-        top_10_latest_records = self.get_top_10_latest_records(request.user.id, summary_data[0]['ST_ID__st_id']) if summary_data else None
-
-        # Get recording dates
-        recording_dates = self.get_recording_dates(request.user.id)
-
-        # Prepare cow summary data and calculate averages
-        cow_summary_data = self.prepare_cow_summary_data(drec_data, active_dpu_list)
-        avg_fat_cow, avg_snf_cow, avg_clr_cow, avg_water_cow, total_ltr_cow, total_amt_cow, total_cust_cow = self.calculate_cow_summary(drec_data)
-
-        # Prepare buffalo summary data and calculate averages
-        buffalo_summary_data = self.prepare_buffalo_summary_data(drec_data, active_dpu_list)
-        avg_fat_buffalo, avg_snf_buffalo, avg_clr_buffalo, avg_water_buffalo, total_ltr_buffalo, total_amt_buffalo, total_cust_buffalo = self.calculate_buffalo_summary(drec_data)
-
-        context = {
-            'active_dpu_list': active_dpu_list,
-            'drec_data': drec_data_page,
-            'customer_list': customer_list,
-            'summary_data': summary_data,
-            'last_updated': timezone.now(),
-            'avg_fat': avg_fat,
-            'avg_snf': avg_snf,
-            'avg_clr': avg_clr,
-            'total_customer_count': total_customer_count,
-            'total_dpus': total_dpus,
-            'dpu_list': ', '.join(dpu.st_id for dpu in active_dpu_list),
-            'recording_dates': recording_dates,
-            'top_10_latest_records': top_10_latest_records,
-            'cow_summary_data': cow_summary_data,
-            'avg_fat_cow': avg_fat_cow,
-            'avg_snf_cow': avg_snf_cow,
-            'avg_clr_cow': avg_clr_cow,
-            'avg_water_cow': avg_water_cow,
-            'total_ltr_cow': total_ltr_cow,
-            'total_amt_cow': total_amt_cow,
-            'total_cust_cow': total_cust_cow,
-            'buffalo_summary_data': buffalo_summary_data,
-            'avg_fat_buffalo': avg_fat_buffalo,
-            'avg_snf_buffalo': avg_snf_buffalo,
-            'avg_clr_buffalo': avg_clr_buffalo,
-            'avg_water_buffalo': avg_water_buffalo,
-            'total_ltr_buffalo': total_ltr_buffalo,
-            'total_amt_buffalo': total_amt_buffalo,
-            'total_cust_buffalo': total_cust_buffalo,
-        }
-
-        return render(request, self.template_name, context)
-
+        
+ 
 class FetchDRECDataView(View):
     def get(self, request, *args, **kwargs):
         try:
             selected_date_str = request.GET.get('selectedDate')
             selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d').date()
             
+            # Fetch DREC data for the selected date
             drec_data = DREC.objects.filter(RecordingDate=selected_date)
+
+            # Prefetch related CustomerList objects to reduce database hits
+            drec_data = drec_data.select_related('ST_ID')
+
+            # Fetch customer names using values queryset to reduce data fetched from CustomerList
+            customer_names = CustomerList.objects.filter(
+                st_id__in=drec_data.values_list('ST_ID__st_id', flat=True),
+                cust_id__in=drec_data.values_list('CUST_ID', flat=True)
+            ).values('st_id', 'name')
+
+            # Create a dictionary to map customer names to ST_IDs
+            customer_name_map = {item['st_id']: item['name'] for item in customer_names}
+
             drec_data_list = []
-            
+
             for drec in drec_data:
-                customer_name = CustomerList.objects.filter(st_id=drec.ST_ID.st_id, cust_id=drec.CUST_ID).values_list('name', flat=True).first()
-                st_id_data = drec.ST_ID
+                # Get customer name from the pre-fetched map
+                customer_name = customer_name_map.get(drec.ST_ID.st_id, 'N/A')
+                
                 drec_data_list.append({
-                    'ST_ID': st_id_data.st_id,
-                    'Location': st_id_data.location,
-                    'Society': st_id_data.society,
+                    'ST_ID': drec.ST_ID.st_id,
+                    'Location': drec.ST_ID.location,
+                    'Society': drec.ST_ID.society,
                     'REC_TYPE': drec.REC_TYPE,
                     'SLIP_TYPE': drec.SLIP_TYPE,
-                    'CUST_ID': drec.CUST_ID,                    
-                    'Customer_Name': customer_name if customer_name else 'N/A',
+                    'CUST_ID': drec.CUST_ID,
+                    'Customer_Name': customer_name,
                     'RecordingDate': drec.RecordingDate.strftime('%Y-%m-%d'),
                     'RecordingTime': drec.RecordingTime,
                     'SHIFT': drec.SHIFT,
