@@ -276,8 +276,6 @@ class DashboardView(TemplateView):
 
         return queryset[:10]
 
-    
-
     def get_recording_dates(self, user_id):
         return DREC.objects.filter(ST_ID__user=user_id).values_list('RecordingDate', flat=True).distinct()
     
