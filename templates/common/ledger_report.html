@@ -4,13 +4,77 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-
+<!-- 
 <style>
     .nav-tabs .nav-link.active{
         background-color: #002d86;
         color: white;
     }
-</style>
+    #loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: none;
+    z-index: 9999;
+}
+
+#milk-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+}
+
+#milk {
+    width: 100px;
+    height: 100px;
+    background-color: white;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+}
+
+#milk-drop {
+    width: 60px;
+    height: 60px;
+    background-color: #F2ECE9;
+    border-radius: 50%;
+    position: absolute;
+    top: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: pourMilk 2s infinite;
+}
+
+@keyframes pourMilk {
+    0% {
+        top: 120%;
+        height: 60px;
+    }
+    50% {
+        height: 100px;
+    }
+    100% {
+        top: 0;
+        height: 60px;
+    }
+}
+
+
+</style> -->
+<!-- <div id="loading-overlay">
+    <div id="milk-container">
+        <div id="milk">
+            <div id="milk-drop"></div>
+        </div>
+    </div>
+</div> -->
+
 
 <div class="container-fluid mt-5">
     <!-- Main Content Here -->
@@ -516,6 +580,27 @@
         // Disable the submit button after the initial submission
         submitButton.disabled = true;
     }
+</script>
+<script>
+    function handleFormSubmit() {
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const reportForm = document.getElementById('reportForm');
+
+    // Show loading overlay
+    loadingOverlay.style.display = 'block';
+
+    // Submit the form
+    reportForm.submit();
+}
+
+// Function to be called after the form submission is complete
+function handleFormSubmissionComplete() {
+    const loadingOverlay = document.getElementById('loading-overlay');
+
+    // Hide loading overlay
+    loadingOverlay.style.display = 'none';
+}
+
 </script>
 
 {% endblock content %}
