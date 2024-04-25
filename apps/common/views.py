@@ -50,6 +50,10 @@ from django.views.generic import FormView
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.paginator import Paginator
 from decimal import Decimal
+from functools import lru_cache
+import time
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
 
 # Common Views
 
@@ -112,6 +116,13 @@ def custom_login(request):
     if request.method == "POST":
         username = request.POST.get('username')
         password = request.POST.get('password')
+        
+        # Perform client-side validation
+        if not (username and password):
+            messages.error(request, "Username and password are required.")
+            return render(request, template_name)
+        
+        # Authenticate user
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
@@ -119,9 +130,10 @@ def custom_login(request):
             return redirect('dashboard')  # Redirect to the dashboard after successful login
         else:
             messages.error(request, "Invalid username or password")
+            return render(request, template_name)
     
+    # Load login template
     return render(request, template_name)
-
 
 def custom_logout(request):
     # Use Django's logout function to log the user out
@@ -140,45 +152,31 @@ def super_dashboard(request):
 class DashboardView(TemplateView):
     template_name = 'example.html'
     paginate_by = 10
+
     def get(self, request, *args, **kwargs):
-        # Fetch DPU data based on user type
+        start_time = time.time()
+
         active_dpu_list = self.get_active_dpu_list(request.user)
-
-        # Fetch DREC data based on user type and prefetch related objects
         drec_data = self.get_drec_data(request.user)
-
-        # Extract distinct CUST_IDs before slicing the queryset
         drec_data_cust_ids = drec_data.values_list('CUST_ID', flat=True).distinct()
 
-        # Prepare summary data
         summary_data = self.prepare_summary_data(drec_data, active_dpu_list)
-
-        # Fetch customer list
         customer_list = self.get_customer_list(drec_data_cust_ids)
 
-        # Calculate global averages
         avg_fat, avg_snf, avg_clr = self.calculate_global_averages(request.user)
 
-        # Paginate the DREC data
         paginator = Paginator(drec_data, self.paginate_by)
         drec_data_page = paginator.get_page(request.GET.get('page'))
 
-        # Calculate total customer count
         total_customer_count = self.calculate_total_customer_count(active_dpu_list)
-
-        # Calculate total DPUs
         total_dpus = active_dpu_list.count()
 
-        # Get top 10 latest records
-        top_10_latest_records = self.get_top_10_latest_records(request.user.id, summary_data[0]['ST_ID__st_id']) if summary_data else None
+        top_10_latest_records = self.get_top_10_latest_records(request.user, summary_data[0]['ST_ID__st_id']) if summary_data else None
 
-        # Get recording dates
         recording_dates = self.get_recording_dates(request.user.id)
 
-        # Prepare cow summary data and calculate averages
         cow_summary_data, avg_fat_cow, avg_snf_cow, avg_clr_cow, avg_water_cow, total_ltr_cow, total_amt_cow, total_cust_cow = self.prepare_and_calculate_summary_data(drec_data, active_dpu_list, 'C')
-
-        # Prepare buffalo summary data and calculate averages
+        
         buffalo_summary_data, avg_fat_buffalo, avg_snf_buffalo, avg_clr_buffalo, avg_water_buffalo, total_ltr_buffalo, total_amt_buffalo, total_cust_buffalo = self.prepare_and_calculate_summary_data(drec_data, active_dpu_list, 'B')
 
         context = {
@@ -213,14 +211,18 @@ class DashboardView(TemplateView):
             'total_cust_buffalo': total_cust_buffalo,
         }
 
+        end_time = time.time()
+        print("Execution time:", end_time - start_time, "seconds")
         return render(request, self.template_name, context)
     
+    @lru_cache(maxsize=None)
     def get_active_dpu_list(self, user):
         if user.is_staff or user.is_superuser:
             return DPU.objects.filter(user=user).select_related('user')
         else:
             return DPU.objects.filter(dpu_user=user.id).select_related('user')
 
+    @lru_cache(maxsize=None)
     def get_drec_data(self, user):
         if user.is_staff or user.is_superuser:
             drec_filter = {'ST_ID__user': user}
@@ -232,6 +234,7 @@ class DashboardView(TemplateView):
     def get_customer_list(self, drec_data_cust_ids):
         return CustomerList.objects.filter(cust_id__in=drec_data_cust_ids)
 
+    @lru_cache(maxsize=None)
     def calculate_global_averages(self, user):
         if isinstance(user, User):
             if user.is_staff or user.is_superuser:
@@ -249,8 +252,8 @@ class DashboardView(TemplateView):
                 round(avg_clr, 1) if avg_clr is not None else None
             )
         else:
-            # Handle the case where user is not an instance of User model
             return None, None, None
+
     def calculate_total_customer_count(self, active_dpu_list):
         if active_dpu_list.exists():
             if active_dpu_list.first().user.is_staff or active_dpu_list.first().user.is_superuser:
@@ -259,26 +262,19 @@ class DashboardView(TemplateView):
                 return CustomerList.objects.filter(st_id=active_dpu_list.first().st_id).count()
         else:
             return 0
-        
-    
-    def get_top_10_latest_records(self, user, st_id=None, sort_by=None):
-        queryset = DREC.objects.filter(ST_ID__user=user)
 
-        if st_id:
-            queryset = queryset.filter(ST_ID__st_id=st_id)
-
-        if sort_by == 'amount':
-            queryset = queryset.order_by('-Amount', '-RecordingDate', '-SHIFT')
-        elif sort_by == 'liter':
-            queryset = queryset.order_by('-QT', '-RecordingDate', '-SHIFT')
+    def get_top_10_latest_records(self, user, st_id):
+        # Retrieve the top 10 latest records for the given ST_ID and user
+        if user.is_staff or user.is_superuser:
+            return DREC.objects.filter(ST_ID__user=user, ST_ID__st_id=st_id).order_by('-RecordingDate', '-SHIFT')[:10]
         else:
-            queryset = queryset.order_by('-RecordingDate', '-SHIFT')
+            return DREC.objects.filter(ST_ID__dpu_user=user.id, ST_ID__st_id=st_id).order_by('-RecordingDate', '-SHIFT')[:10]
 
-        return queryset[:10]
-
+    @lru_cache(maxsize=None)
     def get_recording_dates(self, user_id):
         return DREC.objects.filter(ST_ID__user=user_id).values_list('RecordingDate', flat=True).distinct()
     
+    @lru_cache(maxsize=None)
     def prepare_and_calculate_summary_data(self, drec_data, active_dpu_list, m_type):
         filtered_records = [record for record in drec_data if record.MType == m_type]
         summary_data = self.prepare_summary_data(filtered_records, active_dpu_list)
@@ -293,13 +289,11 @@ class DashboardView(TemplateView):
             key = drec.ST_ID.st_id
             grouped_data[key].append(drec)
 
-            # Track the latest record for each ST_ID
             if key not in latest_records or drec.RecordingDate > latest_records[key].RecordingDate:
                 latest_records[key] = drec
 
         summary_data = []
         for st_id, records in grouped_data.items():
-            # Use the latest record from the tracked records
             latest_record = latest_records.get(st_id)
 
             if latest_record:
@@ -321,10 +315,7 @@ class DashboardView(TemplateView):
                     'latest_record': latest_record,
                 })
 
-        # Sort by RecordingDate and SHIFT in descending order
         return summary_data
-
-        
 
     def calculate_averages(self, records):
         if not records:
@@ -337,11 +328,9 @@ class DashboardView(TemplateView):
         total_ltr = sum(record.QT for record in records)
         total_amt = sum(record.Amount for record in records)
 
-        # Count unique customer IDs and CSR numbers
         total_cust_set = Counter((record.CUST_ID, record.CSR_NO) for record in records)
         total_cust = len(total_cust_set)
 
-        # Calculate averages
         num_records = len(records)
         avg_fat = round(total_fat / num_records, 1)
         avg_snf = round(total_snf / num_records, 1)
@@ -352,20 +341,28 @@ class DashboardView(TemplateView):
 
         return avg_fat, avg_snf, avg_clr, avg_water, total_ltr, total_amt, total_cust
 
-
         
 
-        
- 
 class FetchDRECDataView(View):
     def get(self, request, *args, **kwargs):
         try:
             selected_date_str = request.GET.get('selectedDate')
+            selected_shift = request.GET.get('selectedShift')  # Get selected shift
+            
             selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d').date()
             
             # Fetch DREC data for the selected date
             drec_data = DREC.objects.filter(RecordingDate=selected_date)
-
+            
+            # Filter DREC data based on the selected shift
+            if selected_shift:
+                if selected_shift == 'both':
+                    # Include both M and E shifts
+                    drec_data = drec_data.filter(Q(SHIFT='M') | Q(SHIFT='E'))
+                else:
+                    # Include only the selected shift
+                    drec_data = drec_data.filter(SHIFT=selected_shift)
+            
             # Prefetch related CustomerList objects to reduce database hits
             drec_data = drec_data.select_related('ST_ID')
 
@@ -413,6 +410,7 @@ class FetchDRECDataView(View):
             return JsonResponse({'drec_data': drec_data_list})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
+
 
 # User Authentication Views
 class SignUpView(CreateView):
@@ -556,18 +554,29 @@ def add_dpu(request):
     return render(request, 'common/add_dpu.html', {'form': form})
 
 def active_dpu(request):
-    # for super user
+    # Retrieve the active DPU list based on user role
     if request.user.is_staff and request.user.is_superuser:
         active_dpu_list = DPU.objects.filter(user=request.user)
-    # for Staff user    
     elif request.user.is_staff and not request.user.is_superuser:   
         active_dpu_list = DPU.objects.filter(user=request.user)
-    # for no staff no super user (Normal)  
     elif not request.user.is_staff and not request.user.is_superuser:
         user_id = request.user.id
         active_dpu_list = DPU.objects.filter(dpu_user=user_id)
+    
+    # Pagination
+    paginator = Paginator(active_dpu_list, 10)  # Adjust the number per page as needed
+    page = request.GET.get('page')
+    try:
+        active_dpu_list = paginator.page(page)
+    except PageNotAnInteger:
+        active_dpu_list = paginator.page(1)
+    except EmptyPage:
+        active_dpu_list = paginator.page(paginator.num_pages)
+        # Reverse the list to display the latest entries first
+    active_dpu_list = list(active_dpu_list)[::-1]
 
     return render(request, 'common/active_dpu.html', {'active_dpu_list': active_dpu_list})
+
     
 class DRECViewSet(viewsets.ModelViewSet):
     queryset = DREC.objects.all()
@@ -1123,39 +1132,25 @@ def ratesitem_api(request):
 
 @login_required
 def shift_report(request):
-    # Fetch dynamic values for dropdowns from the database
+    template_name = 'common/shift_report.html'
+    user = request.user
+    customer_list = CustomerList.objects.filter(user=user)
+    initial_data = {}
 
-    # staff and super user
-    if request.user.is_staff or request.user.is_superuser:
-        locations = DPU.objects.filter(user=request.user).values_list('location', flat=True).distinct()
-        dpus = DPU.objects.filter(user=request.user).values_list('st_id', flat=True).distinct()
-        societies = DPU.objects.filter(user=request.user).values_list('society', flat=True).distinct()
-        shifts = DREC.objects.filter(ST_ID__user=request.user, SHIFT__in=['M', 'E']).values_list('SHIFT', flat=True).distinct()
-
-
-        # Count distinct locations, dpus, and societies
-        total_locations = DPU.objects.filter(user=request.user).values('location').distinct().count()
-        total_dpus = DPU.objects.filter(user=request.user).count()
-        total_societies = DPU.objects.filter(user=request.user).values('society').distinct().count()
-        customer_list = CustomerList.objects.filter(user=request.user)
-
+    if user.is_staff or user.is_superuser:
+        dpu_filter = {'user': user}
     else:
-        # normal user
-        locations = DPU.objects.filter(dpu_user=request.user.id).values_list('location', flat=True).distinct()
-        dpus = DPU.objects.filter(dpu_user=request.user.id).values_list('st_id', flat=True).distinct()
-        societies = DPU.objects.filter(dpu_user=request.user.id).values_list('society', flat=True).distinct()
-        shifts = DREC.objects.filter(ST_ID__dpu_user=request.user.id, SHIFT__in=['M', 'E']).values_list('SHIFT', flat=True).distinct()
+        dpu_filter = {'dpu_user': user.id}
 
+    locations = DPU.objects.filter(**dpu_filter).values_list('location', flat=True).distinct()
+    dpus = DPU.objects.filter(**dpu_filter).values_list('st_id', flat=True).distinct()
+    societies = DPU.objects.filter(**dpu_filter).values_list('society', flat=True).distinct()
+    shifts = DREC.objects.filter(ST_ID__user=user, SHIFT__in=['M', 'E']).values_list('SHIFT', flat=True).distinct()
 
-        # Count distinct locations, dpus, and societies
-        total_locations = DPU.objects.filter(dpu_user=request.user.id).values('location').distinct().count()
-        total_dpus = DPU.objects.filter(dpu_user=request.user.id).count()
-        total_societies = DPU.objects.filter(dpu_user=request.user.id).values('society').distinct().count()
-        customer_list = CustomerList.objects.filter(user=request.user)
+    total_locations = DPU.objects.filter(**dpu_filter).values('location').distinct().count()
+    total_dpus = DPU.objects.filter(**dpu_filter).count()
+    total_societies = DPU.objects.filter(**dpu_filter).values('society').distinct().count()
 
-
-
-    # Get initial data for dropdowns
     initial_data = {
         'locations': list(locations),
         'dpus': list(dpus),
@@ -1170,8 +1165,8 @@ def shift_report(request):
         'total_locations': total_locations,
         'total_dpus': total_dpus,
         'total_societies': total_societies,
-        'initial_data': initial_data,  # Include initial data in the context
-        'customer_list': customer_list,  # Include customer list in the context
+        'initial_data': initial_data,
+        'customer_list': customer_list,
     }
 
     if request.method == 'POST':
@@ -1181,12 +1176,11 @@ def shift_report(request):
         shift = request.POST.get('shift')
         start_date_str = request.POST.get('start_date')
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else None
+        selected_start_date = start_date.strftime('%d-%m-%Y') if start_date else None
 
-        # Replace the following lines with your actual data retrieval logic
         summary_data = get_summary_data(location, dpu, society, shift, start_date)
         detail_data = get_detail_data(request, location, dpu, society, shift, start_date)
 
-        # Calculate summary data for cow and buffalo records
         cow_records = [record for record in detail_data if record['MType'] == 'C']
         buffalo_records = [record for record in detail_data if record['MType'] == 'B']
 
@@ -1198,13 +1192,14 @@ def shift_report(request):
             'selected_dpu': dpu,
             'selected_society': society,
             'selected_shift': shift,
-            'selected_start_date': start_date_str,
+            'selected_start_date': selected_start_date,
             'summary_data': summary_data,
             'detail_data': detail_data,
             'cow_summary_data': cow_summary_data,
             'buffalo_summary_data': buffalo_summary_data,
         })
-    return render(request, 'common/shift_report.html', context)
+
+    return render(request, template_name, context)
 
 def calculate_cow_summary(records):
     total_fat = sum(record['FAT'] for record in records)
@@ -1292,10 +1287,19 @@ def get_summary_data(location, dpu, society, shift, start_date):
         TotalQT=Sum('QT'),
         TotalAmount=Sum('Amount'),
         TotalCAmount=Sum('CAmount'),
-        AvgFAT=Round(Avg('FAT'), 1),
-        AvgSNF=Round(Avg('SNF'), 1),
-        AvgCLR=Round(Avg('CLR'), 1),
+        AvgFAT=Avg('FAT'),
+        AvgSNF=Avg('SNF'),
+        AvgCLR=Avg('CLR'),
     )
+
+    # Round the TotalQT to two decimal places
+    summary_data['TotalQT'] = round(summary_data['TotalQT'], 2) if summary_data['TotalQT'] is not None else Decimal('0.00')
+
+    # Round the averages to one decimal place
+    summary_data['AvgFAT'] = round(summary_data['AvgFAT'], 1) if summary_data['AvgFAT'] is not None else Decimal('0.0')
+    summary_data['AvgSNF'] = round(summary_data['AvgSNF'], 1) if summary_data['AvgSNF'] is not None else Decimal('0.0')
+    summary_data['AvgCLR'] = round(summary_data['AvgCLR'], 1) if summary_data['AvgCLR'] is not None else Decimal('0.0')
+
     return summary_data
 
 def get_detail_data(request, location, dpu, society, shift, start_date):

@@ -180,7 +180,9 @@
                 {% if no_records %}
                 <p>No records available.</p>
                 {% else %}
-                <table class="table table-striped table-hover rounded table-responsive mb-5">
+                <table class="table table-striped table-hover rounded table-responsive mb-5"data-toggle="table"
+                data-pagination="true"
+                data-auto-refresh="true">
                     <thead>
                         <tr>
                             <th>User</th>

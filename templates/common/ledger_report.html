@@ -4,7 +4,7 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<!-- 
+
 <style>
     .nav-tabs .nav-link.active{
         background-color: #002d86;
@@ -39,41 +39,18 @@
     position: relative;
 }
 
-#milk-drop {
-    width: 60px;
-    height: 60px;
-    background-color: #F2ECE9;
-    border-radius: 50%;
-    position: absolute;
-    top: 120%;
-    left: 50%;
-    transform: translateX(-50%);
-    animation: pourMilk 2s infinite;
-}
-
-@keyframes pourMilk {
-    0% {
-        top: 120%;
-        height: 60px;
-    }
-    50% {
-        height: 100px;
-    }
-    100% {
-        top: 0;
-        height: 60px;
-    }
-}
 
 
-</style> -->
-<!-- <div id="loading-overlay">
+
+</style>
+ <div id="loading-overlay">
     <div id="milk-container">
-        <div id="milk">
-            <div id="milk-drop"></div>
-        </div>
+        
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>       
     </div>
-</div> -->
+</div> 
 
 
 <div class="container-fluid mt-5">
@@ -185,6 +162,7 @@
                         <label for="start_date" class="text-sm mb-0 text-uppercase fw-bold">Start Date</label>
                         <input type="date" name="start_date" id="start_date" value="{{ selected_start_date }}" class="form-control" required>
                     </div>
+                    
                 </div>
             </div>
             <div class="col-xl-2 col-md-2 col-sm-5 mb-xl-0 mb-5">
@@ -241,96 +219,99 @@
                 </div>
                 <div class="table-responsive card-body">
                     {% if ledger_summary_data %}
-                    {% for summary_data_entry in ledger_summary_data|dictsort:"CUST_ID" %}
-                    {% ifchanged summary_data_entry.CustomerName %}
+                    <div id="divID"> <!-- Common container for both tables -->
 
-                    <h4>
-                       Customer Name:-  <strong class="text-danger">{{ summary_data_entry.CustomerName }} </strong> Customer Id:- <strong class="text-danger">{{ summary_data_entry.CUST_ID }} </strong> 
-                    </h4> 
-                    <hr/>       
+                        {% for summary_data_entry in ledger_summary_data|dictsort:"CUST_ID" %}
+                        {% ifchanged summary_data_entry.CustomerName %}
 
-                    <h5 class="text-center fw-bold">
-                    Summary Report 
-                    </h5> 
-                    <hr/>
-                    <!-- Table 1: Summary Data -->
-                    <table id="ledger_summary_data" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 mt-3 fw-bold">
-                        <thead class="table-title text-white text-center rounded">
-                            <tr>
-                                <th>Customer</th>
-                                <th>Root</th>
-                                <th>Society</th>
-                                <th>DPU</th>
-                                <th>Total Qty.</th>
-                                <th>Total Amount</th>
-                                <th>Total CAmount</th>
-                                <th>Avg. FAT</th>
-                                <th>Avg. SNF</th>
-                                <th>Avg. CLR</th>
+                        <h4>
+                        Customer Name:-  <strong class="text-danger">{{ summary_data_entry.CustomerName }} </strong> Customer Id:- <strong class="text-danger">{{ summary_data_entry.CUST_ID }} </strong> 
+                        </h4> 
+                        <hr/>       
 
-                            </tr>
-                        </thead>
-                        <tbody class="align-items-center text-center">
-                            <tr>
-                                <td>{{ summary_data_entry.CUST_ID }}</td>
-                                <td>{{ summary_data_entry.ST_ID__location }}</td>
-                                <td>{{ summary_data_entry.ST_ID__society }}</td>
-                                <td>{{ summary_data_entry.ST_ID__st_id }}</td>
-                                <td>{{ summary_data_entry.TotalQT }} ltr.</td>
-                                <td>₹ {{ summary_data_entry.TotalAmount }}</td>
-                                <td>{{ summary_data_entry.TotalCAmount }}</td>
-                                <td>{{ summary_data_entry.AvgFAT|floatformat:2 }}</td>
-                                <td>{{ summary_data_entry.AvgSNF|floatformat:2 }}</td>
-                                <td>{{ summary_data_entry.AvgCLR|floatformat:2 }}</td>
+                        <h5 class="text-center fw-bold">
+                        Summary Report 
+                        </h5> 
+                        <hr/>
+                        <!-- Table 1: Summary Data -->
+                        <table id="ledger_summary_data" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 mt-3 fw-bold">
+                            <thead class="table-title text-white text-center rounded">
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Root</th>
+                                    <th>Society</th>
+                                    <th>DPU</th>
+                                    <th>Total Qty.</th>
+                                    <th>Total Amount</th>
+                                    <th>Total CAmount</th>
+                                    <th>Avg. FAT</th>
+                                    <th>Avg. SNF</th>
+                                    <th>Avg. CLR</th>
 
-                            </tr>
-                        </tbody>
-                    </table>
-        
-                    <!-- Table 2: Detail Data -->
-                    <hr/>
-                    <h5 class="text-center fw-bold">
-                        Detail Report 
-                    </h5> 
-                    <hr/>
+                                </tr>
+                            </thead>
+                            <tbody class="align-items-center text-center">
+                                <tr>
+                                    <td>{{ summary_data_entry.CUST_ID }}</td>
+                                    <td>{{ summary_data_entry.ST_ID__location }}</td>
+                                    <td>{{ summary_data_entry.ST_ID__society }}</td>
+                                    <td>{{ summary_data_entry.ST_ID__st_id }}</td>
+                                    <td>{{ summary_data_entry.TotalQT }} ltr.</td>
+                                    <td>₹ {{ summary_data_entry.TotalAmount }}</td>
+                                    <td>{{ summary_data_entry.TotalCAmount }}</td>
+                                    <td>{{ summary_data_entry.AvgFAT|floatformat:2 }}</td>
+                                    <td>{{ summary_data_entry.AvgSNF|floatformat:2 }}</td>
+                                    <td>{{ summary_data_entry.AvgCLR|floatformat:2 }}</td>
 
-                    <table id="ledger_detail_data" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 mb-5 fw-bold">
-                        <thead class="table-title text-white text-center rounded bg-success">
-                            <tr>
-                                <th>Date</th>
-                                <th>SHIFT</th>
-                                <th>MType</th>
-                                <th>FAT</th>
-                                <th>SNF</th>
-                                <th>CLR</th>
-                                <th>WATER</th>
-                                <th>Quantity</th>
-                                <th>RATE</th>
-                                <th>Amount</th>
-                                <th>CAmount</th>
-                            </tr>
-                        </thead>
-                        <tbody class="align-items-center text-center">
-                            {% for entry in ledger_detail_data %}
-                                {% if entry.CUST_ID == summary_data_entry.CUST_ID %}
-                                    <tr>
-                                        <td>{{ entry.RecordingDate|date:"d-m-Y" }}</td>
-                                        <td>{{ entry.SHIFT }}</td>
-                                        <td>{{ entry.MType }}</td>
-                                        <td>{{ entry.FAT }}</td>
-                                        <td>{{ entry.SNF }}</td>
-                                        <td>{{ entry.CLR }}</td>
-                                        <td>{{ entry.WATER }}</td>
-                                        <td>{{ entry.QT }}</td>
-                                        <td>{{ entry.RATE }}</td>
-                                        <td>{{ entry.Amount }}</td>
-                                        <td>{{ entry.CAmount }}</td>
-                                    </tr>
-                                {% endif %}
-                            {% endfor %}
-                        </tbody>
-                                            </table> {% endifchanged %}
-                {% endfor %}
+                                </tr>
+                            </tbody>
+                        </table>
+            
+                        <!-- Table 2: Detail Data -->
+                        <hr/>
+                        <h5 class="text-center fw-bold">
+                            Detail Report 
+                        </h5> 
+                        <hr/>
+
+                        <table id="ledger_detail_data" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 mb-5 fw-bold">
+                            <thead class="table-title text-white text-center rounded bg-success">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>SHIFT</th>
+                                    <th>MType</th>
+                                    <th>FAT</th>
+                                    <th>SNF</th>
+                                    <th>CLR</th>
+                                    <th>WATER</th>
+                                    <th>Quantity</th>
+                                    <th>RATE</th>
+                                    <th>Amount</th>
+                                    <th>CAmount</th>
+                                </tr>
+                            </thead>
+                            <tbody class="align-items-center text-center">
+                                {% for entry in ledger_detail_data %}
+                                    {% if entry.CUST_ID == summary_data_entry.CUST_ID %}
+                                        <tr>
+                                            <td>{{ entry.RecordingDate|date:"d-m-Y" }}</td>
+                                            <td>{{ entry.SHIFT }}</td>
+                                            <td>{{ entry.MType }}</td>
+                                            <td>{{ entry.FAT }}</td>
+                                            <td>{{ entry.SNF }}</td>
+                                            <td>{{ entry.CLR }}</td>
+                                            <td>{{ entry.WATER }}</td>
+                                            <td>{{ entry.QT }}</td>
+                                            <td>{{ entry.RATE }}</td>
+                                            <td>{{ entry.Amount }}</td>
+                                            <td>{{ entry.CAmount }}</td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                                                </table> {% endifchanged %}
+                    {% endfor %}
+                    </div>
                 {% else %}
                 <p class="text-center">No data available for the selected filters.</p>
             {% endif %}
@@ -438,15 +419,16 @@
 
         <!-- New Table for Payment Summary Data -->
        
-        
-
+     
 
         <script>
             function exportToCsvAndPdf(tableIds, fileNamePrefix, format) {
                 const username = '{{ user.username }}';
                 const csvData = [];
-                const pdf = new jsPDF();
-        
+                const pdf = new jsPDF({
+        orientation: 'landscape',
+        format: 'a4',
+    });        
                 tableIds.forEach((tableId, index) => {
                     const table = document.getElementById(tableId);
                     const rows = table.querySelectorAll('tr');
@@ -463,11 +445,12 @@
         
                     csvData.push(tableData.join('\n'));
         
-                    if (index > 0) {
-                        pdf.addPage();  // Add a new page for each additional table in PDF
+                    if (format === 'pdf') {
+                        if (index > 0) {
+                            pdf.addPage();  // Add a new page for each additional table in PDF
+                        }
+                        pdf.autoTable({ html: `#${tableId}` });
                     }
-        
-                    pdf.autoTable({ html: `#${tableId}` });
                 });
         
                 const fullFileName = `${username}_${fileNamePrefix}`;
@@ -483,6 +466,11 @@
                 }
             }
         </script>
+        
+                                        
+        
+                
+        
         
         <script>
             function updateDpusByLocation(selectedLocation) {
