@@ -103,12 +103,16 @@
                     </ul>
                 </div>
     
-                <table id="dpu_details" class="table table-striped table-hover rounded table-responsive mt-4">
+                <table id="dpu_details" class="table table-striped table-hover rounded table-responsive mt-4" data-toggle="table"
+                data-pagination="true"
+                data-auto-refresh="true">
                     <thead>
-                        <tr class="text-center align-items-center">
+                        <tr class="table-title text-white text-center rounded">
                             <th>CUST_ID</th>
                             <th>Name</th>
                             <th>Shift</th>
+                            <th>Date</th>
+                            <th>Time</th>
                             <th>MType</th>
                             <th>FAT</th>
                             <th>SNF</th>
@@ -130,6 +134,9 @@
                             {% endif %}
                             {% endfor %}                           
                             <td>{{ drec.SHIFT }}</td>
+                            <td>{{ drec.RecordingDate|date:"d-m-Y" }}</td>
+                            <td>{{ drec.RecordingTime }}</td>
+
                             <td>{{ drec.MType }}</td>
                             <td>{{ drec.FAT }}</td>
                             <td>{{ drec.SNF }}</td>
@@ -150,8 +157,5 @@
     
 </div>
 
-<script>
-    new DataTable('#dpu_details');
-</script>
 
 {% endblock content %}

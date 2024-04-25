@@ -2,13 +2,7 @@
 {% load static %}
 {% block content %}
 <!-- Add these CDN links to your base HTML file -->
-<head>
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.3/dist/bootstrap-table.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.3/dist/extensions/auto-refresh/bootstrap-table-auto-refresh.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.3/dist/bootstrap-table.min.js"></script>
-</head>
+
 
 <div class="container-fluid py-4">
     <div class="col-sm-12">
@@ -193,7 +187,7 @@
                                                 <td>{{ total_cust_cow }}</td>
                                             </tr>
                                             <tr class="align-items-center text-align-center">
-                                                <td colspan="5">Buffalo Summary</td>
+                                                <td colspan="5">🐃 Buffalo Summary</td>
                                                 <td>{{ avg_fat_buffalo }}</td>
                                                 <td>{{ avg_snf_buffalo }}</td>
                                                 <td>{{ avg_clr_buffalo }}</td>
@@ -329,45 +323,44 @@
                 <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
                 <!-- Add this section to display the top 10 DREC records in a table format -->
                 <div class="container-fluid col-lg-12 mb-lg-0 mb-5">
-                    <div class="card shadow rounded" >
+                    <div class="card shadow rounded">
                         <div class="card-header pb-0 p-3">
-                            <div class=" justify-content-between">
+                            <div class="justify-content-between">
                                 <h6 class="mb-2 fw-bold">Top 10 Records</h6>
                             </div>
                         </div>
-                        <div class="table-responsive card-body rounded" >
-                            <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack"  
-                          data-toggle="table"
-                            data-pagination="false"
-                            data-auto-refresh="true">
+                        <div class="table-responsive card-body rounded">
+                            <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack"
+                                   data-toggle="table"
+                                   data-pagination="false"
+                                   data-auto-refresh="true">
                                 <thead class="table-title text-white text-center rounded">
-                                    <tr>
-                                        <th>St ID</th>
-                                        <th>Location</th>
-                                        <th>Society</th>
-                                        <th>Date</th>
-                                        <th>Time</th>
-                                        <th>Shift</th>
-                                        <th>Cust. Id</th>
-                                        <th>Name</th>
-                                        <th>FAT</th>
-                                        <th>SNF</th>
-                                        <th>CLR</th>
-                                        <th>Water</th>
-                                        <th>Ltr.Qty</th>
-                                        <th>Amt</th>
-                                        <th>Cum. Amt.</th>
-                                    </tr>
+                                <tr>
+                                    <th>St ID</th>
+                                    <th>Location</th>
+                                    <th>Society</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Shift</th>
+                                    <th>Cust. Id</th>
+                                    <th>Name</th>
+                                    <th>FAT</th>
+                                    <th>SNF</th>
+                                    <th>CLR</th>
+                                    <th>Water</th>
+                                    <th>Ltr.Qty</th>
+                                    <th>Amt</th>
+                                    <th>Cumu. Amt.</th>
+                                </tr>
                                 </thead>
                                 <tbody class="text-center fw-bold" id="tableBody">
-                                    {% for drec in drec_data|slice:":10" %}
+                                {% for drec in top_10_latest_records %}
                                     <tr>
                                         <td>{{ drec.ST_ID.st_id }}</td>
                                         <td>{{ drec.ST_ID.location }}</td>
                                         <td>{{ drec.ST_ID.society }}</td>
                                         <td>{{ drec.RecordingDate|date:"d-m-Y" }}</td>
                                         <td>{{ drec.RecordingTime }}</td>
-    
                                         <td>{{ drec.SHIFT }}</td>
                                         <td>{{ drec.CUST_ID }}</td>
                                         <td>
@@ -390,8 +383,8 @@
                             </table>
                         </div>
                     </div>
-                </div> 
-               
+                </div>
+                
                 
               </div>
 
@@ -407,16 +400,24 @@
                         <div class="table-responsive card-body rounded" >
                             <div class="d-flex justify-content-center align-items-center">
                                 <div class="text-center">
-                                    <h5>Please select a date:</h5>
-                                    <input type="date" id="selectedDate" class="form-control ">
+                                    <h5>Please select a date and shift:</h5>
+                                    <input type="date" id="selectedDate" class="form-control" required>
+                                           <!-- Add a dropdown menu for selecting shift -->
+                                        <select id="selectedShift" class="form-select mt-2" required>
+                                            <option value="M">Morning (M)</option>
+                                            <option value="E">Evening (E)</option>
+                                            <option value="both">Both M and E</option>
+                                        </select>
+
                                     <button onclick="fetchDRECData()" class="btn btn-success mt-2">Fetch Data</button>
                                 </div>
                             </div>
+                            
                             <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack"  
                             data-toggle="table"
-                            data-pagination="false"
+                            data-pagination="true"
                             data-auto-refresh="true">
-                                <thead class="table-title text-white text-center rounded">
+                                                     <thead class="table-title text-white text-center rounded">
                                     <tr>
                                         <th>St ID</th>
                                         <th>Root</th>
@@ -439,8 +440,10 @@
                                 <tbody id="drecDataBody" class="fw-bold">
                                     <!-- DREC data will be populated here dynamically using JavaScript -->
                                 </tbody>
+                       
+
                             </table>
-                           
+                                
                         
                         </div>
                     </div>
@@ -474,11 +477,21 @@
   <script>
   function fetchDRECData() {
     var selectedDate = document.getElementById('selectedDate').value;
-    fetch(`/fetch_drec_data/?selectedDate=${selectedDate}`)
+    var selectedShift = document.getElementById('selectedShift').value;
+    if (!selectedDate) {
+        alert('Please select a date.');
+        return;
+    }
+    // Construct the URL with selected date and shift
+    var url = `/fetch_drec_data/?selectedDate=${selectedDate}`;
+    if (selectedShift) {
+        url += `&selectedShift=${selectedShift}`;
+    }
+    fetch(url)
     .then(response => response.json())
     .then(data => {
         var drecDataBody = document.getElementById('drecDataBody');
-        drecDataBody.innerHTML = '';
+        var rowsHTML = '';
         data.drec_data.forEach(item => {
             var recordingDate = new Date(item.RecordingDate);
             var formattedDate = recordingDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -499,13 +512,15 @@
                 <td>₹ ${item.Amount}</td>
                 <td>${item.CAmount}</td>
             </tr>`;
-            drecDataBody.innerHTML += row;
+            rowsHTML += row;
         });
+        drecDataBody.innerHTML = rowsHTML;
     })
     .catch(error => {
         console.error('Error fetching DREC data:', error);
     });
 }
+
 
 
 </script>
