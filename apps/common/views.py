@@ -62,6 +62,8 @@ from django.core.cache import cache
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 import threading
+from django.views.decorators.cache import cache_page
+
 # Common Views
 
 def custom_404_page(request, exception):
@@ -99,6 +101,10 @@ def website_ultrasonic_milk_analyzer(request):
     return render(request, 'home/ultrasonic_milk_analyzer.html') 
 def health(request):
     return HttpResponse("OK")
+@cache_page(60 * 15)  # Cache the page for 15 minutes
+def base_template_view(request,context):
+    # Your view logic here
+    return render(request, 'base.html', context)
 
 class HomeView(TemplateView):
     # HomeView class definition ...
@@ -131,15 +137,23 @@ def custom_login(request):
             messages.error(request, "Username and password are required.")
             return render(request, template_name)
         
-        # Authenticate user
-        user = authenticate(request, username=username, password=password)
+        # Check if the user's credentials are cached
+        user = cache.get(username)
         
-        if user is not None:
-            login(request, user)
-            return redirect('dashboard')  # Redirect to the dashboard after successful login
-        else:
-            messages.error(request, "Invalid username or password")
-            return render(request, template_name)
+        if user is None:
+            # Authenticate user
+            user = authenticate(request, username=username, password=password)
+            
+            if user is not None:
+                # Cache the authenticated user for future requests
+                cache.set(username, user, timeout=None)  # Cache indefinitely or set a suitable expiration time
+            else:
+                messages.error(request, "Invalid username or password")
+                return render(request, template_name)
+        
+        # Log in the user
+        login(request, user)
+        return redirect('dashboard')  # Redirect to the dashboard after successful login
     
     # Load login template
     return render(request, template_name)

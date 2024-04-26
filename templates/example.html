@@ -454,144 +454,131 @@
      
         </div>
       </div>
-        <script>
+      <script>
+        // Function to refresh table content
         function refreshTable() {
             $.ajax({
                 url: '{% url "dashboard" %}',
                 type: 'GET',
                 dataType: 'html',
                 success: function (data) {
-                    // Update the content of summary_table's tbody
                     $('#summary_table tbody').html($(data).find('#summary_table tbody').html());
-
-                    // Update the content of live_table's tbody
                     $('#live_table tbody').html($(data).find('#live_table tbody tr:lt(10)').clone());
                 }
             });
         }
-
+    
         // Refresh the content every 5 seconds
         setInterval(refreshTable, 5000);
-
-        </script>
-  <script>
-  function fetchDRECData() {
-    var selectedDate = document.getElementById('selectedDate').value;
-    var selectedShift = document.getElementById('selectedShift').value;
-    if (!selectedDate) {
-        alert('Please select a date.');
-        return;
-    }
-    // Construct the URL with selected date and shift
-    var url = `/fetch_drec_data/?selectedDate=${selectedDate}`;
-    if (selectedShift) {
-        url += `&selectedShift=${selectedShift}`;
-    }
-    fetch(url)
-    .then(response => response.json())
-    .then(data => {
-        var drecDataBody = document.getElementById('drecDataBody');
-        var rowsHTML = '';
-        data.drec_data.forEach(item => {
-            var recordingDate = new Date(item.RecordingDate);
-            var formattedDate = recordingDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-            var row = `<tr>
-                <td>${item.ST_ID}</td>
-                <td>${item.Location}</td>
-                <td>${item.Society}</td>
-                <td>${formattedDate}</td>
-                <td>${item.RecordingTime}</td>
-                <td>${item.SHIFT}</td>
-                <td>${item.CUST_ID}</td>
-                <td>${item.Customer_Name}</td>
-                <td>${item.FAT}</td>
-                <td>${item.SNF}</td>
-                <td>${item.CLR}</td>
-                <td>${item.WATER}</td>
-                <td>${item.QT}</td>
-                <td>₹ ${item.Amount}</td>
-                <td>${item.CAmount}</td>
-            </tr>`;
-            rowsHTML += row;
-        });
-        drecDataBody.innerHTML = rowsHTML;
-    })
-    .catch(error => {
-        console.error('Error fetching DREC data:', error);
-    });
-}
-
-
-
-</script>
-<script>var page = 1; // Initialize page number
-    var pageSize = 10; // Number of records to load per page
-    var isLoading = false; // Flag to prevent multiple simultaneous requests
     
-    // Function to check if the user has scrolled to the bottom of the table
-    function isScrolledToBottom() {
-        var table = $('#live_table');
-        var tableHeight = table.height();
-        var scrollTop = table.scrollTop();
-        var windowHeight = table.prop('scrollHeight');
-        return (windowHeight - tableHeight - scrollTop) < 50; // Adjust 50 as needed for accuracy
-    }
-    
-    // Function to load more records
-    function loadMoreRecords() {
-        if (!isLoading && isScrolledToBottom()) {
-            isLoading = true;
-            $.ajax({
-                url: '{% url "dashboard" %}',
-                type: 'GET',
-                dataType: 'json',
-                data: {
-                    page: page,
-                    page_size: pageSize
-                },
-                success: function (data) {
-                    var tbody = $('#tableBody');
-                    data.records.forEach(function(record) {
-                        var row = '<tr>' +
-                            '<td>' + record.ST_ID.st_id + '</td>' +
-                            '<td>' + record.ST_ID.location + '</td>' +
-                            '<td>' + record.ST_ID.society + '</td>' +
-                            '<td>' + record.RecordingDate + '</td>' +
-                            '<td>' + record.RecordingTime + '</td>' +
-                            '<td>' + record.SHIFT + '</td>' +
-                            '<td>' + record.CUST_ID + '</td>' +
-                            '<td>' + record.Customer_Name + '</td>' +
-                            '<td>' + record.FAT + '</td>' +
-                            '<td>' + record.SNF + '</td>' +
-                            '<td>' + record.CLR + '</td>' +
-                            '<td>' + record.WATER + '</td>' +
-                            '<td>' + record.QT + '</td>' +
-                            '<td>' + record.Amount + '</td>' +
-                            '<td>' + record.CAmount + '</td>' +
-                            '</tr>';
-                        tbody.append(row);
-                    });
-                    page++; // Increment page number
-                    isLoading = false;
-                },
-                error: function (xhr, status, error) {
-                    console.error('Error loading more records:', error);
-                    isLoading = false;
-                }
+        // Function to fetch DREC data
+        function fetchDRECData() {
+            var selectedDate = document.getElementById('selectedDate').value;
+            var selectedShift = document.getElementById('selectedShift').value;
+            if (!selectedDate) {
+                alert('Please select a date.');
+                return;
+            }
+            var url = `/fetch_drec_data/?selectedDate=${selectedDate}`;
+            if (selectedShift) {
+                url += `&selectedShift=${selectedShift}`;
+            }
+            fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                var drecDataBody = document.getElementById('drecDataBody');
+                var rowsHTML = '';
+                data.drec_data.forEach(item => {
+                    var recordingDate = new Date(item.RecordingDate);
+                    var formattedDate = recordingDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    var row = `<tr>
+                        <td>${item.ST_ID}</td>
+                        <td>${item.Location}</td>
+                        <td>${item.Society}</td>
+                        <td>${formattedDate}</td>
+                        <td>${item.RecordingTime}</td>
+                        <td>${item.SHIFT}</td>
+                        <td>${item.CUST_ID}</td>
+                        <td>${item.Customer_Name}</td>
+                        <td>${item.FAT}</td>
+                        <td>${item.SNF}</td>
+                        <td>${item.CLR}</td>
+                        <td>${item.WATER}</td>
+                        <td>${item.QT}</td>
+                        <td>₹ ${item.Amount}</td>
+                        <td>${item.CAmount}</td>
+                    </tr>`;
+                    rowsHTML += row;
+                });
+                drecDataBody.innerHTML = rowsHTML;
+            })
+            .catch(error => {
+                console.error('Error fetching DREC data:', error);
             });
         }
-    }
     
-    // Load initial records and attach scroll event handler
-    $(document).ready(function() {
-        loadMoreRecords();
-        $('#live_table').scroll(loadMoreRecords);
-    });
-
+        // Pagination and lazy loading
+        var page = 1;
+        var pageSize = 10;
+        var isLoading = false;
     
+        function isScrolledToBottom() {
+            var table = $('#live_table');
+            var tableHeight = table.height();
+            var scrollTop = table.scrollTop();
+            var windowHeight = table.prop('scrollHeight');
+            return (windowHeight - tableHeight - scrollTop) < 50;
+        }
+    
+        function loadMoreRecords() {
+            if (!isLoading && isScrolledToBottom()) {
+                isLoading = true;
+                $.ajax({
+                    url: '{% url "dashboard" %}',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        page: page,
+                        page_size: pageSize
+                    },
+                    success: function (data) {
+                        var tbody = $('#tableBody');
+                        data.records.forEach(function(record) {
+                            var row = '<tr>' +
+                                '<td>' + record.ST_ID.st_id + '</td>' +
+                                '<td>' + record.ST_ID.location + '</td>' +
+                                '<td>' + record.ST_ID.society + '</td>' +
+                                '<td>' + record.RecordingDate + '</td>' +
+                                '<td>' + record.RecordingTime + '</td>' +
+                                '<td>' + record.SHIFT + '</td>' +
+                                '<td>' + record.CUST_ID + '</td>' +
+                                '<td>' + record.Customer_Name + '</td>' +
+                                '<td>' + record.FAT + '</td>' +
+                                '<td>' + record.SNF + '</td>' +
+                                '<td>' + record.CLR + '</td>' +
+                                '<td>' + record.WATER + '</td>' +
+                                '<td>' + record.QT + '</td>' +
+                                '<td>' + record.Amount + '</td>' +
+                                '<td>' + record.CAmount + '</td>' +
+                                '</tr>';
+                            tbody.append(row);
+                        });
+                        page++;
+                        isLoading = false;
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error loading more records:', error);
+                        isLoading = false;
+                    }
+                });
+            }
+        }
+    
+        $(document).ready(function() {
+            // Attach scroll event handler
+            $('#live_table').scroll(loadMoreRecords);
+        });
     </script>
-
-
 </div>
 
 {% endblock content %}
