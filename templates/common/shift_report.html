@@ -32,7 +32,7 @@
                            
                             <form method="post" action="{% url 'shift_report' %}" >
                                 {% csrf_token %}                            
-                                        <!-- Dropdowns for selecting filters -->
+                                                <!-- Dropdowns for selecting filters -->
                                         <label for="location" class="text-sm mb-0 text-uppercase fw-bold">Root</label>
                                         <p class="float-end fw-bold">
                                             Total - <code><strong>{{ total_locations }}</strong></code>
