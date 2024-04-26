@@ -97,6 +97,8 @@ def website_ultrasonic_digital_stirrer_v2(request):
 
 def website_ultrasonic_milk_analyzer(request):
     return render(request, 'home/ultrasonic_milk_analyzer.html') 
+def health(request):
+    return HttpResponse("OK")
 
 class HomeView(TemplateView):
     # HomeView class definition ...
