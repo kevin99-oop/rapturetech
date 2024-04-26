@@ -137,26 +137,19 @@ def custom_login(request):
             messages.error(request, "Username and password are required.")
             return render(request, template_name)
         
-        # Check if the user's credentials are cached
-        user = cache.get(username)
+        # Authenticate user
+        user = authenticate(request, username=username, password=password)
         
-        if user is None:
-            # Authenticate user
-            user = authenticate(request, username=username, password=password)
-            
-            if user is not None:
-                # Cache the authenticated user for future requests
-                cache.set(username, user, timeout=None)  # Cache indefinitely or set a suitable expiration time
-            else:
-                messages.error(request, "Invalid username or password")
-                return render(request, template_name)
-        
-        # Log in the user
-        login(request, user)
-        return redirect('dashboard')  # Redirect to the dashboard after successful login
+        if user is not None:
+            login(request, user)
+            return redirect('dashboard')  # Redirect to the dashboard after successful login
+        else:
+            messages.error(request, "Invalid username or password")
+            return render(request, template_name)
     
     # Load login template
     return render(request, template_name)
+
 
 def custom_logout(request):
     # Use Django's logout function to log the user out
