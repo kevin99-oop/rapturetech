@@ -79,7 +79,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+  'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware',
 
 
 ]
@@ -199,3 +201,10 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'kevinpandya18@gnu.ac.in'
 EMAIL_HOST_PASSWORD = 'JACK@99kevin281099'
 
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
