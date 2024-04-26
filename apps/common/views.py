@@ -101,6 +101,10 @@ def website_ultrasonic_milk_analyzer(request):
     return render(request, 'home/ultrasonic_milk_analyzer.html') 
 def health(request):
     return HttpResponse("OK")
+@cache_page(60 * 15)  # Cache the page for 15 minutes
+def base_template_view(request,context):
+    # Your view logic here
+    return render(request, 'base.html', context)
 
 class HomeView(TemplateView):
     # HomeView class definition ...
