@@ -1165,25 +1165,39 @@ def ratesitem_api(request):
 
 @login_required
 def shift_report(request):
-    template_name = 'common/shift_report.html'
-    user = request.user
-    customer_list = CustomerList.objects.filter(user=user)
-    initial_data = {}
+    # Fetch dynamic values for dropdowns from the database
 
-    if user.is_staff or user.is_superuser:
-        dpu_filter = {'user': user}
+    # staff and super user
+    if request.user.is_staff or request.user.is_superuser:
+        locations = DPU.objects.filter(user=request.user).values_list('location', flat=True).distinct()
+        dpus = DPU.objects.filter(user=request.user).values_list('st_id', flat=True).distinct()
+        societies = DPU.objects.filter(user=request.user).values_list('society', flat=True).distinct()
+        shifts = DREC.objects.filter(ST_ID__user=request.user, SHIFT__in=['M', 'E']).values_list('SHIFT', flat=True).distinct()
+
+
+        # Count distinct locations, dpus, and societies
+        total_locations = DPU.objects.filter(user=request.user).values('location').distinct().count()
+        total_dpus = DPU.objects.filter(user=request.user).count()
+        total_societies = DPU.objects.filter(user=request.user).values('society').distinct().count()
+        customer_list = CustomerList.objects.filter(user=request.user)
+
     else:
-        dpu_filter = {'dpu_user': user.id}
+        # normal user
+        locations = DPU.objects.filter(dpu_user=request.user.id).values_list('location', flat=True).distinct()
+        dpus = DPU.objects.filter(dpu_user=request.user.id).values_list('st_id', flat=True).distinct()
+        societies = DPU.objects.filter(dpu_user=request.user.id).values_list('society', flat=True).distinct()
+        shifts = DREC.objects.filter(ST_ID__dpu_user=request.user.id, SHIFT__in=['M', 'E']).values_list('SHIFT', flat=True).distinct()
 
-    locations = DPU.objects.filter(**dpu_filter).values_list('location', flat=True).distinct()
-    dpus = DPU.objects.filter(**dpu_filter).values_list('st_id', flat=True).distinct()
-    societies = DPU.objects.filter(**dpu_filter).values_list('society', flat=True).distinct()
-    shifts = DREC.objects.filter(ST_ID__user=user, SHIFT__in=['M', 'E']).values_list('SHIFT', flat=True).distinct()
 
-    total_locations = DPU.objects.filter(**dpu_filter).values('location').distinct().count()
-    total_dpus = DPU.objects.filter(**dpu_filter).count()
-    total_societies = DPU.objects.filter(**dpu_filter).values('society').distinct().count()
+        # Count distinct locations, dpus, and societies
+        total_locations = DPU.objects.filter(dpu_user=request.user.id).values('location').distinct().count()
+        total_dpus = DPU.objects.filter(dpu_user=request.user.id).count()
+        total_societies = DPU.objects.filter(dpu_user=request.user.id).values('society').distinct().count()
+        customer_list = CustomerList.objects.filter(user=request.user)
 
+
+
+    # Get initial data for dropdowns
     initial_data = {
         'locations': list(locations),
         'dpus': list(dpus),
@@ -1198,8 +1212,8 @@ def shift_report(request):
         'total_locations': total_locations,
         'total_dpus': total_dpus,
         'total_societies': total_societies,
-        'initial_data': initial_data,
-        'customer_list': customer_list,
+        'initial_data': initial_data,  # Include initial data in the context
+        'customer_list': customer_list,  # Include customer list in the context
     }
 
     if request.method == 'POST':
@@ -1209,11 +1223,12 @@ def shift_report(request):
         shift = request.POST.get('shift')
         start_date_str = request.POST.get('start_date')
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else None
-        selected_start_date = start_date.strftime('%d-%m-%Y') if start_date else None
 
+        # Replace the following lines with your actual data retrieval logic
         summary_data = get_summary_data(location, dpu, society, shift, start_date)
         detail_data = get_detail_data(request, location, dpu, society, shift, start_date)
 
+        # Calculate summary data for cow and buffalo records
         cow_records = [record for record in detail_data if record['MType'] == 'C']
         buffalo_records = [record for record in detail_data if record['MType'] == 'B']
 
@@ -1225,14 +1240,13 @@ def shift_report(request):
             'selected_dpu': dpu,
             'selected_society': society,
             'selected_shift': shift,
-            'selected_start_date': selected_start_date,
+            'selected_start_date': start_date_str,
             'summary_data': summary_data,
             'detail_data': detail_data,
             'cow_summary_data': cow_summary_data,
             'buffalo_summary_data': buffalo_summary_data,
         })
-
-    return render(request, template_name, context)
+    return render(request, 'common/shift_report.html', context)
 
 def calculate_cow_summary(records):
     total_fat = sum(record['FAT'] for record in records)
@@ -1320,19 +1334,10 @@ def get_summary_data(location, dpu, society, shift, start_date):
         TotalQT=Sum('QT'),
         TotalAmount=Sum('Amount'),
         TotalCAmount=Sum('CAmount'),
-        AvgFAT=Avg('FAT'),
-        AvgSNF=Avg('SNF'),
-        AvgCLR=Avg('CLR'),
+        AvgFAT=Round(Avg('FAT'), 1),
+        AvgSNF=Round(Avg('SNF'), 1),
+        AvgCLR=Round(Avg('CLR'), 1),
     )
-
-    # Round the TotalQT to two decimal places
-    summary_data['TotalQT'] = round(summary_data['TotalQT'], 2) if summary_data['TotalQT'] is not None else Decimal('0.00')
-
-    # Round the averages to one decimal place
-    summary_data['AvgFAT'] = round(summary_data['AvgFAT'], 1) if summary_data['AvgFAT'] is not None else Decimal('0.0')
-    summary_data['AvgSNF'] = round(summary_data['AvgSNF'], 1) if summary_data['AvgSNF'] is not None else Decimal('0.0')
-    summary_data['AvgCLR'] = round(summary_data['AvgCLR'], 1) if summary_data['AvgCLR'] is not None else Decimal('0.0')
-
     return summary_data
 
 def get_detail_data(request, location, dpu, society, shift, start_date):
