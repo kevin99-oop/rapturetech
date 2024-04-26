@@ -21,6 +21,7 @@ from django.db import connection
 from django.db.models.functions import Round
 import string
 import random
+
 from django.contrib.auth.views import LoginView
 # Django Imports
 from apps.common.models import DREC, DPU, Customer, Config, RateTable, CustomerList
@@ -54,7 +55,13 @@ from functools import lru_cache
 import time
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
-
+from collections import defaultdict, Counter
+import time
+import concurrent.futures
+from django.core.cache import cache
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta
+import threading
 # Common Views
 
 def custom_404_page(request, exception):
@@ -152,69 +159,80 @@ def super_dashboard(request):
 class DashboardView(TemplateView):
     template_name = 'example.html'
     paginate_by = 10
+    live_data_lock = threading.Lock()
+    live_data = None
 
     def get(self, request, *args, **kwargs):
         start_time = time.time()
-
-        active_dpu_list = self.get_active_dpu_list(request.user)
-        drec_data = self.get_drec_data(request.user)
-        drec_data_cust_ids = drec_data.values_list('CUST_ID', flat=True).distinct()
-
-        summary_data = self.prepare_summary_data(drec_data, active_dpu_list)
-        customer_list = self.get_customer_list(drec_data_cust_ids)
-
-        avg_fat, avg_snf, avg_clr = self.calculate_global_averages(request.user)
-
-        paginator = Paginator(drec_data, self.paginate_by)
-        drec_data_page = paginator.get_page(request.GET.get('page'))
-
-        total_customer_count = self.calculate_total_customer_count(active_dpu_list)
-        total_dpus = active_dpu_list.count()
-
-        top_10_latest_records = self.get_top_10_latest_records(request.user, summary_data[0]['ST_ID__st_id']) if summary_data else None
-
-        recording_dates = self.get_recording_dates(request.user.id)
-
-        cow_summary_data, avg_fat_cow, avg_snf_cow, avg_clr_cow, avg_water_cow, total_ltr_cow, total_amt_cow, total_cust_cow = self.prepare_and_calculate_summary_data(drec_data, active_dpu_list, 'C')
-        
-        buffalo_summary_data, avg_fat_buffalo, avg_snf_buffalo, avg_clr_buffalo, avg_water_buffalo, total_ltr_buffalo, total_amt_buffalo, total_cust_buffalo = self.prepare_and_calculate_summary_data(drec_data, active_dpu_list, 'B')
-
-        context = {
-            'active_dpu_list': active_dpu_list,
-            'drec_data': drec_data_page,
-            'customer_list': customer_list,
-            'summary_data': summary_data,
-            'last_updated': timezone.now(),
-            'avg_fat': avg_fat,
-            'avg_snf': avg_snf,
-            'avg_clr': avg_clr,
-            'total_customer_count': total_customer_count,
-            'total_dpus': total_dpus,
-            'dpu_list': ', '.join(dpu.st_id for dpu in active_dpu_list),
-            'recording_dates': recording_dates,
-            'top_10_latest_records': top_10_latest_records,
-            'cow_summary_data': cow_summary_data,
-            'avg_fat_cow': avg_fat_cow,
-            'avg_snf_cow': avg_snf_cow,
-            'avg_clr_cow': avg_clr_cow,
-            'avg_water_cow': avg_water_cow,
-            'total_ltr_cow': total_ltr_cow,
-            'total_amt_cow': total_amt_cow,
-            'total_cust_cow': total_cust_cow,
-            'buffalo_summary_data': buffalo_summary_data,
-            'avg_fat_buffalo': avg_fat_buffalo,
-            'avg_snf_buffalo': avg_snf_buffalo,
-            'avg_clr_buffalo': avg_clr_buffalo,
-            'avg_water_buffalo': avg_water_buffalo,
-            'total_ltr_buffalo': total_ltr_buffalo,
-            'total_amt_buffalo': total_amt_buffalo,
-            'total_cust_buffalo': total_cust_buffalo,
-        }
-
+        context = self.compute_data(request)
         end_time = time.time()
         print("Execution time:", end_time - start_time, "seconds")
         return render(request, self.template_name, context)
     
+    def update_live_data_thread(self):
+        while True:
+            with self.live_data_lock:
+                self.live_data = self.compute_data(None)
+            time.sleep(5)
+
+    def compute_data(self, request):
+        active_dpu_list = self.get_active_dpu_list(request.user) if request else None
+        drec_data = self.get_drec_data(request.user) if request else None
+
+        if drec_data is not None:
+            drec_data_cust_ids = drec_data.values_list('CUST_ID', flat=True).distinct()
+
+            summary_data = self.prepare_summary_data(drec_data, active_dpu_list)
+            customer_list = self.get_customer_list(drec_data_cust_ids)
+
+            avg_fat, avg_snf, avg_clr = self.calculate_global_averages(request.user)
+
+            paginator = Paginator(drec_data, self.paginate_by)
+            drec_data_page = paginator.get_page(request.GET.get('page'))
+
+            total_customer_count = self.calculate_total_customer_count(active_dpu_list)
+            total_dpus = active_dpu_list.count()
+
+            top_10_latest_records = self.get_top_10_latest_records(request.user, summary_data[0]['ST_ID__st_id']) if summary_data else None
+
+            recording_dates = self.get_recording_dates(request.user.id)
+
+            cow_summary_data, avg_fat_cow, avg_snf_cow, avg_clr_cow, avg_water_cow, total_ltr_cow, total_amt_cow, total_cust_cow = self.prepare_and_calculate_summary_data(drec_data, active_dpu_list, 'C')
+            
+            buffalo_summary_data, avg_fat_buffalo, avg_snf_buffalo, avg_clr_buffalo, avg_water_buffalo, total_ltr_buffalo, total_amt_buffalo, total_cust_buffalo = self.prepare_and_calculate_summary_data(drec_data, active_dpu_list, 'B')
+
+            live_data = {
+                'active_dpu_list': active_dpu_list,
+                'drec_data': drec_data_page,
+                'customer_list': customer_list,
+                'summary_data': summary_data,
+                'avg_fat': avg_fat,
+                'avg_snf': avg_snf,
+                'avg_clr': avg_clr,
+                'total_customer_count': total_customer_count,
+                'total_dpus': total_dpus,
+                'dpu_list': ', '.join(dpu.st_id for dpu in active_dpu_list),
+                'recording_dates': recording_dates,
+                'top_10_latest_records': top_10_latest_records,
+                'cow_summary_data': cow_summary_data,
+                'avg_fat_cow': avg_fat_cow,
+                'avg_snf_cow': avg_snf_cow,
+                'avg_clr_cow': avg_clr_cow,
+                'avg_water_cow': avg_water_cow,
+                'total_ltr_cow': total_ltr_cow,
+                'total_amt_cow': total_amt_cow,
+                'total_cust_cow': total_cust_cow,
+                'buffalo_summary_data': buffalo_summary_data,
+                'avg_fat_buffalo': avg_fat_buffalo,
+                'avg_snf_buffalo': avg_snf_buffalo,
+                'avg_clr_buffalo': avg_clr_buffalo,
+                'avg_water_buffalo': avg_water_buffalo,
+                'total_ltr_buffalo': total_ltr_buffalo,
+                'total_amt_buffalo': total_amt_buffalo,
+                'total_cust_buffalo': total_cust_buffalo,
+            }
+            return live_data
+
     @lru_cache(maxsize=None)
     def get_active_dpu_list(self, user):
         if user.is_staff or user.is_superuser:
@@ -341,7 +359,6 @@ class DashboardView(TemplateView):
 
         return avg_fat, avg_snf, avg_clr, avg_water, total_ltr, total_amt, total_cust
 
-        
 
 class FetchDRECDataView(View):
     def get(self, request, *args, **kwargs):
