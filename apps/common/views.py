@@ -1302,12 +1302,14 @@ def get_summary_data(location, dpu, society, shift, start_date):
         RecordingDate=start_date,
     ).aggregate(
         TotalCustomer=Count('CUST_ID'),
-        TotalQT=Sum('QT'),
-        TotalAmount=Sum('Amount'),
-        TotalCAmount=Sum('CAmount'),
-        AvgFAT=Avg('FAT'),
-        AvgSNF=Avg('SNF'),
-        AvgCLR=Avg('CLR'),
+         TotalQT=Round(Sum('QT'), 2),  # Round to 2 decimal places
+            TotalAmount=Round(Sum('Amount'), 2),  # Round to 2 decimal places
+            TotalCAmount=Round(Sum('CAmount'), 2),  # Round to 2 decimal places
+
+            AvgFAT=Round(Avg('FAT'), 2),  # Round to 2 decimal places
+            AvgSNF=Round(Avg('SNF'), 2),  # Round to 2 decimal places
+            AvgCLR=Round(Avg('CLR'), 2),  # Round to 2 decimal places
+            AvgRATE=Round(Avg('RATE'), 2), # Round to 2 decimal places
     )
 
     # Round the TotalQT to two decimal places
