@@ -81,7 +81,7 @@
                         </div>
                         <div class="col-md-6">
                            
-                            <a href="{% url 'customer-list' st_id=dpu.st_id %}" class="btn btn-success ml-2 rounded">
+                            <a href="{% url 'customer-list' st_id=dpu.st_id %}" class="btn btn-success ml-2 rounded fw-bold">
                                 <i class="fa fa-users small-logos" aria-hidden="true"></i>
                                Customer List
                             </a>
@@ -90,24 +90,38 @@
                 </div>
     
                 <div class="dpu-details mt-4">
-                    <h2>DPU Details:</h2>
-                    <ul>
-                        <li><strong>Society:</strong> {{ dpu.society }}</li>
-                        <li><strong>SID:</strong> {{ dpu.st_id }}</li>
-                        <li><strong>Dpu Created On:</strong> {{ dpu.date|date:"d-m-Y H:i:s" }}</li>
-                        <!-- Add more details as needed -->
-                        {% if request.user.is_staff or request.user.is_superuser  %}
+                    <div class="col-sm-12">
+                        <div class="statistics-details d-flex align-items-center justify-content-between">
+                          <div>
+                            <p class="statistics-title text-danger"><strong>Society</strong></p>
+                            <h5 class="rate-percentage  fw-bold">{{ dpu.society }}</h5>
+                          </div>
+                          <div>
+                            <p class="statistics-title text-danger"><strong>Station Id</strong></p>
+                            <h5 class="rate-percentage  fw-bold"> {{ dpu.st_id }}</h5>
+                          </div>
+                          <div>
+                            <p class="statistics-title text-danger"><strong>DPU Created On</strong></p>
+                            <h5 class="rate-percentage  fw-bold">{{ dpu.date|date:"d-m-Y H:i:s" }}</h5>
+                          </div>
+                          {% if request.user.is_staff or request.user.is_superuser  %}
 
-                        <li><strong>Password:</strong> {{ dpu.plain_password }}</li>
-                        {%endif%}
-                    </ul>
+                          <div class="d-none d-md-block">
+                            <p class="statistics-title text-danger"><strong>Password</strong></p>
+                            <h5 class="rate-percentage  fw-bold" onclick="myFunction()" id="password">******</h5>
+                          </div>
+                          {%endif%}
+                       
+                        </div>
+                      </div>
+                   
                 </div>
     
-                <table id="dpu_details" class="table table-striped table-hover rounded table-responsive mt-4" data-toggle="table"
+                <table id="dpu_details" class="table table-striped table-hover rounded table-responsive mt-4 border-2 border-dark" data-toggle="table"
                 data-pagination="true"
                 data-auto-refresh="true">
                     <thead>
-                        <tr class="table-title text-white text-center rounded">
+                        <tr class="table-title text-white text-center rounded border-white">
                             <th>CUST_ID</th>
                             <th>Name</th>
                             <th>Shift</th>
@@ -154,8 +168,49 @@
             </div>
         </div>
     </div>
+    <div class="modal" id="copyConfirmationModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Password Copied</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>The password has been copied to the clipboard.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     
 </div>
+<script>
+    function myFunction() {
+        var x = document.getElementById("password");
 
+        // Create a temporary input element to copy the password to the clipboard
+        var tempInput = document.createElement("input");
+        tempInput.setAttribute("type", "text");
+        tempInput.setAttribute("value", "{{ dpu.plain_password }}");
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+
+        // Change the innerHTML of the password field
+        x.innerHTML = "{{ dpu.plain_password }}";
+
+        // Show the Bootstrap modal for the copy confirmation
+        $('#copyConfirmationModal').modal('show');
+
+        // Hide the actual password after 5 seconds
+        setTimeout(function() {
+            x.innerHTML = "******";
+            $('#copyConfirmationModal').modal('hide'); // Hide the modal after 5 seconds
+        }, 5000);
+    }
+</script>
 
 {% endblock content %}

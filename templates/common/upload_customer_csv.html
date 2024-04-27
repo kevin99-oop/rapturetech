@@ -1,10 +1,13 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends 'base.html' %} <!-- Extends the base template -->
 
-{% load crispy_forms_tags %}
+{% load static %} <!-- Load the static template tag -->
 
-{% block content %}
+{% load crispy_forms_tags %} <!-- Load crispy forms tags for rendering forms -->
+
+{% block content %} <!-- Define a block named content -->
+
 <style>
+    /* CSS styles for the page */
     .table-wrapper {
         background: #fff;
         padding: 20px 25px;
@@ -56,42 +59,39 @@
 
     tr {
         text-align: center;
-
     }
 
     td {
         padding: 1px;
         text-align: center;
     }
-    /* Add this to your CSS file or in a <style> tag in your HTML */
-ul.messages {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
 
-ul.messages li {
-    padding: 10px;
-    margin: 10px 0;
-}
+    /* Additional CSS for message display */
+    ul.messages {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
 
-li.error {
-    background-color: #FFD2D2;
-    border: 1px solid #FF6363;
-    color: #FF0000;
-}
+    ul.messages li {
+        padding: 10px;
+        margin: 10px 0;
+    }
 
-li.success {
-    background-color: #D2FFD2;
-    border: 1px solid #63FF63;
-    color: #008000;
-}
+    li.error {
+        background-color: #FFD2D2;
+        border: 1px solid #FF6363;
+        color: #FF0000;
+    }
 
+    li.success {
+        background-color: #D2FFD2;
+        border: 1px solid #63FF63;
+        color: #008000;
+    }
 </style>
 
 <div class="container-fluid mt-5">
-
-
 
     <!-- Main Content Here -->
 
@@ -104,35 +104,31 @@ li.success {
                         <div class="col-sm-6">
                             <h5 class="text-white mt-2">Upload Customer CSV</h5>
                             {% if messages %}
-                            <ul class="messages">
-                              {% for message in messages %}
+                            <ul class="messages"> <!-- Display messages -->
+                                {% for message in messages %}
                                 <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                              {% endfor %}
+                                {% endfor %}
                             </ul>
-                          {% endif %}
+                            {% endif %}
                         </div>
                         <div class="col-md-6">
                         </div>
                     </div>
                 </div>
-            
+
+                <!-- Form for uploading CSV -->
                 <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {{ form }}
-                    <button type="submit" class="btn btn-success">Upload CSV</button>
-                  </form>
-                
+                    {% csrf_token %} <!-- CSRF token -->
+                    {{ form }} <!-- Display the form -->
+                    <button type="submit" class="btn btn-success">Upload CSV</button> <!-- Submit button -->
+                </form>
 
             </div>
         </div>
-
-
-
-
 
     </div>
 
     <!-- /.container-fluid -->
 </div>
 
-{% endblock content %}
+{% endblock content %} <!-- End of content block -->
