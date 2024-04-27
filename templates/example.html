@@ -1,4 +1,4 @@
-{% extends 'base2.html' %}
+{% extends 'base.html' %}
 {% load static %}
 {% block content %}
 <!-- Add these CDN links to your base HTML file -->
@@ -176,7 +176,7 @@
                                             </tr>
                                             {% endfor %}
                     
-                                            <tr class="align-items-center text-align-center ">
+                                            <tr class="align-items-center text-align-center  bg-white">
                                                 <td colspan="5">Cow Summary</td>
                                                 <td>{{ avg_fat_cow }}</td>
                                                 <td>{{ avg_snf_cow }}</td>
@@ -186,7 +186,7 @@
                                                 <td>₹ {{ total_amt_cow }}</td>
                                                 <td>{{ total_cust_cow }}</td>
                                             </tr>
-                                            <tr class="align-items-center text-align-center">
+                                            <tr class="align-items-center text-align-center bg-white">
                                                 <td colspan="5">Buffalo Summary</td>
                                                 <td>{{ avg_fat_buffalo }}</td>
                                                 <td>{{ avg_snf_buffalo }}</td>
