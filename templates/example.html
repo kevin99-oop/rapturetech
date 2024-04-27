@@ -21,8 +21,6 @@
                                 Top 10 Records
                             </a>
                         </li>
-                      
-
                         <li class="nav-item">
                             <a class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
                                 Date Filter
@@ -30,26 +28,27 @@
                         </li>
                     </ul>
                 </div>
-              </nav>
-              <div class="tab-content" id="nav-tabContent">
+            </nav>
+            <div class="tab-content" id="nav-tabContent">
                 <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
                     <div class="row"> 
                         <div class="col-xl-3 col-sm-3 col-md-3 mb-xl-0 mb-4">
                             <div class="card">
-                                <div class="card-body p-3">
+                                <div class="card-body p-4">
                                     <div class="row">
                                         <div class="col-8">
                                             <div class="numbers">
-                                                <p class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Average Fat</p>
+                                                <h5 class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Average Fat</h5>
                 
-                                                <p class="mb-0">
-                                                    <span class="text-success text-lg font-weight-bolder fw-bold">
-                                                        {{ avg_fat }}</span>
-                                                </p>
+                                               
                                             </div>
                                         </div>
                                         <div class="col-4 text-end">
-                
+                                            <h5 class="mb-0">
+                                                <span class="text-danger text-lg font-weight-bolder fw-bold">
+                                                    {{ avg_fat }}
+                                                </span>
+                                                </h5>
                                         </div>
                                     </div>
                                 </div>
@@ -57,23 +56,21 @@
                         </div>
                         <div class="col-xl-3 col-sm-3 col-md-3 mb-xl-0 mb-4">
                             <div class="card">
-                                <div class="card-body p-3">
+                                <div class="card-body p-4">
                                     <div class="row">
                                         <div class="col-8">
                                             <div class="numbers">
-                                                <p class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Average SNF</p>
+                                                <h5 class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Average SNF</h5>
                 
-                                                <p class="mb-0">
-                                                    <span class="text-success text-lg font-weight-bolder fw-bold">{{ avg_snf }}</span>
-                
-                                                </p>
+                                              
                 
                                             </div>
                                         </div>
                                         <div class="col-4 text-end">
-                                            <div class="icon icon-shape bg-gradient-danger shadow-danger text-center rounded-circle">
-                                                <i class="ni ni-world text-lg opacity-10" aria-hidden="true"></i>
-                                            </div>
+                                            <h5 class="mb-0">
+                                                <span class="text-danger text-lg font-weight-bolder fw-bold">{{ avg_snf }}</span>
+            
+                                            </h5>
                                         </div>
                                     </div>
                                 </div>
@@ -81,23 +78,21 @@
                         </div>
                         <div class="col-xl-3 col-sm-3 col-md-3 mb-xl-0 mb-4">
                             <div class="card">
-                                <div class="card-body p-3">
+                                <div class="card-body p-4">
                                     <div class="row">
                                         <div class="col-8">
                                             <div class="numbers">
-                                                <p class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Average CLR</p>
+                                                <h5 class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Average CLR</h5>
                 
-                                                <p class="mb-0">
-                                                    <span class="text-success text-lg font-weight-bolder fw-bold">{{ avg_clr }}</span>
-                
-                                                </p>
+                                              
                 
                                             </div>
                                         </div>
                                         <div class="col-4 text-end">
-                                            <div class="icon icon-shape bg-gradient-success shadow-success text-center rounded-circle">
-                                                <i class="ni ni-paper-diploma text-lg opacity-10" aria-hidden="true"></i>
-                                            </div>
+                                            <h5 class="mb-0">
+                                                <span class="text-danger text-lg font-weight-bolder fw-bold">{{ avg_clr }}</span>
+            
+                                            </h5>
                                         </div>
                                     </div>
                                 </div>
@@ -105,24 +100,21 @@
                         </div>
                         <div class="col-xl-3 col-sm-3 col-md-3 mb-xl-0 mb-4">
                             <div class="card">
-                                <div class="card-body p-3">
+                                <div class="card-body p-4">
                                     <div class="row">
                                         <div class="col-8">
                                             <div class="numbers">
-                                                <p class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Total Customer</p>
+                                                <h5 class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Total Customer</h5>
                 
-                                                <p class="mb-0">
-                
-                                                    <span class="text-success text-lg font-weight-bolder fw-bold">   {{total_customer_count}}                                    </span>
-                                                </p>
+                                               
                 
                                             </div>
                                         </div>
                                         <div class="col-4 text-end">
-                                            <div class="icon icon-shape bg-gradient-warning shadow-warning text-center rounded-circle">
-                                                <i class="fa fa-users text-lg opacity-10" aria-hidden="true"></i>
+                                            <h5 class="mb-0">
                 
-                                            </div>
+                                                <span class="text-danger text-lg font-weight-bolder fw-bold">   {{total_customer_count}}                                    </span>
+                                            </h5>
                                         </div>
                                     </div>
                                     
@@ -139,12 +131,12 @@
                                     <h6 class="mb-2 fw-bold">Total Summary Record</h6>
                                 </div>
                                 <div class="table-responsive card-body rounded">
-                                    <table id="summary_table" class="table align-items-center table-rwd text-center table table-striped table-hover rounded table-responsive w-100"data-toggle="table"
+                                    <table id="summary_table" class="table align-items-center table-rwd text-center table table-striped table-hover rounded table-responsive w-100 border-2 border-dark "data-toggle="table"
                                     data-pagination="false"
                                     data-auto-refresh="true">
-                                        <thead class="text-white text-center rounded table-title">
+                                        <thead class="text-white text-center rounded table-title border-white">
                                             <tr>
-                                                <th>St Id</th>
+                                                <th>St. Id</th>
                                                 <th>Location</th>
                                                 <th>Society</th>
                                                 <th>Date</th>
@@ -176,7 +168,7 @@
                                             </tr>
                                             {% endfor %}
                     
-                                            <tr class="align-items-center text-align-center  bg-white">
+                                            <tr class="align-items-center text-align-center  border-2  border-dark">
                                                 <td colspan="5">Cow Summary</td>
                                                 <td>{{ avg_fat_cow }}</td>
                                                 <td>{{ avg_snf_cow }}</td>
@@ -186,7 +178,7 @@
                                                 <td>₹ {{ total_amt_cow }}</td>
                                                 <td>{{ total_cust_cow }}</td>
                                             </tr>
-                                            <tr class="align-items-center text-align-center bg-white">
+                                            <tr class="align-items-center text-align-center border-2 border-dark">
                                                 <td colspan="5">Buffalo Summary</td>
                                                 <td>{{ avg_fat_buffalo }}</td>
                                                 <td>{{ avg_snf_buffalo }}</td>
@@ -213,11 +205,11 @@
                                     </div>
                                 </div>
                                 <div class="card-body table-responsive card-body rounded">
-                                    <table id="live_table" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 "data-toggle="table"
+                                    <table id="live_table" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 border-2 border-dark "data-toggle="table"
                                     data-pagination="false"
                                     data-auto-refresh="true">
                                         <!-- Table header -->
-                                        <thead class="table-title text-white text-center rounded">
+                                        <thead class="table-title text-white text-center rounded border-white">
                                             <tr>
                                                 <th>St. Id</th>
                                                 <th>Location</th>
@@ -330,11 +322,12 @@
                             </div>
                         </div>
                         <div class="table-responsive card-body rounded">
-                            <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack"
+                            
+                            <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack border-2 border-dark"
                                    data-toggle="table"
                                    data-pagination="false"
                                    data-auto-refresh="true">
-                                <thead class="table-title text-white text-center rounded">
+                                <thead class="table-title text-white text-center rounded border-white">
                                 <tr>
                                     <th>St ID</th>
                                     <th>Location</th>
@@ -413,11 +406,11 @@
                                 </div>
                             </div>
                             
-                            <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack"  
+                            <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack border-2 border-dark"  
                             data-toggle="table"
                             data-pagination="true"
                             data-auto-refresh="true">
-                                                     <thead class="table-title text-white text-center rounded">
+                                                     <thead class="table-title text-white text-center rounded border-white">
                                     <tr>
                                         <th>St ID</th>
                                         <th>Root</th>
@@ -462,8 +455,12 @@
                 type: 'GET',
                 dataType: 'html',
                 success: function (data) {
+                    // Replace the entire table body with the new data
                     $('#summary_table tbody').html($(data).find('#summary_table tbody').html());
-                    $('#live_table tbody').html($(data).find('#live_table tbody tr:lt(10)').clone());
+                    $('#live_table tbody').html($(data).find('#live_table tbody').html());
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error refreshing table:', error);
                 }
             });
         }
@@ -488,28 +485,32 @@
             .then(data => {
                 var drecDataBody = document.getElementById('drecDataBody');
                 var rowsHTML = '';
-                data.drec_data.forEach(item => {
-                    var recordingDate = new Date(item.RecordingDate);
-                    var formattedDate = recordingDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                    var row = `<tr>
-                        <td>${item.ST_ID}</td>
-                        <td>${item.Location}</td>
-                        <td>${item.Society}</td>
-                        <td>${formattedDate}</td>
-                        <td>${item.RecordingTime}</td>
-                        <td>${item.SHIFT}</td>
-                        <td>${item.CUST_ID}</td>
-                        <td>${item.Customer_Name}</td>
-                        <td>${item.FAT}</td>
-                        <td>${item.SNF}</td>
-                        <td>${item.CLR}</td>
-                        <td>${item.WATER}</td>
-                        <td>${item.QT}</td>
-                        <td>₹ ${item.Amount}</td>
-                        <td>${item.CAmount}</td>
-                    </tr>`;
-                    rowsHTML += row;
-                });
+                if (data.drec_data.length === 0) {
+                    rowsHTML = '<tr><td colspan="15">No data found for the selected date.</td></tr>';
+                } else {
+                    data.drec_data.forEach(item => {
+                        var recordingDate = new Date(item.RecordingDate);
+                        var formattedDate = recordingDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                        var row = `<tr>
+                            <td>${item.ST_ID}</td>
+                            <td>${item.Location}</td>
+                            <td>${item.Society}</td>
+                            <td>${formattedDate}</td>
+                            <td>${item.RecordingTime}</td>
+                            <td>${item.SHIFT}</td>
+                            <td>${item.CUST_ID}</td>
+                            <td>${item.Customer_Name}</td>
+                            <td>${item.FAT}</td>
+                            <td>${item.SNF}</td>
+                            <td>${item.CLR}</td>
+                            <td>${item.WATER}</td>
+                            <td>${item.QT}</td>
+                            <td>₹ ${item.Amount}</td>
+                            <td>${item.CAmount}</td>
+                        </tr>`;
+                        rowsHTML += row;
+                    });
+                }
                 drecDataBody.innerHTML = rowsHTML;
             })
             .catch(error => {
@@ -542,7 +543,7 @@
                         page_size: pageSize
                     },
                     success: function (data) {
-                        var tbody = $('#tableBody');
+                        var tbody = $('#live_table tbody');
                         data.records.forEach(function(record) {
                             var row = '<tr>' +
                                 '<td>' + record.ST_ID.st_id + '</td>' +
@@ -577,8 +578,12 @@
         $(document).ready(function() {
             // Attach scroll event handler
             $('#live_table').scroll(loadMoreRecords);
+    
+            // Refresh the content every 5 seconds
+            setInterval(refreshTable, 5000);
         });
     </script>
+    
 </div>
 
 {% endblock content %}

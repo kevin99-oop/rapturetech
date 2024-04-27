@@ -153,8 +153,8 @@
 
     <div class="card o-hidden border-0 shadow-lg mt-5 ">
 
-        <div class="container">
-            <div class="table-wrapper table-responsive">
+        <div class="container mb-3">
+            <div class="table-wrapper table-responsive ">
                 <div class="table-title border rounded">
                     <div class="row">
                         <div class="col-sm-6">
@@ -163,7 +163,7 @@
                         <div class="col-md-6">
                             {% if request.user.is_staff or request.user.is_superuser  %}
 
-                            <a href="{% url 'upload_rate_table' %}" class="btn btn-success rounded">
+                            <a href="{% url 'upload_rate_table' %}" class="btn btn-success rounded fw-bold">
                                 <span>Upload Rate Table</span>
                             </a>
                             {%endif%}
@@ -180,11 +180,11 @@
                 {% if no_records %}
                 <p>No records available.</p>
                 {% else %}
-                <table class="table table-striped table-hover rounded table-responsive mb-5"data-toggle="table"
+                <table class="table table-striped table-hover rounded table-responsive mb-5 border-2 border-dark mb-3"data-toggle="table"
                 data-pagination="true"
                 data-auto-refresh="true">
                     <thead>
-                        <tr>
+                        <tr class="border-2 border-dark">
                             <th>User</th>
                             <th>Uploaded On</th>
                             <th>Animal</th>
