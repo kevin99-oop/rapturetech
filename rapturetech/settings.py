@@ -82,6 +82,7 @@ MIDDLEWARE = [
   'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.cache.FetchFromCacheMiddleware',
+    'django.middleware.cache.CacheMiddleware',
 
 
 ]
@@ -208,3 +209,5 @@ CACHES = {
         'LOCATION': 'unique-snowflake',
     }
 }
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+CACHE_CONTROL_MAX_AGE = 31536000  # One year in seconds
