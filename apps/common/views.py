@@ -63,6 +63,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 import threading
 from django.views.decorators.cache import cache_page
+from django.db.models import Sum, Avg, Count, OuterRef, Subquery
 
 # Common Views
 
@@ -1371,26 +1372,124 @@ def get_detail_data(request, location, dpu, society, shift, start_date):
 
     return detail_data
 
-
-@login_required
-def ledger_report(request):
-    # Fetch dynamic values for dropdowns from the database
+# Function to fetch dynamic values for dropdowns
+def fetch_dropdown_values(request):
     dpus_queryset = DPU.objects.filter(user=request.user) if request.user.is_staff or request.user.is_superuser else DPU.objects.filter(dpu_user=request.user.id)
-
-    # Fetch distinct values using values_list
+    
     locations = dpus_queryset.values_list('location', flat=True).distinct()
     dpus = dpus_queryset.values_list('st_id', flat=True).distinct()
     societies = dpus_queryset.values_list('society', flat=True).distinct()
-
-    # Count total locations, dpus, and societies
     total_locations = dpus_queryset.values('location').distinct().count()
     total_dpus = dpus_queryset.count()
     total_societies = dpus_queryset.values('society').distinct().count()
-
-    # Get customer IDs
     user_dpu_ids = dpus_queryset.values_list('st_id', flat=True).distinct()
     customer_ids = list(CustomerList.objects.filter(st_id__in=user_dpu_ids).values_list('cust_id', flat=True).distinct())
     customer_ids.sort()
+    
+    return locations, dpus, societies, total_locations, total_dpus, total_societies, customer_ids
+
+# Function to get ledger summary data
+def get_ledger_summary_data(location, dpu, society, start_id, end_id, start_date, end_date):
+    distinct_cust_ids = DREC.objects.filter(
+        ST_ID__location=location,
+        ST_ID__st_id=dpu,
+        ST_ID__society=society,
+        CUST_ID__gte=start_id,
+        CUST_ID__lte=end_id,
+        RecordingDate__range=[start_date, end_date]
+    ).values_list('CUST_ID', flat=True).distinct()
+
+    summary_data_list = []
+
+    for cust_id in distinct_cust_ids:
+        summary_data = DREC.objects.filter(
+            ST_ID__location=location,
+            ST_ID__st_id=dpu,
+            ST_ID__society=society,
+            CUST_ID=cust_id,
+            RecordingDate__range=[start_date, end_date]
+        ).values(
+            'CUST_ID',
+            'ST_ID__location',
+            'ST_ID__society',
+            'ST_ID__st_id',
+        ).annotate(
+           TotalQT=Round(Sum('QT'), 2),
+            TotalAmount=Round(Sum('Amount'), 2),
+            TotalCAmount=Round(Sum('CAmount'), 2),
+            AvgFAT=Round(Avg('FAT'), 2),
+            AvgSNF=Round(Avg('SNF'), 2),
+            AvgCLR=Round(Avg('CLR'), 2),
+            AvgRATE=Round(Avg('RATE'), 2)
+        ).order_by('CUST_ID').first()
+
+        if summary_data:
+            summary_data['CUST_ID'] = cust_id
+            customer_name = CustomerList.objects.filter(cust_id=cust_id, st_id=dpu).values_list('name', flat=True).first()
+            summary_data['CustomerName'] = customer_name
+            summary_data_list.append(summary_data)
+
+    return summary_data_list
+
+# Function to get ledger detail data
+def get_ledger_detail_data(location, dpu, society, start_id, end_id, start_date, end_date):
+    detail_data = DREC.objects.filter(
+        ST_ID__location=location,
+        ST_ID__st_id=dpu,
+        ST_ID__society=society,
+        CUST_ID__gte=start_id,
+        CUST_ID__lte=end_id,
+        RecordingDate__range=[start_date, end_date]
+    ).select_related('ST_ID').order_by('CUST_ID')
+
+    return detail_data
+
+# Function to get payment summary data
+def get_payment_summary_data(location, dpu, start_date, end_date, start_id, end_id):
+    payment_data = DREC.objects.filter(
+        ST_ID__location=location,
+        ST_ID__st_id=dpu,
+        RecordingDate__range=[start_date, end_date],
+        CUST_ID__range=[start_id, end_id]
+    )
+    payment_summary_data = {
+        'GrandTotalQT': Decimal(payment_data.aggregate(GrandTotalQT=Sum('QT'))['GrandTotalQT'] or 0).quantize(Decimal('0.00')),
+        'GrandTotalAmount': Decimal(payment_data.aggregate(GrandTotalAmount=Sum('Amount'))['GrandTotalAmount'] or 0).quantize(Decimal('0.00')),
+        'CustomerData': [],
+    }
+
+    customer_name_subquery = CustomerList.objects.filter(
+        cust_id=OuterRef('CUST_ID'),
+        st_id=dpu
+    ).values('name')[:1]
+
+    customer_data = payment_data.values('CUST_ID').annotate(
+        NoOfShifts=Count('SHIFT'),
+        TotalQT=Sum('QT'),
+        TotalAmount=Sum('Amount'),
+        TotalCAmount=Sum('CAmount'),
+        AvgFAT=Avg('FAT'),
+        AvgSNF=Avg('SNF'),
+        AvgCLR=Avg('CLR'),
+        AvgRATE=Avg('RATE'),
+        CustomerName=Subquery(customer_name_subquery)
+    ).order_by('CUST_ID')
+
+    payment_summary_data['CustomerData'] = list(customer_data)
+
+    return payment_summary_data
+
+@login_required
+def ledger_report(request):
+    cache_key_prefix = f'ledger_report_{request.user.id}'
+
+    cached_data = cache.get(cache_key_prefix)
+    if cached_data:
+        locations, dpus, societies, total_locations, total_dpus, total_societies, customer_ids = cached_data
+    else:
+        locations, dpus, societies, total_locations, total_dpus, total_societies, customer_ids = fetch_dropdown_values(request)
+        cached_data = (locations, dpus, societies, total_locations, total_dpus, total_societies, customer_ids)
+        cache.set(cache_key_prefix, cached_data, timeout=3600)
 
     context = {
         'locations': locations,
@@ -1402,7 +1501,6 @@ def ledger_report(request):
         'total_societies': total_societies,
     }
 
-    # Handle POST request
     if request.method == 'POST':
         location = request.POST.get('location')
         dpu = request.POST.get('dpu')
@@ -1415,15 +1513,22 @@ def ledger_report(request):
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else None
         end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else None
 
-        # Format dates to 'ddmmyy' format
         start_date_formatted = start_date.strftime('%d-%m-%Y') if start_date else None
         end_date_formatted = end_date.strftime('%d-%m-%Y') if end_date else None
 
-
-
         if all((location, dpu, society, start_id, end_id, start_date, end_date)):
-            summary_data = get_ledger_summary_data(location, dpu, society, start_id, end_id, start_date, end_date)
-            detail_data = get_ledger_detail_data(location, dpu, society, start_id, end_id, start_date, end_date)
+            cache_key = f'{cache_key_prefix}_{location}_{dpu}_{society}_{start_id}_{end_id}_{start_date}_{end_date}'
+
+            summary_data = cache.get(cache_key)
+            detail_data = cache.get(f'{cache_key}_detail')
+
+            if summary_data is None:
+                summary_data = get_ledger_summary_data(location, dpu, society, start_id, end_id, start_date, end_date)
+                cache.set(cache_key, summary_data, timeout=300)
+
+            if detail_data is None:
+                detail_data = get_ledger_detail_data(location, dpu, society, start_id, end_id, start_date, end_date)
+                cache.set(f'{cache_key}_detail', detail_data, timeout=300)
         else:
             summary_data = []
             detail_data = []
@@ -1444,109 +1549,3 @@ def ledger_report(request):
         })
 
     return render(request, 'common/ledger_report.html', context)
-
-
-
-def get_ledger_summary_data(location, dpu, society, start_id, end_id, start_date, end_date):
-    # Get distinct customer IDs within the specified range
-    distinct_cust_ids = DREC.objects.filter(
-        ST_ID__location=location,
-        ST_ID__st_id=dpu,
-        ST_ID__society=society,
-        CUST_ID__gte=start_id,
-        CUST_ID__lte=end_id,
-        RecordingDate__gte=start_date,
-        RecordingDate__lte=end_date
-    ).values_list('CUST_ID', flat=True).distinct()
-
-    summary_data_list = []
-
-    for cust_id in distinct_cust_ids:
-        # Using aggregates to get summary data for each CUST_ID
-        summary_data = DREC.objects.filter(
-            ST_ID__location=location,
-            ST_ID__st_id=dpu,
-            ST_ID__society=society,
-            CUST_ID=cust_id,
-            RecordingDate__gte=start_date,
-            RecordingDate__lte=end_date
-        ).values(
-            'CUST_ID',
-            'ST_ID__location',  # Include location in values
-            'ST_ID__society',   # Include society in values
-            'ST_ID__st_id',     # Include st_id in values
-        ).annotate(
-            TotalQT=Round(Sum('QT'), 2),  # Round to 2 decimal places
-            TotalAmount=Round(Sum('Amount'), 2),  # Round to 2 decimal places
-            TotalCAmount=Round(Sum('CAmount'), 2),  # Round to 2 decimal places
-
-            AvgFAT=Round(Avg('FAT'), 2),  # Round to 2 decimal places
-            AvgSNF=Round(Avg('SNF'), 2),  # Round to 2 decimal places
-            AvgCLR=Round(Avg('CLR'), 2),  # Round to 2 decimal places
-            AvgRATE=Round(Avg('RATE'), 2), # Round to 2 decimal places
-        ).order_by('CUST_ID').first()
-
-        if summary_data:
-            # If summary_data is not None, add the cust_id to the summary_data dictionary
-            summary_data['CUST_ID'] = cust_id
-            
-            # Add customer name to the summary_data
-            customer_name = CustomerList.objects.filter(cust_id=cust_id, st_id=dpu).values_list('name', flat=True).first()
-            summary_data['CustomerName'] = customer_name
-
-            # Append the summary_data to the list
-            summary_data_list.append(summary_data)
-
-    return summary_data_list
-
-def get_ledger_detail_data(location, dpu, society, start_id, end_id, start_date, end_date):
-    # Query detailed data with select_related and order by CUST_ID
-    detail_data = DREC.objects.filter(
-        ST_ID__location=location,
-        ST_ID__st_id=dpu,
-        ST_ID__society=society,
-        CUST_ID__gte=start_id,
-        CUST_ID__lte=end_id,
-        RecordingDate__gte=start_date,
-        RecordingDate__lte=end_date
-    ).select_related('ST_ID').order_by('CUST_ID')
-
-    return detail_data
-
-from django.db.models import OuterRef, Subquery
-
-def get_payment_summary_data(location, dpu, start_date, end_date, start_id, end_id):
-    payment_data = DREC.objects.filter(
-        ST_ID__location=location,
-        ST_ID__st_id=dpu,
-        RecordingDate__range=[start_date, end_date],
-        CUST_ID__range=[start_id, end_id]
-    )
-    payment_summary_data = {
-        'GrandTotalQT': Decimal(payment_data.aggregate(GrandTotalQT=Sum('QT'))['GrandTotalQT'] or 0).quantize(Decimal('0.00')),
-        'GrandTotalAmount': Decimal(payment_data.aggregate(GrandTotalAmount=Sum('Amount'))['GrandTotalAmount'] or 0).quantize(Decimal('0.00')),
-        'CustomerData': [],
-    }
-
-    # Subquery to fetch customer name based on CUST_ID and ST_ID
-    customer_name_subquery = CustomerList.objects.filter(
-        cust_id=OuterRef('CUST_ID'),
-        st_id=dpu
-    ).values('name')[:1]
-
-    # Get individual customer data with customer name
-    customer_data = payment_data.values('CUST_ID').annotate(
-        NoOfShifts=Count('SHIFT'),
-        TotalQT=Round(Sum('QT'), 2),  # Round to 2 decimal places
-        TotalAmount=Round(Sum('Amount'), 2),  # Round to 2 decimal places
-        TotalCAmount=Round(Sum('CAmount'), 2),  # Round to 2 decimal places
-        AvgFAT=Round(Avg('FAT'), 2),  # Round to 2 decimal places
-        AvgSNF=Round(Avg('SNF'), 2),  # Round to 2 decimal places
-        AvgCLR=Round(Avg('CLR'), 2),  # Round to 2 decimal places
-        AvgRATE=Round(Avg('RATE'), 2), # Round to 2 decimal places
-        CustomerName=Subquery(customer_name_subquery)
-    ).order_by('CUST_ID')
-
-    payment_summary_data['CustomerData'] = list(customer_data)
-
-    return payment_summary_data
