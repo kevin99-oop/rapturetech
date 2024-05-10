@@ -131,6 +131,8 @@ def super_dashboard(request):
     # Logic for user dashboard
     return render(request, 'common/super_admin/super_dashboard.html')
 
+
+@method_decorator([login_required, ensure_csrf_cookie], name='dispatch')
 class DashboardView(TemplateView):
     template_name = 'example.html'
     paginate_by = 10
@@ -138,11 +140,14 @@ class DashboardView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         start_time = time.time()
-        context = self.compute_data(request)
+        context = cache.get('dashboard_data')
+        if not context:
+            context = self.compute_data(request)
+            cache.set('dashboard_data', context, timeout=self.refresh_interval)
         end_time = time.time()
         print("Execution time:", end_time - start_time, "seconds")
         return render(request, self.template_name, context)
-    
+
     def update_data_periodically(self):
         while True:
             context = self.compute_data(None)
@@ -179,7 +184,7 @@ class DashboardView(TemplateView):
             recording_dates = self.get_recording_dates(request.user.id)
 
             cow_summary_data, avg_fat_cow, avg_snf_cow, avg_clr_cow, avg_water_cow, total_ltr_cow, total_amt_cow, total_cust_cow = self.prepare_and_calculate_summary_data(drec_data, active_dpu_list, 'C')
-            
+
             buffalo_summary_data, avg_fat_buffalo, avg_snf_buffalo, avg_clr_buffalo, avg_water_buffalo, total_ltr_buffalo, total_amt_buffalo, total_cust_buffalo = self.prepare_and_calculate_summary_data(drec_data, active_dpu_list, 'B')
 
             live_data = {
@@ -253,7 +258,7 @@ class DashboardView(TemplateView):
 
     def get_recording_dates(self, user_id):
         return DREC.objects.filter(ST_ID__user=user_id).values_list('RecordingDate', flat=True).distinct()
-    
+
     def prepare_and_calculate_summary_data(self, drec_data, active_dpu_list, m_type):
         filtered_records = [record for record in drec_data if record.MType == m_type]
         summary_data = self.prepare_summary_data(filtered_records, active_dpu_list)
@@ -319,6 +324,8 @@ class DashboardView(TemplateView):
         total_amt = round(total_amt, 2)
 
         return avg_fat, avg_snf, avg_clr, avg_water, total_ltr, total_amt, total_cust
+
+
 
 
 class FetchDRECDataView(View):
