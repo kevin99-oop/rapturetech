@@ -42,6 +42,7 @@ DEFAULT_APPS = [
     'apps',
     'rest_framework',
     'rest_framework.authtoken', 
+    
 
 ]
 
@@ -191,10 +192,10 @@ AUTHENTICATION_BACKENDS = [
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 # Email settings
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'kevinpandya18@gnu.ac.in'
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587  # Use the appropriate port for your SMTP server
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'kevinpandya18@gnu.ac.in'
 EMAIL_HOST_PASSWORD = 'JACK@99kevin281099'
-

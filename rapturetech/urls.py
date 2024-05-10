@@ -11,7 +11,9 @@ from apps.common.views import (
     shift_report,ledger_report ,UserRegistrationView, UserLoginView, add_dpu, active_dpu,CustomLoginView,custom_logout,
     DRECViewSet, NtpDatetimeView, dpudetails, edit_dpu,upload_customer_csv,download_latest_csv,
     get_cid_range,get_cust_info,customer_list,config_api,download_config_by_st_id,
-    upload_rate_table,rate_table_list,download_rate_table,lastratedate_api,ratesitem_api,get_dpus_by_location,get_societies_by_dpu,FetchDRECDataView,custom_404_page,health
+    upload_rate_table,rate_table_list,download_rate_table,lastratedate_api,ratesitem_api,get_dpus_by_location,get_societies_by_dpu,FetchDRECDataView,custom_404_page,health,admin_question_view,update_question_view,
+    ask_question_view,question_history_view
+
     )
 from django.contrib.auth import views as auth_views
 from rest_framework.authtoken.views import obtain_auth_token
@@ -118,7 +120,16 @@ urlpatterns = [
     path('fetch_drec_data/', FetchDRECDataView.as_view(), name='fetch_drec_data'),
     path('<path:not_found>/', custom_404_page, name='custom_404_page'),
     path('health/', health, name='health'),
+    
+    path('admin-question', admin_question_view,name='admin-question'),
+    path('update-question/<int:pk>', update_question_view,name='update-question'),
+    
+    
+    path('ask-question', ask_question_view,name='ask-question'),
+    path('question-history', question_history_view,name='question-history'),
 
+
+    
 ]
 
 handler404 = custom_404_page

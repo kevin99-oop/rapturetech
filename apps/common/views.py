@@ -649,29 +649,32 @@ class NtpDatetimeView(View):
         return JsonResponse(response_data)
 
 def dpudetails(request, dpuid):
+    # Fetch DPU object
     dpu = get_object_or_404(DPU, st_id=dpuid)
-    drecs = dpu.drecs.all()  # Use the correct related name
-    context = {
-        'dpu': dpu,
-        'drecs': drecs,
-    }
- # Fetch DPU based on dpu_id
-    dpu = DPU.objects.get(st_id=dpuid)
-    # Fetch customer names for the specific DPU
-    customer_list = CustomerList.objects.filter(st_id=dpuid)
-    # Fetch DREC entries for the specific DPU
-    drecs = DREC.objects.filter(ST_ID=dpu)
-    dpu = get_object_or_404(DPU, st_id=dpuid)
-    context = {
-        'dpu': dpu,
-        'drecs': drecs,
-    }
 
+    # Fetch customer list for the specific DPU
+    customer_list = CustomerList.objects.filter(st_id=dpuid)
+
+    # Fetch DREC entries related to the specific DPU
+    drecs = DREC.objects.filter(ST_ID=dpu)
+
+    # Paginate the drecs queryset
+    paginator = Paginator(drecs,1000)  # Adjust the page size as needed
+    page = request.GET.get('page')
+    try:
+        drecs = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        drecs = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        drecs = paginator.page(paginator.num_pages)
+
+    # Render the template with the fetched data
     context = {
         'dpu': dpu,
         'customer_list': customer_list,
         'drecs': drecs,
-
     }
     return render(request, 'common/dpudetails.html', context)
 
@@ -827,7 +830,7 @@ def process_csv_content(user, st_id, csv_lines):
 @login_required
 def customer_list(request, st_id):
     # Fetch the customer list for the given st_id
-    customer_list = CustomerList.objects.filter(st_id=st_id)
+    customer_list = list(CustomerList.objects.filter(st_id=st_id).values())
 
     # Pass the customer_list to the template
     context = {'customer_list': customer_list, 'st_id': st_id}
@@ -1375,26 +1378,23 @@ def get_detail_data(request, location, dpu, society, shift, start_date):
     return detail_data
 
 from django.db.models import Count, Avg, Sum, OuterRef, Subquery
+from django.utils.timezone import make_aware
 
 @login_required
 def ledger_report(request):
-    # Fetch dynamic values for dropdowns from the database
     dpus_queryset = DPU.objects.filter(user=request.user) if request.user.is_staff or request.user.is_superuser else DPU.objects.filter(dpu_user=request.user.id)
 
-    # Fetch distinct values using values_list
     locations = dpus_queryset.values_list('location', flat=True).distinct()
     dpus = dpus_queryset.values_list('st_id', flat=True).distinct()
     societies = dpus_queryset.values_list('society', flat=True).distinct()
 
-    # Count total locations, dpus, and societies
     total_locations = dpus_queryset.values('location').distinct().count()
     total_dpus = dpus_queryset.count()
     total_societies = dpus_queryset.values('society').distinct().count()
 
-    # Get customer IDs
     user_dpu_ids = dpus_queryset.values_list('st_id', flat=True).distinct()
-    customer_ids = list(CustomerList.objects.filter(st_id__in=user_dpu_ids).values_list('cust_id', flat=True).distinct())
-    customer_ids.sort()
+    customer_ids = CustomerList.objects.filter(st_id__in=user_dpu_ids).values_list('cust_id', flat=True).distinct()
+    customer_ids = sorted(customer_ids)
 
     context = {
         'locations': locations,
@@ -1406,7 +1406,6 @@ def ledger_report(request):
         'total_societies': total_societies,
     }
 
-    # Handle POST request
     if request.method == 'POST':
         location = request.POST.get('location')
         dpu = request.POST.get('dpu')
@@ -1416,10 +1415,9 @@ def ledger_report(request):
         start_date_str = request.POST.get('start_date')
         end_date_str = request.POST.get('end_date')
 
-        start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else None
-        end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else None
+        start_date = make_aware(datetime.strptime(start_date_str, '%Y-%m-%d')) if start_date_str else None
+        end_date = make_aware(datetime.strptime(end_date_str, '%Y-%m-%d')) if end_date_str else None
 
-        # Format dates to 'ddmmyy' format
         start_date_formatted = start_date.strftime('%d-%m-%Y') if start_date else None
         end_date_formatted = end_date.strftime('%d-%m-%Y') if end_date else None
 
@@ -1447,9 +1445,7 @@ def ledger_report(request):
 
     return render(request, 'common/ledger_report.html', context)
 
-
 def get_ledger_summary_data(location, dpu, society, start_id, end_id, start_date, end_date):
-    # Get distinct customer IDs within the specified range
     distinct_cust_ids = DREC.objects.filter(
         ST_ID__location=location,
         ST_ID__st_id=dpu,
@@ -1461,7 +1457,6 @@ def get_ledger_summary_data(location, dpu, society, start_id, end_id, start_date
     summary_data_list = []
 
     for cust_id in distinct_cust_ids:
-        # Using aggregates to get summary data for each CUST_ID
         summary_data = DREC.objects.filter(
             ST_ID__location=location,
             ST_ID__st_id=dpu,
@@ -1470,35 +1465,28 @@ def get_ledger_summary_data(location, dpu, society, start_id, end_id, start_date
             RecordingDate__range=[start_date, end_date]
         ).values(
             'CUST_ID',
-            'ST_ID__location',  # Include location in values
-            'ST_ID__society',   # Include society in values
-            'ST_ID__st_id',     # Include st_id in values
+            'ST_ID__location',
+            'ST_ID__society',
+            'ST_ID__st_id',
         ).annotate(
-            TotalQT=Round(Sum('QT'), 2),  # Round to 2 decimal places
-            TotalAmount=Round(Sum('Amount'), 2),  # Round to 2 decimal places
-            TotalCAmount=Round(Sum('CAmount'), 2),  # Round to 2 decimal places
-            AvgFAT=Round(Avg('FAT'), 2),  # Round to 2 decimal places
-            AvgSNF=Round(Avg('SNF'), 2),  # Round to 2 decimal places
-            AvgCLR=Round(Avg('CLR'), 2),  # Round to 2 decimal places
-            AvgRATE=Round(Avg('RATE'), 2) # Round to 2 decimal places
+            TotalQT=Round(Sum('QT'), 2),
+            TotalAmount=Round(Sum('Amount'), 2),
+            TotalCAmount=Round(Sum('CAmount'), 2),
+            AvgFAT=Round(Avg('FAT'), 2),
+            AvgSNF=Round(Avg('SNF'), 2),
+            AvgCLR=Round(Avg('CLR'), 2),
+            AvgRATE=Round(Avg('RATE'), 2)
         ).order_by('CUST_ID').first()
 
         if summary_data:
-            # If summary_data is not None, add the cust_id to the summary_data dictionary
             summary_data['CUST_ID'] = cust_id
-            
-            # Add customer name to the summary_data
             customer_name = CustomerList.objects.filter(cust_id=cust_id, st_id=dpu).values_list('name', flat=True).first()
             summary_data['CustomerName'] = customer_name
-
-            # Append the summary_data to the list
             summary_data_list.append(summary_data)
 
     return summary_data_list
 
-
 def get_ledger_detail_data(location, dpu, society, start_id, end_id, start_date, end_date):
-    # Query detailed data with select_related and order by CUST_ID
     detail_data = DREC.objects.filter(
         ST_ID__location=location,
         ST_ID__st_id=dpu,
@@ -1509,7 +1497,6 @@ def get_ledger_detail_data(location, dpu, society, start_id, end_id, start_date,
 
     return detail_data
 
-
 def get_payment_summary_data(location, dpu, start_date, end_date, start_id, end_id):
     payment_data = DREC.objects.filter(
         ST_ID__location=location,
@@ -1518,7 +1505,6 @@ def get_payment_summary_data(location, dpu, start_date, end_date, start_id, end_
         CUST_ID__range=[start_id, end_id]
     )
 
-    # Get aggregate data
     payment_summary_data = payment_data.aggregate(
         GrandTotalQT=Sum('QT'),
         GrandTotalAmount=Sum('Amount')
@@ -1527,7 +1513,6 @@ def get_payment_summary_data(location, dpu, start_date, end_date, start_id, end_
     grand_total_qt = Decimal(payment_summary_data['GrandTotalQT'] or 0).quantize(Decimal('0.00'))
     grand_total_amount = Decimal(payment_summary_data['GrandTotalAmount'] or 0).quantize(Decimal('0.00'))
 
-    # Get individual customer data with customer name
     customer_data = payment_data.values('CUST_ID').annotate(
         NoOfShifts=Count('SHIFT'),
         TotalQT=Round(Sum('QT'), 2),
@@ -1547,3 +1532,104 @@ def get_payment_summary_data(location, dpu, start_date, end_date, start_id, end_
     }
 
     return payment_summary_data
+
+
+from . import models
+from . import forms
+from django.core.mail import send_mail
+from django.conf import settings
+@login_required
+def ask_question_view(request):
+    if request.method == 'POST':
+        questionForm = forms.QuestionForm(request.POST)
+        if questionForm.is_valid():
+            question = questionForm.save(commit=False)
+            question.user = request.user
+            dpu_obj = models.DPU.objects.get(mobile_number=request.user.username)
+            question.username = request.user.username
+            question.st_id = dpu_obj.st_id
+            question.save()
+            
+            return redirect('question-history')
+    else:
+        questionForm = forms.QuestionForm()
+
+    return render(request, 'common/ask_question.html', {'questionForm': questionForm})
+
+
+@login_required
+def question_history_view(request):
+    questions = models.Questions.objects.filter(user=request.user)
+    return render(request, 'common/question_history.html', {'questions': questions})
+
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from . import models
+from django.shortcuts import render
+from . import models
+@login_required
+def admin_question_view(request):
+    # Check if the user is superuser or staff
+    if request.user.is_staff and not request.user.is_superuser:
+        print("inside")
+        try:
+            print("inside12")
+            
+            user_st_ids = models.DPU.objects.filter(user=request.user).values_list('st_id', flat=True)
+            questions = models.Questions.objects.filter(st_id__in=user_st_ids).order_by('-asked_date')
+            print(user_st_ids, "11")
+
+        except AttributeError:
+            # If user's DPU information is not available, return an empty list of questions
+            questions = []
+    elif request.user.is_superuser:
+        # Retrieve all questions
+        questions = models.Questions.objects.all().order_by('-asked_date')
+    else:
+        # If the user is not staff or superuser, redirect to some other page or show an error
+        return HttpResponse("You are not authorized to view this page.")
+
+    # Fetch DPU information for each question based on the mobile number
+    question_info = []
+    for question in questions:
+        try:
+            dpu_instance = DPU.objects.get(mobile_number=question.username)
+            question_info.append((question, dpu_instance.st_id))
+        except DPU.DoesNotExist:
+            question_info.append((question, 'N/A'))
+
+    # Debug information
+    # print("User:", request.user)
+    # print("Questions count:", len(question_info))
+    # print("Question info:", question_info)
+    
+    context = {'question_info': question_info}
+    return render(request, 'common/admin_question.html', context)
+
+
+
+
+@login_required
+def update_question_view(request, pk):
+    if request.user.is_staff or request.user.is_superuser:
+        try:
+            question = models.Questions.objects.get(id=pk)
+            questionForm = forms.QuestionForm(instance=question)
+            
+            if request.method == 'POST':
+                questionForm = forms.QuestionForm(request.POST, instance=question)
+                
+                if questionForm.is_valid():
+                    admin_comment = request.POST.get('admin_comment')
+                    question = questionForm.save(commit=False)
+                    question.admin_comment = admin_comment
+                    question.save()
+                    return redirect('admin-question')
+            return render(request, 'common/update_question.html', {'questionForm': questionForm})
+        except models.Questions.DoesNotExist:
+            # Handle case where question does not exist
+            return HttpResponse("Question does not exist")
+    else:
+        return redirect('question-history')
+

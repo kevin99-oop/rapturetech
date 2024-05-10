@@ -147,14 +147,19 @@ li.success {
                         </div>
                     </div>
                 </div>
-            
-                <form method="post" action="{% url 'add_dpu' %}" class="dpu-form">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <div class="d-grid gap-2 col-6 mx-auto">
-                        <button type="submit" class="btn btn-success align-items-center center mt-4 ">Submit</button>
+                <div class="row">
+                    <div class="col-12 ">
+                        <form method="post" action="{% url 'add_dpu' %}" class="dpu-form" autocomplete="on">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                            <div class="d-grid gap-2 col-6 mx-auto">
+                                <button type="submit" class="btn btn-success align-items-center center mt-4 ">Submit</button>
+                            </div>
+                        </form>                        
                     </div>
-                </form>
+                   
+                </div>
+                
 
             </div>
         </div>

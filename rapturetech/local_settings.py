@@ -9,12 +9,27 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Database settings for the project
-DATABASES = {
+
+#for dev we need to set env variable 
+#for production (export ENV=prod)
+print("Current Env:- ",os.getenv("ENV","dev"))
+if os.getenv("ENV","dev")=="dev":
+    print("dev database selected")
+    DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',  # Database engine (SQLite in this case)
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),  # Database file path
     }
 }
+else:
+    print("Production database selected")
+    DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',  # Database engine (SQLite in this case)
+        'NAME': os.path.join(BASE_DIR, 'production.sqlite3'),  # Database file path
+    }
+}
+
 
 # DATABASES = {
 #    'default': {
