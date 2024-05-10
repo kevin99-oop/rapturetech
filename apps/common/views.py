@@ -1,7 +1,12 @@
 # Standard Library Imports
-import csv
-import logging
 import os
+import csv
+import time
+import string
+import random
+import logging
+import threading
+
 from datetime import datetime, date
 from collections import defaultdict, Counter
 from django.http import HttpResponseRedirect, JsonResponse, Http404, HttpResponse
@@ -14,13 +19,10 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView, CreateView, View
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.utils.decorators import method_decorator
-from django.utils import timezone
 from django.db.models import Count, Sum, Avg
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import connection
 from django.db.models.functions import Round
-import string
-import random
 
 from django.contrib.auth.views import LoginView
 # Django Imports
@@ -52,16 +54,10 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.core.paginator import Paginator
 from decimal import Decimal
 from functools import lru_cache
-import time
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from collections import defaultdict, Counter
-import time
-import concurrent.futures
 from django.core.cache import cache
-from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
-import threading
 from django.views.decorators.cache import cache_page
 
 # Common Views
@@ -131,12 +127,14 @@ def super_dashboard(request):
     # Logic for user dashboard
     return render(request, 'common/super_admin/super_dashboard.html')
 
-
-@method_decorator([login_required, ensure_csrf_cookie], name='dispatch')
 class DashboardView(TemplateView):
     template_name = 'example.html'
     paginate_by = 10
     refresh_interval = 5  # Refresh interval in seconds
+
+    @method_decorator([login_required, ensure_csrf_cookie])
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         start_time = time.time()
@@ -146,7 +144,7 @@ class DashboardView(TemplateView):
             cache.set('dashboard_data', context, timeout=self.refresh_interval)
         end_time = time.time()
         print("Execution time:", end_time - start_time, "seconds")
-        return render(request, self.template_name, context)
+        return self.render_to_response(context)
 
     def update_data_periodically(self):
         while True:
@@ -219,10 +217,12 @@ class DashboardView(TemplateView):
             }
             return live_data
 
+    @lru_cache(maxsize=None)
     def get_active_dpu_list(self, user):
         queryset = DPU.objects.filter(user=user) if (user.is_staff or user.is_superuser) else DPU.objects.filter(dpu_user=user.id)
         return queryset.select_related('user')
 
+    @lru_cache(maxsize=None)
     def get_all_drec_data(self, user):
         drec_filter = {'ST_ID__user': user} if (user.is_staff or user.is_superuser) else {'ST_ID__dpu_user': user.id}
         return DREC.objects.filter(**drec_filter).order_by('-created_at').select_related('ST_ID__user')
@@ -301,6 +301,7 @@ class DashboardView(TemplateView):
 
         return summary_data
 
+    
     def calculate_averages(self, records):
         if not records:
             return 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0
