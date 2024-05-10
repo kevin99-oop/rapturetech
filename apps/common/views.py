@@ -184,6 +184,7 @@ class DashboardView(TemplateView):
 
         if drec_data is not None:
             drec_data_cust_ids = drec_data.values_list('CUST_ID', flat=True).distinct()
+            drec_data = drec_data[:500]
 
             summary_data = self.prepare_summary_data(drec_data, active_dpu_list)
             customer_list = self.get_customer_list(drec_data_cust_ids)
