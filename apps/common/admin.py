@@ -1,5 +1,5 @@
 from django.contrib import admin
-from apps.common.models import DREC,DPU,Customer,Config,RateTable,CustomerList
+from apps.common.models import DREC,DPU,Customer,Config,RateTable,CustomerList,Questions
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
@@ -128,3 +128,9 @@ class RateTableAdmin(admin.ModelAdmin):
             queryset = queryset.filter(user_id=user_id)
 
         return queryset
+
+
+
+@admin.register(Questions)
+class QuestionAdmin(admin.ModelAdmin):
+    list_display = ['id', 'description', 'admin_comment', 'asked_date']

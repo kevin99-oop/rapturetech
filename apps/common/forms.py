@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from apps.userprofile.models import Profile
 from django.forms import ModelForm
 from django import forms
-from apps.common.models import DPU, Customer
+from apps.common.models import DPU, Customer,Questions
 
 # SignUpForm is a custom form that extends UserCreationForm for user registration
 class SignUpForm(UserCreationForm):
@@ -104,6 +104,14 @@ class DPUForm(forms.ModelForm):
     class Meta:
         model = DPU
         fields = ['location', 'st_id', 'society', 'mobile_number', 'owner', 'status']
+        widgets = {
+            'location': forms.TextInput(attrs={'placeholder': 'Enter Location'}),
+            'st_id': forms.TextInput(attrs={'placeholder': 'Enter Station ID'}),
+            'society': forms.TextInput(attrs={'placeholder': 'Enter Society'}),
+            'mobile_number': forms.TextInput(attrs={'placeholder': 'Enter Mobile Number'}),
+            'owner': forms.TextInput(attrs={'placeholder': 'Enter Owner'}),
+        }
+
 
 # UploadCSVForm is a form for handling CSV file uploads for the Customer model
 class UploadCSVForm(forms.ModelForm):
@@ -138,3 +146,7 @@ class UploadRateTableForm(forms.ModelForm):
 
         return csv_file
 
+class QuestionForm(forms.ModelForm):
+    class Meta:
+        model = Questions
+        fields = ['description']

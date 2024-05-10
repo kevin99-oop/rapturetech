@@ -199,6 +199,7 @@
               <input type="text" id="dateInput" class="form-control fw-bold text-danger" readonly>
             </div>
           </li>
+          
           <li class="nav-item">
            
             <div class="nav-link text-dark" id="google_translate_element">
@@ -347,13 +348,30 @@
 
 
           <li class="nav-item nav-category">help</li>
+          {% if request.user.is_staff or request.user.is_superuser  %}
           <li class="nav-item">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="{% url 'admin-question' %}">
               <i class="menu-icon mdi mdi-message-text
               "></i>
               <span class="menu-title">Chat</span>
             </a>
           </li>
+          {%endif%}
+          {% if not request.user.is_staff and not request.user.is_superuser %}
+          <li class="nav-item"> <a class="nav-link" href="{% url 'ask-question' %}"> <i class="menu-icon mdi mdi-message-text
+            "></i>
+            <span class="menu-title">Support</span></a></li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'question-history' %}">
+                  <i class="menu-icon mdi mdi-message-text"></i>
+                  <span class="menu-title">Chat History</span>
+                  {% if has_unread_messages %}
+                      <span class="badge badge-danger">New</span>
+                  {% endif %}
+              </a>
+          </li>
+          
+          {%endif%}
       
         </ul>
       </nav>

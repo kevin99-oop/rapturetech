@@ -168,7 +168,7 @@
                                             </tr>
                                             {% endfor %}
                     
-                                            <tr class="align-items-center text-align-center  border-2  border-dark">
+                                            <tr class="align-items-center text-align-center  border-2  border-dark bg-light">
                                                 <td colspan="5">Cow Summary</td>
                                                 <td>{{ avg_fat_cow }}</td>
                                                 <td>{{ avg_snf_cow }}</td>
@@ -178,7 +178,8 @@
                                                 <td>₹ {{ total_amt_cow }}</td>
                                                 <td>{{ total_cust_cow }}</td>
                                             </tr>
-                                            <tr class="align-items-center text-align-center border-2 border-dark">
+                                            <tr class="align-items-center text-align-center border-2 border-dark bg-light
+                                            ">
                                                 <td colspan="5">Buffalo Summary</td>
                                                 <td>{{ avg_fat_buffalo }}</td>
                                                 <td>{{ avg_snf_buffalo }}</td>
@@ -207,7 +208,9 @@
                                 <div class="card-body table-responsive card-body rounded">
                                     <table id="live_table" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 border-2 border-dark "data-toggle="table"
                                     data-pagination="false"
-                                    data-auto-refresh="true">
+                                    data-auto-refresh="true"
+                                    data-side-pagination="server"
+                                    >
                                         <!-- Table header -->
                                         <thead class="table-title text-white text-center rounded border-white">
                                             <tr>
@@ -326,24 +329,26 @@
                             <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack border-2 border-dark"
                                    data-toggle="table"
                                    data-pagination="false"
-                                   data-auto-refresh="true">
+                                   data-auto-refresh="true"
+                                   data-sort-order="desc"
+                                 >
                                 <thead class="table-title text-white text-center rounded border-white">
                                 <tr>
                                     <th>St ID</th>
-                                    <th>Location</th>
-                                    <th>Society</th>
-                                    <th>Date</th>
-                                    <th>Time</th>
-                                    <th>Shift</th>
-                                    <th>Cust. Id</th>
-                                    <th>Name</th>
-                                    <th>FAT</th>
-                                    <th>SNF</th>
-                                    <th>CLR</th>
-                                    <th>Water</th>
-                                    <th>Ltr.Qty</th>
-                                    <th>Amt</th>
-                                    <th>Cumu. Amt.</th>
+                                    <th >Location</th>
+                                    <th >Society</th>
+                                    <th data-sortable="true">Date</th>
+                                    <th data-sortable="true">Time</th>
+                                    <th data-sortable="true">Shift</th>
+                                    <th data-sortable="true">Cust. Id</th>
+                                    <th data-sortable="true">Name</th>
+                                    <th data-sortable="true">FAT</th>
+                                    <th data-sortable="true">SNF</th>
+                                    <th data-sortable="true">CLR</th>
+                                    <th data-sortable="true">Water</th>
+                                    <th data-sortable="true">Ltr.Qty</th>
+                                    <th data-sortable="true">Amt</th>
+                                    <th data-sortable="true">Cumu. Amt.</th>
                                 </tr>
                                 </thead>
                                 <tbody class="text-center fw-bold" id="tableBody">
@@ -377,7 +382,17 @@
                         </div>
                     </div>
                 </div>
+           <div class="container-fluid col-lg-12 mb-lg-0 mb-5 mt-5">
+    <div class="col-lg-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h1>Bar Chart</h1>
+                <canvas id="barChart"></canvas>
                 
+            </div>
+        </div>
+    </div>
+</div>
                 
               </div>
 
@@ -582,8 +597,10 @@
             // Refresh the content every 5 seconds
             setInterval(refreshTable, 5000);
         });
+
+        
     </script>
-    
-</div>
+  
+    </div>
 
 {% endblock content %}

@@ -12,6 +12,8 @@ from django.utils.crypto import get_random_string
 from django.contrib.auth.hashers import make_password
 import string
 import random
+from django.utils import timezone
+from datetime import timedelta
 
 
 # Signal to create a Token for a user upon registration
@@ -172,4 +174,26 @@ class RateTable(models.Model):
     def csv_file_path(self):
         return self.csv_file.path if self.csv_file else ''
     
+class Questions(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Linking with the User model
+    description = models.CharField(max_length=500)
+    admin_comment = models.CharField(max_length=200, default='Nothing')
+    asked_date = models.DateField(auto_now=True)
+    username = models.CharField(max_length=50, null=True, blank=True)  # Add username field
+    st_id = models.CharField(max_length=50, null=True, blank=True)  # Add st_id field
 
+    @classmethod
+    def delete_old_records(cls):
+        thirty_days_ago = timezone.now() - timedelta(days=30)
+        cls.objects.filter(asked_date__lt=thirty_days_ago).delete()
+
+@receiver(post_save, sender=Questions)
+def set_st_id(sender, instance, created, **kwargs):
+    if created:
+        try:
+            # Get the associated DPU instance based on matching username and mobile_number
+            dpu_instance = DPU.objects.get(user__username=instance.username, mobile_number=instance.user_id)
+            instance.st_id = dpu_instance.st_id
+            instance.save()
+        except DPU.DoesNotExist:
+            pass
