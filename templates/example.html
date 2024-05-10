@@ -1,239 +1,357 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block content %}
-<!-- Add these CDN links to your base HTML file -->
-
-
 <div class="container-fluid py-4">
-    <div class="col-sm-12">
-        
-        <div class="home-tab">
-            <nav>
-                <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                    <ul class="nav nav-tabs" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">
-                                Live Data
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">
-                                Top 10 Records
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
-                                Date Filter
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-            <div class="tab-content" id="nav-tabContent">
-                <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
-                    <div class="row"> 
-                        <div class="col-xl-3 col-sm-3 col-md-3 mb-xl-0 mb-4">
-                            <div class="card">
-                                <div class="card-body p-4">
-                                    <div class="row">
-                                        <div class="col-8">
-                                            <div class="numbers">
-                                                <h5 class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Average Fat</h5>
-                
-                                               
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="home-tab">
+                <nav>
+                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="nav-home-tab" data-bs-toggle="tab"
+                                    data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home"
+                                    aria-selected="true">Live Data</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="nav-profile-tab" data-bs-toggle="tab"
+                                    data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile"
+                                    aria-selected="false">Top 10 Records</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="nav-contact-tab" data-bs-toggle="tab"
+                                    data-bs-target="#nav-contact" type="button" role="tab"
+                                    aria-controls="nav-contact" aria-selected="false">Date Filter</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+                <div class="tab-content" id="nav-tabContent">
+                    <!-- Live Data Content -->
+                    <div class="tab-pane fade show active" id="nav-home" role="tabpanel"
+                        aria-labelledby="nav-home-tab">
+                        <!-- Live Data Card Content -->
+                        <div class="row"> 
+                            <div class="col-xl-3 col-sm-3 col-md-3 mb-xl-0 mb-4">
+                                <div class="card">
+                                    <div class="card-body p-4">
+                                        <div class="row">
+                                            <div class="col-8">
+                                                <div class="numbers">
+                                                    <h5 class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Average Fat</h5>
+                    
+                                                   
+                                                </div>
+                                            </div>
+                                            <div class="col-4 text-end">
+                                                <h5 class="mb-0">
+                                                    <span class="text-danger text-lg font-weight-bolder fw-bold">
+                                                        {{ avg_fat }}
+                                                    </span>
+                                                    </h5>
                                             </div>
                                         </div>
-                                        <div class="col-4 text-end">
-                                            <h5 class="mb-0">
-                                                <span class="text-danger text-lg font-weight-bolder fw-bold">
-                                                    {{ avg_fat }}
-                                                </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-sm-3 col-md-3 mb-xl-0 mb-4">
+                                <div class="card">
+                                    <div class="card-body p-4">
+                                        <div class="row">
+                                            <div class="col-8">
+                                                <div class="numbers">
+                                                    <h5 class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Average SNF</h5>
+                    
+                                                  
+                    
+                                                </div>
+                                            </div>
+                                            <div class="col-4 text-end">
+                                                <h5 class="mb-0">
+                                                    <span class="text-danger text-lg font-weight-bolder fw-bold">{{ avg_snf }}</span>
+                
                                                 </h5>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-xl-3 col-sm-3 col-md-3 mb-xl-0 mb-4">
-                            <div class="card">
-                                <div class="card-body p-4">
-                                    <div class="row">
-                                        <div class="col-8">
-                                            <div class="numbers">
-                                                <h5 class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Average SNF</h5>
-                
-                                              
-                
+                            <div class="col-xl-3 col-sm-3 col-md-3 mb-xl-0 mb-4">
+                                <div class="card">
+                                    <div class="card-body p-4">
+                                        <div class="row">
+                                            <div class="col-8">
+                                                <div class="numbers">
+                                                    <h5 class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Average CLR</h5>
+                    
+                                                  
+                    
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-4 text-end">
-                                            <h5 class="mb-0">
-                                                <span class="text-danger text-lg font-weight-bolder fw-bold">{{ avg_snf }}</span>
-            
-                                            </h5>
+                                            <div class="col-4 text-end">
+                                                <h5 class="mb-0">
+                                                    <span class="text-danger text-lg font-weight-bolder fw-bold">{{ avg_clr }}</span>
+                
+                                                </h5>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-xl-3 col-sm-3 col-md-3 mb-xl-0 mb-4">
-                            <div class="card">
-                                <div class="card-body p-4">
-                                    <div class="row">
-                                        <div class="col-8">
-                                            <div class="numbers">
-                                                <h5 class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Average CLR</h5>
-                
-                                              
-                
+                            <div class="col-xl-3 col-sm-3 col-md-3 mb-xl-0 mb-4">
+                                <div class="card">
+                                    <div class="card-body p-4">
+                                        <div class="row">
+                                            <div class="col-8">
+                                                <div class="numbers">
+                                                    <h5 class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Total Customer</h5>
+                    
+                                                   
+                    
+                                                </div>
+                                            </div>
+                                            <div class="col-4 text-end">
+                                                <h5 class="mb-0">
+                    
+                                                    <span class="text-danger text-lg font-weight-bolder fw-bold">   {{total_customer_count}}                                    </span>
+                                                </h5>
                                             </div>
                                         </div>
-                                        <div class="col-4 text-end">
-                                            <h5 class="mb-0">
-                                                <span class="text-danger text-lg font-weight-bolder fw-bold">{{ avg_clr }}</span>
-            
-                                            </h5>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xl-3 col-sm-3 col-md-3 mb-xl-0 mb-4">
-                            <div class="card">
-                                <div class="card-body p-4">
-                                    <div class="row">
-                                        <div class="col-8">
-                                            <div class="numbers">
-                                                <h5 class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Total Customer</h5>
-                
-                                               
-                
-                                            </div>
-                                        </div>
-                                        <div class="col-4 text-end">
-                                            <h5 class="mb-0">
-                
-                                                <span class="text-danger text-lg font-weight-bolder fw-bold">   {{total_customer_count}}                                    </span>
-                                            </h5>
-                                        </div>
+                                        
                                     </div>
                                     
                                 </div>
-                                
+                            
                             </div>
+                        </div>
+                        <div class="row mt-4" id="divID">
+                            <div class="col-lg-12 mb-lg-0 mb-5">
+                                <div class="card shadow rounded">
+                                    <div class="card-header justify-content-between pb-0 p-3">
+                                        <h6 class="mb-2 fw-bold">Total Summary Record</h6>
+                                    </div>
+                                    <div class="table-responsive card-body rounded">
+                                        <table id="summary_table" class="table align-items-center table-rwd text-center table table-striped table-hover rounded table-responsive w-100 border-2 border-dark "data-toggle="table"
+                                        data-pagination="false"
+                                        data-auto-refresh="true">
+                                            <thead class="text-white text-center rounded table-title border-white">
+                                                <tr>
+                                                    <th>St. Id</th>
+                                                    <th>Location</th>
+                                                    <th>Society</th>
+                                                    <th>Date</th>
+                                                    <th>Shift</th>
+                                                    <th>Avg. FAT</th>
+                                                    <th>Avg. SNF</th>
+                                                    <th>Avg. CLR</th>
+                                                    <th>Avg. Water</th>
+                                                    <th>Total Liter</th>
+                                                    <th>Total Amt.</th>
+                                                    <th>Total Cust.</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="align-items-center text-center fw-bold">
+                                                {% for record in summary_data %}
+                                                <tr class="align-items-center text-align-center">
+                                                    <td><a href="{% url 'dpudetails' dpuid=record.ST_ID__st_id  %}" class="text-dark">{{ record.ST_ID__st_id  }}</a></td>
+                                                    <td>{{ record.ST_ID__location }}</td>
+                                                    <td>{{ record.ST_ID__society }}</td>
+                                                    <td>{{ record.RecordingDate|date:"d-m-Y" }}</td>
+                                                    <td>{{ record.SHIFT }}</td>
+                                                    <td>{{ record.avg_fat }}</td>
+                                                    <td>{{ record.avg_snf }}</td>
+                                                    <td>{{ record.avg_clr }}</td>
+                                                    <td>{{ record.avg_water }}</td>
+                                                    <td>{{ record.total_ltr }} ltr.</td>
+                                                    <td>₹ {{ record.total_amt }}</td>
+                                                    <td>{{ record.total_cust }}</td>
+                                                </tr>
+                                                {% endfor %}
                         
-                        </div>
-                    </div>
-                    <div class="row mt-4" id="divID">
-                        <div class="col-lg-12 mb-lg-0 mb-5">
-                            <div class="card shadow rounded">
-                                <div class="card-header justify-content-between pb-0 p-3">
-                                    <h6 class="mb-2 fw-bold">Total Summary Record</h6>
-                                </div>
-                                <div class="table-responsive card-body rounded">
-                                    <table id="summary_table" class="table align-items-center table-rwd text-center table table-striped table-hover rounded table-responsive w-100 border-2 border-dark "data-toggle="table"
-                                    data-pagination="false"
-                                    data-auto-refresh="true">
-                                        <thead class="text-white text-center rounded table-title border-white">
-                                            <tr>
-                                                <th>St. Id</th>
-                                                <th>Location</th>
-                                                <th>Society</th>
-                                                <th>Date</th>
-                                                <th>Shift</th>
-                                                <th>Avg. FAT</th>
-                                                <th>Avg. SNF</th>
-                                                <th>Avg. CLR</th>
-                                                <th>Avg. Water</th>
-                                                <th>Total Liter</th>
-                                                <th>Total Amt.</th>
-                                                <th>Total Cust.</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="align-items-center text-center fw-bold">
-                                            {% for record in summary_data %}
-                                            <tr class="align-items-center text-align-center">
-                                                <td><a href="{% url 'dpudetails' dpuid=record.ST_ID__st_id  %}" class="text-dark">{{ record.ST_ID__st_id  }}</a></td>
-                                                <td>{{ record.ST_ID__location }}</td>
-                                                <td>{{ record.ST_ID__society }}</td>
-                                                <td>{{ record.RecordingDate|date:"d-m-Y" }}</td>
-                                                <td>{{ record.SHIFT }}</td>
-                                                <td>{{ record.avg_fat }}</td>
-                                                <td>{{ record.avg_snf }}</td>
-                                                <td>{{ record.avg_clr }}</td>
-                                                <td>{{ record.avg_water }}</td>
-                                                <td>{{ record.total_ltr }} ltr.</td>
-                                                <td>₹ {{ record.total_amt }}</td>
-                                                <td>{{ record.total_cust }}</td>
-                                            </tr>
-                                            {% endfor %}
-                    
-                                            <tr class="align-items-center text-align-center  border-2  border-dark bg-light">
-                                                <td colspan="5">Cow Summary</td>
-                                                <td>{{ avg_fat_cow }}</td>
-                                                <td>{{ avg_snf_cow }}</td>
-                                                <td>{{ avg_clr_cow }}</td>
-                                                <td>{{ avg_water_cow }}</td>
-                                                <td>{{ total_ltr_cow }} ltr.</td>
-                                                <td>₹ {{ total_amt_cow }}</td>
-                                                <td>{{ total_cust_cow }}</td>
-                                            </tr>
-                                            <tr class="align-items-center text-align-center border-2 border-dark bg-light
-                                            ">
-                                                <td colspan="5">Buffalo Summary</td>
-                                                <td>{{ avg_fat_buffalo }}</td>
-                                                <td>{{ avg_snf_buffalo }}</td>
-                                                <td>{{ avg_clr_buffalo }}</td>
-                                                <td>{{ avg_water_buffalo }}</td>
-                                                <td>{{ total_ltr_buffalo }} ltr.</td>
-                                                <td>₹ {{ total_amt_buffalo }}</td>
-                                                <td>{{ total_cust_buffalo }}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>    
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Live Records -->
-                    <div class="row mt-4">
-                        <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
-                            <div class="card shadow rounded" id="liveTableContent">
-                                <div class="card-header pb-0 p-3">
-                                    <div class="d-flex justify-content-between">
-                                        <h6 class="mb-2 fw-bold">Live Records</h6>
+                                                <tr class="align-items-center text-align-center  border-2  border-dark bg-light">
+                                                    <td colspan="5">Cow Summary</td>
+                                                    <td>{{ avg_fat_cow }}</td>
+                                                    <td>{{ avg_snf_cow }}</td>
+                                                    <td>{{ avg_clr_cow }}</td>
+                                                    <td>{{ avg_water_cow }}</td>
+                                                    <td>{{ total_ltr_cow }} ltr.</td>
+                                                    <td>₹ {{ total_amt_cow }}</td>
+                                                    <td>{{ total_cust_cow }}</td>
+                                                </tr>
+                                                <tr class="align-items-center text-align-center border-2 border-dark bg-light">
+                                                    <td colspan="5">Buffalo Summary</td>
+                                                    <td>{{ avg_fat_buffalo }}</td>
+                                                    <td>{{ avg_snf_buffalo }}</td>
+                                                    <td>{{ avg_clr_buffalo }}</td>
+                                                    <td>{{ avg_water_buffalo }}</td>
+                                                    <td>{{ total_ltr_buffalo }} ltr.</td>
+                                                    <td>₹ {{ total_amt_buffalo }}</td>
+                                                    <td>{{ total_cust_buffalo }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>    
                                     </div>
                                 </div>
-                                <div class="card-body table-responsive card-body rounded">
-                                    <table id="live_table" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 border-2 border-dark "data-toggle="table"
-                                    data-pagination="false"
-                                    data-auto-refresh="true"
-                                    data-side-pagination="server"
-                                    >
-                                        <!-- Table header -->
+                            </div>
+                        </div>
+                        <!-- Live Records -->
+                        <div class="row mt-4">
+                            <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
+                                <div class="card shadow rounded" id="liveTableContent">
+                                    <div class="card-header pb-0 p-3">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="mb-2 fw-bold">Live Records</h6>
+                                        </div>
+                                    </div>
+                                    <div class="card-body table-responsive card-body rounded">
+                                        <table id="live_table" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 border-2 border-dark "data-toggle="table"
+                                        data-pagination="false"
+                                        data-auto-refresh="true"
+                                        data-side-pagination="server"
+                                        >
+                                            <!-- Table header -->
+                                            <thead class="table-title text-white text-center rounded border-white">
+                                                <tr>
+                                                    <th>St. Id</th>
+                                                    <th>Location</th>
+                                                    <th>Society</th>
+                                                    <th>Date</th>
+                                                    <th>Time</th>
+                                                    <th>Shift</th>
+                                                    <th>Cust. ID</th>
+                                                    <th>Cust. Name</th>
+                                                    <th>FAT</th>
+                                                    <th>SNF</th>
+                                                    <th>CLR</th>
+                                                    <th>Water</th>
+                                                    <th>Liter Qty.</th>
+                                                    <th>Amt.</th>
+                                                    <th>Cum. Amt.</th>
+                                                </tr>
+                                            </thead>
+                                            <!-- Table body -->
+                                            <tbody class="text-center fw-bold" id="tableBody">
+                                                {% for drec in drec_data %}
+                                                <tr>
+                                                    <td>{{ drec.ST_ID.st_id }}</td>
+                                                    <td>{{ drec.ST_ID.location }}</td>
+                                                    <td>{{ drec.ST_ID.society }}</td>
+                                                    <td>{{ drec.RecordingDate|date:"d-m-Y" }}</td>
+                                                    <td>{{ drec.RecordingTime }}</td>
+                                                    <td>{{ drec.SHIFT }}</td>
+                                                    <td>{{ drec.CUST_ID }}</td>
+                                                    <td>
+                                                        {% for customer in customer_list %}
+                                                        {% if customer.cust_id == drec.CUST_ID and customer.st_id == drec.ST_ID.st_id %}
+                                                        {{ customer.name }}
+                                                        {% endif %}
+                                                        {% endfor %}
+                                                    </td>
+                                                    <td>{{ drec.FAT }}</td>
+                                                    <td>{{ drec.SNF }}</td>
+                                                    <td>{{ drec.CLR }}</td>
+                                                    <td>{{ drec.WATER }}</td>
+                                                    <td>{{ drec.QT }} ltr.</td>
+                                                    <td>₹ {{ drec.Amount }}</td>
+                                                    <td>{{ drec.CAmount }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                        <!-- Pagination -->
+                                       <!-- Pagination -->
+                                        <nav aria-label="Page navigation example " class="mt-3">
+                                            <ul class="pagination justify-content-end fw-bold">
+                                                {% if drec_data.has_previous %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page=1" aria-label="First">
+                                                        <span aria-hidden="true">&laquo;</span>
+                                                        <span class="sr-only">First</span>
+                                                    </a>
+                                                </li>
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page={{ drec_data.previous_page_number }}" aria-label="Previous">
+                                                        <span aria-hidden="true">&lsaquo;</span>
+                                                        <span class="sr-only">Previous</span>
+                                                    </a>
+                                                </li>
+                                                {% else %}
+                                                <li class="page-item disabled">
+                                                    <span class="page-link" aria-hidden="true">&laquo;</span>
+                                                </li>
+                                                {% endif %}
+                        
+                                                <li class="page-item {% if drec_data.number == 1 %}active{% endif %}" aria-current="page">
+                                                    <span class="page-link">1</span>
+                                                </li>
+                        
+                                                <li class="page-item"><a class="page-link" href="?page=2">2</a></li>
+                        
+                                                {% if drec_data.has_next %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page={{ drec_data.next_page_number }}" aria-label="Next">
+                                                        <span aria-hidden="true">&rsaquo;</span>
+                                                        <span class="sr-only">Next</span>
+                                                    </a>
+                                                </li>
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page={{ drec_data.paginator.num_pages }}" aria-label="Last">
+                                                        <span aria-hidden="true">&raquo;</span>
+                                                        <span class="sr-only">Last</span>
+                                                    </a>
+                                                </li>
+                                                {% else %}
+                                                <li class="page-item disabled">
+                                                    <span class="page-link" aria-hidden="true">&rsaquo;</span>
+                                                </li>
+                                                {% endif %}
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>                    
+                    </div>
+                    <!-- Top 10 Records Content -->
+                    <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                        <!-- Top 10 Records Table Content -->
+                        <div class="container-fluid col-lg-12 mb-lg-0 mb-5">
+                            <div class="card shadow rounded">
+                                <div class="card-header pb-0 p-3">
+                                    <div class="justify-content-between">
+                                        <h6 class="mb-2 fw-bold">Top 10 Records</h6>
+                                    </div>
+                                </div>
+                                <div class="table-responsive card-body rounded">
+                                    
+                                    <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack border-2 border-dark"
+                                           data-toggle="table"
+                                           data-pagination="false"
+                                           data-auto-refresh="true"
+                                           data-sort-order="desc"
+                                         >
                                         <thead class="table-title text-white text-center rounded border-white">
-                                            <tr>
-                                                <th>St. Id</th>
-                                                <th>Location</th>
-                                                <th>Society</th>
-                                                <th>Date</th>
-                                                <th>Time</th>
-                                                <th>Shift</th>
-                                                <th>Cust. ID</th>
-                                                <th>Cust. Name</th>
-                                                <th>FAT</th>
-                                                <th>SNF</th>
-                                                <th>CLR</th>
-                                                <th>Water</th>
-                                                <th>Liter Qty.</th>
-                                                <th>Amt.</th>
-                                                <th>Cum. Amt.</th>
-                                            </tr>
+                                        <tr>
+                                            <th>St ID</th>
+                                            <th >Location</th>
+                                            <th >Society</th>
+                                            <th data-sortable="true">Date</th>
+                                            <th data-sortable="true">Time</th>
+                                            <th data-sortable="true">Shift</th>
+                                            <th data-sortable="true">Cust. Id</th>
+                                            <th data-sortable="true">Name</th>
+                                            <th data-sortable="true">FAT</th>
+                                            <th data-sortable="true">SNF</th>
+                                            <th data-sortable="true">CLR</th>
+                                            <th data-sortable="true">Water</th>
+                                            <th data-sortable="true">Ltr.Qty</th>
+                                            <th data-sortable="true">Amt</th>
+                                            <th data-sortable="true">Cumu. Amt.</th>
+                                        </tr>
                                         </thead>
-                                        <!-- Table body -->
                                         <tbody class="text-center fw-bold" id="tableBody">
-                                            {% for drec in drec_data %}
+                                        {% for drec in top_10_latest_records %}
                                             <tr>
                                                 <td>{{ drec.ST_ID.st_id }}</td>
                                                 <td>{{ drec.ST_ID.location }}</td>
@@ -244,9 +362,9 @@
                                                 <td>{{ drec.CUST_ID }}</td>
                                                 <td>
                                                     {% for customer in customer_list %}
-                                                    {% if customer.cust_id == drec.CUST_ID and customer.st_id == drec.ST_ID.st_id %}
-                                                    {{ customer.name }}
-                                                    {% endif %}
+                                                        {% if customer.cust_id == drec.CUST_ID and customer.st_id == drec.ST_ID.st_id %}
+                                                            {{ customer.name }}
+                                                        {% endif %}
                                                     {% endfor %}
                                                 </td>
                                                 <td>{{ drec.FAT }}</td>
@@ -257,338 +375,194 @@
                                                 <td>₹ {{ drec.Amount }}</td>
                                                 <td>{{ drec.CAmount }}</td>
                                             </tr>
-                                            {% endfor %}
+                                        {% endfor %}
                                         </tbody>
                                     </table>
-                                    <!-- Pagination -->
-                                   <!-- Pagination -->
-                <nav aria-label="Page navigation example " class="mt-3">
-                    <ul class="pagination justify-content-end fw-bold">
-                        {% if drec_data.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page=1" aria-label="First">
-                                <span aria-hidden="true">&laquo;</span>
-                                <span class="sr-only">First</span>
-                            </a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ drec_data.previous_page_number }}" aria-label="Previous">
-                                <span aria-hidden="true">&lsaquo;</span>
-                                <span class="sr-only">Previous</span>
-                            </a>
-                        </li>
-                        {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link" aria-hidden="true">&laquo;</span>
-                        </li>
-                        {% endif %}
-
-                        <li class="page-item {% if drec_data.number == 1 %}active{% endif %}" aria-current="page">
-                            <span class="page-link">1</span>
-                        </li>
-
-                        <li class="page-item"><a class="page-link" href="?page=2">2</a></li>
-
-                        {% if drec_data.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ drec_data.next_page_number }}" aria-label="Next">
-                                <span aria-hidden="true">&rsaquo;</span>
-                                <span class="sr-only">Next</span>
-                            </a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ drec_data.paginator.num_pages }}" aria-label="Last">
-                                <span aria-hidden="true">&raquo;</span>
-                                <span class="sr-only">Last</span>
-                            </a>
-                        </li>
-                        {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link" aria-hidden="true">&rsaquo;</span>
-                        </li>
-                        {% endif %}
-                    </ul>
-                </nav>
                                 </div>
                             </div>
-                        </div>
+                        </div>                    
                     </div>
-                    </div>
-                    
-                <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
-                <!-- Add this section to display the top 10 DREC records in a table format -->
-                <div class="container-fluid col-lg-12 mb-lg-0 mb-5">
-                    <div class="card shadow rounded">
-                        <div class="card-header pb-0 p-3">
-                            <div class="justify-content-between">
-                                <h6 class="mb-2 fw-bold">Top 10 Records</h6>
-                            </div>
-                        </div>
-                        <div class="table-responsive card-body rounded">
-                            
-                            <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack border-2 border-dark"
-                                   data-toggle="table"
-                                   data-pagination="false"
-                                   data-auto-refresh="true"
-                                   data-sort-order="desc"
-                                 >
-                                <thead class="table-title text-white text-center rounded border-white">
-                                <tr>
-                                    <th>St ID</th>
-                                    <th >Location</th>
-                                    <th >Society</th>
-                                    <th data-sortable="true">Date</th>
-                                    <th data-sortable="true">Time</th>
-                                    <th data-sortable="true">Shift</th>
-                                    <th data-sortable="true">Cust. Id</th>
-                                    <th data-sortable="true">Name</th>
-                                    <th data-sortable="true">FAT</th>
-                                    <th data-sortable="true">SNF</th>
-                                    <th data-sortable="true">CLR</th>
-                                    <th data-sortable="true">Water</th>
-                                    <th data-sortable="true">Ltr.Qty</th>
-                                    <th data-sortable="true">Amt</th>
-                                    <th data-sortable="true">Cumu. Amt.</th>
-                                </tr>
-                                </thead>
-                                <tbody class="text-center fw-bold" id="tableBody">
-                                {% for drec in top_10_latest_records %}
-                                    <tr>
-                                        <td>{{ drec.ST_ID.st_id }}</td>
-                                        <td>{{ drec.ST_ID.location }}</td>
-                                        <td>{{ drec.ST_ID.society }}</td>
-                                        <td>{{ drec.RecordingDate|date:"d-m-Y" }}</td>
-                                        <td>{{ drec.RecordingTime }}</td>
-                                        <td>{{ drec.SHIFT }}</td>
-                                        <td>{{ drec.CUST_ID }}</td>
-                                        <td>
-                                            {% for customer in customer_list %}
-                                                {% if customer.cust_id == drec.CUST_ID and customer.st_id == drec.ST_ID.st_id %}
-                                                    {{ customer.name }}
-                                                {% endif %}
-                                            {% endfor %}
-                                        </td>
-                                        <td>{{ drec.FAT }}</td>
-                                        <td>{{ drec.SNF }}</td>
-                                        <td>{{ drec.CLR }}</td>
-                                        <td>{{ drec.WATER }}</td>
-                                        <td>{{ drec.QT }} ltr.</td>
-                                        <td>₹ {{ drec.Amount }}</td>
-                                        <td>{{ drec.CAmount }}</td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-              </div>
-
-                <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
-                <!--Date Filter-->
-                <div class="container-fluid col-lg-12 mb-lg-0 mb-5">
-                    <div class="card shadow rounded" >
-                        <div class="card-header pb-0 p-3">
-                            <div class=" justify-content-start">
-                                <h6 class="mb-2 fw-bold">Date Filter</h6>
-                            </div>
-                        </div>
-                        <div class="table-responsive card-body rounded" >
-                            <div class="d-flex justify-content-center align-items-center">
-                                <div class="text-center">
-                                    <h5>Please select a date and shift:</h5>
-                                    <input type="date" id="selectedDate" class="form-control" required>
-                                           <!-- Add a dropdown menu for selecting shift -->
-                                        <select id="selectedShift" class="form-select mt-2" required>
-                                            <option value="M">Morning (M)</option>
-                                            <option value="E">Evening (E)</option>
-                                            <option value="both">Both M and E</option>
-                                        </select>
-
-                                    <button onclick="fetchDRECData()" class="btn btn-success mt-2">Fetch Data</button>
+                    <!-- Date Filter Content -->
+                    <div class="tab-pane fade" id="nav-contact" role="tabpanel"
+                        aria-labelledby="nav-contact-tab">
+                        <!-- Date Filter Content -->
+                        <div class="container-fluid col-lg-12 mb-lg-0 mb-5">
+                            <div class="card shadow rounded" >
+                                <div class="card-header pb-0 p-3">
+                                    <div class=" justify-content-start">
+                                        <h6 class="mb-2 fw-bold">Date Filter</h6>
+                                    </div>
+                                </div>
+                                <div class="table-responsive card-body rounded" >
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <div class="text-center">
+                                            <h5>Please select a date and shift:</h5>
+                                            <input type="date" id="selectedDate" class="form-control" required>
+                                                   <!-- Add a dropdown menu for selecting shift -->
+                                                <select id="selectedShift" class="form-select mt-2" required>
+                                                    <option value="M">Morning (M)</option>
+                                                    <option value="E">Evening (E)</option>
+                                                    <option value="both">Both M and E</option>
+                                                </select>
+        
+                                            <button onclick="fetchDRECData()" class="btn btn-success mt-2">Fetch Data</button>
+                                        </div>
+                                    </div>
+                                    <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack border-2 border-dark"  
+                                    data-toggle="table"
+                                    data-pagination="true"
+                                    data-auto-refresh="true">
+                                    <thead class="table-title text-white text-center rounded border-white">
+                                            <tr>
+                                                <th>St ID</th>
+                                                <th>Root</th>
+                                                <th>Society</th>
+                                                <th>Date</th>
+                                                <th>Time</th>
+                                                <th>Shift</th>
+                                                <th>Cust. ID</th>
+                                                <th>Name</th>
+                                                <th>FAT</th>
+                                                <th>SNF</th>
+                                                <th>CLR</th>
+                                                <th>Water</th>
+                                                <th>Ltr. Qty</th>
+                                                <th>Amt</th>
+                                                <th>Cumu. Amount</th> 
+                                                <!-- Add more table headers as needed -->
+                                            </tr>
+                                        </thead>
+                                        <tbody id="drecDataBody" class="fw-bold">
+                                            <!-- DREC data will be populated here dynamically using JavaScript -->
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                            
-                            <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack border-2 border-dark"  
-                            data-toggle="table"
-                            data-pagination="true"
-                            data-auto-refresh="true">
-                                                     <thead class="table-title text-white text-center rounded border-white">
-                                    <tr>
-                                        <th>St ID</th>
-                                        <th>Root</th>
-                                        <th>Society</th>
-                                        <th>Date</th>
-                                        <th>Time</th>
-                                        <th>Shift</th>
-                                        <th>Cust. ID</th>
-                                        <th>Name</th>
-                                        <th>FAT</th>
-                                        <th>SNF</th>
-                                        <th>CLR</th>
-                                        <th>Water</th>
-                                        <th>Ltr. Qty</th>
-                                        <th>Amt</th>
-                                        <th>Cumu. Amount</th> 
-                                        <!-- Add more table headers as needed -->
-                                    </tr>
-                                </thead>
-                                <tbody id="drecDataBody" class="fw-bold">
-                                    <!-- DREC data will be populated here dynamically using JavaScript -->
-                                </tbody>
-                       
-
-                            </table>
-                                
-                        
-                        </div>
+                        </div>      
                     </div>
-                </div>                                         
                 </div>
-              </div>
-    
-     
+            </div>
         </div>
-      </div>
-      <script>
-        // Function to refresh table content
-        function refreshTable() {
-            $.ajax({
-                url: '{% url "dashboard" %}',
-                type: 'GET',
-                dataType: 'html',
-                success: function (data) {
-                    // Replace the entire table body with the new data
-                    $('#summary_table tbody').html($(data).find('#summary_table tbody').html());
-                    $('#live_table tbody').html($(data).find('#live_table tbody').html());
-                },
-                error: function (xhr, status, error) {
-                    console.error('Error refreshing table:', error);
-                }
-            });
+    </div>
+</div>
+<script async>
+    async function refreshTable() {
+        try {
+            const response = await fetch('{% url "dashboard" %}');
+            const data = await response.text();
+            const summaryTableBody = $(data).find('#summary_table tbody').html();
+            const liveTableBody = $(data).find('#live_table tbody').html();
+            $('#summary_table tbody').html(summaryTableBody);
+            $('#live_table tbody').html(liveTableBody);
+        } catch (error) {
+            console.error('Error refreshing table:', error);
         }
-    
-        // Refresh the content every 5 seconds
-        setInterval(refreshTable, 5000);
-    
-        // Function to fetch DREC data
-        function fetchDRECData() {
-            var selectedDate = document.getElementById('selectedDate').value;
-            var selectedShift = document.getElementById('selectedShift').value;
-            if (!selectedDate) {
-                alert('Please select a date.');
-                return;
-            }
-            var url = `/fetch_drec_data/?selectedDate=${selectedDate}`;
-            if (selectedShift) {
-                url += `&selectedShift=${selectedShift}`;
-            }
-            fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                var drecDataBody = document.getElementById('drecDataBody');
-                var rowsHTML = '';
-                if (data.drec_data.length === 0) {
-                    rowsHTML = '<tr><td colspan="15">No data found for the selected date.</td></tr>';
-                } else {
-                    data.drec_data.forEach(item => {
-                        var recordingDate = new Date(item.RecordingDate);
-                        var formattedDate = recordingDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                        var row = `<tr>
-                            <td>${item.ST_ID}</td>
-                            <td>${item.Location}</td>
-                            <td>${item.Society}</td>
-                            <td>${formattedDate}</td>
-                            <td>${item.RecordingTime}</td>
-                            <td>${item.SHIFT}</td>
-                            <td>${item.CUST_ID}</td>
-                            <td>${item.Customer_Name}</td>
-                            <td>${item.FAT}</td>
-                            <td>${item.SNF}</td>
-                            <td>${item.CLR}</td>
-                            <td>${item.WATER}</td>
-                            <td>${item.QT}</td>
-                            <td>₹ ${item.Amount}</td>
-                            <td>${item.CAmount}</td>
-                        </tr>`;
-                        rowsHTML += row;
-                    });
-                }
-                drecDataBody.innerHTML = rowsHTML;
-            })
-            .catch(error => {
-                console.error('Error fetching DREC data:', error);
-            });
+    }
+
+    async function fetchDRECData() {
+        const selectedDate = $('#selectedDate').val();
+        const selectedShift = $('#selectedShift').val();
+        if (!selectedDate) {
+            alert('Please select a date.');
+            return;
         }
-    
-        // Pagination and lazy loading
-        var page = 1;
-        var pageSize = 10;
-        var isLoading = false;
-    
-        function isScrolledToBottom() {
-            var table = $('#live_table');
-            var tableHeight = table.height();
-            var scrollTop = table.scrollTop();
-            var windowHeight = table.prop('scrollHeight');
-            return (windowHeight - tableHeight - scrollTop) < 50;
+        let url = `/fetch_drec_data/?selectedDate=${selectedDate}`;
+        if (selectedShift) {
+            url += `&selectedShift=${selectedShift}`;
         }
-    
-        function loadMoreRecords() {
-            if (!isLoading && isScrolledToBottom()) {
-                isLoading = true;
-                $.ajax({
-                    url: '{% url "dashboard" %}',
-                    type: 'GET',
-                    dataType: 'json',
-                    data: {
-                        page: page,
-                        page_size: pageSize
-                    },
-                    success: function (data) {
-                        var tbody = $('#live_table tbody');
-                        data.records.forEach(function(record) {
-                            var row = '<tr>' +
-                                '<td>' + record.ST_ID.st_id + '</td>' +
-                                '<td>' + record.ST_ID.location + '</td>' +
-                                '<td>' + record.ST_ID.society + '</td>' +
-                                '<td>' + record.RecordingDate + '</td>' +
-                                '<td>' + record.RecordingTime + '</td>' +
-                                '<td>' + record.SHIFT + '</td>' +
-                                '<td>' + record.CUST_ID + '</td>' +
-                                '<td>' + record.Customer_Name + '</td>' +
-                                '<td>' + record.FAT + '</td>' +
-                                '<td>' + record.SNF + '</td>' +
-                                '<td>' + record.CLR + '</td>' +
-                                '<td>' + record.WATER + '</td>' +
-                                '<td>' + record.QT + '</td>' +
-                                '<td>' + record.Amount + '</td>' +
-                                '<td>' + record.CAmount + '</td>' +
-                                '</tr>';
-                            tbody.append(row);
-                        });
-                        page++;
-                        isLoading = false;
-                    },
-                    error: function (xhr, status, error) {
-                        console.error('Error loading more records:', error);
-                        isLoading = false;
-                    }
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            const drecDataBody = $('#drecDataBody');
+            let rowsHTML = '';
+            if (data.drec_data.length === 0) {
+                rowsHTML = '<tr><td colspan="15">No data found for the selected date.</td></tr>';
+            } else {
+                data.drec_data.forEach(item => {
+                    const recordingDate = new Date(item.RecordingDate);
+                    const formattedDate = recordingDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    const row = `<tr>
+                        <td>${item.ST_ID}</td>
+                        <td>${item.Location}</td>
+                        <td>${item.Society}</td>
+                        <td>${formattedDate}</td>
+                        <td>${item.RecordingTime}</td>
+                        <td>${item.SHIFT}</td>
+                        <td>${item.CUST_ID}</td>
+                        <td>${item.Customer_Name}</td>
+                        <td>${item.FAT}</td>
+                        <td>${item.SNF}</td>
+                        <td>${item.CLR}</td>
+                        <td>${item.WATER}</td>
+                        <td>${item.QT}</td>
+                        <td>₹ ${item.Amount}</td>
+                        <td>${item.CAmount}</td>
+                    </tr>`;
+                    rowsHTML += row;
                 });
             }
+            drecDataBody.html(rowsHTML);
+        } catch (error) {
+            console.error('Error fetching DREC data:', error);
         }
-    
-        $(document).ready(function() {
-            // Attach scroll event handler
-            $('#live_table').scroll(loadMoreRecords);
-    
-            // Refresh the content every 5 seconds
-            setInterval(refreshTable, 5000);
-        });
+    }
 
-        
-    </script>
-  
-    </div>
+    let page = 1;
+    const pageSize = 10;
+    let isLoading = false;
 
-{% endblock content %}
+    function isScrolledToBottom() {
+        const table = $('#live_table');
+        const tableHeight = table.height();
+        const scrollTop = table.scrollTop();
+        const windowHeight = table.prop('scrollHeight');
+        return (windowHeight - tableHeight - scrollTop) < 50;
+    }
+
+    async function loadMoreRecords() {
+        if (!isLoading && isScrolledToBottom()) {
+            isLoading = true;
+            try {
+                const response = await fetch('{% url "dashboard" %}?page=${page}&page_size=${pageSize}');
+                const data = await response.json();
+                const tbody = $('#live_table tbody');
+                data.records.forEach(record => {
+                    const row = '<tr>' +
+                        `<td>${record.ST_ID.st_id}</td>` +
+                        `<td>${record.ST_ID.location}</td>` +
+                        `<td>${record.ST_ID.society}</td>` +
+                        `<td>${record.RecordingDate}</td>` +
+                        `<td>${record.RecordingTime}</td>` +
+                        `<td>${record.SHIFT}</td>` +
+                        `<td>${record.CUST_ID}</td>` +
+                        `<td>${record.Customer_Name}</td>` +
+                        `<td>${record.FAT}</td>` +
+                        `<td>${record.SNF}</td>` +
+                        `<td>${record.CLR}</td>` +
+                        `<td>${record.WATER}</td>` +
+                        `<td>${record.QT}</td>` +
+                        `<td>${record.Amount}</td>` +
+                        `<td>${record.CAmount}</td>` +
+                        '</tr>';
+                    tbody.append(row);
+                });
+                page++;
+                isLoading = false;
+            } catch (error) {
+                console.error('Error loading more records:', error);
+                isLoading = false;
+            }
+        }
+    }
+
+    $(document).ready(function () {
+        setInterval(refreshTable, 5000);
+        $('#live_table').scroll(loadMoreRecords);
+    });
+</script>
+
+{% endblock %}<script src="{% static 'register/js/jquery-3.3.1.min.js' %}" defer></script>
+<script src="{% static 'register/js/popper.min.js' %}" defer></script>
+<script src="{% static 'register/js/bootstrap.min.js' %}" defer></script>
+<script src="{% static 'register/js/main.js' %}" defer></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js" defer></script>

@@ -3,18 +3,18 @@
 {% load widget_tweaks %}
 <!doctype html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="description" content="Welcome to RaptureTech. We make DPU, UDS, and SCC.">
+    <meta name="author" content="Paras Dave">
     <link rel="apple-touch-icon" sizes="76x76" href="{% static 'assets/img/rapturetech_logo.jpeg'%}">
     <link rel="icon" type="image/png" href="{% static 'assets/img/rapturetech_logo.jpeg'%}">
+    <!-- Add Cache-Control header for static assets -->
+    <meta http-equiv="Cache-control" content="public, max-age=604800">
 
     <title>RaptureTech Pvt. Ltd.</title>
-
     <!-- CSS FILES -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -23,7 +23,7 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap"
         rel="stylesheet">
 
-    <link href="{% static 'home/css/bootstrap.min.css'%}" rel="stylesheet">
+    <link  href="{% static 'home/css/bootstrap.min.css'%}" rel="stylesheet">
 
     <link href="{% static 'home/css/bootstrap-icons.css'%}" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -45,80 +45,86 @@
     <main>
 
         <div id="sticky-wrapper" class="sticky-wrapper is-sticky" style="height: 100px;">
+            <!-- Navigation Bar -->
             <nav class="navbar navbar-expand-lg">
                 <div class="container">
+                    <!-- Logo -->
                     <a class="navbar-brand d-flex align-items-center" href="{%url 'home'%}">
-                        <img src="{% static 'home/images/logo1.png'%}" class="navbar-brand-image logo1"
-                            alt="rapturetech logo">
-
+                        <img src="{% static 'home/images/logo1.png'%}" class="navbar-brand-image logo1" alt="rapturetech logo"loading="lazy">
                     </a>
-
+        
+                    <!-- Mobile Menu Button -->
                     <div class="d-lg-none ms-auto me-3">
                         <a href="{%url 'register'%}">
-                            <img src="{% static 'home/images/cloud-data (1).png'%}" class="" alt="" width="70"
-                                height="70">
+                            <img src="{% static 'home/images/cloud-data (1).png'%}" class="" alt="CLOUD_DATA_LOGIN" width="70" height="70"loading="lazy">
                         </a>
                     </div>
-
+        
+                    <!-- Navbar Toggler Button -->
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
-
+        
+                    <!-- Navbar Links -->
                     <div class="collapse navbar-collapse" id="navbarNav">
                         <ul class="navbar-nav ms-lg-auto">
+                            <!-- Home Section Link -->
                             <li class="nav-item">
                                 <a class="nav-link click-scroll active" href="#section_1">Home</a>
                             </li>
+                            <!-- About Section Link -->
                             <li class="nav-item">
                                 <a class="nav-link click-scroll inactive" href="#section_2">About</a>
                             </li>
-
+                            <!-- Products Section Link -->
                             <li class="nav-item">
                                 <a class="nav-link click-scroll inactive" href="#section_3">Products</a>
                             </li>
+                            <!-- Why Us Section Link -->
                             <li class="nav-item">
                                 <a class="nav-link click-scroll inactive" href="#section_4">Why Us</a>
                             </li>
+                            <!-- Contact Us Section Link -->
                             <li class="nav-item">
                                 <a class="nav-link click-scroll inactive" href="#section_5">Contact Us</a>
                             </li>
-
-
+                            <!-- Login Link -->
                             <li class="nav-item">
                                 <a class="nav-link click-scroll inactive" href="{%url 'login'%}">Login</a>
                             </li>
+                            <!-- Login Button -->
                             <a href="{%url 'login'%}">
-
-                                <img src="{% static 'home/images/cloud-data (1).png'%}" class="" href="{%url 'login'%}"
-                                    alt="" width="80" height="80">
+                                <img src="{% static 'home/images/cloud-data (1).png'%}" class="CLOUD_DATA_LOGIN" href="{%url 'login'%}" alt="" width="80" height="80" loading="lazy">
                             </a>
                         </ul>
-
                     </div>
                 </div>
             </nav>
         </div>
-
+        
 
 
         <section class="hero-section d-flex justify-content-center align-items-center " id="section_1">
-
+            <!-- Section Overlay -->
             <div class="section-overlay"></div>
-
+        
+            <!-- SVG Shape -->
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
                 <path fill="#063974" fill-opacity="1"
                     d="M0,224L34.3,192C68.6,160,137,96,206,90.7C274.3,85,343,139,411,144C480,149,549,107,617,122.7C685.7,139,754,213,823,240C891.4,267,960,245,1029,224C1097.1,203,1166,181,1234,160C1302.9,139,1371,117,1406,106.7L1440,96L1440,0L1405.7,0C1371.4,0,1303,0,1234,0C1165.7,0,1097,0,1029,0C960,0,891,0,823,0C754.3,0,686,0,617,0C548.6,0,480,0,411,0C342.9,0,274,0,206,0C137.1,0,69,0,34,0L0,0Z">
                 </path>
             </svg>
-
+        
             <div class="container">
                 <div class="row">
-
+                    <!-- Left Column -->
                     <div class="col-lg-7 col-12 mb-5 mb-lg-0" data-aos="fade-right" data-aos-offset="300"
                         data-aos-easing="ease-in-sine">
+                        <!-- Main Heading -->
                         <h1 class="text-white text-head">Welcome to RaptureTech</h1>
-
+        
+                        <!-- Rotating Text -->
                         <h1 class="cd-headline rotate-1 text-white mb-4 pb-2 text-head">
                             <span>We make</span>
                             <span class="cd-words-wrapper" style="width: 258px;">
@@ -127,43 +133,48 @@
                                 <b class="is-hidden">SCC</b>
                             </span>
                         </h1>
-
+        
+                        <!-- Button Group -->
                         <div class="custom-btn-group">
                             <a href="#section_2" class="btn custom-btn smoothscroll me-3">Our Story</a>
-
                         </div>
                     </div>
-
+        
+                    <!-- Right Column -->
                     <div class="col-lg-5 col-12" data-aos="fade-left" data-aos-anchor="#example-anchor"
                         data-aos-offset="500" data-aos-duration="500">
                         <div class="ratio ratio-16x9 ">
+                            <!-- Rotating Images -->
                             <h1 class="cd-headline rotate-1 text-white mb-4 pb-2">
                                 <span></span>
                                 <span class="cd-words-wrapper">
                                     <b class="is-hidden">
                                         <img src="{% static 'home/images/DPU1.png'%}"
-                                            class="custom-block-image img-fluid" alt="">
+                                            class="custom-block-image img-fluid" alt="DPU1">
                                     </b>
-                                    <b class="is-visible"> <img src="{% static 'home/images/UDS2.png'%}"
-                                            class="custom-block-image img-fluid" alt=""></b>
-                                    <b class="is-hidden"> <img
-                                            src="{% static 'home/images/SOLAR_CHARGE_CONTROLLER.png'%}"
-                                            class="custom-block-image img-fluid" alt=""></b>
+                                    <b class="is-visible">
+                                        <img src="{% static 'home/images/UDS2.png'%}"
+                                            class="custom-block-image img-fluid" alt="UDS2">
+                                    </b>
+                                    <b class="is-hidden">
+                                        <img src="{% static 'home/images/SOLAR_CHARGE_CONTROLLER.png'%}"
+                                            class="custom-block-image img-fluid" alt="SOLAR_CHARGE_CONTROLLER" >
+                                    </b>
                                 </span>
                             </h1>
-
                         </div>
                     </div>
-
                 </div>
             </div>
-
+        
+            <!-- Bottom SVG Shape -->
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
                 <path fill="#ffffff" fill-opacity="1"
                     d="M0,224L34.3,192C68.6,160,137,96,206,90.7C274.3,85,343,139,411,144C480,149,549,107,617,122.7C685.7,139,754,213,823,240C891.4,267,960,245,1029,224C1097.1,203,1166,181,1234,160C1302.9,139,1371,117,1406,106.7L1440,96L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z">
                 </path>
             </svg>
         </section>
+        
 
 
         <section class="about-section section-padding" id="section_2">
@@ -195,7 +206,7 @@
                         <div class="member-block">
                             <div class="member-block-image-wrap">
                                 <img src="{% static 'home/images/logo1.png'%}" class="member-block-image img-fluid"
-                                    alt="">
+                                    alt="logo1" loading="lazy">
 
                                 <ul class="social-icon">
                                     <li class="social-icon-item">
@@ -245,7 +256,7 @@
                                 <div class="custom-block-image-wrap">
                                     <a href="{% url 'website_dpu' %}">
                                         <img src="{% static 'home/images/Product_1.png'%}"
-                                            class="custom-block-image block-2 img-fluid" alt="">
+                                            class="custom-block-image block-2 img-fluid" alt="PRODUCT_IMAGE"loading="lazy">
                                         <i class="custom-block-icon bi-link"></i>
                                     </a>
                                 </div>
@@ -310,7 +321,7 @@
                                 <div class="custom-block-image-wrap">
                                     <a href="website_ultrasonic_digital_stirrer">
                                         <img src="{% static 'home/images/Product_2.png'%}"
-                                            class="custom-block-image block-2 img-fluid" alt="">
+                                            class="custom-block-image block-2 img-fluid" alt="PRODUCT_IMAGE"loading="lazy">
 
                                         <i class="custom-block-icon bi-link"></i>
                                     </a>
@@ -373,7 +384,7 @@
                                 <div class="custom-block-image-wrap">
                                     <a href="{%url 'website_solar_charger'%}">
                                         <img src="{% static 'home/images/Product_3.png'%}"
-                                            class="custom-block-image block-2 img-fluid" alt="">
+                                            class="custom-block-image block-2 img-fluid" alt="PRODUCT_IMAGE"loading="lazy">
 
                                         <i class="custom-block-icon bi-link"></i>
                                     </a>
@@ -472,7 +483,7 @@
                         <div class="member-block">
                             <div class="member-block-image-wrap">
                                 <img src="{% static 'home/images/8357605.jpg'%}" class="member-block-image img-fluid"
-                                    alt="">
+                                    alt="IMAGE"loading="lazy">
 
 
                             </div>
@@ -518,7 +529,7 @@
 
                             </div>
 
-                            <img src="{% static 'home/images/WorldMap.svg'%}" class="img-fluid" alt="">
+                            <img src="{% static 'home/images/WorldMap.svg'%}" class="img-fluid" alt="WORLDMAP"loading="lazy">
                         </div>
                     </div>
 
@@ -537,7 +548,7 @@
 
                 <div class="col-lg-6 col-12 me-auto mb-5 mb-lg-0">
                     <a class="navbar-brand d-flex align-items-center" href="{%url 'home'%}">
-                        <img src="{% static 'home/images/logo1.png'%}" class="navbar-brand-image " alt="">
+                        <img src="{% static 'home/images/logo1.png'%}" class="navbar-brand-image " alt="LOGO"loading="lazy">
 
                     </a>
                 </div>
@@ -603,5 +614,4 @@
         AOS.init();
     </script>
 </body>
-
 </html>
