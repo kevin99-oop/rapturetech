@@ -66,39 +66,19 @@ from django.views.decorators.cache import cache_page
 
 # Common Views
 
+def render_website_page(request, page_name):
+    """
+    Render the requested website page.
+    """
+    template_name = f'home/{page_name}.html'
+    return render(request, template_name)
+
 def custom_404_page(request, exception):
+    """
+    Custom 404 error page.
+    """
     return render(request, '404.html', status=404)
 
-def index(request):
-    return render(request, 'home/index.html')
-
-def website_products(request):
-    return render(request, 'home/products.html') 
-
-def website_dpu(request):
-    return render(request, 'home/dpu.html') 
-
-def website_2_in_1_smart_mini_combo(request):
-    return render(request, 'home/2_in_1_smart_mini_combo.html') 
-
-def website_all_in_1_smart_combo(request):
-    return render(request, 'home/all_in_1_smart_combo.html') 
-
-def website_solar_charger(request):
-    return render(request, 'home/solar_charger.html') 
-
-def website_ultrasonic_digital_stirrer(request):
-    return render(request, 'home/ultrasonic_digital_stirrer.html') 
-
-def website_ultrasonic_digital_stirrer_ss(request):
-    return render(request, 'home/ultrasonic_digital_stirrer_ss.html') 
-
-def website_ultrasonic_digital_stirrer_v2(request):
-    return render(request, 'home/ultrasonic_digital_stirrer_v2.html') 
-
-
-def website_ultrasonic_milk_analyzer(request):
-    return render(request, 'home/ultrasonic_milk_analyzer.html') 
 def health(request):
     return HttpResponse("OK")
 
@@ -107,19 +87,19 @@ class HomeView(TemplateView):
     template_name = 'home/index.html'
 
 
-class CustomLoginView(LoginView):
-    template_name = 'common/login.html'
+# class CustomLoginView(LoginView):
+#     template_name = 'common/login.html'
 
-    def form_invalid(self, form):
-        response = super().form_invalid(form)
-        messages.error(self.request, 'Invalid username or password. Please try again.')
-        return response
+#     def form_invalid(self, form):
+#         response = super().form_invalid(form)
+#         messages.error(self.request, 'Invalid username or password. Please try again.')
+#         return response
 
-    def form_valid(self, form):
-        # Customize this function if needed (e.g., redirecting to a different page on successful login)
-        response = super().form_valid(form)
+#     def form_valid(self, form):
+#         # Customize this function if needed (e.g., redirecting to a different page on successful login)
+#         response = super().form_valid(form)
         
-        return response
+#         return response
 
 def custom_login(request):
     template_name = 'common/login.html'
@@ -151,8 +131,6 @@ def super_dashboard(request):
     # Logic for user dashboard
     return render(request, 'common/super_admin/super_dashboard.html')
 
-#This dashboard is for Mandli Main who manage all the st_id and all 
-@method_decorator([login_required, ensure_csrf_cookie], name='dispatch')
 class DashboardView(TemplateView):
     template_name = 'example.html'
     paginate_by = 10
@@ -160,7 +138,7 @@ class DashboardView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         start_time = time.time()
-        context = self.get_cached_data(request)
+        context = self.compute_data(request)
         end_time = time.time()
         print("Execution time:", end_time - start_time, "seconds")
         return render(request, self.template_name, context)
@@ -178,20 +156,12 @@ class DashboardView(TemplateView):
         thread.start()
         return super().dispatch(request, *args, **kwargs)
 
-    def get_cached_data(self, request):
-        cached_data = cache.get('dashboard_data')
-        if cached_data is None:
-            cached_data = self.compute_data(request)
-            cache.set('dashboard_data', cached_data, timeout=self.refresh_interval)
-        return cached_data
-
     def compute_data(self, request):
         active_dpu_list = self.get_active_dpu_list(request.user) if request else None
-        drec_data = self.get_drec_data(request.user) if request else None
+        drec_data = self.get_all_drec_data(request.user) if request else None
 
         if drec_data is not None:
             drec_data_cust_ids = drec_data.values_list('CUST_ID', flat=True).distinct()
-            drec_data = drec_data[:500]
 
             summary_data = self.prepare_summary_data(drec_data, active_dpu_list)
             customer_list = self.get_customer_list(drec_data_cust_ids)
@@ -244,81 +214,53 @@ class DashboardView(TemplateView):
             }
             return live_data
 
-    @staticmethod
-    @lru_cache(maxsize=None)
-    def get_active_dpu_list(user):
-        if user.is_staff or user.is_superuser:
-            return DPU.objects.filter(user=user).select_related('user')
-        else:
-            return DPU.objects.filter(dpu_user=user.id).select_related('user')
+    def get_active_dpu_list(self, user):
+        queryset = DPU.objects.filter(user=user) if (user.is_staff or user.is_superuser) else DPU.objects.filter(dpu_user=user.id)
+        return queryset.select_related('user')
 
-    @staticmethod
-    @lru_cache(maxsize=None)
-    def get_drec_data(user):
-        if user.is_staff or user.is_superuser:
-            drec_filter = {'ST_ID__user': user}
-        else:
-            drec_filter = {'ST_ID__dpu_user': user.id}
-
+    def get_all_drec_data(self, user):
+        drec_filter = {'ST_ID__user': user} if (user.is_staff or user.is_superuser) else {'ST_ID__dpu_user': user.id}
         return DREC.objects.filter(**drec_filter).order_by('-created_at').select_related('ST_ID__user')
 
-    @staticmethod
-    def get_customer_list(drec_data_cust_ids):
+    def get_customer_list(self, drec_data_cust_ids):
         return CustomerList.objects.filter(cust_id__in=drec_data_cust_ids)
 
-    @staticmethod
-    @lru_cache(maxsize=None)
-    def calculate_global_averages(user):
-        if isinstance(user, User):
-            if user.is_staff or user.is_superuser:
-                drec_filter = {'ST_ID__user': user}
-            else:
-                drec_filter = {'ST_ID__dpu_user': user.id}
-
-            avg_fat = DREC.objects.filter(**drec_filter).aggregate(avg_fat=Avg('FAT'))['avg_fat']
-            avg_snf = DREC.objects.filter(**drec_filter).aggregate(avg_snf=Avg('SNF'))['avg_snf']
-            avg_clr = DREC.objects.filter(**drec_filter).aggregate(avg_clr=Avg('CLR'))['avg_clr']
-
-            return (
-                round(avg_fat, 1) if avg_fat is not None else None,
-                round(avg_snf, 1) if avg_snf is not None else None,
-                round(avg_clr, 1) if avg_clr is not None else None
-            )
-        else:
+    def calculate_global_averages(self, user):
+        if not isinstance(user, User):
             return None, None, None
 
-    @staticmethod
-    def calculate_total_customer_count(active_dpu_list):
-        if active_dpu_list.exists():
-            if active_dpu_list.first().user.is_staff or active_dpu_list.first().user.is_superuser:
-                return CustomerList.objects.filter(st_id__in=active_dpu_list.values_list('st_id', flat=True).distinct()).count()
-            else:
-                return CustomerList.objects.filter(st_id=active_dpu_list.first().st_id).count()
-        else:
+        drec_filter = {'ST_ID__user': user} if (user.is_staff or user.is_superuser) else {'ST_ID__dpu_user': user.id}
+        avg_fat = DREC.objects.filter(**drec_filter).aggregate(avg_fat=Avg('FAT'))['avg_fat']
+        avg_snf = DREC.objects.filter(**drec_filter).aggregate(avg_snf=Avg('SNF'))['avg_snf']
+        avg_clr = DREC.objects.filter(**drec_filter).aggregate(avg_clr=Avg('CLR'))['avg_clr']
+
+        return (
+            round(avg_fat, 1) if avg_fat is not None else None,
+            round(avg_snf, 1) if avg_snf is not None else None,
+            round(avg_clr, 1) if avg_clr is not None else None
+        )
+
+    def calculate_total_customer_count(self, active_dpu_list):
+        if not active_dpu_list.exists():
             return 0
 
-    @staticmethod
-    def get_top_10_latest_records(user, st_id):
-        if user.is_staff or user.is_superuser:
-            return DREC.objects.filter(ST_ID__user=user, ST_ID__st_id=st_id).order_by('-RecordingDate', '-SHIFT')[:10]
-        else:
-            return DREC.objects.filter(ST_ID__dpu_user=user.id, ST_ID__st_id=st_id).order_by('-RecordingDate', '-SHIFT')[:10]
+        queryset = CustomerList.objects.filter(st_id__in=active_dpu_list.values_list('st_id', flat=True).distinct())
+        return queryset.count() if (active_dpu_list.first().user.is_staff or active_dpu_list.first().user.is_superuser) else queryset.filter(st_id=active_dpu_list.first().st_id).count()
 
-    @staticmethod
-    @lru_cache(maxsize=None)
-    def get_recording_dates(user_id):
+    def get_top_10_latest_records(self, user, st_id):
+        queryset = DREC.objects.filter(ST_ID__user=user, ST_ID__st_id=st_id) if (user.is_staff or user.is_superuser) else DREC.objects.filter(ST_ID__dpu_user=user.id, ST_ID__st_id=st_id)
+        return queryset.order_by('-RecordingDate', '-SHIFT')[:10]
+
+    def get_recording_dates(self, user_id):
         return DREC.objects.filter(ST_ID__user=user_id).values_list('RecordingDate', flat=True).distinct()
     
-    @staticmethod
-    @lru_cache(maxsize=None)
-    def prepare_and_calculate_summary_data(drec_data, active_dpu_list, m_type):
+    def prepare_and_calculate_summary_data(self, drec_data, active_dpu_list, m_type):
         filtered_records = [record for record in drec_data if record.MType == m_type]
-        summary_data = DashboardView.prepare_summary_data(filtered_records, active_dpu_list)
-        averages = DashboardView.calculate_averages(filtered_records)
+        summary_data = self.prepare_summary_data(filtered_records, active_dpu_list)
+        averages = self.calculate_averages(filtered_records)
         return summary_data, *averages
 
-    @staticmethod
-    def prepare_summary_data(drec_data, active_dpu_list):
+    def prepare_summary_data(self, drec_data, active_dpu_list):
         grouped_data = defaultdict(list)
         latest_records = {}
 
@@ -334,7 +276,7 @@ class DashboardView(TemplateView):
             latest_record = latest_records.get(st_id)
 
             if latest_record:
-                avg_fat, avg_snf, avg_clr, avg_water, total_ltr, total_amt, total_cust = DashboardView.calculate_averages(records)
+                avg_fat, avg_snf, avg_clr, avg_water, total_ltr, total_amt, total_cust = self.calculate_averages(records)
 
                 summary_data.append({
                     'ST_ID__st_id': st_id,
@@ -354,8 +296,7 @@ class DashboardView(TemplateView):
 
         return summary_data
 
-    @staticmethod
-    def calculate_averages(records):
+    def calculate_averages(self, records):
         if not records:
             return 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0
 
@@ -560,7 +501,7 @@ class ProfileUpdateView(LoginRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
 
-
+@login_required
 def generate_random_password( length=8):
     characters = string.ascii_letters + string.digits
     return ''.join(random.choice(characters) for i in range(length))
@@ -589,6 +530,7 @@ def add_dpu(request):
         form = DPUForm()
     return render(request, 'common/add_dpu.html', {'form': form})
 
+@login_required
 def active_dpu(request):
     # Retrieve the active DPU list based on user role
     if request.user.is_staff and request.user.is_superuser:
@@ -598,7 +540,6 @@ def active_dpu(request):
     elif not request.user.is_staff and not request.user.is_superuser:
         user_id = request.user.id
         active_dpu_list = DPU.objects.filter(dpu_user=user_id)
-    
     # Pagination
     paginator = Paginator(active_dpu_list, 10)  # Adjust the number per page as needed
     page = request.GET.get('page')
@@ -665,6 +606,7 @@ class NtpDatetimeView(View):
         # Return the response as a JSON object
         return JsonResponse(response_data)
 
+@login_required
 def dpudetails(request, dpuid):
     # Fetch DPU object
     dpu = get_object_or_404(DPU, st_id=dpuid)
@@ -695,6 +637,7 @@ def dpudetails(request, dpuid):
     }
     return render(request, 'common/dpudetails.html', context)
 
+@login_required
 class UserDpuDetails(TemplateView):
     template_name = 'common/user/user_dpudetails.html'  # Assuming the template is named 'user_dpudetails.html'
     
@@ -712,6 +655,7 @@ class UserDpuDetails(TemplateView):
         }
         return context
 
+@login_required
 def edit_dpu(request, st_id):
     dpu = get_object_or_404(DPU, st_id=st_id)
 
@@ -844,6 +788,7 @@ def process_csv_content(user, st_id, csv_lines):
             )
     # Delete rows that are in the database but not in the CSV file
     CustomerList.objects.filter(user=user, st_id=st_id).exclude(cust_id__in=existing_cust_ids).delete()
+
 @login_required
 def customer_list(request, st_id):
     # Fetch the customer list for the given st_id
@@ -854,6 +799,7 @@ def customer_list(request, st_id):
     
     return render(request, 'common/customer_list.html', context)
 
+@login_required
 def download_latest_csv(request, st_id):
     try:
         latest_customer = get_object_or_404(Customer.objects.filter(
