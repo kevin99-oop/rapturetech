@@ -160,7 +160,7 @@ class DashboardView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         start_time = time.time()
-        context = self.compute_data(request)
+        context = self.get_cached_data(request)
         end_time = time.time()
         print("Execution time:", end_time - start_time, "seconds")
         return render(request, self.template_name, context)
@@ -177,6 +177,13 @@ class DashboardView(TemplateView):
         thread.daemon = True
         thread.start()
         return super().dispatch(request, *args, **kwargs)
+
+    def get_cached_data(self, request):
+        cached_data = cache.get('dashboard_data')
+        if cached_data is None:
+            cached_data = self.compute_data(request)
+            cache.set('dashboard_data', cached_data, timeout=self.refresh_interval)
+        return cached_data
 
     def compute_data(self, request):
         active_dpu_list = self.get_active_dpu_list(request.user) if request else None
@@ -237,15 +244,17 @@ class DashboardView(TemplateView):
             }
             return live_data
 
+    @staticmethod
     @lru_cache(maxsize=None)
-    def get_active_dpu_list(self, user):
+    def get_active_dpu_list(user):
         if user.is_staff or user.is_superuser:
             return DPU.objects.filter(user=user).select_related('user')
         else:
             return DPU.objects.filter(dpu_user=user.id).select_related('user')
 
+    @staticmethod
     @lru_cache(maxsize=None)
-    def get_drec_data(self, user):
+    def get_drec_data(user):
         if user.is_staff or user.is_superuser:
             drec_filter = {'ST_ID__user': user}
         else:
@@ -253,11 +262,13 @@ class DashboardView(TemplateView):
 
         return DREC.objects.filter(**drec_filter).order_by('-created_at').select_related('ST_ID__user')
 
-    def get_customer_list(self, drec_data_cust_ids):
+    @staticmethod
+    def get_customer_list(drec_data_cust_ids):
         return CustomerList.objects.filter(cust_id__in=drec_data_cust_ids)
 
+    @staticmethod
     @lru_cache(maxsize=None)
-    def calculate_global_averages(self, user):
+    def calculate_global_averages(user):
         if isinstance(user, User):
             if user.is_staff or user.is_superuser:
                 drec_filter = {'ST_ID__user': user}
@@ -276,7 +287,8 @@ class DashboardView(TemplateView):
         else:
             return None, None, None
 
-    def calculate_total_customer_count(self, active_dpu_list):
+    @staticmethod
+    def calculate_total_customer_count(active_dpu_list):
         if active_dpu_list.exists():
             if active_dpu_list.first().user.is_staff or active_dpu_list.first().user.is_superuser:
                 return CustomerList.objects.filter(st_id__in=active_dpu_list.values_list('st_id', flat=True).distinct()).count()
@@ -285,25 +297,28 @@ class DashboardView(TemplateView):
         else:
             return 0
 
-    def get_top_10_latest_records(self, user, st_id):
-        # Retrieve the top 10 latest records for the given ST_ID and user
+    @staticmethod
+    def get_top_10_latest_records(user, st_id):
         if user.is_staff or user.is_superuser:
             return DREC.objects.filter(ST_ID__user=user, ST_ID__st_id=st_id).order_by('-RecordingDate', '-SHIFT')[:10]
         else:
             return DREC.objects.filter(ST_ID__dpu_user=user.id, ST_ID__st_id=st_id).order_by('-RecordingDate', '-SHIFT')[:10]
 
+    @staticmethod
     @lru_cache(maxsize=None)
-    def get_recording_dates(self, user_id):
+    def get_recording_dates(user_id):
         return DREC.objects.filter(ST_ID__user=user_id).values_list('RecordingDate', flat=True).distinct()
     
+    @staticmethod
     @lru_cache(maxsize=None)
-    def prepare_and_calculate_summary_data(self, drec_data, active_dpu_list, m_type):
+    def prepare_and_calculate_summary_data(drec_data, active_dpu_list, m_type):
         filtered_records = [record for record in drec_data if record.MType == m_type]
-        summary_data = self.prepare_summary_data(filtered_records, active_dpu_list)
-        averages = self.calculate_averages(filtered_records)
+        summary_data = DashboardView.prepare_summary_data(filtered_records, active_dpu_list)
+        averages = DashboardView.calculate_averages(filtered_records)
         return summary_data, *averages
 
-    def prepare_summary_data(self, drec_data, active_dpu_list):
+    @staticmethod
+    def prepare_summary_data(drec_data, active_dpu_list):
         grouped_data = defaultdict(list)
         latest_records = {}
 
@@ -319,7 +334,7 @@ class DashboardView(TemplateView):
             latest_record = latest_records.get(st_id)
 
             if latest_record:
-                avg_fat, avg_snf, avg_clr, avg_water, total_ltr, total_amt, total_cust = self.calculate_averages(records)
+                avg_fat, avg_snf, avg_clr, avg_water, total_ltr, total_amt, total_cust = DashboardView.calculate_averages(records)
 
                 summary_data.append({
                     'ST_ID__st_id': st_id,
@@ -339,7 +354,8 @@ class DashboardView(TemplateView):
 
         return summary_data
 
-    def calculate_averages(self, records):
+    @staticmethod
+    def calculate_averages(records):
         if not records:
             return 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0
 
