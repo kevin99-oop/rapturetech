@@ -60,6 +60,19 @@ from collections import defaultdict, Counter
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page
 
+from django.db.models import Count, Avg, Sum, OuterRef, Subquery
+from django.utils.timezone import make_aware
+
+from . import models
+from . import forms
+from django.core.mail import send_mail
+from django.conf import settings
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from . import models
+from django.shortcuts import render
+from . import models
 # Common Views
 
 def render_website_page(request, page_name):
@@ -300,7 +313,6 @@ class DashboardView(TemplateView):
                 })
 
         return summary_data
-
     
     def calculate_averages(self, records):
         if not records:
@@ -562,6 +574,8 @@ def active_dpu(request):
 
     return render(request, 'common/active_dpu.html', {'active_dpu_list': active_dpu_list})
 
+
+
     
 class DRECViewSet(viewsets.ModelViewSet):
     queryset = DREC.objects.all()
@@ -624,18 +638,6 @@ def dpudetails(request, dpuid):
 
     # Fetch DREC entries related to the specific DPU
     drecs = DREC.objects.filter(ST_ID=dpu)
-
-    # Paginate the drecs queryset
-    paginator = Paginator(drecs,1000)  # Adjust the page size as needed
-    page = request.GET.get('page')
-    try:
-        drecs = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        drecs = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        drecs = paginator.page(paginator.num_pages)
 
     # Render the template with the fetched data
     context = {
@@ -1266,6 +1268,7 @@ def get_societies_by_dpu(request):
     
     return JsonResponse(list(societies), safe=False)
 
+
 def get_summary_data(location, dpu, society, shift, start_date):
     # Replace this function with your actual data retrieval logic for summary data
     # Example: Using aggregates to get summary data
@@ -1347,9 +1350,6 @@ def get_detail_data(request, location, dpu, society, shift, start_date):
         detail_data.append(record_dict)
 
     return detail_data
-
-from django.db.models import Count, Avg, Sum, OuterRef, Subquery
-from django.utils.timezone import make_aware
 
 @login_required
 def ledger_report(request):
@@ -1505,10 +1505,6 @@ def get_payment_summary_data(location, dpu, start_date, end_date, start_id, end_
     return payment_summary_data
 
 
-from . import models
-from . import forms
-from django.core.mail import send_mail
-from django.conf import settings
 @login_required
 def ask_question_view(request):
     if request.method == 'POST':
@@ -1534,11 +1530,6 @@ def question_history_view(request):
     return render(request, 'common/question_history.html', {'questions': questions})
 
 
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from . import models
-from django.shortcuts import render
-from . import models
 @login_required
 def admin_question_view(request):
     # Check if the user is superuser or staff

@@ -154,8 +154,12 @@
                                             <tbody class="align-items-center text-center fw-bold">
                                                 {% for record in summary_data %}
                                                 <tr class="align-items-center text-align-center">
-                                                    <td><a href="{% url 'dpudetails' dpuid=record.ST_ID__st_id  %}" class="text-dark">{{ record.ST_ID__st_id  }}</a></td>
-                                                    <td>{{ record.ST_ID__location }}</td>
+                                                    {% if record.ST_ID__st_id %}
+                                                    <td><a href="{% url 'dpudetails' dpuid=record.ST_ID__st_id %}" class="text-dark">{{ record.ST_ID__st_id }}</a></td>
+                                                {% else %}
+                                                    <td>N/A</td>
+                                                {% endif %}
+                                                                                                    <td>{{ record.ST_ID__location }}</td>
                                                     <td>{{ record.ST_ID__society }}</td>
                                                     <td>{{ record.RecordingDate|date:"d-m-Y" }}</td>
                                                     <td>{{ record.SHIFT }}</td>
@@ -445,21 +449,26 @@
         </div>
     </div>
 </div>
-<script async>
-    async function refreshTable() {
+<script>
+    function refreshTable() {
         try {
-            const response = await fetch('{% url "dashboard" %}');
-            const data = await response.text();
-            const summaryTableBody = $(data).find('#summary_table tbody').html();
-            const liveTableBody = $(data).find('#live_table tbody').html();
-            $('#summary_table tbody').html(summaryTableBody);
-            $('#live_table tbody').html(liveTableBody);
+            fetch('{% url "dashboard" %}')
+            .then(response => response.text())
+            .then(data => {
+                const summaryTableBody = $(data).find('#summary_table tbody').html();
+                const liveTableBody = $(data).find('#live_table tbody').html();
+                $('#summary_table tbody').html(summaryTableBody);
+                $('#live_table tbody').html(liveTableBody);
+            })
+            .catch(error => {
+                console.error('Error refreshing table:', error);
+            });
         } catch (error) {
             console.error('Error refreshing table:', error);
         }
     }
 
-    async function fetchDRECData() {
+    function fetchDRECData() {
         const selectedDate = $('#selectedDate').val();
         const selectedShift = $('#selectedShift').val();
         if (!selectedDate) {
@@ -471,37 +480,42 @@
             url += `&selectedShift=${selectedShift}`;
         }
         try {
-            const response = await fetch(url);
-            const data = await response.json();
-            const drecDataBody = $('#drecDataBody');
-            let rowsHTML = '';
-            if (data.drec_data.length === 0) {
-                rowsHTML = '<tr><td colspan="15">No data found for the selected date.</td></tr>';
-            } else {
-                data.drec_data.forEach(item => {
-                    const recordingDate = new Date(item.RecordingDate);
-                    const formattedDate = recordingDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                    const row = `<tr>
-                        <td>${item.ST_ID}</td>
-                        <td>${item.Location}</td>
-                        <td>${item.Society}</td>
-                        <td>${formattedDate}</td>
-                        <td>${item.RecordingTime}</td>
-                        <td>${item.SHIFT}</td>
-                        <td>${item.CUST_ID}</td>
-                        <td>${item.Customer_Name}</td>
-                        <td>${item.FAT}</td>
-                        <td>${item.SNF}</td>
-                        <td>${item.CLR}</td>
-                        <td>${item.WATER}</td>
-                        <td>${item.QT}</td>
-                        <td>₹ ${item.Amount}</td>
-                        <td>${item.CAmount}</td>
-                    </tr>`;
-                    rowsHTML += row;
-                });
-            }
-            drecDataBody.html(rowsHTML);
+            fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const drecDataBody = $('#drecDataBody');
+                let rowsHTML = '';
+                if (data.drec_data.length === 0) {
+                    rowsHTML = '<tr><td colspan="15">No data found for the selected date.</td></tr>';
+                } else {
+                    data.drec_data.forEach(item => {
+                        const recordingDate = new Date(item.RecordingDate);
+                        const formattedDate = recordingDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                        const row = `<tr>
+                            <td>${item.ST_ID}</td>
+                            <td>${item.Location}</td>
+                            <td>${item.Society}</td>
+                            <td>${formattedDate}</td>
+                            <td>${item.RecordingTime}</td>
+                            <td>${item.SHIFT}</td>
+                            <td>${item.CUST_ID}</td>
+                            <td>${item.Customer_Name}</td>
+                            <td>${item.FAT}</td>
+                            <td>${item.SNF}</td>
+                            <td>${item.CLR}</td>
+                            <td>${item.WATER}</td>
+                            <td>${item.QT}</td>
+                            <td>₹ ${item.Amount}</td>
+                            <td>${item.CAmount}</td>
+                        </tr>`;
+                        rowsHTML += row;
+                    });
+                }
+                drecDataBody.html(rowsHTML);
+            })
+            .catch(error => {
+                console.error('Error fetching DREC data:', error);
+            });
         } catch (error) {
             console.error('Error fetching DREC data:', error);
         }
@@ -519,35 +533,41 @@
         return (windowHeight - tableHeight - scrollTop) < 50;
     }
 
-    async function loadMoreRecords() {
+    function loadMoreRecords() {
         if (!isLoading && isScrolledToBottom()) {
             isLoading = true;
             try {
-                const response = await fetch('{% url "dashboard" %}?page=${page}&page_size=${pageSize}');
-                const data = await response.json();
-                const tbody = $('#live_table tbody');
-                data.records.forEach(record => {
-                    const row = '<tr>' +
-                        `<td>${record.ST_ID.st_id}</td>` +
-                        `<td>${record.ST_ID.location}</td>` +
-                        `<td>${record.ST_ID.society}</td>` +
-                        `<td>${record.RecordingDate}</td>` +
-                        `<td>${record.RecordingTime}</td>` +
-                        `<td>${record.SHIFT}</td>` +
-                        `<td>${record.CUST_ID}</td>` +
-                        `<td>${record.Customer_Name}</td>` +
-                        `<td>${record.FAT}</td>` +
-                        `<td>${record.SNF}</td>` +
-                        `<td>${record.CLR}</td>` +
-                        `<td>${record.WATER}</td>` +
-                        `<td>${record.QT}</td>` +
-                        `<td>${record.Amount}</td>` +
-                        `<td>${record.CAmount}</td>` +
-                        '</tr>';
-                    tbody.append(row);
+                fetch(`{% url "dashboard" %}?page=${page}&page_size=${pageSize}`)
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = $('#live_table tbody');
+                    data.records.forEach(record => {
+                        const row = '<tr>' +
+                            `<td>${record.ST_ID.st_id}</td>` +
+                            `<td>${record.ST_ID.location}</td>` +
+                            `<td>${record.ST_ID.society}</td>` +
+                            `<td>${record.RecordingDate}</td>` +
+                            `<td>${record.RecordingTime}</td>` +
+                            `<td>${record.SHIFT}</td>` +
+                            `<td>${record.CUST_ID}</td>` +
+                            `<td>${record.Customer_Name}</td>` +
+                            `<td>${record.FAT}</td>` +
+                            `<td>${record.SNF}</td>` +
+                            `<td>${record.CLR}</td>` +
+                            `<td>${record.WATER}</td>` +
+                            `<td>${record.QT}</td>` +
+                            `<td>${record.Amount}</td>` +
+                            `<td>${record.CAmount}</td>` +
+                            '</tr>';
+                        tbody.append(row);
+                    });
+                    page++;
+                    isLoading = false;
+                })
+                .catch(error => {
+                    console.error('Error loading more records:', error);
+                    isLoading = false;
                 });
-                page++;
-                isLoading = false;
             } catch (error) {
                 console.error('Error loading more records:', error);
                 isLoading = false;

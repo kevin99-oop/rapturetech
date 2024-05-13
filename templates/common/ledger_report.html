@@ -235,6 +235,7 @@
                     </div>
                 </div>
                 <div class="table-responsive card-body">
+                    {% if ledger_summary_data %}
                     {% for summary_data_entry in ledger_summary_data|dictsort:"CUST_ID" %}
                     {% ifchanged summary_data_entry.CustomerName %}
 
@@ -325,7 +326,9 @@
                         </tbody>
                                             </table> {% endifchanged %}
                 {% endfor %}
+                {% else %}
                 <p class="text-center">No data available for the selected filters.</p>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -434,16 +437,18 @@
 
 
         <script>
-           function exportToCsvAndPdf(tableIds, fileNamePrefix, format) {
+ function exportToCsvAndPdf(tableIds, fileNamePrefix, format) {
     const username = '{{ user.username }}';
     const pdf = new jsPDF();
-    let csvData = '';
+    let csvData = [];
 
-    tableIds.forEach((tableId, index) => {
+    for (let i = 0; i < tableIds.length; i++) {
+        const tableId = tableIds[i];
         const table = document.getElementById(tableId);
+
+        // Generate CSV data
         const rows = table.querySelectorAll('tr');
         const tableData = [];
-
         rows.forEach((row) => {
             const rowData = [];
             const cells = row.querySelectorAll('td, th');
@@ -452,29 +457,32 @@
             });
             tableData.push(rowData.join(','));
         });
+        csvData.push(tableData.join('\n'));
 
-        const tableCsv = tableData.join('\n') + '\n\n';
-        csvData += tableCsv;
-
-        if (index > 0) {
-            pdf.addPage();  // Add a new page for each additional table in PDF
+        // Generate PDF
+        if (format === 'pdf') {
+            if (i > 1) {
+                pdf.addPage(); // Add new page for each additional table in PDF
+            }
+            pdf.autoTable({ html: `#${tableId}` });
         }
+    }
 
-        pdf.autoTable({ html: `#${tableId}` });
-    });
-
-    const fullFileName = `${username}_${fileNamePrefix}`;
-
+    // Generate and download CSV
     if (format === 'csv') {
-        const csvBlob = new Blob([csvData], { type: 'text/csv' });
+        const csvBlob = new Blob([csvData.join('\n')], { type: 'text/csv' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(csvBlob);
-        link.download = `${fullFileName}.csv`;
+        link.download = `${username}_${fileNamePrefix}.csv`;
         link.click();
-    } else if (format === 'pdf') {
-        pdf.save(`${fullFileName}.pdf`);
+    }
+
+    // Save PDF
+    if (format === 'pdf') {
+        pdf.save(`${username}_${fileNamePrefix}.pdf`);
     }
 }
+
 
         </script>
         
