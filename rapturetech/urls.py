@@ -75,6 +75,7 @@ urlpatterns = [
     # DPU-related URLs
     path('get_dpus_by_location/', get_dpus_by_location, name='get_dpus_by_location'),
     path('get_societies_by_dpu/', get_societies_by_dpu, name='get_societies_by_dpu'),
+    
     path('add_dpu/', add_dpu, name='add_dpu'),
     path('active_dpu/', active_dpu, name='active_dpu'),
     path('dpudetails/<str:dpuid>/', dpudetails, name='dpudetails'),
