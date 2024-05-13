@@ -437,15 +437,61 @@
 
 
         <script>
- function exportToCsvAndPdf(tableIds, fileNamePrefix, format) {
-    const username = '{{ user.username }}';
-    const pdf = new jsPDF();
+//  function exportToCsvAndPdf(tableIds, fileNamePrefix, format) {
+//     const username = '{{ user.username }}';
+//     const pdf = new jsPDF();
+//     let csvData = [];
+
+//     for (let i = 0; i < tableIds.length; i++) {
+//         const tableId = tableIds[i];
+//         const table = document.getElementById(tableId);
+
+//         // Generate CSV data
+//         const rows = table.querySelectorAll('tr');
+//         const tableData = [];
+//         rows.forEach((row) => {
+//             const rowData = [];
+//             const cells = row.querySelectorAll('td, th');
+//             cells.forEach((cell) => {
+//                 rowData.push(cell.innerText);
+//             });
+//             tableData.push(rowData.join(','));
+//         });
+//         csvData.push(tableData.join('\n'));
+
+//         // Generate PDF
+//         if (format === 'pdf') {
+//             if (i > 1) {
+//                 pdf.addPage(); // Add new page for each additional table in PDF
+//             }
+//             pdf.autoTable({ html: `#${tableId}` });
+//         }
+
+//     }
+
+//     // Generate and download CSV
+//     if (format === 'csv') {
+//         const csvBlob = new Blob([csvData.join('\n')], { type: 'text/csv' });
+//         const link = document.createElement('a');
+//         link.href = URL.createObjectURL(csvBlob);
+//         link.download = `${username}_${fileNamePrefix}.csv`;
+//         link.click();
+//     }
+
+//     // Save PDF
+//     if (format === 'pdf') {
+//         pdf.save(`${username}_${fileNamePrefix}.pdf`);
+//     }
+// }
+function exportToCsvAndPdf(tableIds, fileNamePrefix, format) {
+    var username = '{{ user.username }}';
+    var pdf = new jsPDF();
     let csvData = [];
 
-    for (let i = 0; i < tableIds.length; i++) {
-        const tableId = tableIds[i];
-        const table = document.getElementById(tableId);
+    var tables = document.querySelectorAll("table");
 
+    // Iterate over each table
+    tables.forEach(function(table, index) {
         // Generate CSV data
         const rows = table.querySelectorAll('tr');
         const tableData = [];
@@ -461,28 +507,30 @@
 
         // Generate PDF
         if (format === 'pdf') {
-            if (i > 1) {
+            if (index > 0) {
                 pdf.addPage(); // Add new page for each additional table in PDF
             }
-            pdf.autoTable({ html: `#${tableId}` });
+            pdf.autoTable({ html: table });
         }
-    }
 
-    // Generate and download CSV
-    if (format === 'csv') {
-        const csvBlob = new Blob([csvData.join('\n')], { type: 'text/csv' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(csvBlob);
-        link.download = `${username}_${fileNamePrefix}.csv`;
-        link.click();
-    }
+        // Check if it's the last table iteration
+        if (index === tables.length - 1) {
+            // Generate and download CSV
+            if (format === 'csv') {
+                const csvBlob = new Blob([csvData.join('\n')], { type: 'text/csv' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(csvBlob);
+                link.download = `${username}_${fileNamePrefix}.csv`;
+                link.click();
+            }
 
-    // Save PDF
-    if (format === 'pdf') {
-        pdf.save(`${username}_${fileNamePrefix}.pdf`);
-    }
+            // Save PDF
+            if (format === 'pdf') {
+                pdf.save(`${username}_${fileNamePrefix}.pdf`);
+            }
+        }
+    });
 }
-
 
         </script>
         

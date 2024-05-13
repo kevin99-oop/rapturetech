@@ -434,7 +434,6 @@ class UserLoginView(APIView):
                 request_data = request.data
             # Deserialize JSON data using your serializer
             serializer = LoginSerializer(data=request_data)
-            print("before if")
             if serializer.is_valid():
                 username = serializer.validated_data['username']
                 password = serializer.validated_data['password']
@@ -521,7 +520,6 @@ class ProfileUpdateView(LoginRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
 
-@login_required
 def generate_random_password( length=8):
     characters = string.ascii_letters + string.digits
     return ''.join(random.choice(characters) for i in range(length))
@@ -535,7 +533,7 @@ def add_dpu(request):
             dpu = form.save(commit=False)
             password = generate_random_password()
             print("password : ", password)
-            user = User.objects.create_user(request.POST.get("mobile_number"),  "dummy@gmail.com", password)
+            user = User.objects.create_user(request.POST.get("st_id"),  "dummy@gmail.com", password)
             user.save()
             dpu.plain_password = password
             dpu.user = request.user
