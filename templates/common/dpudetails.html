@@ -94,33 +94,30 @@
                     </div>
                 </div>
     
+              
                 <div class="dpu-details mt-4">
-                    <div class="col-sm-12">
-                        <div class="statistics-details d-flex align-items-center justify-content-between">
-                          <div>
-                            <p class="statistics-title text-danger"><strong>Society</strong></p>
-                            <h5 class="rate-percentage  fw-bold">{{ dpu.society }}</h5>
-                          </div>
-                          <div>
-                            <p class="statistics-title text-danger"><strong>Station Id</strong></p>
-                            <h5 class="rate-percentage  fw-bold"> {{ dpu.st_id }}</h5>
-                          </div>
-                          <div>
-                            <p class="statistics-title text-danger"><strong>DPU Created On</strong></p>
-                            <h5 class="rate-percentage  fw-bold">{{ dpu.date|date:"d-m-Y H:i:s" }}</h5>
-                          </div>
-                          {% if request.user.is_staff or request.user.is_superuser  %}
-
-                          <div class="d-none d-md-block">
-                            <p class="statistics-title text-danger"><strong>Password</strong></p>
-                            <h5 class="rate-percentage  fw-bold" onclick="myFunction()" id="password">******</h5>
-                          </div>
-                          {%endif%}
-                       
+                        <div class="row row-cols-4">
+                            <div class="col ">
+                                    <p class="statistics-title text-danger"><strong>Society</strong></p>
+                                    <h5 class="rate-percentage fw-bold">{{ dpu.society }}</h5>
+                            </div>
+                            <div class="col">
+                                    <p class="statistics-title text-danger"><strong>Station Id</strong></p>
+                                    <h5 class="rate-percentage fw-bold">{{ dpu.st_id }}</h5>
+                            </div>
+                            <div class="col">
+                                    <p class="statistics-title text-danger"><strong>DPU Created On</strong></p>
+                                    <h5 class="rate-percentage fw-bold">{{ dpu.date|date:"d-m-Y H:i:s" }}</h5>
+                            </div>
+                            {% if request.user.is_staff or request.user.is_superuser %}
+                            <div class="col">
+                                    <p class="statistics-title text-danger"><strong>Password</strong></p>
+                                    <h5 class="rate-percentage fw-bold" onclick="myFunction()" id="password">******</h5>
+                            </div>
+                            {% endif %}
                         </div>
-                      </div>
-                   
                 </div>
+                
     
                 <table id="dpu_details" class="table table-striped table-hover rounded table-responsive mt-4 border-2 border-dark" data-toggle="table"
                 data-toggle="table"

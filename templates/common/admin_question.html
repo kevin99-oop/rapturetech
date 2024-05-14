@@ -29,7 +29,7 @@
                             {% for question, st_id in question_info %}
                             <tr>
                                 <td>{{ forloop.counter }}</td>
-                                <td>{{ question.username }}</td>
+                                <td>{{ question.user.DPU.st_id }}</td>
                                 <td>{{ question.user.username }}</td>
                                 <td>
                                     {% if st_id %}
