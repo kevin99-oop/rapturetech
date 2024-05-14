@@ -1510,7 +1510,7 @@ def ask_question_view(request):
         if questionForm.is_valid():
             question = questionForm.save(commit=False)
             question.user = request.user
-            dpu_obj = models.DPU.objects.get(mobile_number=request.user.username)
+            dpu_obj = models.DPU.objects.get(st_id=request.user.username)
             question.username = request.user.username
             question.st_id = dpu_obj.st_id
             question.save()
@@ -1554,7 +1554,7 @@ def admin_question_view(request):
     question_info = []
     for question in questions:
         try:
-            dpu_instance = DPU.objects.get(mobile_number=question.username)
+            dpu_instance = DPU.objects.get(st_id=question.username)
             question_info.append((question, dpu_instance.st_id))
         except DPU.DoesNotExist:
             question_info.append((question, 'N/A'))
