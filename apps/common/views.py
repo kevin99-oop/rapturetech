@@ -1040,7 +1040,7 @@ def lastratedate_api(request):
         if animal == 'BUFFALO':
             animal = 'BUFFALOW'
 
-        csv_file_object = RateTable.objects.filter(rate_type= rate_type,animal_type= animal, user=user.id ).order_by("-uploaded_at") # get the latest csv file object
+        csv_file_object = RateTable.objects.filter(rate_type=rate_type, animal_type=animal, user=user.id).order_by("-uploaded_at")  # get the latest csv file object
 
         if len(csv_file_object) > 0:
             file_path = csv_file_object[0].csv_file.path
@@ -1050,13 +1050,13 @@ def lastratedate_api(request):
                 print("in 2nd if error one")
                 raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
 
-
-            Response_obj = {'date': csv_file_object[0].start_date.strftime('%d-%m-%Y'), 'file_path': file_path, 'id': csv_file_object[0].id }
+            Response_obj = {'date': csv_file_object[0].start_date.strftime('%d-%m-%Y'), 'file_path': file_path,
+                            'id': csv_file_object[0].id}
             # Return both the date and the file path
             return JsonResponse(Response_obj)
         else:
             logger.error(f'FileNotFoundError in lastratedate_api: {e}')
-            return JsonResponse({'error': 'No csv found' })
+            return JsonResponse({'error': 'No csv found'})
     except FileNotFoundError as e:
         # Log the error
         logger.error(f'FileNotFoundError in lastratedate_api: {e}')
@@ -1080,43 +1080,46 @@ def ratesitem_api(request):
         user = request.user
         # Convert date string to date object
         date_obj = date(int(date_str[2]), int(date_str[1]), int(date_str[0]))
-        
+
         # Query the RateTable model for the latest CSV file object
-        csv_file_object = RateTable.objects.filter(rate_type=rate_type, animal_type=animal, user=user.id, start_date=date_obj).order_by("-uploaded_at")
-        
+        csv_file_object = RateTable.objects.filter(rate_type=rate_type, animal_type=animal, user=user.id,
+                                                    start_date=date_obj).order_by("-uploaded_at")
+
         if len(csv_file_object) > 0:
             file_path = csv_file_object[0].csv_file.path
-            
+
             # Check if the file exists
             if not os.path.exists(file_path):
                 logger.error(f'FileNotFoundError in lastratedate_api: {e}')
                 raise FileNotFoundError(f"CSV file not found for {animal}_{rate_type}")
-                
+
             # Read CSV file
             with open(file_path, newline='') as csvfile:
                 reader = csv.reader(csvfile)
                 data = [row for row in reader]
-            
+
             # Find the row corresponding to the requested item
             values_row = None
             for data_row in data:
                 if data_row[0] == item:
                     values_row = data_row
                     break
-            
+
             if not values_row:
                 return JsonResponse({'error': f'Item not found in CSV {animal}_{rate_type} and {item}'}, status=404)
-            
+
             # Format output
             output_data = {"row": ",".join(values_row)}
-            
+
             return JsonResponse(output_data)
 
         else:
-            return JsonResponse({'error': f'CSV file not found for {animal}_{rate_type} and {user.username}'}, status=404)
-    
+            return JsonResponse({'error': f'CSV file not found for {animal}_{rate_type} and {user.username}'},
+                                status=404)
+
     except FileNotFoundError as e:
-        return JsonResponse({'error': f'CSV file not found for {animal}_{rate_type} and {user.username}'}, status=404)
+        return JsonResponse({'error': f'CSV file not found for {animal}_{rate_type} and {user.username}'},
+                            status=404)
 
     except Exception as e:
         # Handle other exceptions appropriately
