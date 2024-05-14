@@ -21,14 +21,14 @@ if os.getenv("ENV","dev")=="dev":
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),  # Database file path
     }
 }
-# else:
-#     print("Production database selected")
-#     DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',  # Database engine (SQLite in this case)
-#         'NAME': os.path.join(BASE_DIR, 'production.sqlite3'),  # Database file path
-#     }
-# }
+else:
+    print("Production database selected")
+    DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',  # Database engine (SQLite in this case)
+        'NAME': os.path.join(BASE_DIR, 'production.sqlite3'),  # Database file path
+    }
+}
 
 
 # DATABASES = {
