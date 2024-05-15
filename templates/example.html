@@ -132,11 +132,9 @@
                                         <h6 class="mb-2 fw-bold">Total Summary Record</h6>
                                     </div>
                                     <div class="table-responsive card-body rounded">
-                                        <table id="summary_table" class="table align-items-center table-rwd text-center table table-striped table-hover rounded table-responsive w-100 border-2 border-dark "
-                                        data-toggle="table"
+                                        <table id="summary_table" class="table align-items-center table-rwd text-center table table-striped table-hover rounded table-responsive w-100 border-2 border-dark "data-toggle="table"
                                         data-pagination="false"
-                                        data-auto-refresh="true"
-                                        >
+                                        data-auto-refresh="true">
                                             <thead class="text-white text-center rounded table-title border-white">
                                                 <tr>
                                                     <th>St. Id</th>
@@ -357,7 +355,7 @@
                                         </tr>
                                         </thead>
                                         <tbody class="text-center fw-bold" id="tableBody">
-                                        {% for drec in top_10_latest_records %}
+                                            {% for drec in top_10_latest_records %}
                                             <tr>
                                                 <td>{{ drec.ST_ID.st_id }}</td>
                                                 <td>{{ drec.ST_ID.location }}</td>

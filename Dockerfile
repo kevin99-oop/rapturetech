@@ -3,7 +3,7 @@
 # The first instruction is what image we want to base our container on
 # We Use an official Python runtime as a parent image
 FROM docker.io/python:3.11.7-alpine
-ENV ENV=dev
+ENV ENV=prod
 # by default it will choose production database 
 WORKDIR /app
 
