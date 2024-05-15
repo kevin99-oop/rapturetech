@@ -49,8 +49,10 @@ urlpatterns = [
 
     # Dashboard and Profile URLs
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
+    
     path('change-password/', auth_views.PasswordChangeView.as_view(
         template_name='common/change-password.html', success_url='/'), name='change-password'),
+    
     path('password_reset/', auth_views.PasswordResetView.as_view(
         template_name='common/password-reset/password_reset.html',
         subject_template_name='common/password-reset/password_reset_subject.txt',
@@ -65,6 +67,8 @@ urlpatterns = [
     path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(
         template_name='common/password-reset/password_reset_complete.html'
     ), name='password_reset_complete'),
+    
+    
     path('profile-update/', ProfileUpdateView.as_view(), name='profile-update'),
     path('profile/', ProfileView.as_view(), name='profile'),
 

@@ -12,27 +12,33 @@
       </div>
       <div class="card-body table-responsive card-body rounded">
         <div class="table-responsive">
-          <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack border-2 border-dark">
-            <thead class="table-title text-white text-center rounded border-white">
-              <tr class="text-center">
+          <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack border-2 border-dark"data-toggle="table"
+          data-pagination="true"
+          data-auto-refresh="true"
+          data-side-pagination="server">
+          <thead class="table-title text-white text-center rounded border-white">
+            <tr class="text-center">
                 <th>Sr No.</th>
                 <th>Question</th>
                 <th>Admin Comment</th>
                 <th>Asked Date</th>
-              </tr>
-            </thead>
-            <tbody class="text-center fw-bold" id="tableBody">
-              {% for t in questions %}
-              <tr class="text-center {% if t.admin_comment == 'Nothing' %}table-danger{% else %}table-success{% endif %}">
-                <td>{{ forloop.counter }}</td>
-                <td>{{ t.description }}</td>
+            </tr>
+        </thead>
+        <tbody class="text-center fw-bold" id="tableBody">
+            {% for t in questions reversed %}
+            <tr class="text-center {% if t.admin_comment == 'Nothing' %}table-danger{% else %}table-success{% endif %}">
+              <td>{{ forloop.revcounter }}</td>
+              <td>{{ t.description }}</td>
                 <td>{{ t.admin_comment }}</td>
                 <td>{{ t.asked_date|date:"d-m-Y" }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">No questions available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+                </div>
       </div>
     </div>
   </div>

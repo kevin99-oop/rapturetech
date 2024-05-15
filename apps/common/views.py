@@ -341,7 +341,7 @@ class DashboardView(TemplateView):
 
 
 
-class FetchDRECDataView(View):
+class FetchDRECDataView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         try:
             selected_date_str = request.GET.get('selectedDate')
@@ -350,7 +350,7 @@ class FetchDRECDataView(View):
             selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d').date()
             
             # Fetch DREC data for the selected date
-            drec_data = DREC.objects.filter(RecordingDate=selected_date)
+            drec_data = DREC.objects.filter(RecordingDate=selected_date, ST_ID__user=request.user)
             
             # Filter DREC data based on the selected shift
             if selected_shift:
@@ -408,6 +408,7 @@ class FetchDRECDataView(View):
             return JsonResponse({'drec_data': drec_data_list})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
+
 
 # User Authentication Views
 class SignUpView(CreateView):
@@ -558,21 +559,11 @@ def active_dpu(request):
     elif not request.user.is_staff and not request.user.is_superuser:
         user_id = request.user.id
         active_dpu_list = DPU.objects.filter(dpu_user=user_id)
-    # Pagination
-    paginator = Paginator(active_dpu_list, 10)  # Adjust the number per page as needed
-    page = request.GET.get('page')
-    try:
-        active_dpu_list = paginator.page(page)
-    except PageNotAnInteger:
-        active_dpu_list = paginator.page(1)
-    except EmptyPage:
-        active_dpu_list = paginator.page(paginator.num_pages)
-        # Reverse the list to display the latest entries first
+
+    # Reverse the list to display the latest entries first
     active_dpu_list = list(active_dpu_list)[::-1]
 
     return render(request, 'common/active_dpu.html', {'active_dpu_list': active_dpu_list})
-
-
 
     
 class DRECViewSet(viewsets.ModelViewSet):
