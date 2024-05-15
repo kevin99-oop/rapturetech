@@ -581,6 +581,20 @@
         $('#live_table').scroll(loadMoreRecords);
     });
 </script>
+<script>
+    // Get the element containing the time
+    var recordingTimeElement = document.getElementById("recordingTime");
+    
+    // Get the raw time string
+    var rawTime = recordingTimeElement.textContent;
+    
+    // Format the time
+    var formattedTime = rawTime.slice(0, 2) + ":" + rawTime.slice(2, 4);
+    
+    // Update the element with the formatted time
+    recordingTimeElement.textContent = formattedTime;
+</script>
+
 <script src="{% static 'register/js/jquery-3.3.1.min.js' %}" defer></script>
 <script src="{% static 'register/js/popper.min.js' %}" defer></script>
 <script src="{% static 'register/js/bootstrap.min.js' %}" defer></script>
