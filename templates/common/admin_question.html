@@ -12,12 +12,13 @@
             <div class="card-body table-responsive card-body rounded">
                 {% if question_info %}
                 <div class="table-responsive">
-                    <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack border-2 border-dark">
+                    <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack border-2 border-dark"data-toggle="table"
+                    data-pagination="true"
+                    data-auto-refresh="true"
+                    data-side-pagination="server">
                         <thead class="table-title text-white text-center rounded border-white">
                             <tr class="text-center">
                                 <th>Sr No.</th>
-                                <th>Mobile Number</th>
-                                <th>Username</th>
                                 <th>St_id</th>
                                 <th>Problem</th>
                                 <th>Reply</th>
@@ -26,18 +27,10 @@
                             </tr>
                         </thead>
                         <tbody class="text-center fw-bold" id="tableBody">
-                            {% for question, st_id in question_info %}
+                            {% for question, st_id in question_info reversed %}
                             <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td>{{ question.user.DPU.st_id }}</td>
+                                <td>{{ forloop.revcounter }}</td>
                                 <td>{{ question.user.username }}</td>
-                                <td>
-                                    {% if st_id %}
-                                        {{ st_id }}
-                                    {% else %}
-                                        N/A
-                                    {% endif %}
-                                </td>
                                 <td>{{ question.description }}</td>
                                 <td>{{ question.admin_comment }}</td>
                                 <td>{{ question.asked_date|date:"d-m-Y" }}</td>
@@ -57,7 +50,7 @@
                             </tr>
                             {% endfor %}
                         </tbody>
-                    </table>
+                                            </table>
                 </div>
                 {% else %}
                 <p>No questions available.</p>

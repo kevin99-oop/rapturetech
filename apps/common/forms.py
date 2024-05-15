@@ -105,11 +105,11 @@ class DPUForm(forms.ModelForm):
         model = DPU
         fields = ['location', 'st_id', 'society', 'mobile_number', 'owner', 'status']
         widgets = {
-            'location': forms.TextInput(attrs={'placeholder': 'Enter Location'}),
-            'st_id': forms.TextInput(attrs={'placeholder': 'Enter Station ID'}),
+            'location': forms.TextInput(attrs={'placeholder': 'Enter Root'}),
+            'st_id': forms.TextInput(attrs={'placeholder': 'Enter Station id'}),
             'society': forms.TextInput(attrs={'placeholder': 'Enter Society'}),
             'mobile_number': forms.TextInput(attrs={'placeholder': 'Enter Mobile Number'}),
-            'owner': forms.TextInput(attrs={'placeholder': 'Enter Owner'}),
+            'owner': forms.TextInput(attrs={'placeholder': 'Enter Owner Name'}),
         }
 
 
