@@ -122,28 +122,68 @@
         border: 1px solid #63FF63;
         color: #008000
     }
+
+    /* Custom style for radio buttons */
+    .radio-inline {
+        display: inline-block!important;
+        margin-right: 10px!important;
+    }
 </style>
 
-<div class="container-fluid mt-5 ">
+<div class="container-fluid mt-5">
     <!-- Main Content Here -->
     <div class="card o-hidden border-0 shadow-lg mt-5">
         <div class="container">
             <div class="table-wrapper table-responsive">
-                <div class="table-title border rounded ">
+                <div class="table-title border rounded">
                     <div class="row">
-                        <div class="col-12 text-center ">
+                        <div class="col-12 text-center">
                             <h3 class="text-white mt-2 fw-bold">Add DPU</h3>
                         </div>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-12 ">
+                    <div class="col-12">
                         <form method="post" action="{% url 'add_dpu' %}" class="dpu-form" autocomplete="on">
                             {% csrf_token %}
-                            {{ form.as_p }}
+                            <div class="form-group">
+                                <label for="{{ form.zone.id_for_label }}">Zone:</label>
+                                {{ form.zone }}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.location.id_for_label }}">Root:</label>
+                                {{ form.location }}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.st_id.id_for_label }}">St id:</label>
+                                {{ form.st_id }}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.society.id_for_label }}">Society:</label>
+                                {{ form.society }}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.mobile_number.id_for_label }}">Mobile number:</label>
+                                <input type="text" class="form-group" pattern="[0-9]{10}" title="Mobile number must be 10 digits" maxlength="10" id="{{ form.mobile_number.id_for_label }}" name="{{ form.mobile_number.html_name }}" class="form-control" placeholder="Enter Mobile Number" required>
+                                <small class="form-text text-muted">Please enter a 10-digit mobile number.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.owner.id_for_label }}">Owner:</label>
+                                {{ form.owner }}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.status.id_for_label }}">Status:</label>
+                                {{ form.status }}
+                            </div>
+                            
+<div class="form-group">
+    <label>Select dpu:</label>
+    <div class="d-inline">
+        {{ form.select_dpu }}
+    </div>
+</div>
                             <div class="d-grid gap-2 col-6 mx-auto">
-                                <button type="submit"
-                                    class="btn btn-success align-items-center center mt-4 ">Submit</button>
+                                <button type="submit" class="btn btn-success align-items-center center mt-4">Submit</button>
                             </div>
                         </form>
                     </div>

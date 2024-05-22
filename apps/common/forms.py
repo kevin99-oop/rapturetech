@@ -103,15 +103,19 @@ class ProfileForm(forms.ModelForm):
 class DPUForm(forms.ModelForm):
     class Meta:
         model = DPU
-        fields = ['location', 'st_id', 'society', 'mobile_number', 'owner', 'status']
+        fields = [
+            'zone', 'location', 'st_id', 'society', 'mobile_number', 'owner', 'status', 'select_dpu'
+        ]
         widgets = {
+            'zone': forms.TextInput(attrs={'placeholder': 'Enter Zone'}),
             'location': forms.TextInput(attrs={'placeholder': 'Enter Root'}),
             'st_id': forms.TextInput(attrs={'placeholder': 'Enter Station id'}),
             'society': forms.TextInput(attrs={'placeholder': 'Enter Society'}),
             'mobile_number': forms.TextInput(attrs={'placeholder': 'Enter Mobile Number'}),
             'owner': forms.TextInput(attrs={'placeholder': 'Enter Owner Name'}),
+            'status': forms.Select(attrs={'placeholder': 'Select Status'}),
+            'select_dpu': forms.RadioSelect,
         }
-
 
 # UploadCSVForm is a form for handling CSV file uploads for the Customer model
 class UploadCSVForm(forms.ModelForm):

@@ -91,6 +91,7 @@
                     <thead class="border-2 border-dark">
                         <tr>
                             <th data-sortable="true">Station ID</th>
+                            <th data-sortable="true">Zone</th>
                             <th data-sortable="true">Root</th>
                             <th data-sortable="true">Society</th>
                             <th data-sortable="true">Mobile Number</th>
@@ -105,6 +106,7 @@
                         {% for dpu in active_dpu_list %}
                         <tr class="align-items-center text-align-center rounded">
                             <td class="fw-bold "><a href="{% url 'dpudetails' dpuid=dpu.st_id %}" class="text-dark">{{ dpu.st_id }}</a></td>
+                            <td> {{ dpu.zone }} </td>
                             <td> {{ dpu.location }} </td>
                             <td>{{ dpu.society }}</td>
                             <td>{{ dpu.mobile_number }}</td>

@@ -37,11 +37,32 @@
                                         <p class="float-end fw-bold">
                                             Total - <code><strong>{{ total_locations }}</strong></code>
                                         </p>
-                                        <select name="location" id="location" class="form-select rounded" onchange="handleLocationChange()">
+                                        <select name="zone" id="location" class="form-select rounded" onchange="handleLocationChange()">
                                             <option value="" selected>Select</option>
                                             {% for location in locations %}
-                                                <option value="{{ location }}" {% if location == selected_location %}selected{% endif %}>
+                                                <option value="{{ zone }}" {% if location == selected_zone %}selected{% endif %}>
                                                     {{ location }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                             <div class="col-xl-2 col-md-2 col-sm-5 mb-xl-0 mb-5">
+                           <div class="card">
+                    <div class="card-body p-3">
+                        <div class="numbers">
+                            <!-- Dropdowns for selecting filters -->
+                                <label for="location" class="text-sm mb-0 text-uppercase fw-bold">Zone</label>
+                                        <p class="float-end fw-bold">
+                                            Total - <code><strong>{{ total_zons }}</strong></code>
+                                        </p>
+                                        <select name="zone" id="location" class="form-select rounded" onchange="handleLocationChange()">
+                                            <option value="" selected>Select</option>
+                                            {% for zone in zons %}
+                                                <option value="{{ zone }}" {% if location == selected_zone %}selected{% endif %}>
+                                                    {{ zone }}
                                                 </option>
                                             {% endfor %}
                                         </select>
@@ -134,70 +155,7 @@
                     
                           
     </div>
-
-    <!-- Table 2: Detail Data -->
-    <div class="row mt-4" id="divID">
-        <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
-            <div class="card rounded">
-                <div class="card-header pb-0 p-3">
-                    <div class="d-flex justify-content-between">
-                        <h6 class="me-2 mt-2 fw-bold">Detail Table</h6>
-                        <div class="float-end  mb-2 ">
-                            <button class="btn btn-primary rounded btn-sm me-2 fw-bold" onclick="exportToCsvAndPdf(['summaryTable_report', 'detailTable_report'], 'shift_report', 'csv')"><i class="icon-download me-2 mb-1"></i>CSV</button>
-                            <button class="btn btn-primary rounded btn-sm fw-bold " onclick="exportToCsvAndPdf(['summaryTable_report', 'detailTable_report'], 'shift_report', 'pdf')"><i class="icon-download me-2 mb-1"></i>PDF</button>
-
-                        </div>
-                    </div>
-                </div>
-                <div class="table-responsive card-body">
-                    {% if detail_data %}                
-                    <!-- Table 1: Summary Data -->
-                    <table id="detailTable_report" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100"data-toggle="table"
-                    data-pagination="false"
-                    data-auto-refresh="true">
-                        <thead class="text-white text-center rounded table-title">
-                            <tr>
-                                <th>CUST_ID</th>
-                                <th>Customer Name</th>  <!-- Add the header for Customer Name -->
-                                <th>MType</th>
-                                <th>FAT</th>
-                                <th>SNF</th>
-                                <th>CLR</th>
-                                <th>WATER</th>
-                                <th>Quantity</th>
-                                <th>RATE</th>
-                                <th>Amount</th>
-                                <th>CAmount</th>
-                            </tr>
-                        </thead>
-                        <tbody class=" align-items-center text-center fw-bold">
-                            {% for record in detail_data %}
-                                <tr>
-                                    <td>{{ record.CUST_ID }}</td>
-                                    <td>{{ record.CustomerName }}</td> <!-- Use the CustomerName here -->
-                                    <td>{{ record.MType }}</td>
-                                    <td>{{ record.FAT }}</td>
-                                    <td>{{ record.SNF }}</td>
-                                    <td>{{ record.CLR }}</td>
-                                    <td>{{ record.WATER }}</td>
-                                    <td>{{ record.QT }} ltr</td>
-                                    <td>{{ record.RATE }}</td>
-                                    <td>{{ record.Amount }}</td>
-                                    <td>{{ record.CAmount }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                  
-                {% else %}
-                    <p>No detailed data available for the selected filters.</p>
-                {% endif %}
-               
-                </div>
-            </div>
-        </div>
-    </div>
-    
+  
         <!-- Total Summary Record -->
 <div class="row mt-4" id="divID">
     <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
@@ -205,7 +163,11 @@
             <div class="card-header pb-0 p-3">
                 <div class="d-flex justify-content-between">
                     <h6 class="mb-2 fw-bold">Summary Table</h6>
-                 
+                  <div class="float-end  mb-2 ">
+                            <button class="btn btn-primary rounded btn-sm me-2 fw-bold" onclick="exportToCsvAndPdf(['summaryTable_report', 'detailTable_report'], 'shift_report', 'csv')"><i class="icon-download me-2 mb-1"></i>CSV</button>
+                            <button class="btn btn-primary rounded btn-sm fw-bold " onclick="exportToCsvAndPdf(['summaryTable_report', 'detailTable_report'], 'shift_report', 'pdf')"><i class="icon-download me-2 mb-1"></i>PDF</button>
+
+                        </div>
                 </div>
             </div>
             <div class="table-responsive card-body">
@@ -280,6 +242,65 @@
     </div>
 </div>
 
+    <!-- Table 2: Detail Data -->
+    <div class="row mt-4" id="divID">
+        <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
+            <div class="card rounded">
+                <div class="card-header pb-0 p-3">
+                    <div class="d-flex justify-content-between">
+                        <h6 class="me-2 mt-2 fw-bold">Detail Table</h6>
+                       
+                    </div>
+                </div>
+                <div class="table-responsive card-body">
+                    {% if detail_data %}                
+                    <!-- Table 1: Summary Data -->
+                    <table id="detailTable_report" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100"data-toggle="table"
+                    data-pagination="false"
+                    data-auto-refresh="true">
+                        <thead class="text-white text-center rounded table-title">
+                            <tr>
+                                <th>CUST_ID</th>
+                                <th>Customer Name</th>  <!-- Add the header for Customer Name -->
+                                <th>MType</th>
+                                <th>FAT</th>
+                                <th>SNF</th>
+                                <th>CLR</th>
+                                <th>WATER</th>
+                                <th>Quantity</th>
+                                <th>RATE</th>
+                                <th>Amount</th>
+                                <th>CAmount</th>
+                            </tr>
+                        </thead>
+                        <tbody class=" align-items-center text-center fw-bold">
+                            {% for record in detail_data %}
+                                <tr>
+                                    <td>{{ record.CUST_ID }}</td>
+                                    <td>{{ record.CustomerName }}</td> <!-- Use the CustomerName here -->
+                                    <td>{{ record.MType }}</td>
+                                    <td>{{ record.FAT }}</td>
+                                    <td>{{ record.SNF }}</td>
+                                    <td>{{ record.CLR }}</td>
+                                    <td>{{ record.WATER }}</td>
+                                    <td>{{ record.QT }} ltr</td>
+                                    <td>{{ record.RATE }}</td>
+                                    <td>{{ record.Amount }}</td>
+                                    <td>{{ record.CAmount }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                  
+                {% else %}
+                    <p>No detailed data available for the selected filters.</p>
+                {% endif %}
+               
+                </div>
+            </div>
+        </div>
+    </div>
+  
 
 <!-- Existing JavaScript for exporting and DataTable initialization -->
 <script>
