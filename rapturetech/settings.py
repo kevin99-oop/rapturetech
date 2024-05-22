@@ -53,8 +53,7 @@ THIRD_PARTY_APPS = [
     'django_cleanup',
 ]
 
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
-CRISPY_TEMPLATE_PACK = "bootstrap5"
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
 LOCAL_APPS = [
  'apps.common',
  'apps.userprofile',

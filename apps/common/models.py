@@ -25,19 +25,27 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 # Model representing a DPU (Data Processing Unit)
 class DPU(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    dpu_user = models.IntegerField(default=1)
+    dpu_user = models.IntegerField()
+    zone = models.CharField(max_length=100)
     location = models.CharField(max_length=255)
-    st_id = models.CharField(max_length=50, unique=True, primary_key=True)  # Renamed from dpu_id to st_id
+    st_id = models.CharField(max_length=50, unique=True, primary_key=True)
     society = models.CharField(max_length=255)
-    mobile_number = models.CharField(max_length=15,unique=True)
+    mobile_number = models.CharField(max_length=15, unique=True)
     owner = models.CharField(max_length=255)
+    
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('deactivated', 'Deactivated'),
     ]
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
-    date = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
-    plain_password = models.CharField(max_length=100)  # Store plain text password
+    date = models.DateTimeField(auto_now_add=True)
+    plain_password = models.CharField(max_length=100)
+
+    select_dpu = [
+        ('DPMCU', 'DPMCU'),
+        ('BMC', 'BMC'),
+    ]
+    select_dpu = models.CharField(max_length=5, choices=select_dpu, default='DPMCU')
 
     def __str__(self):
         return f"{self.user.username}'s DPU - {self.st_id}"
@@ -54,7 +62,7 @@ class DPU(models.Model):
 class DREC(models.Model):
     REC_TYPE = models.CharField(max_length=255, default="", blank=True)
     SLIP_TYPE = models.IntegerField(null=True, default=None)
-    ST_ID = models.ForeignKey(DPU, on_delete=models.CASCADE, related_name='drecs')  # Use ForeignKey instead of OneToOneField
+    ST_ID = models.ForeignKey(DPU, on_delete=models.CASCADE, related_name='drecs')  
     CUST_ID = models.IntegerField(null=True, default=None)
     TotalFileRecord = models.IntegerField(null=True, default=None)
     FlagEdited = models.CharField(max_length=255, default="", blank=True)
@@ -79,21 +87,20 @@ class DREC(models.Model):
     CREV = models.IntegerField(null=True, default=None)
     END_TAG = models.CharField(max_length=255, default="", blank=True)
     dpuid = models.CharField(max_length=255, default="", blank=True)
+    RID = models.CharField(max_length=255, null=True, default=None)  # Changed to CharField
     created_at = models.DateTimeField(auto_now_add=True)
-
 
     def __str__(self):
         return f"DREC for {self.ST_ID.user.username}'s DPU - {self.ST_ID.st_id}"
+    
     class Meta:
         ordering = ['-created_at']
-
         
     def save(self, *args, **kwargs):
-            # Check the status of the associated DPU
-            if self.ST_ID.status == 'deactivated':
-                raise ValidationError("Cannot save DREC. DPU is deactivated. Activate the DPU from the admin.")
+        if self.ST_ID.status == 'deactivated':
+            raise ValidationError("Cannot save DREC. DPU is deactivated. Activate the DPU from the admin.")
             
-            super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
 class Customer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -264,9 +264,8 @@ class DashboardView(TemplateView):
 
         queryset = CustomerList.objects.filter(st_id__in=active_dpu_list.values_list('st_id', flat=True).distinct())
         return queryset.count() if (active_dpu_list.first().user.is_staff or active_dpu_list.first().user.is_superuser) else queryset.filter(st_id=active_dpu_list.first().st_id).count()
-
     def get_top_10_latest_records(self, user, st_id):
-        queryset = DREC.objects.filter(ST_ID__user=user, ST_ID__st_id=st_id) if (user.is_staff or user.is_superuser) else DREC.objects.filter(ST_ID__dpu_user=user.id, ST_ID__st_id=st_id)
+        queryset = DREC.objects.filter(ST_ID__user=user) if (user.is_staff or user.is_superuser) else DREC.objects.filter(ST_ID__dpu_user=user.id)
         return queryset.order_by('-RecordingDate', '-SHIFT')[:10]
 
     def get_recording_dates(self, user_id):
@@ -798,21 +797,40 @@ def customer_list(request, st_id):
     
     return render(request, 'common/customer_list.html', context)
 
+
 @login_required
 def download_latest_csv(request, st_id):
     try:
-        latest_customer = get_object_or_404(Customer.objects.filter(
-            user=request.user, st_id=st_id).order_by('-date_uploaded')[:1])
+        # Ensure the DPU instance exists and belongs to the user
+        dpu_instance = get_object_or_404(DPU, st_id=st_id, user=request.user)
+        # Fetch all CustomerList entries related to the given st_id
+        customer_list_entries = CustomerList.objects.filter(st_id=st_id, user=request.user)
 
-        with open(latest_customer.csv_file.path, 'rb') as csv_file:
-            response = HttpResponse(csv_file.read(), content_type='text/csv')
-            response['Content-Disposition'] = f'attachment; filename="{latest_customer.csv_file.name}"'
-            return response
+        if not customer_list_entries.exists():
+            messages.error(request, 'No customer data found for the specified st_id.')
+            return redirect('error_view')
 
-    except FileNotFoundError:
-        messages.error(request, 'CSV file not found.')
+        # Create the HttpResponse object with CSV header
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{st_id}_all_customers.csv"'
+
+        writer = csv.writer(response)
+        # Write the st_id in the first line
+        writer.writerow([st_id])
+        # Write the header row in the same format as uploaded
+        writer.writerow(['CUST_ID', 'NAME', 'MOBILE', 'ADHAAR', 'BANK_AC', 'IFSC'])
+
+        # Write the data rows
+        for customer in customer_list_entries:
+            writer.writerow([customer.cust_id, customer.name, customer.mobile,
+                             customer.adhaar, customer.bank_ac, customer.ifsc])
+
+        return response
+
+    except DPU.DoesNotExist:
+        messages.error(request, f'DPU with st_id {st_id} does not exist.')
     except Exception as e:
-        messages.error(request, f'Error downloading CSV file: {e}')
+        messages.error(request, f'Error generating CSV file: {e}')
 
     return redirect('error_view')
 

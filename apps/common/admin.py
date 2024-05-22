@@ -6,11 +6,14 @@ from django.utils.html import format_html
 
 # Admin for DPU model
 class DPUAdmin(admin.ModelAdmin):
-    list_display = ('user', 'location', 'st_id', 'society', 'mobile_number', 'owner', 'status', 'Amount', 'CAmount')
+    list_display = (
+        'user', 'zone', 'location', 'st_id', 'society', 'mobile_number', 'owner',
+        'status', 'select_dpu'
+    )
     list_filter = ('user', 'status', 'location', 'society')  # Add more fields as needed
-    search_fields = ('user__username', 'location', 'st_id__st_id', 'society', 'mobile_number', 'owner')  # Add more fields as needed
+    search_fields = ('user__username', 'location', 'st_id', 'society', 'mobile_number', 'owner')  # Add more fields as needed
 
-admin.site.register(DPU)
+admin.site.register(DPU, DPUAdmin)
 
 # Admin for DREC model
 @admin.register(DREC)
@@ -21,7 +24,7 @@ class DRECAdmin(admin.ModelAdmin):
         'MType', 'RecordingDate', 'RecordingTime', 'SHIFT', 'FAT', 'FAT_UNIT',
         'SNF', 'SNF_UNIT', 'CLR', 'CLR_UNIT', 'WATER', 'WATER_UNIT', 'QT',
         'QT_UNIT', 'RATE', 'Amount', 'CAmount', 'CSR_NO', 'CREV', 'END_TAG',
-        'dpuid', 'created_at'
+        'dpuid', 'created_at','RID'
     )
     search_fields = ['ST_ID__st_id', 'CUST_ID']  # Add fields you want to search on
 # Admin for Customer model
