@@ -148,7 +148,6 @@ class DREC(models.Model):
             
         super().save(*args, **kwargs)
 
-
 class Customer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     st_id = models.ForeignKey(DPU, on_delete=models.CASCADE, related_name='customers')
