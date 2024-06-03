@@ -139,11 +139,11 @@ def custom_logout(request):
 def super_dashboard(request):
     # Logic for user dashboard
     return render(request, 'common/super_admin/super_dashboard.html')
-
 class DashboardView(TemplateView):
     template_name = 'example.html'
     paginate_by = 10
     refresh_interval = 5  # Refresh interval in seconds
+    max_records_to_fetch = 300  # Maximum number of records to fetch
 
     @method_decorator([login_required, ensure_csrf_cookie])
     def dispatch(self, *args, **kwargs):
@@ -177,7 +177,11 @@ class DashboardView(TemplateView):
         drec_data = self.get_all_drec_data(request.user) if request else None
 
         if drec_data is not None:
-            drec_data_cust_ids = drec_data.values_list('CUST_ID', flat=True).distinct()
+            # Limit the number of records fetched
+            drec_data = drec_data[:self.max_records_to_fetch]
+
+            # Get distinct customer IDs directly from the filtered records
+            drec_data_cust_ids = set(record.CUST_ID for record in drec_data)
 
             summary_data = self.prepare_summary_data(drec_data, active_dpu_list)
             customer_list = self.get_customer_list(drec_data_cust_ids)
@@ -1378,6 +1382,7 @@ def get_detail_data(request, location, dpu, society, shift, start_date):
         detail_data.append(record_dict)
 
     return detail_data
+
 
 @login_required
 def ledger_report(request):
