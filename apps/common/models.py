@@ -79,7 +79,7 @@ class DREC(models.Model):
         (7, 'Deduction'),
     ]
 
-    REC_TYPE = models.IntegerField(null=True, default=None)  # REC_TYPE will be kept as an integer field with no choices
+    REC_TYPE = models.CharField(max_length=10,null=True, default=None)  # REC_TYPE will be kept as an integer field with no choices
     SLIP_TYPE = models.IntegerField(choices=SLIP_TYPE_CHOICES, default=1)
     ST_ID = models.ForeignKey('DPU', on_delete=models.CASCADE, related_name='drecs')
     CUST_ID = models.IntegerField(null=True, default=None)
