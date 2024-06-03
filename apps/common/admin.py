@@ -1,5 +1,5 @@
 from django.contrib import admin
-from apps.common.models import DREC,DPU,Customer,Config,RateTable,CustomerList,Questions
+from apps.common.models import DREC,DPU,Customer,Config,RateTable,CustomerList,Questions,OldDrecDataEdited
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
@@ -16,17 +16,36 @@ class DPUAdmin(admin.ModelAdmin):
 admin.site.register(DPU, DPUAdmin)
 
 # Admin for DREC model
-@admin.register(DREC)
 class DRECAdmin(admin.ModelAdmin):
-  # Display all fields in the admin interface
-    list_display = (
-        'REC_TYPE', 'SLIP_TYPE', 'ST_ID', 'CUST_ID', 'TotalFileRecord', 'FlagEdited',
-        'MType', 'RecordingDate', 'RecordingTime', 'SHIFT', 'FAT', 'FAT_UNIT',
-        'SNF', 'SNF_UNIT', 'CLR', 'CLR_UNIT', 'WATER', 'WATER_UNIT', 'QT',
-        'QT_UNIT', 'RATE', 'Amount', 'CAmount', 'CSR_NO', 'CREV', 'END_TAG',
-        'dpuid', 'created_at','RID'
-    )
-    search_fields = ['ST_ID__st_id', 'CUST_ID']  # Add fields you want to search on
+    list_display = [
+        'REC_TYPE', 'SLIP_TYPE', 'ST_ID', 'CUST_ID', 'TotalFileRecord',
+        'FlagEdited', 'MType', 'RecordingDate', 'RecordingTime', 'SHIFT', 
+        'FAT', 'FAT_UNIT', 'SNF', 'SNF_UNIT', 'CLR', 'CLR_UNIT', 'WATER', 
+        'WATER_UNIT', 'QT', 'QT_UNIT', 'RATE', 'Amount', 'CAmount', 'CSR_NO', 
+        'CREV', 'END_TAG', 'dpuid', 'RID', 'created_at'
+    ]
+    list_filter = ['REC_TYPE', 'created_at']
+    search_fields = ['ST_ID__st_id', 'CUST_ID']
+
+class OldDrecDataEditedAdmin(admin.ModelAdmin):
+    list_display = [
+        'original_record', 'REC_TYPE', 'SLIP_TYPE', 'ST_ID', 'CUST_ID', 'TotalFileRecord',
+        'FlagEdited', 'MType', 'RecordingDate', 'RecordingTime', 'SHIFT', 'FAT', 'FAT_UNIT',
+        'SNF', 'SNF_UNIT', 'CLR', 'CLR_UNIT', 'WATER', 'WATER_UNIT', 'QT', 'QT_UNIT',
+        'RATE', 'Amount', 'CAmount', 'CSR_NO', 'CREV', 'END_TAG', 'dpuid', 'RID', 'created_at'
+    ]
+    readonly_fields = ['created_at']
+    list_filter = ['REC_TYPE', 'created_at']
+    search_fields = ['ST_ID', 'CUST_ID']
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return self.readonly_fields + ['created_at']
+        return self.readonly_fields
+
+# Register the admin classes
+admin.site.register(DREC, DRECAdmin)
+admin.site.register(OldDrecDataEdited, OldDrecDataEditedAdmin)
 # Admin for Customer model
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):

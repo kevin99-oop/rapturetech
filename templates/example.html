@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-<div class="container-fluid py-4">
+<div class="py-4">
     <div class="row">
         <div class="col-sm-12">
             <div class="home-tab">
@@ -40,8 +40,6 @@
                                             <div class="col-8">
                                                 <div class="numbers">
                                                     <h5 class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Average Fat</h5>
-                    
-                                                   
                                                 </div>
                                             </div>
                                             <div class="col-4 text-end">
@@ -49,7 +47,7 @@
                                                     <span class="text-danger text-lg font-weight-bolder fw-bold">
                                                         {{ avg_fat }}
                                                     </span>
-                                                    </h5>
+                                                </h5>
                                             </div>
                                         </div>
                                     </div>
@@ -62,9 +60,6 @@
                                             <div class="col-8">
                                                 <div class="numbers">
                                                     <h5 class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Average SNF</h5>
-                    
-                                                  
-                    
                                                 </div>
                                             </div>
                                             <div class="col-4 text-end">
@@ -84,15 +79,11 @@
                                             <div class="col-8">
                                                 <div class="numbers">
                                                     <h5 class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Average CLR</h5>
-                    
-                                                  
-                    
                                                 </div>
                                             </div>
                                             <div class="col-4 text-end">
                                                 <h5 class="mb-0">
                                                     <span class="text-danger text-lg font-weight-bolder fw-bold">{{ avg_clr }}</span>
-                
                                                 </h5>
                                             </div>
                                         </div>
@@ -106,9 +97,6 @@
                                             <div class="col-8">
                                                 <div class="numbers">
                                                     <h5 class="text-sm mb-0 text-uppercase font-weight-bold fw-bold">Total Customer</h5>
-                    
-                                                   
-                    
                                                 </div>
                                             </div>
                                             <div class="col-4 text-end">
@@ -118,11 +106,8 @@
                                                 </h5>
                                             </div>
                                         </div>
-                                        
                                     </div>
-                                    
                                 </div>
-                            
                             </div>
                         </div>
                         <div class="row mt-4" id="divID">
@@ -132,9 +117,7 @@
                                         <h6 class="mb-2 fw-bold">Total Summary Record</h6>
                                     </div>
                                     <div class="table-responsive card-body rounded">
-                                        <table id="summary_table" class="table align-items-center table-rwd text-center table table-striped table-hover rounded table-responsive w-100 border-2 border-dark "data-toggle="table"
-                                        data-pagination="false"
-                                        data-auto-refresh="true">
+                                        <table id="summary_table" class="table align-items-center table-rwd text-center table table-striped table-hover rounded table-responsive w-100 border-2 border-dark "data-toggle="table" data-pagination="false" data-auto-refresh="true">
                                             <thead class="text-white text-center rounded table-title border-white">
                                                 <tr>
                                                     <th>St. Id</th>
@@ -156,10 +139,10 @@
                                                 <tr class="align-items-center text-align-center">
                                                     {% if record.ST_ID__st_id %}
                                                     <td><a href="{% url 'dpudetails' dpuid=record.ST_ID__st_id %}" class="text-dark">{{ record.ST_ID__st_id }}</a></td>
-                                                {% else %}
-                                                    <td>N/A</td>
-                                                {% endif %}
-                                                                                                    <td>{{ record.ST_ID__location }}</td>
+                                                    {% else %}
+                                                        <td>N/A</td>
+                                                    {% endif %}
+                                                    <td>{{ record.ST_ID__location }}</td>
                                                     <td>{{ record.ST_ID__society }}</td>
                                                     <td>{{ record.RecordingDate|date:"d-m-Y" }}</td>
                                                     <td>{{ record.SHIFT }}</td>
@@ -172,7 +155,6 @@
                                                     <td>{{ record.total_cust }}</td>
                                                 </tr>
                                                 {% endfor %}
-                        
                                                 <tr class="align-items-center text-align-center  border-2  border-dark bg-light">
                                                     <td colspan="5">Cow Summary</td>
                                                     <td>{{ avg_fat_cow }}</td>
@@ -209,12 +191,8 @@
                                         </div>
                                     </div>
                                     <div class="card-body table-responsive card-body rounded">
-                                        <table id="live_table" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 border-2 border-dark "data-toggle="table"
-                                        data-pagination="false"
-                                        data-auto-refresh="true"
-                                        data-side-pagination="server"
-                                        >
-                                            <!-- Table header -->
+                                        <table id="live_table" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 border-2 border-dark " data-toggle="table" data-pagination="false" data-auto-refresh="true" data-side-pagination="server">
+                                            <!-- Table header --> 
                                             <thead class="table-title text-white text-center rounded border-white">
                                                 <tr>
                                                     <th>St. Id</th>
@@ -284,14 +262,11 @@
                                                 <li class="page-item disabled">
                                                     <span class="page-link" aria-hidden="true">&laquo;</span>
                                                 </li>
-                                                {% endif %}
-                        
+                                                {% endif %}                        
                                                 <li class="page-item {% if drec_data.number == 1 %}active{% endif %}" aria-current="page">
                                                     <span class="page-link">1</span>
                                                 </li>
-                        
                                                 <li class="page-item"><a class="page-link" href="?page=2">2</a></li>
-                        
                                                 {% if drec_data.has_next %}
                                                 <li class="page-item">
                                                     <a class="page-link" href="?page={{ drec_data.next_page_number }}" aria-label="Next">
@@ -320,7 +295,7 @@
                     <!-- Top 10 Records Content -->
                     <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
                         <!-- Top 10 Records Table Content -->
-                        <div class="container-fluid col-lg-12 mb-lg-0 mb-5">
+                        <div class="col-lg-12 mb-lg-0 mb-5">
                             <div class="card shadow rounded">
                                 <div class="card-header pb-0 p-3">
                                     <div class="justify-content-between">
@@ -329,17 +304,12 @@
                                 </div>
                                 <div class="table-responsive card-body rounded">
                                     
-                                    <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack border-2 border-dark"
-                                           data-toggle="table"
-                                           data-pagination="false"
-                                           data-auto-refresh="true"
-                                           data-sort-order="desc"
-                                         >
+                                    <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack border-2 border-dark" data-toggle="table" data-pagination="false" data-auto-refresh="true" data-sort-order="desc">
                                         <thead class="table-title text-white text-center rounded border-white">
                                         <tr>
                                             <th>St ID</th>
-                                            <th >Location</th>
-                                            <th >Society</th>
+                                            <th>Location</th>
+                                            <th>Society</th>
                                             <th data-sortable="true">Date</th>
                                             <th data-sortable="true">Time</th>
                                             <th data-sortable="true">Shift</th>
@@ -387,38 +357,82 @@
                         </div>                    
                     </div>
                     <!-- Date Filter Content -->
-                    <div class="tab-pane fade" id="nav-contact" role="tabpanel"
-                        aria-labelledby="nav-contact-tab">
+                    <!-- A container for a tab panel -->
+                    <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
                         <!-- Date Filter Content -->
-                        <div class="container-fluid col-lg-12 mb-lg-0 mb-5">
-                            <div class="card shadow rounded" >
+                        <!-- A Bootstrap column for layout -->
+                        <div class="col-lg-12 mb-lg-0 mb-5">
+                            <!-- A card component with shadow and rounded corners -->
+                            <div class="card shadow rounded">
+                                <!-- Card header with padding and border-bottom -->
                                 <div class="card-header pb-0 p-3">
-                                    <div class=" justify-content-start">
+                                    <!-- Flex container for header content alignment -->
+                                    <div class="justify-content-start">
+                                        <!-- Header title -->
                                         <h6 class="mb-2 fw-bold">Date Filter</h6>
                                     </div>
                                 </div>
-                                <div class="table-responsive card-body rounded" >
-                                    <div class="d-flex justify-content-center align-items-center">
-                                        <div class="text-center">
-                                            <h5>Please select a date and shift:</h5>
-                                            <input type="date" id="selectedDate" class="form-control" required>
-                                                   <!-- Add a dropdown menu for selecting shift -->
-                                                <select id="selectedShift" class="form-select mt-2" required>
-                                                    <option value="M">Morning (M)</option>
-                                                    <option value="E">Evening (E)</option>
-                                                    <option value="both">Both M and E</option>
-                                                </select>
-                                                
-        
-                                            <button onclick="fetchDRECData()" class="btn btn-success mt-2">Fetch Data</button>
+                                <!-- Card body with rounded corners and responsive table -->
+                                <div class="table-responsive card-body rounded">
+                                    <!-- Flex container for centering content -->
+                                    <form method="post" id="filterForm">
+                                        <div class="row align-items-center justify-content-center text-center">
+                                            <!-- Center-aligned text container -->
+                                            <div class="col-xl-2 col-md-2 col-sm-5 mb-xl-0 mb-5">
+                                                <div class="card">
+                                                    <div class="card-body p-3">
+                                                        <!-- Dropdown for selecting date -->
+                                                        <label for="selectedDate" class="text-sm mb-0 text-uppercase fw-bold">Select Date</label>
+                                                        <div class="input-group">
+                                                            <input type="date" id="selectedDate" class="form-control rounded" placeholder="dd/mm/yyyy" name="selectedDate" required>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-2 col-md-2 col-sm-5 mb-xl-0 mb-5">
+                                                <div class="card">
+                                                    <div class="card-body p-3">
+                                                        <!-- Dropdown for selecting shift -->
+                                                        <label for="selectedShift" class="text-sm mb-0 text-uppercase fw-bold">Select Shift</label>
+                                                        <div class="numbers">
+                                                            <select id="selectedShift" name="selectedShift" class="form-select">
+                                                                <option value="">All</option>
+                                                                <option value="M">Morning</option>
+                                                                <option value="E">Evening</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-2 col-md-2 col-sm-5 mb-xl-0 mb-5">
+                                                <div class="card">
+                                                    <div class="card-body p-3">
+                                                        <!-- Dropdown for selecting ST ID -->
+                                                        <label for="selectedStId" class="text-sm mb-0 text-uppercase fw-bold">Select ST ID</label>
+                                                        <div class="numbers">
+                                                            <select id="selectedStId" name="selectedStId" class="form-select">
+                                                                <option value="">All</option>
+                                                                <!-- Add options dynamically if needed -->
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <table class="table align-items-center text-center table table-striped table-hover rounded table-responsive table-responsive-stack border-2 border-dark"  
-                                    data-toggle="table"
-                                    data-pagination="true"
-                                    data-auto-refresh="true">
-                                    <thead class="table-title text-white text-center rounded border-white">
+                                        <!-- Filter button -->
+                                        <div class="row justify-content-center mt-4">
+                                            <div class="col-auto">
+                                                <button type="button" onclick="fetchDRECData()" class="btn btn-success align-items-center center">Filter</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                
+                                    <!-- Table with various Bootstrap and custom classes for styling and functionality -->
+                                    <table class=" table align-items-center text-center table-striped table-hover rounded table-responsive table-responsive-stack border-2 border-dark" data-toggle="table" data-pagination="true" data-auto-refresh="true">
+                                        <!-- Table header with specific styles -->
+                                        <thead class="table-title text-white text-center rounded border-white">
                                             <tr>
+                                                <!-- Table headers defining each column -->
                                                 <th>St ID</th>
                                                 <th>Root</th>
                                                 <th>Society</th>
@@ -428,23 +442,25 @@
                                                 <th>Cust. ID</th>
                                                 <th>Name</th>
                                                 <th>FAT</th>
-                                                <th>SNF</th>
+                                                <th>SNF</nth>
                                                 <th>CLR</th>
                                                 <th>Water</th>
                                                 <th>Ltr. Qty</th>
                                                 <th>Amt</th>
-                                                <th>Cumu. Amount</th> 
+                                                <th>Cumu. Amount</th>
                                                 <!-- Add more table headers as needed -->
                                             </tr>
                                         </thead>
+                                        <!-- Table body where data will be dynamically populated -->
                                         <tbody id="drecDataBody" class="fw-bold">
                                             <!-- DREC data will be populated here dynamically using JavaScript -->
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
-                        </div>      
+                        </div>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -470,57 +486,101 @@
     }
 
     function fetchDRECData() {
-        const selectedDate = $('#selectedDate').val();
-        const selectedShift = $('#selectedShift').val();
-        if (!selectedDate) {
-            alert('Please select a date.');
-            return;
-        }
-        let url = `/fetch_drec_data/?selectedDate=${selectedDate}`;
-        if (selectedShift) {
-            url += `&selectedShift=${selectedShift}`;
-        }
-        try {
-            fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                const drecDataBody = $('#drecDataBody');
-                let rowsHTML = '';
-                if (data.drec_data.length === 0) {
-                    rowsHTML = '<tr><td colspan="15">No data found for the selected date.</td></tr>';
-                } else {
-                    data.drec_data.forEach(item => {
-                        const recordingDate = new Date(item.RecordingDate);
-                        const formattedDate = recordingDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                        const row = `<tr>
-                            <td>${item.ST_ID}</td>
-                            <td>${item.Location}</td>
-                            <td>${item.Society}</td>
-                            <td>${formattedDate}</td>
-                            <td>${item.RecordingTime}</td>
-                            <td>${item.SHIFT}</td>
-                            <td>${item.CUST_ID}</td>
-                            <td>${item.Customer_Name}</td>
-                            <td>${item.FAT}</td>
-                            <td>${item.SNF}</td>
-                            <td>${item.CLR}</td>
-                            <td>${item.WATER}</td>
-                            <td>${item.QT}</td>
-                            <td>₹ ${item.Amount}</td>
-                            <td>${item.CAmount}</td>
-                        </tr>`;
-                        rowsHTML += row;
-                    });
-                }
-                drecDataBody.html(rowsHTML);
-            })
-            .catch(error => {
-                console.error('Error fetching DREC data:', error);
-            });
-        } catch (error) {
-            console.error('Error fetching DREC data:', error);
-        }
+    const selectedDate = $('#selectedDate').val();
+    const selectedShift = $('#selectedShift').val();
+    const selectedStId = $('#selectedStId').val();
+    const selectedLocation = $('#selectedLocation').val();
+    const selectedSociety = $('#selectedSociety').val();
+
+    if (!selectedDate) {
+        alert('Please select a date.');
+        return;
     }
+
+    let url = `/fetch_drec_data/?selectedDate=${selectedDate}`;
+    if (selectedShift) {
+        url += `&selectedShift=${selectedShift}`;
+    }
+    if (selectedStId) {
+        url += `&selectedStId=${selectedStId}`;
+    }
+    if (selectedLocation) {
+        url += `&selectedLocation=${selectedLocation}`;
+    }
+    if (selectedSociety) {
+        url += `&selectedSociety=${selectedSociety}`;
+    }
+
+    try {
+        fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            // Only update the dropdowns if they are empty
+            if ($('#selectedStId').children().length === 1) {
+                const stIdSelect = $('#selectedStId');
+                stIdSelect.html('<option value="">All</option>');
+                data.st_ids.forEach(st_id => {
+                    stIdSelect.append(new Option(st_id, st_id));
+                });
+            }
+
+            if ($('#selectedLocation').children().length === 1) {
+                const locationSelect = $('#selectedLocation');
+                locationSelect.html('<option value="">All</option>');
+                data.locations.forEach(location => {
+                    locationSelect.append(new Option(location, location));
+                });
+            }
+
+            if ($('#selectedSociety').children().length === 1) {
+                const societySelect = $('#selectedSociety');
+                societySelect.html('<option value="">All</option>');
+                data.societies.forEach(society => {
+                    societySelect.append(new Option(society, society));
+                });
+            }
+
+            // Populate DREC data
+            const drecDataBody = $('#drecDataBody');
+            let rowsHTML = '';
+            if (data.drec_data.length === 0) {
+                rowsHTML = '<tr><td colspan="15">No data found for the selected criteria.</td></tr>';
+            } else {
+                data.drec_data.forEach(item => {
+                    const recordingDate = new Date(item.RecordingDate);
+                    const formattedDate = recordingDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    const row = `<tr>
+                        <td>${item.ST_ID}</td>
+                        <td>${item.Location}</td>
+                        <td>${item.Society}</td>
+                        <td>${formattedDate}</td>
+                        <td>${item.RecordingTime}</td>
+                        <td>${item.SHIFT}</td>
+                        <td>${item.CUST_ID}</td>
+                        <td>${item.Customer_Name}</td>
+                        <td>${item.FAT}</td>
+                        <td>${item.SNF}</td>
+                        <td>${item.CLR}</td>
+                        <td>${item.WATER}</td>
+                        <td>${item.QT}</td>
+                        <td>₹ ${item.Amount}</td>
+                        <td>${item.CAmount}</td>
+                    </tr>`;
+                    rowsHTML += row;
+                });
+            }
+            drecDataBody.html(rowsHTML);
+        })
+        .catch(error => {
+            alert('Error fetching DREC data. Please try again later.');
+            console.error('Error fetching DREC data:', error);
+        });
+    } catch (error) {
+        alert('Error fetching DREC data. Please try again later.');
+        console.error('Error fetching DREC data:', error);
+    }
+}
+
 
     let page = 1;
     const pageSize = 10;
@@ -593,11 +653,21 @@
     
     // Update the element with the formatted time
     recordingTimeElement.textContent = formattedTime;
+       // Assume 'drec' is a JavaScript object containing the DREC data
+       if (drec.FlagEdited === 0) {
+            // Set color to green for 10 minutes
+            setTimeout(function() {
+                // Change color to default
+            }, 600000); // 600000 ms = 10 min
+        } else {
+            // Set color to red
+        }
 </script>
+<script src="{% static 'new/vendor/js/select2.js' %}"></script>
 
-<script src="{% static 'register/js/jquery-3.3.1.min.js' %}" defer></script>
-<script src="{% static 'register/js/popper.min.js' %}" defer></script>
-<script src="{% static 'register/js/bootstrap.min.js' %}" defer></script>
-<script src="{% static 'register/js/main.js' %}" defer></script>
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js" defer></script>
+<script src="{% static 'register/js/jquery-3.3.1.min.js' %}" ></script>
+<script src="{% static 'register/js/popper.min.js' %}" ></script>
+<script src="{% static 'register/js/bootstrap.min.js' %}" ></script>
+<script src="{% static 'register/js/main.js' %}" ></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js" ></script>
 {% endblock %}

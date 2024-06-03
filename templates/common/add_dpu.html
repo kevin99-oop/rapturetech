@@ -175,13 +175,26 @@
                                 <label for="{{ form.status.id_for_label }}">Status:</label>
                                 {{ form.status }}
                             </div>
+                            <div class="col-md-6">
+                                <div class="form-group row">
+                                    <label class="col-sm-3 col-form-label">SELECT DPU</label>
+                                    <div class="col-sm-4">
+                                        <div class="form-check">
+                                            <input type="radio" class="form-check-input" name="select_dpu" id="DPMCU" value="DPMCU" {% if form.initial.select_dpu == "DPMCU" %} checked {% endif %} required >
+                                            <label class="form-check-label" for="DPMCU">DPMCU</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="form-check">
+                                            <input type="radio" class="form-check-input" name="select_dpu" id="BMC" value="BMC" {% if form.initial.select_dpu == "BMC" %} checked {% endif %} required>
+                                            <label class="form-check-label" for="BMC">BMC</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             
-<div class="form-group">
-    <label>Select dpu:</label>
-    <div class="d-inline">
-        {{ form.select_dpu }}
-    </div>
-</div>
+                                                          
+                        
                             <div class="d-grid gap-2 col-6 mx-auto">
                                 <button type="submit" class="btn btn-success align-items-center center mt-4">Submit</button>
                             </div>

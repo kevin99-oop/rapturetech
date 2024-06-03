@@ -1,0 +1,114 @@
+<!-- partial:partials/_sidebar.html -->
+<nav class="sidebar sidebar-offcanvas rounded" id="sidebar">
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}" href="{% url 'dashboard' %}">
+                <i class="mdi mdi-view-dashboard mdi-grid-large menu-icon"></i>
+                <span class="menu-title">Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item nav-category">Reports</li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.path == '/shift_report/' or request.path == '/ledger/' %}active{% endif %}" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false">
+                <i class="menu-icon mdi mdi-file-check"></i>
+                <span class="menu-title">Reports</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="ui-basic">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'shift_report' %}">Shift Report</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'ledger_report' %}">Ledger</a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+        <li class="nav-item nav-category">Service</li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.path == '/add_dpu/' or request.path == '/active_dpu/' %}active{% endif %}" data-bs-toggle="collapse" href="#form-elements" aria-expanded="false" aria-controls="form-elements">
+                <i class="menu-icon mdi mdi-memory"></i>
+                <span class="menu-title">DPU</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="form-elements">
+                <ul class="nav flex-column sub-menu">
+                    {% if request.user.is_staff or request.user.is_superuser %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'add_dpu' %}">Add DPU</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'active_dpu' %}">DPU List</a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.path == '/upload_rate_table/' or request.path == '/rate_table_list/' %}active{% endif %}" data-bs-toggle="collapse" href="#charts" aria-expanded="false" aria-controls="charts">
+                <i class="menu-icon mdi mdi-currency-inr"></i>
+                <span class="menu-title">Rate Table</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="charts">
+                <ul class="nav flex-column sub-menu">
+                    {% if request.user.is_staff or request.user.is_superuser %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'upload_rate_table' %}">Rate Table Upload</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'rate_table_list' %}">Rate Table List</a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.path == '/upload_customer_csv/' %}active{% endif %}" data-bs-toggle="collapse" href="#tables" aria-expanded="false" aria-controls="tables">
+                <i class="menu-icon mdi mdi-account-multiple"></i>
+                <span class="menu-title">Customer</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="tables">
+                <ul class="nav flex-column sub-menu">
+                    {% if request.user.is_staff or request.user.is_superuser %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'upload_customer_csv' %}">Add Customer</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'active_dpu' %}">Customer List</a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+        <li class="nav-item nav-category">Help</li>
+        {% if request.user.is_staff or request.user.is_superuser %}
+        <li class="nav-item">
+            <a class="nav-link {% if request.path == '/admin-question/' %}active{% endif %}" href="{% url 'admin-question' %}">
+                <i class="menu-icon mdi mdi-message-text"></i>
+                <span class="menu-title">Chat</span>
+            </a>
+        </li>
+        {% endif %}
+        {% if not request.user.is_staff and not request.user.is_superuser %}
+        <li class="nav-item">
+            <a class="nav-link {% if request.path == '/ask-question/' %}active{% endif %}" href="{% url 'ask-question' %}">
+                <i class="menu-icon mdi mdi-message-text"></i>
+                <span class="menu-title">Support</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.path == '/question-history/' %}active{% endif %}" href="{% url 'question-history' %}">
+                <i class="menu-icon mdi mdi-message-text"></i>
+                <span class="menu-title">Chat History</span>
+                {% if has_unread_messages %}
+                <span class="badge badge-danger">New</span>
+                {% endif %}
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+<!-- partial -->

@@ -338,28 +338,38 @@ class DashboardView(TemplateView):
         return avg_fat, avg_snf, avg_clr, avg_water, total_ltr, total_amt, total_cust
 
 
-
-
 class FetchDRECDataView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         try:
             selected_date_str = request.GET.get('selectedDate')
             selected_shift = request.GET.get('selectedShift')  # Get selected shift
+            selected_st_id = request.GET.get('selectedStId')  # Get selected st_id
+            selected_location = request.GET.get('selectedLocation')  # Get selected location
+            selected_society = request.GET.get('selectedSociety')  # Get selected society
             
-            selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d').date()
+            selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d').date() if selected_date_str else None
             
-            # Fetch DREC data for the selected date
-            drec_data = DREC.objects.filter(RecordingDate=selected_date, ST_ID__user=request.user)
+            # Initial filter for user
+            drec_data = DREC.objects.filter(ST_ID__user=request.user)
             
-            # Filter DREC data based on the selected shift
+            if selected_date:
+                drec_data = drec_data.filter(RecordingDate=selected_date)
+            
             if selected_shift:
                 if selected_shift == 'both':
-                    # Include both M and E shifts
                     drec_data = drec_data.filter(Q(SHIFT='M') | Q(SHIFT='E'))
                 else:
-                    # Include only the selected shift
                     drec_data = drec_data.filter(SHIFT=selected_shift)
             
+            if selected_st_id:
+                drec_data = drec_data.filter(ST_ID=selected_st_id)
+            
+            if selected_location:
+                drec_data = drec_data.filter(ST_ID__location=selected_location)
+            
+            if selected_society:
+                drec_data = drec_data.filter(ST_ID__society=selected_society)
+
             # Prefetch related CustomerList objects to reduce database hits
             drec_data = drec_data.select_related('ST_ID')
 
@@ -404,7 +414,18 @@ class FetchDRECDataView(LoginRequiredMixin, View):
                     'created_at': drec.created_at.strftime('%Y-%m-%d %H:%M:%S')
                 })
 
-            return JsonResponse({'drec_data': drec_data_list})
+            # Get distinct st_id, location, and society for the dropdown filters from DPU model
+            dpu_filter = {'user': request.user}
+            st_ids = DPU.objects.filter(**dpu_filter).values_list('st_id', flat=True).distinct()
+            locations = DPU.objects.filter(**dpu_filter).values_list('location', flat=True).distinct()
+            societies = DPU.objects.filter(**dpu_filter).values_list('society', flat=True).distinct()
+
+            return JsonResponse({
+                'drec_data': drec_data_list,
+                'st_ids': list(st_ids),
+                'locations': list(locations),
+                'societies': list(societies)
+            })
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
 
