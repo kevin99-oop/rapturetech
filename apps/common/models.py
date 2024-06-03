@@ -68,6 +68,7 @@ class DPU(models.Model):
         except Customer.DoesNotExist:
             return None
         
+
 class DREC(models.Model):
     SLIP_TYPE_CHOICES = [
         (1, 'FAT/SNF/CLR Record'),
@@ -79,12 +80,12 @@ class DREC(models.Model):
         (7, 'Deduction'),
     ]
 
-    REC_TYPE = models.CharField(max_length=10,null=True, default=None)  # REC_TYPE will be kept as an integer field with no choices
+    REC_TYPE = models.CharField(max_length=10, null=True, default=None)  # REC_TYPE will be kept as a CharField
     SLIP_TYPE = models.IntegerField(choices=SLIP_TYPE_CHOICES, default=1)
     ST_ID = models.ForeignKey('DPU', on_delete=models.CASCADE, related_name='drecs')
     CUST_ID = models.IntegerField(null=True, default=None)
     TotalFileRecord = models.IntegerField(null=True, default=None)
-    FlagEdited = models.CharField(max_length=10, default="", blank=True)
+    FlagEdited = models.IntegerField(default=0)  # Changed to integer
     MType = models.CharField(max_length=255, null=True, default=None)
     RecordingDate = models.DateField(null=True, default=None)
     RecordingTime = models.CharField(max_length=255, default="0000")
@@ -154,19 +155,22 @@ class DREC(models.Model):
         super().save(*args, **kwargs)
         self.handle_slip_type_logic()
 
-    def handle_slip_type_logic(self):
-        if self.SLIP_TYPE in [1, 2]:
+    def handle_rec_type_logic(self):
+        if self.REC_TYPE in [1, 2]:
             self.FlagEdited = 'green'
+            logger.debug(f"Setting FlagEdited to 'green' for record ID {self.id}")
             Timer(600, self.reset_flag_edited).start()
-            if self.SLIP_TYPE == 2:
+            if self.REC_TYPE == 2:
                 self.link_and_edit_records()
-        elif self.SLIP_TYPE in [3, 5]:
+        elif self.REC_TYPE in [3, 5]:
+            logger.debug(f"Processing Local Sell or Dan for record ID {self.id}")
             pass
-        elif self.SLIP_TYPE in [4, 6]:
+        elif self.REC_TYPE in [4, 6]:
+            logger.debug(f"Processing Edited Local Sell or Edited Dan for record ID {self.id}")
             self.link_and_edit_records()
 
     def reset_flag_edited(self):
-        self.FlagEdited = ""
+        self.FlagEdited = 0
         self.save(update_fields=['FlagEdited'], skip_duplicate_check=True)
 
     def link_and_edit_records(self):
@@ -187,8 +191,13 @@ class DREC(models.Model):
         for record in linked_records:
             logger.debug(f"Processing linked record with ID: {record.id}")
             self.create_old_drec_data_edited(record)
-            record.FlagEdited = 'red'
+            record.FlagEdited = 1
             record.save(update_fields=['FlagEdited'], skip_duplicate_check=True)
+            Timer(600, self.reset_old_flag_edited, [record]).start()
+
+    def reset_old_flag_edited(self, record):
+        record.FlagEdited = 0
+        record.save(update_fields=['FlagEdited'], skip_duplicate_check=True)
 
     def create_old_drec_data_edited(self, record):
         try:
@@ -225,6 +234,7 @@ class DREC(models.Model):
                     RID=record.RID
                 )
                 logger.debug(f"OldDrecDataEdited created for DREC ID: {record.id}")
+                record.delete()  # Deleting the old record after creating OldDrecDataEdited
         except Exception as e:
             logger.error(f"Error creating OldDrecDataEdited: {e}")
 
@@ -235,12 +245,12 @@ class DREC(models.Model):
 
 class OldDrecDataEdited(models.Model):
     original_record = models.ForeignKey(DREC, on_delete=models.CASCADE, related_name='edited_records')
-    REC_TYPE = models.IntegerField()
+    REC_TYPE = models.CharField(max_length=10, null=True, default=None)
     SLIP_TYPE = models.IntegerField(null=True, default=None)
     ST_ID = models.CharField(max_length=255)
     CUST_ID = models.IntegerField(null=True, default=None)
     TotalFileRecord = models.IntegerField(null=True, default=None)
-    FlagEdited = models.CharField(max_length=10, default="", blank=True)
+    FlagEdited = models.IntegerField(default=0)  # Changed to integer
     MType = models.CharField(max_length=255, null=True, default=None)
     RecordingDate = models.DateField(null=True, default=None)
     RecordingTime = models.CharField(max_length=255, default="0000")
