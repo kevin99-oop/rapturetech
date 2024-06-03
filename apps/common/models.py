@@ -67,8 +67,9 @@ class DPU(models.Model):
             return latest_customer.csv_file.path
         except Customer.DoesNotExist:
             return None
+        
 class DREC(models.Model):
-    REC_TYPE_CHOICES = [
+    SLIP_TYPE_CHOICES = [
         (1, 'FAT/SNF/CLR Record'),
         (2, 'Edited FAT/SNF/CLR Data'),
         (3, 'Local Sell'),
@@ -78,8 +79,8 @@ class DREC(models.Model):
         (7, 'Deduction'),
     ]
 
-    REC_TYPE = models.IntegerField(choices=REC_TYPE_CHOICES, default=1)
-    SLIP_TYPE = models.IntegerField(null=True, default=None)
+    REC_TYPE = models.IntegerField(null=True, default=None)  # REC_TYPE will be kept as an integer field with no choices
+    SLIP_TYPE = models.IntegerField(choices=SLIP_TYPE_CHOICES, default=1)
     ST_ID = models.ForeignKey('DPU', on_delete=models.CASCADE, related_name='drecs')
     CUST_ID = models.IntegerField(null=True, default=None)
     TotalFileRecord = models.IntegerField(null=True, default=None)
@@ -151,17 +152,17 @@ class DREC(models.Model):
                 raise ValidationError("Duplicate record exists. Record not saved.")
 
         super().save(*args, **kwargs)
-        self.handle_rec_type_logic()
+        self.handle_slip_type_logic()
 
-    def handle_rec_type_logic(self):
-        if self.REC_TYPE in [1, 2]:
+    def handle_slip_type_logic(self):
+        if self.SLIP_TYPE in [1, 2]:
             self.FlagEdited = 'green'
             Timer(600, self.reset_flag_edited).start()
-            if self.REC_TYPE == 2:
+            if self.SLIP_TYPE == 2:
                 self.link_and_edit_records()
-        elif self.REC_TYPE in [3, 5]:
+        elif self.SLIP_TYPE in [3, 5]:
             pass
-        elif self.REC_TYPE in [4, 6]:
+        elif self.SLIP_TYPE in [4, 6]:
             self.link_and_edit_records()
 
     def reset_flag_edited(self):
@@ -177,7 +178,7 @@ class DREC(models.Model):
             CUST_ID=self.CUST_ID,
             RecordingDate=self.RecordingDate,
             RecordingTime=self.RecordingTime,
-            REC_TYPE=1,
+            SLIP_TYPE=1,
         ).exclude(id=self.id)
 
         logger.debug(f"Linked records query: {linked_records.query}")
@@ -266,6 +267,9 @@ class OldDrecDataEdited(models.Model):
 
     def __str__(self):
         return f"OldDrecDataEdited for DREC ID: {self.original_record.id}"
+
+
+
 
 class Customer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
