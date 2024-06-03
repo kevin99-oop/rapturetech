@@ -29,6 +29,11 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
         Token. objects.create(user=instance)
 
 # Model representing a DPU (Data Processing Unit)
+# Configure logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+
+# Model representing a DPU (Data Processing Unit)
 class DPU(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     dpu_user = models.IntegerField()
@@ -63,11 +68,41 @@ class DPU(models.Model):
         except Customer.DoesNotExist:
             return None
 
-# Model representing DREC (Data Recording)
+class OldDrecDataEdited(models.Model):
+    original_record = models.ForeignKey('DREC', on_delete=models.CASCADE, related_name='edited_records')
+    REC_TYPE = models.IntegerField()
+    SLIP_TYPE = models.IntegerField(null=True, default=None)
+    ST_ID = models.CharField(max_length=255)
+    CUST_ID = models.IntegerField(null=True, default=None)
+    TotalFileRecord = models.IntegerField(null=True, default=None)
+    FlagEdited = models.CharField(max_length=10, default="", blank=True)
+    MType = models.CharField(max_length=255, null=True, default=None)
+    RecordingDate = models.DateField(null=True, default=None)
+    RecordingTime = models.CharField(max_length=255, default="0000")
+    SHIFT = models.CharField(max_length=255, null=True, default=None)
+    FAT = models.FloatField(null=True, default=None)
+    FAT_UNIT = models.CharField(max_length=255, default="", blank=True)
+    SNF = models.FloatField(null=True, default=None)
+    SNF_UNIT = models.CharField(max_length=255, default="", blank=True)
+    CLR = models.FloatField(null=True, default=None)
+    CLR_UNIT = models.CharField(max_length=255, default="", blank=True)
+    WATER = models.FloatField(null=True, default=None)
+    WATER_UNIT = models.CharField(max_length=255, default="", blank=True)
+    QT = models.FloatField(null=True, default=None)
+    QT_UNIT = models.CharField(max_length=255, default="", blank=True)
+    RATE = models.FloatField(null=True, default=None)
+    Amount = models.FloatField(null=True, default=None)
+    CAmount = models.FloatField(null=True, default=None)
+    CSR_NO = models.IntegerField(null=True, default=None)
+    CREV = models.IntegerField(null=True, default=None)
+    END_TAG = models.CharField(max_length=255, default="", blank=True)
+    dpuid = models.CharField(max_length=255, default="", blank=True)
+    RID = models.CharField(max_length=255, null=True, default=None)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-# Configure logging
+    def __str__(self):
+        return f"OldDrecDataEdited for DREC ID: {self.original_record.id}"
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
 
 class DREC(models.Model):
     REC_TYPE_CHOICES = [
@@ -114,42 +149,43 @@ class DREC(models.Model):
         ordering = ['-created_at']
 
     def save(self, *args, **kwargs):
-        if self.ST_ID.status == 'deactivated':
-            raise ValidationError("Cannot save DREC. DPU is deactivated. Activate the DPU from the admin.")
+        skip_duplicate_check = kwargs.pop('skip_duplicate_check', False)
+        is_update = self.pk is not None
 
-        # Check for duplicate records
-        if DREC.objects.filter(
-            REC_TYPE=self.REC_TYPE,
-            SLIP_TYPE=self.SLIP_TYPE,
-            ST_ID=self.ST_ID,
-            CUST_ID=self.CUST_ID,
-            TotalFileRecord=self.TotalFileRecord,
-            MType=self.MType,
-            RecordingDate=self.RecordingDate,
-            RecordingTime=self.RecordingTime,
-            SHIFT=self.SHIFT,
-            FAT=self.FAT,
-            FAT_UNIT=self.FAT_UNIT,
-            SNF=self.SNF,
-            SNF_UNIT=self.SNF_UNIT,
-            CLR=self.CLR,
-            CLR_UNIT=self.CLR_UNIT,
-            WATER=self.WATER,
-            WATER_UNIT=self.WATER_UNIT,
-            QT=self.QT,
-            QT_UNIT=self.QT_UNIT,
-            RATE=self.RATE,
-            Amount=self.Amount,
-            CAmount=self.CAmount,
-            CSR_NO=self.CSR_NO,
-            CREV=self.CREV,
-            END_TAG=self.END_TAG,
-            dpuid=self.dpuid,
-            RID=self.RID
-        ).exists():
-            raise ValidationError("Duplicate record exists. Record not saved.")
+        if not skip_duplicate_check and not is_update:
+            if DREC.objects.filter(
+                ST_ID=self.ST_ID,
+                REC_TYPE=self.REC_TYPE,
+                SLIP_TYPE=self.SLIP_TYPE,
+                CUST_ID=self.CUST_ID,
+                TotalFileRecord=self.TotalFileRecord,
+                MType=self.MType,
+                RecordingDate=self.RecordingDate,
+                RecordingTime=self.RecordingTime,
+                SHIFT=self.SHIFT,
+                FAT=self.FAT,
+                FAT_UNIT=self.FAT_UNIT,
+                SNF=self.SNF,
+                SNF_UNIT=self.SNF_UNIT,
+                CLR=self.CLR,
+                CLR_UNIT=self.CLR_UNIT,
+                WATER=self.WATER,
+                WATER_UNIT=self.WATER_UNIT,
+                QT=self.QT,
+                QT_UNIT=self.QT_UNIT,
+                RATE=self.RATE,
+                Amount=self.Amount,
+                CAmount=self.CAmount,
+                CSR_NO=self.CSR_NO,
+                CREV=self.CREV,
+                END_TAG=self.END_TAG,
+                dpuid=self.dpuid,
+                RID=self.RID
+            ).exists():
+                raise ValidationError("Duplicate record exists. Record not saved.")
 
         super().save(*args, **kwargs)
+
         self.handle_rec_type_logic()
 
     def handle_rec_type_logic(self):
@@ -165,25 +201,19 @@ class DREC(models.Model):
 
     def reset_flag_edited(self):
         self.FlagEdited = ""
-        self.save(update_fields=['FlagEdited'])
+        self.save(update_fields=['FlagEdited'], skip_duplicate_check=True)
 
     def link_and_edit_records(self):
         logger.debug(f"Searching for linked records with CUST_ID {self.CUST_ID}")
-        
-        # Log the values being used for filtering
         logger.debug(f"ST_ID: {self.ST_ID.st_id}, FAT: {self.FAT}, SNF: {self.SNF}, CLR: {self.CLR}, RecordingDate: {self.RecordingDate}, RecordingTime: {self.RecordingTime}")
 
         linked_records = DREC.objects.filter(
             ST_ID=self.ST_ID,
-            FAT=self.FAT,
-            SNF=self.SNF,
-            CLR=self.CLR,
+            CUST_ID=self.CUST_ID,
             RecordingDate=self.RecordingDate,
             RecordingTime=self.RecordingTime,
             REC_TYPE=1,
-        )
-
-        linked_records = linked_records.filter(CUST_ID=self.CUST_ID)
+        ).exclude(id=self.id)
 
         logger.debug(f"Linked records query: {linked_records.query}")
         logger.debug(f"Found {linked_records.count()} linked records for CUST_ID {self.CUST_ID}")
@@ -192,7 +222,7 @@ class DREC(models.Model):
             logger.debug(f"Processing linked record with ID: {record.id}")
             self.create_old_drec_data_edited(record)
             record.FlagEdited = 'red'
-            record.save(update_fields=['FlagEdited'])
+            record.save(update_fields=['FlagEdited'], skip_duplicate_check=True)
 
     def create_old_drec_data_edited(self, record):
         try:
@@ -231,42 +261,6 @@ class DREC(models.Model):
                 logger.debug(f"OldDrecDataEdited created for DREC ID: {record.id}")
         except Exception as e:
             logger.error(f"Error creating OldDrecDataEdited: {e}")
-
-class OldDrecDataEdited(models.Model):
-    original_record = models.ForeignKey(DREC, on_delete=models.CASCADE, related_name='edited_records')
-    REC_TYPE = models.IntegerField()
-    SLIP_TYPE = models.IntegerField(null=True, default=None)
-    ST_ID = models.CharField(max_length=255)
-    CUST_ID = models.IntegerField(null=True, default=None)
-    TotalFileRecord = models.IntegerField(null=True, default=None)
-    FlagEdited = models.CharField(max_length=10, default="", blank=True)
-    MType = models.CharField(max_length=255, null=True, default=None)
-    RecordingDate = models.DateField(null=True, default=None)
-    RecordingTime = models.CharField(max_length=255, default="0000")
-    SHIFT = models.CharField(max_length=255, null=True, default=None)
-    FAT = models.FloatField(null=True, default=None)
-    FAT_UNIT = models.CharField(max_length=255, default="", blank=True)
-    SNF = models.FloatField(null=True, default=None)
-    SNF_UNIT = models.CharField(max_length=255, default="", blank=True)
-    CLR = models.FloatField(null=True, default=None)
-    CLR_UNIT = models.CharField(max_length=255, default="", blank=True)
-    WATER = models.FloatField(null=True, default=None)
-    WATER_UNIT = models.CharField(max_length=255, default="", blank=True)
-    QT = models.FloatField(null=True, default=None)
-    QT_UNIT = models.CharField(max_length=255, default="", blank=True)
-    RATE = models.FloatField(null=True, default=None)
-    Amount = models.FloatField(null=True, default=None)
-    CAmount = models.FloatField(null=True, default=None)
-    CSR_NO = models.IntegerField(null=True, default=None)
-    CREV = models.IntegerField(null=True, default=None)
-    END_TAG = models.CharField(max_length=255, default="", blank=True)
-    dpuid = models.CharField(max_length=255, default="", blank=True)
-    RID = models.CharField(max_length=255, null=True, default=None)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"OldDrecDataEdited for DREC ID: {self.original_record.id}"
-
 
 
 class Customer(models.Model):
