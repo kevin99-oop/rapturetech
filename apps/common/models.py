@@ -102,7 +102,7 @@ class OldDrecDataEdited(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"OldDrecDataEdited for DREC ID: {self.original_record.id}"
+        return f"OldDrecDataEdited for DREC ID: {self.id}"
 
 class DREC(models.Model):
     SLIP_TYPE_CHOICES = [

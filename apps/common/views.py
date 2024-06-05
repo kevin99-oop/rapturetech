@@ -598,6 +598,7 @@ class DRECViewSet(viewsets.ModelViewSet):
         instance = serializer.save()
 
     def create(self, request, *args, **kwargs):
+        print("create")
         if isinstance(request.data, list):  # Check if the request data is a list
             serializer = self.get_serializer(data=request.data, many=True)
         else:# single data
@@ -606,19 +607,19 @@ class DRECViewSet(viewsets.ModelViewSet):
             if request.data.get("SLIP_TYPE") in ["2","4","6"] and request.data.get("FlagEdited") == 1:
                 print("###############\n\n\nFound Edited Data")
                 # find old original data
+                print( request.data.get("ST_ID"),  request.data.get("CUST_ID"), "1", )
                 linked_records = DREC.objects.filter(
                     ST_ID=request.data.get("ST_ID"),
                     CUST_ID=request.data.get("CUST_ID"),
-                    SLIP_TYPE=1,
-                    RID=request.data.get("RID")
+                    CSR_NO=request.data.get("CSR_NO")
                 )
-
+                print(linked_records.count())
                 # check if we have only one record filterd
                 if linked_records.count() == 1:
                     # save data into OldDrec
                     Old_drec_obj = OldDrecDataEdited(
-                        new_drec = linked_records[0].id,
-                        ST_ID=linked_records[0].ST_ID,
+                        new_drec = linked_records[0].id, 
+                        ST_ID=linked_records[0].ST_ID.st_id,
                         REC_TYPE=linked_records[0].REC_TYPE,
                         SLIP_TYPE=linked_records[0].SLIP_TYPE,
                         CUST_ID=linked_records[0].CUST_ID,
@@ -651,15 +652,26 @@ class DRECViewSet(viewsets.ModelViewSet):
                     # delete Old data from Drec
                     linked_records.delete()
 
+                    # create new edited obj into Drec
+                    serializer = self.get_serializer(data=request.data)      
+                    if serializer.is_valid():
+                        serializer.save()
+                        # Return 200 OK instead of 201 Created
+                        print("saved obj id: ",serializer.data)
+                    Old_drec_obj.new_drec = serializer.data.get('id')
+                    Old_drec_obj.save()    
                     # Return 200 OK instead of 201 Created
                     print("#######################\n\n Edited Data saved")
-                    return Response(serializer.data, status=status.HTTP_200_OK)    
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                else:
+                    print("Duplicate data found, total matched rows: ", linked_records.count() )
             # save data
             serializer = self.get_serializer(data=request.data)                                   
 
         if serializer.is_valid():
             serializer.save()
             # Return 200 OK instead of 201 Created
+            print("saved obj id: ",serializer.data.get("id"))
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
