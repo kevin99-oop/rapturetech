@@ -601,10 +601,10 @@ class DRECViewSet(viewsets.ModelViewSet):
         if isinstance(request.data, list):  # Check if the request data is a list
             serializer = self.get_serializer(data=request.data, many=True)
         else:# single data
-
+            print("Single data recived")
             # check if edited data
             if request.data.get("SLIP_TYPE") in ["2","4","6"] and request.data.get("FlagEdited") == 1:
-                logger.info("###############\n\n\nFound Edited Data")
+                print("###############\n\n\nFound Edited Data")
                 # find old original data
                 linked_records = DREC.objects.filter(
                     ST_ID=request.data.get("ST_ID"),
@@ -652,7 +652,7 @@ class DRECViewSet(viewsets.ModelViewSet):
                     linked_records.delete()
 
                     # Return 200 OK instead of 201 Created
-                    logger.info("#######################\n\n Edited Data saved")
+                    print("#######################\n\n Edited Data saved")
                     return Response(serializer.data, status=status.HTTP_200_OK)    
             # save data
             serializer = self.get_serializer(data=request.data)                                   
