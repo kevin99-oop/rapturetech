@@ -605,10 +605,10 @@ class DRECViewSet(viewsets.ModelViewSet):
             print("Single data recived")
             # check if edited data
             print(request.data)
-            if request.data.get("SLIP_TYPE") in ["2","4","6"] and request.data.get("FlagEdited") == 1:
+            if request.data.get("SLIP_TYPE") in ["2","4","6"] and request.data.get("FlagEdited") == '1':
                 print("###############\n\n\nFound Edited Data")
                 # find old original data
-                print( request.data.get("ST_ID"),  request.data.get("CUST_ID"), "1", )
+                print( request.data.get("ST_ID"),  request.data.get("CUST_ID"), "1" )
                 linked_records = DREC.objects.filter(
                     ST_ID=request.data.get("ST_ID"),
                     CUST_ID=request.data.get("CUST_ID"),
