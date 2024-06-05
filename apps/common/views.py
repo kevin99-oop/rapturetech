@@ -603,7 +603,7 @@ class DRECViewSet(viewsets.ModelViewSet):
         else:# single data
 
             # check if edited data
-            if request.data.get("SLIP_TYPE") in [2,4,6] and request.data.get("FlagEdited") == 1:
+            if request.data.get("SLIP_TYPE") in ["2","4","6"] and request.data.get("FlagEdited") == 1:
                 logger.info("###############\n\n\nFound Edited Data")
                 # find old original data
                 linked_records = DREC.objects.filter(
