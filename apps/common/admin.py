@@ -29,7 +29,7 @@ class DRECAdmin(admin.ModelAdmin):
 
 class OldDrecDataEditedAdmin(admin.ModelAdmin):
     list_display = [
-        'original_record', 'REC_TYPE', 'SLIP_TYPE', 'ST_ID', 'CUST_ID', 'TotalFileRecord',
+         'REC_TYPE', 'SLIP_TYPE', 'ST_ID', 'CUST_ID', 'TotalFileRecord',
         'FlagEdited', 'MType', 'RecordingDate', 'RecordingTime', 'SHIFT', 'FAT', 'FAT_UNIT',
         'SNF', 'SNF_UNIT', 'CLR', 'CLR_UNIT', 'WATER', 'WATER_UNIT', 'QT', 'QT_UNIT',
         'RATE', 'Amount', 'CAmount', 'CSR_NO', 'CREV', 'END_TAG', 'dpuid', 'RID', 'created_at'

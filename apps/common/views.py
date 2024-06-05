@@ -521,7 +521,7 @@ class ProfileView(LoginRequiredMixin, TemplateView):
                 pass
 
         return context
-    
+
 class ProfileUpdateView(LoginRequiredMixin, TemplateView):
     user_form = UserForm
     profile_form = ProfileForm
@@ -589,20 +589,14 @@ def active_dpu(request):
 
     return render(request, 'common/active_dpu.html', {'active_dpu_list': active_dpu_list})
 
-    
 class DRECViewSet(viewsets.ModelViewSet):
     queryset = DREC.objects.all()
     serializer_class = DRECSerializer
 
     def perform_create(self, serializer):
-        # You can customize the save process here before calling the super method
+        # Customize the save process here before calling the super method
         instance = serializer.save()
 
-    # def create(self, request, *args, **kwargs):
-    #     response = super().create(request, *args, **kwargs)
-
-    #     response.status_code = 200  # Set the status code to 200
-    #     return response
     def create(self, request, *args, **kwargs):
         if isinstance(request.data, list):  # Check if the request data is a list
             serializer = self.get_serializer(data=request.data, many=True)
@@ -611,7 +605,8 @@ class DRECViewSet(viewsets.ModelViewSet):
 
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            # Return 200 OK instead of 201 Created
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def save(self, *args, **kwargs):

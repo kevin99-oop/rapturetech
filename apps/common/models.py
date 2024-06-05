@@ -69,6 +69,42 @@ class DPU(models.Model):
             return None
         
 
+class OldDrecDataEdited(models.Model):
+    REC_TYPE = models.CharField(max_length=255)
+    SLIP_TYPE = models.IntegerField(null=True, default=None)
+    ST_ID = models.CharField(max_length=255)
+    CUST_ID = models.IntegerField(null=True, default=None)
+    TotalFileRecord = models.IntegerField(null=True, default=None)
+    FlagEdited = models.CharField(max_length=10, default="", blank=True)
+    MType = models.CharField(max_length=255, null=True, default=None)
+    RecordingDate = models.DateField(null=True, default=None)
+    RecordingTime = models.CharField(max_length=255, default="0000")
+    SHIFT = models.CharField(max_length=255, null=True, default=None)
+    FAT = models.FloatField(null=True, default=None)
+    FAT_UNIT = models.CharField(max_length=255, default="", blank=True)
+    SNF = models.FloatField(null=True, default=None)
+    SNF_UNIT = models.CharField(max_length=255, default="", blank=True)
+    CLR = models.FloatField(null=True, default=None)
+    CLR_UNIT = models.CharField(max_length=255, default="", blank=True)
+    WATER = models.FloatField(null=True, default=None)
+    WATER_UNIT = models.CharField(max_length=255, default="", blank=True)
+    QT = models.FloatField(null=True, default=None)
+    QT_UNIT = models.CharField(max_length=255, default="", blank=True)
+    RATE = models.FloatField(null=True, default=None)
+    Amount = models.FloatField(null=True, default=None)
+    CAmount = models.FloatField(null=True, default=None)
+    CSR_NO = models.IntegerField(null=True, default=None)
+    CREV = models.IntegerField(null=True, default=None)
+    END_TAG = models.CharField(max_length=255, default="", blank=True)
+    dpuid = models.CharField(max_length=255, default="", blank=True)
+    RID = models.CharField(max_length=255, null=True, default=None)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"OldDrecDataEdited for CUST_ID: {self.CUST_ID}"
+
+
+
 class DREC(models.Model):
     SLIP_TYPE_CHOICES = [
         (1, 'FAT/SNF/CLR Record'),
@@ -80,12 +116,12 @@ class DREC(models.Model):
         (7, 'Deduction'),
     ]
 
-    REC_TYPE = models.CharField(max_length=10, null=True, default=None)  # REC_TYPE will be kept as a CharField
+    REC_TYPE = models.CharField(max_length=255, null=True, default=None)
     SLIP_TYPE = models.IntegerField(choices=SLIP_TYPE_CHOICES, default=1)
     ST_ID = models.ForeignKey('DPU', on_delete=models.CASCADE, related_name='drecs')
     CUST_ID = models.IntegerField(null=True, default=None)
     TotalFileRecord = models.IntegerField(null=True, default=None)
-    FlagEdited = models.IntegerField(default=0)  # Changed to integer
+    FlagEdited = models.CharField(max_length=10, default="", blank=True)
     MType = models.CharField(max_length=255, null=True, default=None)
     RecordingDate = models.DateField(null=True, default=None)
     RecordingTime = models.CharField(max_length=255, default="0000")
@@ -112,12 +148,22 @@ class DREC(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+    
+    def get_text_color(self):
+        if self.FlagEdited == '1' and self.SLIP_TYPE == 2:
+            if self.created_at + timezone.timedelta(minutes=10) > timezone.now():
+                return 'green'
+            else:
+                return ''
+        elif self.FlagEdited == 'red':
+            return 'red'
+        else:
+            return ''
 
     def save(self, *args, **kwargs):
         skip_duplicate_check = kwargs.pop('skip_duplicate_check', False)
         is_update = self.pk is not None
 
-        # Convert RecordingTime to HH:MM format
         self.RecordingTime = self.convert_to_hhmm_format(self.RecordingTime)
 
         if not skip_duplicate_check and not is_update:
@@ -155,27 +201,25 @@ class DREC(models.Model):
         super().save(*args, **kwargs)
         self.handle_slip_type_logic()
 
-    def handle_rec_type_logic(self):
-        if self.REC_TYPE in [1, 2]:
-            self.FlagEdited = 'green'
-            logger.debug(f"Setting FlagEdited to 'green' for record ID {self.id}")
-            Timer(600, self.reset_flag_edited).start()
-            if self.REC_TYPE == 2:
-                self.link_and_edit_records()
-        elif self.REC_TYPE in [3, 5]:
-            logger.debug(f"Processing Local Sell or Dan for record ID {self.id}")
-            pass
-        elif self.REC_TYPE in [4, 6]:
-            logger.debug(f"Processing Edited Local Sell or Edited Dan for record ID {self.id}")
+    def handle_slip_type_logic(self):
+        if self.SLIP_TYPE in [2, 4, 6]:
+            self.FlagEdited = 'orange'  # example for edited slip types
             self.link_and_edit_records()
+        elif self.SLIP_TYPE in [1, 3, 5]:
+            self.FlagEdited = 'green'
+            Timer(600, self.reset_flag_edited).start()
+            Timer(600, self.delete_record).start()  # Schedule record deletion after 10 minutes
+        elif self.SLIP_TYPE == 7:
+            # Handle logic for Deduction
+            pass
 
     def reset_flag_edited(self):
-        self.FlagEdited = 0
+        self.FlagEdited = ""
         self.save(update_fields=['FlagEdited'], skip_duplicate_check=True)
 
     def link_and_edit_records(self):
         logger.debug(f"Searching for linked records with CUST_ID {self.CUST_ID}")
-        logger.debug(f"ST_ID: {self.ST_ID.st_id}, FAT: {self.FAT}, SNF: {self.SNF}, CLR: {self.CLR}, RecordingDate: {self.RecordingDate}, RecordingTime: {self.RecordingTime}")
+        logger.debug(f"ST_ID: {self.ST_ID}, FAT: {self.FAT}, SNF: {self.SNF}, CLR: {self.CLR}, RecordingDate: {self.RecordingDate}, RecordingTime: {self.RecordingTime}")
 
         linked_records = DREC.objects.filter(
             ST_ID=self.ST_ID,
@@ -191,13 +235,8 @@ class DREC(models.Model):
         for record in linked_records:
             logger.debug(f"Processing linked record with ID: {record.id}")
             self.create_old_drec_data_edited(record)
-            record.FlagEdited = 1
+            record.FlagEdited = 'red'
             record.save(update_fields=['FlagEdited'], skip_duplicate_check=True)
-            Timer(600, self.reset_old_flag_edited, [record]).start()
-
-    def reset_old_flag_edited(self, record):
-        record.FlagEdited = 0
-        record.save(update_fields=['FlagEdited'], skip_duplicate_check=True)
 
     def create_old_drec_data_edited(self, record):
         try:
@@ -206,7 +245,7 @@ class DREC(models.Model):
                     original_record=record,
                     REC_TYPE=record.REC_TYPE,
                     SLIP_TYPE=record.SLIP_TYPE,
-                    ST_ID=record.ST_ID.st_id,
+                    ST_ID=record.ST_ID,
                     CUST_ID=record.CUST_ID,
                     TotalFileRecord=record.TotalFileRecord,
                     FlagEdited=record.FlagEdited,
@@ -234,51 +273,21 @@ class DREC(models.Model):
                     RID=record.RID
                 )
                 logger.debug(f"OldDrecDataEdited created for DREC ID: {record.id}")
-                record.delete()  # Deleting the old record after creating OldDrecDataEdited
         except Exception as e:
             logger.error(f"Error creating OldDrecDataEdited: {e}")
 
+    def delete_record(self):
+        try:
+            # Only delete the DREC record without affecting OldDrecDataEdited records
+            DREC.objects.filter(id=self.id).delete()
+            logger.debug(f"Record with ID {self.id} deleted successfully after 10 minutes.")
+        except Exception as e:
+            logger.error(f"Error deleting record with ID {self.id}: {e}")
+
     def convert_to_hhmm_format(self, time_str):
-        if len(time_str) == 4 and time_str.isdigit():
+        if len(time_str) == 4:
             return f"{time_str[:2]}:{time_str[2:]}"
-        raise ValidationError("Invalid time format. Expected 'HHMM'.")
-
-class OldDrecDataEdited(models.Model):
-    original_record = models.ForeignKey(DREC, on_delete=models.CASCADE, related_name='edited_records')
-    REC_TYPE = models.CharField(max_length=10, null=True, default=None)
-    SLIP_TYPE = models.IntegerField(null=True, default=None)
-    ST_ID = models.CharField(max_length=255)
-    CUST_ID = models.IntegerField(null=True, default=None)
-    TotalFileRecord = models.IntegerField(null=True, default=None)
-    FlagEdited = models.IntegerField(default=0)  # Changed to integer
-    MType = models.CharField(max_length=255, null=True, default=None)
-    RecordingDate = models.DateField(null=True, default=None)
-    RecordingTime = models.CharField(max_length=255, default="0000")
-    SHIFT = models.CharField(max_length=255, null=True, default=None)
-    FAT = models.FloatField(null=True, default=None)
-    FAT_UNIT = models.CharField(max_length=255, default="", blank=True)
-    SNF = models.FloatField(null=True, default=None)
-    SNF_UNIT = models.CharField(max_length=255, default="", blank=True)
-    CLR = models.FloatField(null=True, default=None)
-    CLR_UNIT = models.CharField(max_length=255, default="", blank=True)
-    WATER = models.FloatField(null=True, default=None)
-    WATER_UNIT = models.CharField(max_length=255, default="", blank=True)
-    QT = models.FloatField(null=True, default=None)
-    QT_UNIT = models.CharField(max_length=255, default="", blank=True)
-    RATE = models.FloatField(null=True, default=None)
-    Amount = models.FloatField(null=True, default=None)
-    CAmount = models.FloatField(null=True, default=None)
-    CSR_NO = models.IntegerField(null=True, default=None)
-    CREV = models.IntegerField(null=True, default=None)
-    END_TAG = models.CharField(max_length=255, default="", blank=True)
-    dpuid = models.CharField(max_length=255, default="", blank=True)
-    RID = models.CharField(max_length=255, null=True, default=None)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"OldDrecDataEdited for DREC ID: {self.original_record.id}"
-
-
+        return time_str
 
 
 class Customer(models.Model):
