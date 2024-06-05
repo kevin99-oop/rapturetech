@@ -70,6 +70,7 @@ class DPU(models.Model):
         
 
 class OldDrecDataEdited(models.Model):
+    new_drec = models.IntegerField(null=True)
     REC_TYPE = models.CharField(max_length=255)
     SLIP_TYPE = models.IntegerField(null=True, default=None)
     ST_ID = models.CharField(max_length=255)
@@ -101,9 +102,7 @@ class OldDrecDataEdited(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"OldDrecDataEdited for CUST_ID: {self.CUST_ID}"
-
-
+        return f"OldDrecDataEdited for DREC ID: {self.original_record.id}"
 
 class DREC(models.Model):
     SLIP_TYPE_CHOICES = [
@@ -199,90 +198,7 @@ class DREC(models.Model):
                 raise ValidationError("Duplicate record exists. Record not saved.")
 
         super().save(*args, **kwargs)
-        self.handle_slip_type_logic()
 
-    def handle_slip_type_logic(self):
-        if self.SLIP_TYPE in [2, 4, 6]:
-            self.FlagEdited = 'orange'  # example for edited slip types
-            self.link_and_edit_records()
-        elif self.SLIP_TYPE in [1, 3, 5]:
-            self.FlagEdited = 'green'
-            Timer(600, self.reset_flag_edited).start()
-            Timer(600, self.delete_record).start()  # Schedule record deletion after 10 minutes
-        elif self.SLIP_TYPE == 7:
-            # Handle logic for Deduction
-            pass
-
-    def reset_flag_edited(self):
-        self.FlagEdited = ""
-        self.save(update_fields=['FlagEdited'], skip_duplicate_check=True)
-
-    def link_and_edit_records(self):
-        logger.debug(f"Searching for linked records with CUST_ID {self.CUST_ID}")
-        logger.debug(f"ST_ID: {self.ST_ID}, FAT: {self.FAT}, SNF: {self.SNF}, CLR: {self.CLR}, RecordingDate: {self.RecordingDate}, RecordingTime: {self.RecordingTime}")
-
-        linked_records = DREC.objects.filter(
-            ST_ID=self.ST_ID,
-            CUST_ID=self.CUST_ID,
-            RecordingDate=self.RecordingDate,
-            RecordingTime=self.RecordingTime,
-            SLIP_TYPE=1,
-        ).exclude(id=self.id)
-
-        logger.debug(f"Linked records query: {linked_records.query}")
-        logger.debug(f"Found {linked_records.count()} linked records for CUST_ID {self.CUST_ID}")
-
-        for record in linked_records:
-            logger.debug(f"Processing linked record with ID: {record.id}")
-            self.create_old_drec_data_edited(record)
-            record.FlagEdited = 'red'
-            record.save(update_fields=['FlagEdited'], skip_duplicate_check=True)
-
-    def create_old_drec_data_edited(self, record):
-        try:
-            with transaction.atomic():
-                OldDrecDataEdited.objects.create(
-                    original_record=record,
-                    REC_TYPE=record.REC_TYPE,
-                    SLIP_TYPE=record.SLIP_TYPE,
-                    ST_ID=record.ST_ID,
-                    CUST_ID=record.CUST_ID,
-                    TotalFileRecord=record.TotalFileRecord,
-                    FlagEdited=record.FlagEdited,
-                    MType=record.MType,
-                    RecordingDate=record.RecordingDate,
-                    RecordingTime=record.RecordingTime,
-                    SHIFT=record.SHIFT,
-                    FAT=record.FAT,
-                    FAT_UNIT=record.FAT_UNIT,
-                    SNF=record.SNF,
-                    SNF_UNIT=record.SNF_UNIT,
-                    CLR=record.CLR,
-                    CLR_UNIT=record.CLR_UNIT,
-                    WATER=record.WATER,
-                    WATER_UNIT=record.WATER_UNIT,
-                    QT=record.QT,
-                    QT_UNIT=record.QT_UNIT,
-                    RATE=record.RATE,
-                    Amount=record.Amount,
-                    CAmount=record.CAmount,
-                    CSR_NO=record.CSR_NO,
-                    CREV=record.CREV,
-                    END_TAG=record.END_TAG,
-                    dpuid=record.dpuid,
-                    RID=record.RID
-                )
-                logger.debug(f"OldDrecDataEdited created for DREC ID: {record.id}")
-        except Exception as e:
-            logger.error(f"Error creating OldDrecDataEdited: {e}")
-
-    def delete_record(self):
-        try:
-            # Only delete the DREC record without affecting OldDrecDataEdited records
-            DREC.objects.filter(id=self.id).delete()
-            logger.debug(f"Record with ID {self.id} deleted successfully after 10 minutes.")
-        except Exception as e:
-            logger.error(f"Error deleting record with ID {self.id}: {e}")
 
     def convert_to_hhmm_format(self, time_str):
         if len(time_str) == 4:
