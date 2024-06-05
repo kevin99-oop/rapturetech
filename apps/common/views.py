@@ -604,6 +604,7 @@ class DRECViewSet(viewsets.ModelViewSet):
         else:# single data
             print("Single data recived")
             # check if edited data
+            print(request.data)
             if request.data.get("SLIP_TYPE") in ["2","4","6"] and request.data.get("FlagEdited") == 1:
                 print("###############\n\n\nFound Edited Data")
                 # find old original data
