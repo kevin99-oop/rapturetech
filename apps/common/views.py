@@ -654,8 +654,8 @@ class DRECViewSet(viewsets.ModelViewSet):
                     # Return 200 OK instead of 201 Created
                     logger.info("#######################\n\n Edited Data saved")
                     return Response(serializer.data, status=status.HTTP_200_OK)    
-                # save data
-                serializer = self.get_serializer(data=request.data)                                   
+            # save data
+            serializer = self.get_serializer(data=request.data)                                   
 
         if serializer.is_valid():
             serializer.save()
