@@ -487,8 +487,10 @@ function exportToCsvAndPdf(tableIds, fileNamePrefix, format) {
     var username = '{{ user.username }}';
     var pdf = new jsPDF();
     let csvData = [];
-
     var tables = document.querySelectorAll("table");
+
+    // Set the initial vertical offset for the first table
+    let verticalOffset = 10;
 
     // Iterate over each table
     tables.forEach(function(table, index) {
@@ -507,10 +509,28 @@ function exportToCsvAndPdf(tableIds, fileNamePrefix, format) {
 
         // Generate PDF
         if (format === 'pdf') {
-            if (index > 0) {
-                pdf.addPage(); // Add new page for each additional table in PDF
+            const tableElement = table.cloneNode(true); // Clone the table element to avoid modifying the original
+            const pageHeight = pdf.internal.pageSize.height;
+            const pageWidth = pdf.internal.pageSize.width;
+
+            // Calculate the height of the table
+            const tableHeight = pdf.autoTable.previous.finalY + tableElement.offsetHeight;
+
+            // Check if the table fits on the current page or if a new page is needed
+            if (verticalOffset + tableHeight > pageHeight) {
+                pdf.addPage();
+                verticalOffset = 10; // Reset vertical offset for new page
             }
-            pdf.autoTable({ html: table });
+
+            pdf.autoTable({
+                html: tableElement,
+                startY: verticalOffset,
+                theme: 'grid', // Optional: you can change the theme as needed
+                styles: { overflow: 'linebreak' }
+            });
+
+            // Update the vertical offset for the next table
+            verticalOffset = pdf.autoTable.previous.finalY + 10;
         }
 
         // Check if it's the last table iteration

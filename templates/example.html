@@ -213,10 +213,11 @@
                                                 </tr>
                                             </thead>
                                             <!-- Table body -->
-                                            <tbody class="text-center fw-bold" id="tableBody">
-                                                {% for drec in drec_data %}
-                                                <tr>
-                                                    <td>{{ drec.ST_ID.st_id }}</td>
+                                        <!-- Table body -->
+                                        <tbody class="text-center fw-bold" id="tableBody">
+                                            {% for drec in drec_data %}
+                                            <tr style="color: {{ drec.get_text_color }};">
+                                                <td>{{ drec.ST_ID.st_id }}</td>
                                                     <td>{{ drec.ST_ID.location }}</td>
                                                     <td>{{ drec.ST_ID.society }}</td>
                                                     <td>{{ drec.RecordingDate|date:"d-m-Y" }}</td>
@@ -225,9 +226,9 @@
                                                     <td>{{ drec.CUST_ID }}</td>
                                                     <td>
                                                         {% for customer in customer_list %}
-                                                        {% if customer.cust_id == drec.CUST_ID and customer.st_id == drec.ST_ID.st_id %}
-                                                        {{ customer.name }}
-                                                        {% endif %}
+                                                            {% if customer.cust_id == drec.CUST_ID and customer.st_id == drec.ST_ID.st_id %}
+                                                                {{ customer.name }}
+                                                            {% endif %}
                                                         {% endfor %}
                                                     </td>
                                                     <td>{{ drec.FAT }}</td>
@@ -238,9 +239,9 @@
                                                     <td>₹ {{ drec.Amount }}</td>
                                                     <td>{{ drec.CAmount }}</td>
                                                 </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
+                                            {% endfor %}
+                                        </tbody>
+                                                                                </table>
                                         <!-- Pagination -->
                                        <!-- Pagination -->
                                         <nav aria-label="Page navigation example " class="mt-3">

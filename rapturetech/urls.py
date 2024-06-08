@@ -16,7 +16,7 @@ from apps.common.views import (
     download_rate_table, lastratedate_api, ratesitem_api,
     get_dpus_by_location, get_societies_by_dpu, FetchDRECDataView,
     health, admin_question_view, update_question_view,
-    ask_question_view, question_history_view
+    ask_question_view, question_history_view,old_drec_data_edited_list
 )
 
 # URL patterns
@@ -106,6 +106,7 @@ urlpatterns = [
     path('update-question/<int:pk>/', update_question_view, name='update-question'),
     path('ask-question/', ask_question_view, name='ask-question'),
     path('question-history/', question_history_view, name='question-history'),
+    path('old_drec_data_edited_list/', old_drec_data_edited_list, name='old_drec_data_edited_list'),
 
     # Custom 404 page
     path('<path:not_found>/', custom_404_page, name='custom_404_page'),

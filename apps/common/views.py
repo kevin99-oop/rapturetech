@@ -26,7 +26,7 @@ from django.db.models.functions import Round
 
 from django.contrib.auth.views import LoginView
 # Django Imports
-from apps.common.models import DREC, DPU, Customer, Config, RateTable, CustomerList
+from apps.common.models import *
 from apps.common.forms import (
     SignUpForm,
     UserForm,
@@ -43,7 +43,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
-from apps.common.serializers import UserSerializer, LoginSerializer, DRECSerializer
+from apps.common.serializers import *
 # Views Imports
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login
@@ -159,18 +159,18 @@ class DashboardView(TemplateView):
         print("Execution time:", end_time - start_time, "seconds")
         return self.render_to_response(context)
 
-    def update_data_periodically(self):
-        while True:
-            context = self.compute_data(None)
-            cache.set('dashboard_data', context, timeout=self.refresh_interval)
-            time.sleep(self.refresh_interval)
+    # def update_data_periodically(self):
+    #     while True:
+    #         context = self.compute_data(None)
+    #         cache.set('dashboard_data', context, timeout=self.refresh_interval)
+    #         time.sleep(self.refresh_interval)
 
-    def dispatch(self, request, *args, **kwargs):
-        # Start a background thread to update data periodically
-        thread = threading.Thread(target=self.update_data_periodically)
-        thread.daemon = True
-        thread.start()
-        return super().dispatch(request, *args, **kwargs)
+    # def dispatch(self, request, *args, **kwargs):
+    #     # Start a background thread to update data periodically
+    #     thread = threading.Thread(target=self.update_data_periodically)
+    #     thread.daemon = True
+    #     thread.start()
+    #     return super().dispatch(request, *args, **kwargs)
 
     def compute_data(self, request):
         active_dpu_list = self.get_active_dpu_list(request.user) if request else None
@@ -521,7 +521,7 @@ class ProfileView(LoginRequiredMixin, TemplateView):
                 pass
 
         return context
-    
+
 class ProfileUpdateView(LoginRequiredMixin, TemplateView):
     user_form = UserForm
     profile_form = ProfileForm
@@ -589,29 +589,91 @@ def active_dpu(request):
 
     return render(request, 'common/active_dpu.html', {'active_dpu_list': active_dpu_list})
 
-    
 class DRECViewSet(viewsets.ModelViewSet):
     queryset = DREC.objects.all()
     serializer_class = DRECSerializer
 
     def perform_create(self, serializer):
-        # You can customize the save process here before calling the super method
+        # Customize the save process here before calling the super method
         instance = serializer.save()
 
-    # def create(self, request, *args, **kwargs):
-    #     response = super().create(request, *args, **kwargs)
-
-    #     response.status_code = 200  # Set the status code to 200
-    #     return response
     def create(self, request, *args, **kwargs):
+        print("create")
         if isinstance(request.data, list):  # Check if the request data is a list
             serializer = self.get_serializer(data=request.data, many=True)
-        else:
-            serializer = self.get_serializer(data=request.data)
+        else:# single data
+            print("Single data recived")
+            # check if edited data
+            print(request.data)
+            if request.data.get("SLIP_TYPE") in ["2","4","6"] and request.data.get("FlagEdited") == '1':
+                print("###############\n\n\nFound Edited Data")
+                # find old original data
+                print( request.data.get("ST_ID"),  request.data.get("CUST_ID"), "1" )
+                linked_records = DREC.objects.filter(
+                    ST_ID=request.data.get("ST_ID"),
+                    CUST_ID=request.data.get("CUST_ID"),
+                    CSR_NO=request.data.get("CSR_NO")
+                )
+                print(linked_records.count())
+                # check if we have only one record filterd
+                if linked_records.count() == 1:
+                    # save data into OldDrec
+                    Old_drec_obj = OldDrecDataEdited(
+                        new_drec = linked_records[0].id, 
+                        ST_ID=linked_records[0].ST_ID.st_id,
+                        REC_TYPE=linked_records[0].REC_TYPE,
+                        SLIP_TYPE=linked_records[0].SLIP_TYPE,
+                        CUST_ID=linked_records[0].CUST_ID,
+                        TotalFileRecord=linked_records[0].TotalFileRecord,
+                        MType=linked_records[0].MType,
+                        RecordingDate=linked_records[0].RecordingDate,
+                        RecordingTime=linked_records[0].RecordingTime,
+                        SHIFT=linked_records[0].SHIFT,
+                        FAT=linked_records[0].FAT,
+                        FAT_UNIT=linked_records[0].FAT_UNIT,
+                        SNF=linked_records[0].SNF,
+                        SNF_UNIT=linked_records[0].SNF_UNIT,
+                        CLR=linked_records[0].CLR,
+                        CLR_UNIT=linked_records[0].CLR_UNIT,
+                        WATER=linked_records[0].WATER,
+                        WATER_UNIT=linked_records[0].WATER_UNIT,
+                        QT=linked_records[0].QT,
+                        QT_UNIT=linked_records[0].QT_UNIT,
+                        RATE=linked_records[0].RATE,
+                        Amount=linked_records[0].Amount,
+                        CAmount=linked_records[0].CAmount,
+                        CSR_NO=linked_records[0].CSR_NO,
+                        CREV=linked_records[0].CREV,
+                        END_TAG=linked_records[0].END_TAG,
+                        dpuid=linked_records[0].dpuid,
+                        RID=linked_records[0].RID                        
+                    )
+                    Old_drec_obj.save()
+
+                    # delete Old data from Drec
+                    linked_records.delete()
+
+                    # create new edited obj into Drec
+                    serializer = self.get_serializer(data=request.data)      
+                    if serializer.is_valid():
+                        serializer.save()
+                        # Return 200 OK instead of 201 Created
+                        print("saved obj id: ",serializer.data)
+                    Old_drec_obj.new_drec = serializer.data.get('id')
+                    Old_drec_obj.save()    
+                    # Return 200 OK instead of 201 Created
+                    print("#######################\n\n Edited Data saved")
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                else:
+                    print("Duplicate data found, total matched rows: ", linked_records.count() )
+            # save data
+            serializer = self.get_serializer(data=request.data)                                   
 
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            # Return 200 OK instead of 201 Created
+            print("saved obj id: ",serializer.data.get("id"))
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def save(self, *args, **kwargs):
@@ -1628,3 +1690,7 @@ def update_question_view(request, pk):
     else:
         return redirect('question-history')
 
+@login_required
+def old_drec_data_edited_list(request):
+    records = OldDrecDataEdited.objects.all()
+    return render(request, 'common/old_drec_data_edited_list.html', {'records': records})
