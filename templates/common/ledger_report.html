@@ -219,146 +219,132 @@
       <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
              <!-- Total Summary Record -->
-    <div class="row mt-4" id="divID">
-        <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
-            <div class="card collapse multi-collapse show rounded" >
-                <div class="card-header pb-0 p-3">
-                    <div class="d-flex justify-content-between">
-                        <h6 class="mb-2 fw-bold">
-                            Ledger Table
-                        </h6>
-                        <div class="float-end mb-2">                    
-                            <button class="btn btn-primary rounded btn-sm me-2 fw-bold" onclick="exportToCsvAndPdf(['ledger_summary_data', 'ledger_detail_data'], 'ledger_report', 'csv')"><i class="icon-download me-2 mb-1"></i>CSV</button>
-                            <button class="btn btn-primary rounded btn-sm  fw-bold" onclick="exportToCsvAndPdf(['ledger_summary_data', 'ledger_detail_data'], 'ledger_report', 'pdf')"><i class="icon-download me-2 mb-1"></i>PDF</button>
-    
+             <div class="row mt-4" id="divID">
+                <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
+                    <div class="card collapse multi-collapse show rounded">
+                        <div class="card-header pb-0 p-3">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-2 fw-bold">Ledger Table</h6>
+                                <div class="float-end mb-2">
+<!-- Ledger report export buttons -->
+<button class="btn btn-primary rounded btn-sm me-2 fw-bold" onclick="exportToCsvAndPdf(['ledger_summary_data', 'ledger_detail_data'], 'ledger_report', 'csv', 'ledger')"><i class="icon-download me-2 mb-1"></i>CSV</button>
+<button class="btn btn-primary rounded btn-sm fw-bold" onclick="exportToCsvAndPdf(['ledger_summary_data', 'ledger_detail_data'], 'ledger_report', 'pdf', 'ledger')"><i class="icon-download me-2 mb-1"></i>PDF</button>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive card-body">
+                            {% if ledger_summary_data %}
+                                {% for summary_data_entry in ledger_summary_data|dictsort:"CUST_ID" %}
+                                    {% ifchanged summary_data_entry.CustomerName %}
+                                        <h4>
+                                            Cust_Id: <strong class="text-danger">{{ summary_data_entry.CUST_ID }}</strong> |
+                                            Cust_Name <strong class="text-danger">{{ summary_data_entry.CustomerName }}</strong>
+                                        </h4>
+                                        <hr/>
+                                        <h5 class="text-center fw-bold">Summary Report</h5>
+                                        <hr/>
+                                        <!-- Table 1: Summary Data -->
+                                        <table id="ledger_summary_data" class="table align-items-center text-center table-striped table-hover rounded table-responsive w-100 mt-3 fw-bold">
+                                            <thead class="table-title text-white text-center rounded">
+                                                <tr>
+                                                    <th>Customer</th>
+                                                    <th>Name</th>
+                                                    <th>Root</th>
+                                                    <th>Society</th>
+                                                    <th>DPU</th>
+                                                    <th>Total Qty.</th>
+                                                    <th>Total Amount</th>
+                                                    <th>Avg. FAT</th>
+                                                    <th>Avg. SNF</th>
+                                                    <th>Avg. CLR</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="align-items-center text-center">
+                                                <tr>
+                                                    <td>{{ summary_data_entry.CUST_ID }}</td>
+                                                    <td>{{ summary_data_entry.CustomerName }}</td>
+                                                    <td>{{ summary_data_entry.ST_ID__location }}</td>
+                                                    <td>{{ summary_data_entry.ST_ID__society }}</td>
+                                                    <td>{{ summary_data_entry.ST_ID__st_id }}</td>
+                                                    <td>{{ summary_data_entry.TotalQT }} ltr.</td>
+                                                    <td>₹ {{ summary_data_entry.TotalAmount }}</td>
+                                                    <td>{{ summary_data_entry.AvgFAT|floatformat:2 }}</td>
+                                                    <td>{{ summary_data_entry.AvgSNF|floatformat:2 }}</td>
+                                                    <td>{{ summary_data_entry.AvgCLR|floatformat:2 }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <hr/>
+                                        <h5 class="text-center fw-bold">Detail Report</h5>
+                                        <hr/>
+                                        <table id="ledger_detail_data" class="table align-items-center text-center table-striped table-hover rounded table-responsive w-100 mb-5 fw-bold">
+                                            <thead class="table-title text-white text-center rounded bg-success">
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>SHIFT</th>
+                                                    <th>MType</th>
+                                                    <th>FAT</th>
+                                                    <th>SNF</th>
+                                                    <th>CLR</th>
+                                                    <th>WATER</th>
+                                                    <th>Quantity</th>
+                                                    <th>RATE</th>
+                                                    <th>Amount</th>
+                                                    <th>CAmount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="align-items-center text-center">
+                                                {% for entry in ledger_detail_data %}
+                                                    {% if entry.CUST_ID == summary_data_entry.CUST_ID %}
+                                                        <tr>
+                                                            <td>{{ entry.RecordingDate|date:"d-m-Y" }}</td>
+                                                            <td>{{ entry.SHIFT }}</td>
+                                                            <td>{{ entry.MType }}</td>
+                                                            <td>{{ entry.FAT }}</td>
+                                                            <td>{{ entry.SNF }}</td>
+                                                            <td>{{ entry.CLR }}</td>
+                                                            <td>{{ entry.WATER }}</td>
+                                                            <td>{{ entry.QT }}</td>
+                                                            <td>{{ entry.RATE }}</td>
+                                                            <td>{{ entry.Amount }}</td>
+                                                            <td>{{ entry.CAmount }}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    {% endifchanged %}
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-center">No data available for the selected filters.</p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-                <div class="table-responsive card-body">
-                    {% if ledger_summary_data %}
-                    {% for summary_data_entry in ledger_summary_data|dictsort:"CUST_ID" %}
-                    {% ifchanged summary_data_entry.CustomerName %}
-
-                    <h4>
-                       Customer Name:-  <strong class="text-danger">{{ summary_data_entry.CustomerName }} </strong> Customer Id:- <strong class="text-danger">{{ summary_data_entry.CUST_ID }} </strong> 
-                    </h4> 
-                    <hr/>       
-
-                    <h5 class="text-center fw-bold">
-                    Summary Report 
-                    </h5> 
-                    <hr/>
-                    <!-- Table 1: Summary Data -->
-                    <table id="ledger_summary_data" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 mt-3 fw-bold">
-                        <thead class="table-title text-white text-center rounded">
-                            <tr>
-                                <th>Customer</th>
-                                <th>Root</th>
-                                <th>Society</th>
-                                <th>DPU</th>
-                                <th>Total Qty.</th>
-                                <th>Total Amount</th>
-                                <th>Total CAmount</th>
-                                <th>Avg. FAT</th>
-                                <th>Avg. SNF</th>
-                                <th>Avg. CLR</th>
-
-                            </tr>
-                        </thead>
-                        <tbody class="align-items-center text-center">
-                            <tr>
-                                <td>{{ summary_data_entry.CUST_ID }}</td>
-                                <td>{{ summary_data_entry.ST_ID__location }}</td>
-                                <td>{{ summary_data_entry.ST_ID__society }}</td>
-                                <td>{{ summary_data_entry.ST_ID__st_id }}</td>
-                                <td>{{ summary_data_entry.TotalQT }} ltr.</td>
-                                <td>₹ {{ summary_data_entry.TotalAmount }}</td>
-                                <td>{{ summary_data_entry.TotalCAmount }}</td>
-                                <td>{{ summary_data_entry.AvgFAT|floatformat:2 }}</td>
-                                <td>{{ summary_data_entry.AvgSNF|floatformat:2 }}</td>
-                                <td>{{ summary_data_entry.AvgCLR|floatformat:2 }}</td>
-
-                            </tr>
-                        </tbody>
-                    </table>
-        
-                    <!-- Table 2: Detail Data -->
-                    <hr/>
-                    <h5 class="text-center fw-bold">
-                        Detail Report 
-                    </h5> 
-                    <hr/>
-
-                    <table id="ledger_detail_data" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 mb-5 fw-bold">
-                        <thead class="table-title text-white text-center rounded bg-success">
-                            <tr>
-                                <th>Date</th>
-                                <th>SHIFT</th>
-                                <th>MType</th>
-                                <th>FAT</th>
-                                <th>SNF</th>
-                                <th>CLR</th>
-                                <th>WATER</th>
-                                <th>Quantity</th>
-                                <th>RATE</th>
-                                <th>Amount</th>
-                                <th>CAmount</th>
-                            </tr>
-                        </thead>
-                        <tbody class="align-items-center text-center">
-                            {% for entry in ledger_detail_data %}
-                                {% if entry.CUST_ID == summary_data_entry.CUST_ID %}
-                                    <tr>
-                                        <td>{{ entry.RecordingDate|date:"d-m-Y" }}</td>
-                                        <td>{{ entry.SHIFT }}</td>
-                                        <td>{{ entry.MType }}</td>
-                                        <td>{{ entry.FAT }}</td>
-                                        <td>{{ entry.SNF }}</td>
-                                        <td>{{ entry.CLR }}</td>
-                                        <td>{{ entry.WATER }}</td>
-                                        <td>{{ entry.QT }}</td>
-                                        <td>{{ entry.RATE }}</td>
-                                        <td>{{ entry.Amount }}</td>
-                                        <td>{{ entry.CAmount }}</td>
-                                    </tr>
-                                {% endif %}
-                            {% endfor %}
-                        </tbody>
-                                            </table> {% endifchanged %}
-                {% endfor %}
-                {% else %}
-                <p class="text-center">No data available for the selected filters.</p>
-            {% endif %}
-        </div>
-    </div>
-</div>
-</div>
-
+            </div>
+            
         </div>
         <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
             <div class="row mt-4">
                 <div class="col-lg-12 mb-lg-0 mb-5">
-                    <div class="card rounded" >
+                    <div class="card rounded">
                         <div class="card-header pb-0 p-3">
                             <div class="d-flex justify-content-between">
-                                <h6 class="mb-2 fw-bold">
-                                    Payment Summary Table
-                                </h6>
-                                <div class="float-end mb-2">                    
-                                    <button class="btn btn-primary rounded btn-sm me-2 fw-bold" onclick="exportToCsvAndPdf(['payment_table_info', 'payment_table_data'], 'ledger_report_payment', 'csv')"><i class="icon-download me-2 mb-1"></i>CSV</button>
-                                    <button class="btn btn-primary rounded btn-sm  fw-bold" onclick="exportToCsvAndPdf(['payment_table_info', 'payment_table_data'], 'ledger_report_payment', 'pdf')"><i class="icon-download me-2 mb-1"></i>PDF</button>
+                                <h6 class="mb-2 fw-bold">Payment Summary Table</h6>
+                                <div class="float-end mb-2">
+<!-- Payment report export buttons -->
+<button class="btn btn-primary rounded btn-sm me-2 fw-bold" onclick="exportToCsvAndPdf(['payment_table_info', 'payment_table_data'], 'ledger_report_payment', 'csv', 'payment')"><i class="icon-download me-2 mb-1"></i>CSV</button>
+<button class="btn btn-primary rounded btn-sm fw-bold" onclick="exportToCsvAndPdf(['payment_table_info', 'payment_table_data'], 'ledger_report_payment', 'pdf', 'payment')"><i class="icon-download me-2 mb-1"></i>PDF</button>
                                 </div>
                             </div>
                         </div>
                         <div class="table-responsive card-body">
                             {% if payment_summary_data %}
-                                <!-- Payment Summary Data Table -->
                                 <hr/>
-                                <h5 class="text-center fw-bold">
-                                    Summary Report 
-                                </h5> 
+                                <h5 class="text-center fw-bold">Summary Report</h5>
                                 <hr/>
-                                <table id="payment_table_info" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 rounded fw-bold">
+                                <table id="payment_table_info" class="table align-items-center text-center table-striped table-hover rounded table-responsive w-100 rounded fw-bold">
                                     <thead class="table-title text-white text-center rounded">
                                         <tr>
                                             <th>Location</th>
@@ -374,19 +360,16 @@
                                             <td>{{ selected_location }}</td>
                                             <td>{{ selected_dpu }}</td>
                                             <td>{{ selected_start_date }}</td>
-                                            <td>{{ selected_end_date }}</td>                                        
+                                            <td>{{ selected_end_date }}</td>
                                             <td>{{ payment_summary_data.GrandTotalQT }} ltr.</td>
                                             <td>₹ {{ payment_summary_data.GrandTotalAmount }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
-                                <!-- Customer Payment Summary Table -->
                                 <hr/>
-                                <h5 class="text-center fw-bold">
-                                    Detail Report 
-                                </h5> 
+                                <h5 class="text-center fw-bold">Detail Report</h5>
                                 <hr/>
-                                <table id="payment_table_data" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100 mt-5 rounded fw-bold">
+                                <table id="payment_table_data" class="table align-items-center text-center table-striped table-hover rounded table-responsive w-100 mt-5 rounded fw-bold">
                                     <thead class="table-title text-white text-center rounded bg-success">
                                         <tr>
                                             <th>Cust. Id</th>
@@ -418,15 +401,15 @@
                                         {% endfor %}
                                     </tbody>
                                 </table>
-                                {% else %}
+                            {% else %}
                                 <p class="text-center">No data available for the selected filters.</p>
                             {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
-            </div>
-       
+        </div>
+               
       </div>
   
         <!-- HTML code for summary and detail tables -->
@@ -437,6 +420,7 @@
 
 
         <script>
+
 //  function exportToCsvAndPdf(tableIds, fileNamePrefix, format) {
 //     const username = '{{ user.username }}';
 //     const pdf = new jsPDF();
@@ -483,76 +467,137 @@
 //         pdf.save(`${username}_${fileNamePrefix}.pdf`);
 //     }
 // }
-function exportToCsvAndPdf(tableIds, fileNamePrefix, format) {
+function exportToCsvAndPdf(tableIds, fileNamePrefix, format, reportType) {
     var username = '{{ user.username }}';
-    var pdf = new jsPDF();
+    var pdf = new jsPDF('landscape'); // Portrait orientation for tables
     let csvData = [];
     var tables = document.querySelectorAll("table");
 
-    // Set the initial vertical offset for the first table
-    let verticalOffset = 10;
+    // Set the initial vertical offset for the PDF export
+    let verticalOffset = 20;
+
+    // Define styles for PDF
+    const styles = {
+        header: {
+            fontSize: 18,
+            bold: true,
+            color: '#333',
+            marginBottom: 10,
+            alignment: 'center'
+        },
+        tableHeader: {
+            bold: true,
+            fontSize: 12,
+            textColor: '#333',
+            fillColor: '#f2f2f2'
+        },
+        tableBody: {
+            fontSize: 12,
+            textColor: '#333'
+        },
+        pageNumber: {
+            fontSize: 10,
+            textColor: '#333',
+            alignment: 'center'
+        },
+        alternateRow: {
+            fillColor: '#f9f9f9'
+        }
+    };
+
+    // Function to add page numbers
+    function addPageNumbers(pdf) {
+        const pageCount = pdf.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            pdf.setPage(i);
+            pdf.setFontSize(styles.pageNumber.fontSize);
+            pdf.text(`Page ${i} of ${pageCount}`, pdf.internal.pageSize.width / 2, pdf.internal.pageSize.height - 10, { align: 'center' });
+        }
+    }
 
     // Iterate over each table
-    tables.forEach(function(table, index) {
-        // Generate CSV data
-        const rows = table.querySelectorAll('tr');
-        const tableData = [];
-        rows.forEach((row) => {
-            const rowData = [];
-            const cells = row.querySelectorAll('td, th');
-            cells.forEach((cell) => {
-                rowData.push(cell.innerText);
-            });
-            tableData.push(rowData.join(','));
-        });
-        csvData.push(tableData.join('\n'));
-
-        // Generate PDF
-        if (format === 'pdf') {
-            const tableElement = table.cloneNode(true); // Clone the table element to avoid modifying the original
-            const pageHeight = pdf.internal.pageSize.height;
-            const pageWidth = pdf.internal.pageSize.width;
-
-            // Calculate the height of the table
-            const tableHeight = pdf.autoTable.previous.finalY + tableElement.offsetHeight;
-
-            // Check if the table fits on the current page or if a new page is needed
-            if (verticalOffset + tableHeight > pageHeight) {
-                pdf.addPage();
-                verticalOffset = 10; // Reset vertical offset for new page
+    tables.forEach(function (table, index) {
+        // Check if the current table id is included in the list of tableIds
+        if (tableIds.includes(table.id) && table.id.includes(reportType)) {
+            // Add label for the table
+            let label = '';
+            if (table.id.includes('ledger_summary')) {
+                label = 'Summary'; // Label for summary table
+            } else if (table.id.includes('ledger_detail')) {
+                label = 'Detail Data'; // Label for detail data table
             }
 
-            pdf.autoTable({
-                html: tableElement,
-                startY: verticalOffset,
-                theme: 'grid', // Optional: you can change the theme as needed
-                styles: { overflow: 'linebreak' }
+            // Generate CSV data
+            const rows = table.querySelectorAll('tr');
+            const tableData = [];
+            rows.forEach((row) => {
+                const rowData = [];
+                const cells = row.querySelectorAll('td, th');
+                cells.forEach((cell) => {
+                    rowData.push(cell.innerText);
+                });
+                tableData.push(rowData.join(','));
             });
+            csvData.push(tableData.join('\n'));
 
-            // Update the vertical offset for the next table
-            verticalOffset = pdf.autoTable.previous.finalY + 10;
-        }
-
-        // Check if it's the last table iteration
-        if (index === tables.length - 1) {
-            // Generate and download CSV
-            if (format === 'csv') {
-                const csvBlob = new Blob([csvData.join('\n')], { type: 'text/csv' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(csvBlob);
-                link.download = `${username}_${fileNamePrefix}.csv`;
-                link.click();
-            }
-
-            // Save PDF
+            // Generate PDF
             if (format === 'pdf') {
-                pdf.save(`${username}_${fileNamePrefix}.pdf`);
+                // Add label for the table
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(styles.header.fontSize);
+                pdf.setTextColor(styles.header.color);
+                pdf.text(label, pdf.internal.pageSize.width / 2, verticalOffset, { align: 'center' });
+
+                // Add table content
+                const tableElement = table.cloneNode(true); // Clone the table element to avoid modifying the original
+
+                pdf.autoTable({
+                    html: tableElement,
+                    startY: verticalOffset + 10,
+                    theme: 'grid',
+                    headStyles: styles.tableHeader,
+                    bodyStyles: styles.tableBody,
+                    alternateRowStyles: styles.alternateRow,
+                    styles: { overflow: 'linebreak', cellPadding: 2, halign: 'center' },
+                    columnStyles: { 0: { cellWidth: 'auto' } }
+                });
+
+                // Check if we need to add a new page after two tables
+                if (index % 2 === 1 && index !== tables.length - 1) {
+                    pdf.addPage();
+                    verticalOffset = 20; // Reset vertical offset for the new page
+                } else {
+                    verticalOffset = pdf.autoTable.previous.finalY + 30; // Update vertical offset for the next table
+                }
             }
         }
     });
+
+    // Add page numbers at the end
+    if (format === 'pdf') {
+        addPageNumbers(pdf);
+    }
+
+    // Generate and download CSV
+    if (format === 'csv') {
+        const csvBlob = new Blob([csvData.join('\n')], { type: 'text/csv' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(csvBlob);
+        link.download = `${username}_${fileNamePrefix}.csv`;
+        link.click();
+    }
+
+    // Save PDF
+    if (format === 'pdf') {
+        pdf.save(`${username}_${fileNamePrefix}.pdf`);
+    }
 }
 
+// Include the necessary jsPDF and autoTable libraries in your HTML
+
         </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
         
         <script>
             function updateDpusByLocation(selectedLocation) {
