@@ -110,7 +110,6 @@ urlpatterns = [
 
     # Custom 404 page
     path('<path:not_found>/', custom_404_page, name='custom_404_page'),
-
 ]
 
 # Handler for 404 error
