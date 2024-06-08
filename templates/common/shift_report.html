@@ -134,7 +134,85 @@
                     
                           
     </div>
-
+        <!-- Total Summary Record -->
+        <div class="row mt-4" id="divID">
+            <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
+                <div class="card rounded">
+                    <div class="card-header pb-0 p-3">
+                        <div class="d-flex justify-content-between">
+                            <h6 class="me-2 mt-2 fw-bold">Summary Table</h6>
+                            <div class="float-end  mb-2 ">
+                                <button class="btn btn-primary rounded btn-sm me-2 fw-bold" onclick="exportToCsvAndPdf(['summaryTable_report', 'detailTable_report'], 'shift_report', 'csv')"><i class="icon-download me-2 mb-1"></i>CSV</button>
+                                <button class="btn btn-primary rounded btn-sm fw-bold " onclick="exportToCsvAndPdf(['summaryTable_report', 'detailTable_report'], 'shift_report', 'pdf')"><i class="icon-download me-2 mb-1"></i>PDF</button>
+    
+                            </div>                    </div>
+                    <div class="table-responsive card-body">
+                        {% if summary_data %}
+                        <!-- Table 1: Summary Data -->
+                        <table id="summaryTable_report" class="table align-items-center  table-rwd text-center table table-striped table-hover rounded table-responsive w-100 "    
+                        data-toggle="table"
+                        data-pagination="true"
+                        data-auto-refresh="true"
+                        data-auto-refresh-interval="5000">
+                            <thead class="text-white text-center rounded table-title">
+                                <tr>
+                                    <th>Location</th>
+                                    <th>DPU</th>
+                                    <th>Society</th>
+                                    <th>Date</th>
+                                    <th>Shift</th>
+                                    <th>Avg.FAT</th>
+                                    <th>Avg.SNF</th>
+                                    <th>Avg.CLR</th>  
+                                    <th>Total Qty.</th>
+                                    <th>Total Amount</th>
+                                    <th>Total Customer</th>
+                                </tr>
+                            </thead>
+                            <tbody class="fw-bold">
+                                <tr>
+                                    <td>{{ selected_location }}</td>
+                                    <td>{{ selected_dpu }}</td>
+                                    <td>{{ selected_society }}</td>
+                                    <td>{{ selected_start_date}}</td>
+                                    <td>{{ selected_shift }}</td>
+                                    <td>{{ summary_data.AvgFAT }}</td>
+                                    <td>{{ summary_data.AvgSNF }}</td>
+                                    <td>{{ summary_data.AvgCLR }}</td>  
+                                    <td>{{ summary_data.TotalQT }} ltr.</td>
+                                    <td>₹ {{ summary_data.TotalAmount }}</td>
+                                    <td>{{ summary_data.TotalCustomer }}</td>
+                                </tr>  
+                                <tr class="align-items-center text-center">
+                                    <td colspan="5"> Cow Summary</td>
+                                    <td>{{ cow_summary_data.AvgFAT }}</td>
+                                    <td>{{ cow_summary_data.AvgSNF }}</td>
+                                    <td>{{ cow_summary_data.AvgCLR }}</td>
+                                    <td>{{ cow_summary_data.TotalLtr }} ltr.</td>
+                                    <td>₹ {{ cow_summary_data.TotalAmt }}</td>
+                                    <td>{{ cow_summary_data.TotalCust }}</td>
+                                </tr>
+                                <tr class="align-items-center text-center">
+                                    <td colspan="5"> Buffalo Summary</td>
+                                    <td>{{ buffalo_summary_data.AvgFAT }}</td>
+                                    <td>{{ buffalo_summary_data.AvgSNF }}</td>
+                                    <td>{{ buffalo_summary_data.AvgCLR }}</td>
+                                    <td>{{ buffalo_summary_data.TotalLtr }} ltr.</td>
+                                    <td>₹ {{ buffalo_summary_data.TotalAmt }}</td>
+                                    <td>{{ buffalo_summary_data.TotalCust }}</td>
+                                </tr>
+                            </tbody>
+                           
+                        </table>
+                        
+                        {% else %}
+                        <p>No data available for the selected filters.</p>
+                        {% endif %}
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
     <!-- Table 2: Detail Data -->
     <div class="row mt-4" id="divID">
         <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
@@ -198,87 +276,7 @@
         </div>
     </div>
     
-        <!-- Total Summary Record -->
-<div class="row mt-4" id="divID">
-    <div class="col-lg-12 mb-lg-0 mb-5" id="myRefreshDiv">
-        <div class="card rounded">
-            <div class="card-header pb-0 p-3">
-                <div class="d-flex justify-content-between">
-                    <h6 class="mb-2 fw-bold">Summary Table</h6>
-                 
-                </div>
-            </div>
-            <div class="table-responsive card-body">
-                {% if summary_data %}
-                <!-- Table 1: Summary Data -->
-                <table id="summaryTable_report" class="table align-items-center  table-rwd text-center table table-striped table-hover rounded table-responsive w-100 "    
-                data-toggle="table"
-                data-pagination="true"
-                data-auto-refresh="true"
-                data-auto-refresh-interval="5000">
-                    <thead class="text-white text-center rounded table-title">
-                        <tr>
-                            <th>Location</th>
-                            <th>DPU</th>
-                            <th>Society</th>
-                            <th>Date</th>
-                            <th>Shift</th>
-                            <th>Avg.FAT</th>
-                            <th>Avg.SNF</th>
-                            <th>Avg.CLR</th>  
-                            <th>Total Qty.</th>
-                            <th>Total Amount</th>
-                            <th>Total CAmount</th>
-                            <th>Total Customer</th>
-                        </tr>
-                    </thead>
-                    <tbody class="fw-bold">
-                        <tr>
-                            <td>{{ selected_location }}</td>
-                            <td>{{ selected_dpu }}</td>
-                            <td>{{ selected_society }}</td>
-                            <td>{{ selected_start_date}}</td>
-                            <td>{{ selected_shift }}</td>
-                            <td>{{ summary_data.AvgFAT }}</td>
-                            <td>{{ summary_data.AvgSNF }}</td>
-                            <td>{{ summary_data.AvgCLR }}</td>  
-                            <td>{{ summary_data.TotalQT }} ltr.</td>
-                            <td>₹ {{ summary_data.TotalAmount }}</td>
-                            <td>{{ summary_data.TotalCAmount }}</td>
-                            <td>{{ summary_data.TotalCustomer }}</td>
-                        </tr>  
-                        <tr class="align-items-center text-center">
-                            <td colspan="5"> Cow Summary</td>
-                            <td>{{ cow_summary_data.AvgFAT }}</td>
-                            <td>{{ cow_summary_data.AvgSNF }}</td>
-                            <td>{{ cow_summary_data.AvgCLR }}</td>
-                            <td>{{ cow_summary_data.TotalLtr }} ltr.</td>
-                            <td>₹ {{ cow_summary_data.TotalAmt }}</td>
-                            <td>{{ cow_summary_data.TotalCAmt }}</td>  
-                            <td>{{ cow_summary_data.TotalCust }}</td>
-                        </tr>
-                        <tr class="align-items-center text-center">
-                            <td colspan="5"> Buffalo Summary</td>
-                            <td>{{ buffalo_summary_data.AvgFAT }}</td>
-                            <td>{{ buffalo_summary_data.AvgSNF }}</td>
-                            <td>{{ buffalo_summary_data.AvgCLR }}</td>
-                            <td>{{ buffalo_summary_data.TotalLtr }} ltr.</td>
-                            <td>₹ {{ buffalo_summary_data.TotalAmt }}</td>
-                            <td>{{ buffalo_summary_data.TotalCAmt }}</td> 
-                            <td>{{ buffalo_summary_data.TotalCust }}</td>
-                        </tr>
-                    </tbody>
-                   
-                </table>
-                
-                {% else %}
-                <p>No data available for the selected filters.</p>
-                {% endif %}
-            </div>
-            
-        </div>
-    </div>
-</div>
+
 
 
 <!-- Existing JavaScript for exporting and DataTable initialization -->

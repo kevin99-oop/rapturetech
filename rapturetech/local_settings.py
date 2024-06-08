@@ -8,7 +8,7 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Database settings for the project
+# # Database settings for the project
 
 #for dev we need to set env variable 
 #for production (export ENV=prod)
@@ -34,10 +34,10 @@ else:
 # DATABASES = {
 #    'default': {
 #        'ENGINE': 'django.db.backends.postgresql',
-#        'NAME': 'rapturetechdb',
-#        'USER': 'rapturetech_mas',
-#        'PASSWORD': 'Raptur3t3chN0S3cPass',
-#        'HOST': 'db-instance-rapturetech.c7msy0kga8dr.ap-south-1.rds.amazonaws.com',
+#        'NAME': 'rapturedb',
+#        'USER': 'sgnonsuser',
+#        'PASSWORD': 'SgnRapDbPas01',
+#        'HOST': '13.235.128.158',
 #        'PORT': '5432'
 #    }
 # }
