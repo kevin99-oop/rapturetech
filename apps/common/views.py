@@ -1690,3 +1690,7 @@ def update_question_view(request, pk):
     else:
         return redirect('question-history')
 
+@login_required
+def old_drec_data_edited_list(request):
+    records = OldDrecDataEdited.objects.all()
+    return render(request, 'common/old_drec_data_edited_list.html', {'records': records})
