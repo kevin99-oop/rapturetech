@@ -150,8 +150,8 @@
                                                     <td>{{ record.avg_snf }}</td>
                                                     <td>{{ record.avg_clr }}</td>
                                                     <td>{{ record.avg_water }}</td>
-                                                    <td>{{ record.total_ltr }} ltr.</td>
-                                                    <td>₹ {{ record.total_amt }}</td>
+                                                    <td>{{ record.total_ltr }} </td>
+                                                    <td> {{ record.total_amt }}</td>
                                                     <td>{{ record.total_cust }}</td>
                                                 </tr>
                                                 {% endfor %}
@@ -161,8 +161,8 @@
                                                     <td>{{ avg_snf_cow }}</td>
                                                     <td>{{ avg_clr_cow }}</td>
                                                     <td>{{ avg_water_cow }}</td>
-                                                    <td>{{ total_ltr_cow }} ltr.</td>
-                                                    <td>₹ {{ total_amt_cow }}</td>
+                                                    <td>{{ total_ltr_cow }} </td>
+                                                    <td> {{ total_amt_cow }}</td>
                                                     <td>{{ total_cust_cow }}</td>
                                                 </tr>
                                                 <tr class="align-items-center text-align-center border-2 border-dark bg-light">
@@ -171,8 +171,8 @@
                                                     <td>{{ avg_snf_buffalo }}</td>
                                                     <td>{{ avg_clr_buffalo }}</td>
                                                     <td>{{ avg_water_buffalo }}</td>
-                                                    <td>{{ total_ltr_buffalo }} ltr.</td>
-                                                    <td>₹ {{ total_amt_buffalo }}</td>
+                                                    <td>{{ total_ltr_buffalo }} </td>
+                                                    <td> {{ total_amt_buffalo }}</td>
                                                     <td>{{ total_cust_buffalo }}</td>
                                                 </tr>
                                             </tbody>
@@ -235,8 +235,8 @@
                                                     <td>{{ drec.SNF }}</td>
                                                     <td>{{ drec.CLR }}</td>
                                                     <td>{{ drec.WATER }}</td>
-                                                    <td>{{ drec.QT }} ltr.</td>
-                                                    <td>₹ {{ drec.Amount }}</td>
+                                                    <td>{{ drec.QT }} </td>
+                                                    <td> {{ drec.Amount }}</td>
                                                     <td>{{ drec.CAmount }}</td>
                                                 </tr>
                                             {% endfor %}
@@ -345,8 +345,8 @@
                                                 <td>{{ drec.SNF }}</td>
                                                 <td>{{ drec.CLR }}</td>
                                                 <td>{{ drec.WATER }}</td>
-                                                <td>{{ drec.QT }} ltr.</td>
-                                                <td>₹ {{ drec.Amount }}</td>
+                                                <td>{{ drec.QT }}</td>
+                                                <td> {{ drec.Amount }}</td>
                                                 <td>{{ drec.CAmount }}</td>
                                             </tr>
                                         {% endfor %}
@@ -563,7 +563,7 @@
                         <td>${item.CLR}</td>
                         <td>${item.WATER}</td>
                         <td>${item.QT}</td>
-                        <td>₹ ${item.Amount}</td>
+                        <td> ${item.Amount}</td>
                         <td>${item.CAmount}</td>
                     </tr>`;
                     rowsHTML += row;

@@ -5,6 +5,8 @@ from apps.userprofile.models import Profile
 from django.forms import ModelForm
 from django import forms
 from apps.common.models import DPU, Customer,Questions
+from django import forms
+from apps.common.models import RateTable
 
 # SignUpForm is a custom form that extends UserCreationForm for user registration
 class SignUpForm(UserCreationForm):
@@ -101,10 +103,16 @@ class ProfileForm(forms.ModelForm):
 
 # DPUForm is a form for handling DPU model data
 class DPUForm(forms.ModelForm):
+    check_options = forms.MultipleChoiceField(
+        choices=DPU.CHECKBOX_CHOICES,
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+
     class Meta:
         model = DPU
         fields = [
-            'zone', 'location', 'st_id', 'society', 'mobile_number', 'owner', 'status', 'select_dpu'
+            'zone', 'location', 'st_id', 'society', 'mobile_number', 'owner', 'status', 'select_dpu', 'check_options'
         ]
         widgets = {
             'zone': forms.TextInput(attrs={'placeholder': 'Enter Zone'}),
@@ -116,6 +124,11 @@ class DPUForm(forms.ModelForm):
             'status': forms.Select(attrs={'placeholder': 'Select Status'}),
             'select_dpu': forms.RadioSelect,
         }
+
+    def clean_check_options(self):
+        check_options = self.cleaned_data.get('check_options', [])
+        return ','.join(check_options)
+
 
 # UploadCSVForm is a form for handling CSV file uploads for the Customer model
 class UploadCSVForm(forms.ModelForm):
@@ -134,9 +147,6 @@ class CustomerForm(forms.ModelForm):
         model = Customer
         fields = ['st_id', 'csv_file']  # Add 'date_uploaded'
 
-# forms.py
-from django import forms
-from apps.common.models import RateTable
 
 class UploadRateTableForm(forms.ModelForm):
     class Meta:
@@ -154,3 +164,5 @@ class QuestionForm(forms.ModelForm):
     class Meta:
         model = Questions
         fields = ['description']
+
+
