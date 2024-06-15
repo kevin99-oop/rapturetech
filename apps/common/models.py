@@ -58,6 +58,13 @@ class DPU(models.Model):
     ]
     select_dpu = models.CharField(max_length=5, choices=SELECT_DPU_CHOICES, default='DPMCU')
 
+    CHECKBOX_CHOICES = [
+        ('FAT', 'FAT'),
+        ('SNF', 'SNF'),
+        ('CLR', 'CLR'),
+    ]
+    check_options = models.CharField(max_length=100, blank=True)  # Comma-separated values
+
     def __str__(self):
         return f"{self.user.username}'s DPU - {self.st_id}"
 
@@ -67,7 +74,41 @@ class DPU(models.Model):
             return latest_customer.csv_file.path
         except Customer.DoesNotExist:
             return None
-        
+
+class OldDrecDataDeleted(models.Model):
+    new_drec = models.IntegerField(null=True)
+    REC_TYPE = models.CharField(max_length=255)
+    SLIP_TYPE = models.IntegerField(null=True, default=None)
+    ST_ID = models.CharField(max_length=255)
+    CUST_ID = models.IntegerField(null=True, default=None)
+    TotalFileRecord = models.IntegerField(null=True, default=None)
+    FlagEdited = models.CharField(max_length=10, default="", blank=True)
+    MType = models.CharField(max_length=255, null=True, default=None)
+    RecordingDate = models.DateField(null=True, default=None)
+    RecordingTime = models.CharField(max_length=255, default="0000")
+    SHIFT = models.CharField(max_length=255, null=True, default=None)
+    FAT = models.FloatField(null=True, default=None)
+    FAT_UNIT = models.CharField(max_length=255, default="", blank=True)
+    SNF = models.FloatField(null=True, default=None)
+    SNF_UNIT = models.CharField(max_length=255, default="", blank=True)
+    CLR = models.FloatField(null=True, default=None)
+    CLR_UNIT = models.CharField(max_length=255, default="", blank=True)
+    WATER = models.FloatField(null=True, default=None)
+    WATER_UNIT = models.CharField(max_length=255, default="", blank=True)
+    QT = models.FloatField(null=True, default=None)
+    QT_UNIT = models.CharField(max_length=255, default="", blank=True)
+    RATE = models.FloatField(null=True, default=None)
+    Amount = models.FloatField(null=True, default=None)
+    CAmount = models.FloatField(null=True, default=None)
+    CSR_NO = models.IntegerField(null=True, default=None)
+    CREV = models.IntegerField(null=True, default=None)
+    END_TAG = models.CharField(max_length=255, default="", blank=True)
+    dpuid = models.CharField(max_length=255, default="", blank=True)
+    RID = models.CharField(max_length=255, null=True, default=None)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"OldDrecDataDeleted for DREC ID: {self.id}"
 
 class OldDrecDataEdited(models.Model):
     new_drec = models.IntegerField(null=True)

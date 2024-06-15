@@ -33,7 +33,7 @@ from apps.common.forms import (
     ProfileForm,
     DPUForm,
     UploadCSVForm,
-    UploadRateTableForm,
+    UploadRateTableForm
 )
 # Django Rest Framework Imports
 from rest_framework.decorators import api_view, permission_classes
@@ -139,6 +139,7 @@ def custom_logout(request):
 def super_dashboard(request):
     # Logic for user dashboard
     return render(request, 'common/super_admin/super_dashboard.html')
+
 class DashboardView(TemplateView):
     template_name = 'example.html'
     paginate_by = 10
@@ -150,56 +151,30 @@ class DashboardView(TemplateView):
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        start_time = time.time()
         context = cache.get('dashboard_data')
         if not context:
             context = self.compute_data(request)
             cache.set('dashboard_data', context, timeout=self.refresh_interval)
-        end_time = time.time()
-        print("Execution time:", end_time - start_time, "seconds")
         return self.render_to_response(context)
-
-    # def update_data_periodically(self):
-    #     while True:
-    #         context = self.compute_data(None)
-    #         cache.set('dashboard_data', context, timeout=self.refresh_interval)
-    #         time.sleep(self.refresh_interval)
-
-    # def dispatch(self, request, *args, **kwargs):
-    #     # Start a background thread to update data periodically
-    #     thread = threading.Thread(target=self.update_data_periodically)
-    #     thread.daemon = True
-    #     thread.start()
-    #     return super().dispatch(request, *args, **kwargs)
 
     def compute_data(self, request):
         active_dpu_list = self.get_active_dpu_list(request.user) if request else None
         drec_data = self.get_all_drec_data(request.user) if request else None
 
         if drec_data is not None:
-            # Limit the number of records fetched
             drec_data = drec_data[:self.max_records_to_fetch]
-
-            # Get distinct customer IDs directly from the filtered records
             drec_data_cust_ids = set(record.CUST_ID for record in drec_data)
-
             summary_data = self.prepare_summary_data(drec_data, active_dpu_list)
             customer_list = self.get_customer_list(drec_data_cust_ids)
-
             avg_fat, avg_snf, avg_clr = self.calculate_global_averages(request.user)
-
-            paginator = Paginator(drec_data, self.paginate_by)
-            drec_data_page = paginator.get_page(request.GET.get('page'))
+            drec_data_page = self.paginate_drec_data(request, drec_data)
 
             total_customer_count = self.calculate_total_customer_count(active_dpu_list)
             total_dpus = active_dpu_list.count()
 
             top_10_latest_records = self.get_top_10_latest_records(request.user, summary_data[0]['ST_ID__st_id']) if summary_data else None
-
             recording_dates = self.get_recording_dates(request.user.id)
-
             cow_summary_data, avg_fat_cow, avg_snf_cow, avg_clr_cow, avg_water_cow, total_ltr_cow, total_amt_cow, total_cust_cow = self.prepare_and_calculate_summary_data(drec_data, active_dpu_list, 'C')
-
             buffalo_summary_data, avg_fat_buffalo, avg_snf_buffalo, avg_clr_buffalo, avg_water_buffalo, total_ltr_buffalo, total_amt_buffalo, total_cust_buffalo = self.prepare_and_calculate_summary_data(drec_data, active_dpu_list, 'B')
 
             live_data = {
@@ -244,18 +219,19 @@ class DashboardView(TemplateView):
         drec_filter = {'ST_ID__user': user} if (user.is_staff or user.is_superuser) else {'ST_ID__dpu_user': user.id}
         return DREC.objects.filter(**drec_filter).order_by('-created_at').select_related('ST_ID__user')
 
+    def paginate_drec_data(self, request, drec_data):
+        paginator = Paginator(drec_data, self.paginate_by)
+        page_number = request.GET.get('page')
+        return paginator.get_page(page_number)
+
     def get_customer_list(self, drec_data_cust_ids):
         return CustomerList.objects.filter(cust_id__in=drec_data_cust_ids)
 
     def calculate_global_averages(self, user):
-        if not isinstance(user, User):
-            return None, None, None
-
         drec_filter = {'ST_ID__user': user} if (user.is_staff or user.is_superuser) else {'ST_ID__dpu_user': user.id}
         avg_fat = DREC.objects.filter(**drec_filter).aggregate(avg_fat=Avg('FAT'))['avg_fat']
         avg_snf = DREC.objects.filter(**drec_filter).aggregate(avg_snf=Avg('SNF'))['avg_snf']
         avg_clr = DREC.objects.filter(**drec_filter).aggregate(avg_clr=Avg('CLR'))['avg_clr']
-
         return (
             round(avg_fat, 1) if avg_fat is not None else None,
             round(avg_snf, 1) if avg_snf is not None else None,
@@ -265,9 +241,9 @@ class DashboardView(TemplateView):
     def calculate_total_customer_count(self, active_dpu_list):
         if not active_dpu_list.exists():
             return 0
-
         queryset = CustomerList.objects.filter(st_id__in=active_dpu_list.values_list('st_id', flat=True).distinct())
         return queryset.count() if (active_dpu_list.first().user.is_staff or active_dpu_list.first().user.is_superuser) else queryset.filter(st_id=active_dpu_list.first().st_id).count()
+
     def get_top_10_latest_records(self, user, st_id):
         queryset = DREC.objects.filter(ST_ID__user=user) if (user.is_staff or user.is_superuser) else DREC.objects.filter(ST_ID__dpu_user=user.id)
         return queryset.order_by('-RecordingDate', '-SHIFT')[:10]
@@ -288,17 +264,14 @@ class DashboardView(TemplateView):
         for drec in drec_data:
             key = drec.ST_ID.st_id
             grouped_data[key].append(drec)
-
             if key not in latest_records or drec.RecordingDate > latest_records[key].RecordingDate:
                 latest_records[key] = drec
 
         summary_data = []
         for st_id, records in grouped_data.items():
             latest_record = latest_records.get(st_id)
-
             if latest_record:
                 avg_fat, avg_snf, avg_clr, avg_water, total_ltr, total_amt, total_cust = self.calculate_averages(records)
-
                 summary_data.append({
                     'ST_ID__st_id': st_id,
                     'ST_ID__location': latest_record.ST_ID.location,
@@ -316,7 +289,7 @@ class DashboardView(TemplateView):
                 })
 
         return summary_data
-    
+
     def calculate_averages(self, records):
         if not records:
             return 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0
@@ -340,7 +313,6 @@ class DashboardView(TemplateView):
         total_amt = round(total_amt, 2)
 
         return avg_fat, avg_snf, avg_clr, avg_water, total_ltr, total_amt, total_cust
-
 
 class FetchDRECDataView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
@@ -562,7 +534,9 @@ def add_dpu(request):
             user.save()
             dpu.plain_password = password
             dpu.user = request.user
-            dpu.dpu_user = user.id        
+            dpu.dpu_user = user.id  
+            dpu.check_options = form.cleaned_data['check_options']
+
             dpu.save()
             # Redirect to the user's dashboard or any other page
             return redirect('active_dpu')
@@ -1694,3 +1668,4 @@ def update_question_view(request, pk):
 def old_drec_data_edited_list(request):
     records = OldDrecDataEdited.objects.all()
     return render(request, 'common/old_drec_data_edited_list.html', {'records': records})
+

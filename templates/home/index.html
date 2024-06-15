@@ -1,617 +1,499 @@
 {% load static %}
-{% load crispy_forms_tags %}
-{% load widget_tweaks %}
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>RaptureTech Pvt Ltd.</title>
     <meta name="description" content="Welcome to RaptureTech. We make DPU, UDS, and SCC.">
     <meta name="author" content="Paras Dave">
-    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'assets/img/rapturetech_logo.jpeg'%}">
-    <link rel="icon" type="image/png" href="{% static 'assets/img/rapturetech_logo.jpeg'%}">
-    <!-- Add Cache-Control header for static assets -->
-    <meta http-equiv="Cache-control" content="public, max-age=604800">
 
-    <title>RaptureTech Pvt. Ltd.</title>
-    <!-- CSS FILES -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap"
+    <!-- Favicons -->
+    <link href="{% static 'home/assets/img/rapturetech_logo.jpeg'%}" rel="icon">
+    <link href="{% static 'home/assets/img/apple-touch-icon.png'%}" rel="apple-touch-icon">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
 
-    <link  href="{% static 'home/css/bootstrap.min.css'%}" rel="stylesheet">
+    <!-- Vendor CSS Files -->
+    <link href="{% static 'home/assets/vendor/bootstrap/css/bootstrap.min.css'%}" rel="stylesheet">
+    <link href="{% static 'home/assets/vendor/bootstrap-icons/bootstrap-icons.css'%}" rel="stylesheet">
+    <link href="{% static 'home/assets/vendor/aos/aos.css'%}" rel="stylesheet">
+    <link href="{% static 'home/assets/vendor/glightbox/css/glightbox.min.css'%}" rel="stylesheet">
+    <link href="{% static 'home/assets/vendor/swiper/swiper-bundle.min.css'%}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
 
-    <link href="{% static 'home/css/bootstrap-icons.css'%}" rel="stylesheet">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Main CSS File -->
+    <link href="{% static 'home/assets/css/main.css'%}" rel="stylesheet">
 
-    <link href="{% static 'home/css/style.css'%}" rel="stylesheet">
-    <style>
-        #section_3 {
-            transform: skew(0deg, -7deg);
-
-        }
-
-        .products_section {
-            transform: skew(0deg, 7deg);
-        }
-    </style>
 </head>
 
-<body>
-    <main>
-
-        <div id="sticky-wrapper" class="sticky-wrapper is-sticky" style="height: 100px;">
-            <!-- Navigation Bar -->
-            <nav class="navbar navbar-expand-lg">
-                <div class="container">
-                    <!-- Logo -->
-                    <a class="navbar-brand d-flex align-items-center" href="{%url 'home'%}">
-                        <img src="{% static 'home/images/logo1.png'%}" class="navbar-brand-image logo1" alt="rapturetech logo"loading="lazy">
-                    </a>
-        
-                    <!-- Mobile Menu Button -->
-                    <div class="d-lg-none ms-auto me-3">
-                        <a href="{%url 'register'%}">
-                            <img src="{% static 'home/images/cloud-data (1).png'%}" class="" alt="CLOUD_DATA_LOGIN" width="70" height="70"loading="lazy">
-                        </a>
-                    </div>
-        
-                    <!-- Navbar Toggler Button -->
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-        
-                    <!-- Navbar Links -->
-                    <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav ms-lg-auto">
-                            <!-- Home Section Link -->
-                            <li class="nav-item">
-                                <a class="nav-link click-scroll active" href="#section_1">Home</a>
-                            </li>
-                            <!-- About Section Link -->
-                            <li class="nav-item">
-                                <a class="nav-link click-scroll inactive" href="#section_2">About</a>
-                            </li>
-                            <!-- Products Section Link -->
-                            <li class="nav-item">
-                                <a class="nav-link click-scroll inactive" href="#section_3">Products</a>
-                            </li>
-                            <!-- Why Us Section Link -->
-                            <li class="nav-item">
-                                <a class="nav-link click-scroll inactive" href="#section_4">Why Us</a>
-                            </li>
-                            <!-- Contact Us Section Link -->
-                            <li class="nav-item">
-                                <a class="nav-link click-scroll inactive" href="#section_5">Contact Us</a>
-                            </li>
-                            <!-- Login Link -->
-                            <li class="nav-item">
-                                <a class="nav-link click-scroll inactive" href="{%url 'login'%}">Login</a>
-                            </li>
-                            <!-- Login Button -->
-                            <a href="{%url 'login'%}">
-                                <img src="{% static 'home/images/cloud-data (1).png'%}" class="CLOUD_DATA_LOGIN" href="{%url 'login'%}" alt="" width="80" height="80" loading="lazy">
-                            </a>
-                        </ul>
-                    </div>
-                </div>
+<body class="index-page">
+    <header id="header" class="header d-flex align-items-center fixed-top">
+        <div class="container-fluid container-xl position-relative d-flex align-items-center">
+            <a href="{%url 'home'%}" class="logo d-flex align-items-center me-auto">
+                <!-- Uncomment the line below if you also wish to use an image logo -->
+                <img src="{% static 'home/assets/img/logo1.png'%}" alt="RaptureTech Pvt. Ltd.">
+            </a>
+            <nav id="navmenu" class="navmenu">
+                <ul>
+                    <li><a href="{%url 'home'%}" class="active">Home<br></a></li>
+                    <li><a href="{%url 'home'%}">About</a></li>
+                    <li><a href="{%url 'home'%}">Why Us</a></li>
+                    <li><a href="{%url 'home'%}">Products</a></li>
+                    <li><a href="{%url 'home'%}">Contact</a></li>
+                    <li><a href="{%url 'login'%}">Login</a></li>
+                </ul>
+                <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
             </nav>
+            </a>
+            <a href="{%url 'login'%}">
+                <img src="{%static 'home/assets/img/cloud-data (1).png'%}" class="CLOUD_DATA_LOGIN mx-3"
+                    href="{%url 'login'%}" alt="" width="80" height="80" loading="lazy">
+            </a>
         </div>
-        
-
-
-        <section class="hero-section d-flex justify-content-center align-items-center " id="section_1">
-            <!-- Section Overlay -->
-            <div class="section-overlay"></div>
-        
-            <!-- SVG Shape -->
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
-                <path fill="#063974" fill-opacity="1"
-                    d="M0,224L34.3,192C68.6,160,137,96,206,90.7C274.3,85,343,139,411,144C480,149,549,107,617,122.7C685.7,139,754,213,823,240C891.4,267,960,245,1029,224C1097.1,203,1166,181,1234,160C1302.9,139,1371,117,1406,106.7L1440,96L1440,0L1405.7,0C1371.4,0,1303,0,1234,0C1165.7,0,1097,0,1029,0C960,0,891,0,823,0C754.3,0,686,0,617,0C548.6,0,480,0,411,0C342.9,0,274,0,206,0C137.1,0,69,0,34,0L0,0Z">
-                </path>
-            </svg>
-        
+    </header>
+    <main class="main">
+        <!-- Hero Section -->
+        <section id="hero" class="hero section">
             <div class="container">
-                <div class="row">
-                    <!-- Left Column -->
-                    <div class="col-lg-7 col-12 mb-5 mb-lg-0" data-aos="fade-right" data-aos-offset="300"
-                        data-aos-easing="ease-in-sine">
-                        <!-- Main Heading -->
-                        <h1 class="text-white text-head">Welcome to RaptureTech</h1>
-        
-                        <!-- Rotating Text -->
-                        <h1 class="cd-headline rotate-1 text-white mb-4 pb-2 text-head">
-                            <span>We make</span>
-                            <span class="cd-words-wrapper" style="width: 258px;">
-                                <b class="is-hidden">DPU</b>
-                                <b class="is-visible">UDS</b>
-                                <b class="is-hidden">SCC</b>
-                            </span>
-                        </h1>
-        
-                        <!-- Button Group -->
-                        <div class="custom-btn-group">
-                            <a href="#section_2" class="btn custom-btn smoothscroll me-3">Our Story</a>
+                <div class="row gy-4">
+                    <div class="col-lg-6 order-1 order-lg-1 d-flex flex-column justify-content-center">
+                        <h1 data-aos="fade-up">Welcome to RaptureTech</h1>
+                        <h3 id="changing-text" data-aos="fade-up" data-aos-delay="100">We make <strong
+                                class="auto_change">All In
+                                One</strong></h3>
+                        <div class="d-flex flex-column flex-md-row" data-aos="fade-up" data-aos-delay="200">
                         </div>
                     </div>
-        
-                    <!-- Right Column -->
-                    <div class="col-lg-5 col-12" data-aos="fade-left" data-aos-anchor="#example-anchor"
-                        data-aos-offset="500" data-aos-duration="500">
-                        <div class="ratio ratio-16x9 ">
-                            <!-- Rotating Images -->
-                            <h1 class="cd-headline rotate-1 text-white mb-4 pb-2">
-                                <span></span>
-                                <span class="cd-words-wrapper">
-                                    <b class="is-hidden">
-                                        <img src="{% static 'home/images/DPU1.png'%}"
-                                            class="custom-block-image img-fluid" alt="DPU1">
-                                    </b>
-                                    <b class="is-visible">
-                                        <img src="{% static 'home/images/UDS2.png'%}"
-                                            class="custom-block-image img-fluid" alt="UDS2">
-                                    </b>
-                                    <b class="is-hidden">
-                                        <img src="{% static 'home/images/SOLAR_CHARGE_CONTROLLER.png'%}"
-                                            class="custom-block-image img-fluid" alt="SOLAR_CHARGE_CONTROLLER" >
-                                    </b>
-                                </span>
-                            </h1>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        
-            <!-- Bottom SVG Shape -->
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
-                <path fill="#ffffff" fill-opacity="1"
-                    d="M0,224L34.3,192C68.6,160,137,96,206,90.7C274.3,85,343,139,411,144C480,149,549,107,617,122.7C685.7,139,754,213,823,240C891.4,267,960,245,1029,224C1097.1,203,1166,181,1234,160C1302.9,139,1371,117,1406,106.7L1440,96L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z">
-                </path>
-            </svg>
-        </section>
-        
+                    <div class="col-lg-6 order-2 order-lg-2 hero-img" data-aos="zoom-out">
+                        <div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
 
-
-        <section class="about-section section-padding" id="section_2">
-            <div class="container">
-                <div class="row">
-
-                    <div class="col-lg-12 col-12 text-center" data-aos="fade-down" data-aos-easing="linear"
-                        data-aos-duration="1500">
-                        <h2 class="mb-lg-5 mb-4">About RaptureTech</h2>
-                    </div>
-
-                    <div class="col-lg-5 col-12 me-auto mb-4 mb-lg-0" data-aos="fade-right" data-aos-offset="300"
-                        data-aos-easing="ease-in-sine">
-                        <h3 class="mb-3">RaptureTech History</h3>
-
-                        <p><strong>Have Experience of 25 years </strong> At RaptureTech, we are passionate about dairy
-                            technology. We understand the importance of quality, precision, and innovation in the dairy
-                            industry. That's why we're dedicated to providing state-of-the-art solutions for milk
-                            analysis, sterilization, and processing.
-
-                        </p>
-
-                    </div>
-
-
-
-                    <div class="col-lg-3 col-md-6 col-12" data-aos="fade-left" data-aos-offset="300"
-                        data-aos-easing="ease-in-sine">
-                        <div class="member-block">
-                            <div class="member-block-image-wrap">
-                                <img src="{% static 'home/images/logo1.png'%}" class="member-block-image img-fluid"
-                                    alt="logo1" loading="lazy">
-
-                                <ul class="social-icon">
-                                    <li class="social-icon-item">
-                                        <a href="#" class="social-icon-link bi-linkedin"></a>
-                                    </li>
-                                    <li class="social-icon-item">
-                                        <a href="#" class="social-icon-link bi-twitter"></a>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div class="member-block-info d-flex align-items-center">
-                                <h4>Paras Dave</h4>
-
-                                <p class="ms-auto">CEO</p>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </section>
-
-
-
-        <section class="events-section section-bg section-padding" id="section_3" data-aos="fade-down"
-            data-aos-easing="linear" data-aos-duration="1500">
-            <div class="container products_section">
-                <div class="row">
-
-                    <div class="col-lg-12 col-12 text-center" data-aos="fade-down" data-aos-easing="linear"
-                        data-aos-duration="1500">
-                        <h2 class="mb-lg-3">Our Products</h2>
-                    </div>
-                    <div class="prod" data-aos="fade-down" data-aos-offset="400" data-aos-easing="ease-in-sine">
-                        <div class="row custom-block mb-3 custom-block-bg">
-                            <div class="col-lg-2 col-md-4 col-12 order-1 order-md-0 order-lg-0">
-                                <div
-                                    class="custom-block-date-wrap  d-lg-block d-md-block align-items-center mt-3 mt-lg-0 mt-md-0">
-                                    <h6 class=" mb-lg-1 mb-0 me-3 me-lg-0 me-md-0 text-white">DPU</h6>
-
-                                    <strong class="text-white"></strong>
+                                    <img src="{% static 'home/assets/img/header/all_in_one_3.png'%}"
+                                        class="d-block  img-fluid animated" alt="All In One">
+                                    <div class="carousel-caption d-none d-md-block">
+                                    </div>
                                 </div>
-                            </div>
-
-                            <div class="col-lg-4 col-md-8 col-12 order-2 order-lg-0">
-                                <div class="custom-block-image-wrap">
-                                    <a href="{% url 'website_dpu' %}">
-                                        <img src="{% static 'home/images/Product_1.png'%}"
-                                            class="custom-block-image block-2 img-fluid" alt="PRODUCT_IMAGE"loading="lazy">
-                                        <i class="custom-block-icon bi-link"></i>
-                                    </a>
+                                <div class="carousel-item">
+                                    <img src="{% static 'home/assets/img/header/ss_str_2.png'%}"
+                                        class="d-block  img-fluid animated" alt="Sterrer">
+                                    <div class="carousel-caption d-none d-md-block">
+                                    </div>
                                 </div>
-                            </div>
-
-                            <div class="col-lg-6 col-12 order-3 order-lg-0 ">
-                                <div class="custom-block-info mt-2 mt-lg-0">
-                                    <a href="{%url 'website_dpu'%}" class="events-title mb-3">Data Processing Unit</a>
-
-                                    <p class="mb-0">
-                                        A Data Processing Unit (DPU) is a specialized hardware component designed for
-                                        efficient data handling and processing in computing systems, crucial for tasks
-                                        like
-                                        data analytics and storage optimization.
-
-                                    </p>
-
-                                    <div class="d-flex flex-wrap border-top mt-4 pt-3">
-
-                                        <div class="mb-4 mb-lg-0">
-                                            <div class="d-flex flex-wrap align-items-center mb-1">
-                                                <span class="custom-block-span">Disc:</span>
-
-                                                <p class="mb-0">
-                                                <ul class="list-group mx-4">
-                                                    <li>
-                                                        <i class="custom-block-icon bi-link"></i>
-                                                        Brand: RTPL
-                                                    </li>
-                                                    <li>
-                                                        Model: DPUV5
-                                                    </li>
-                                                    <li>
-                                                        Processor: 64 bit Ultra high speed Armcore Microcontroller
-                                                    </li>
-
-                                                </ul>
-                                                </p>
-                                            </div>
-
-
-                                        </div>
-
-                                        <div class="d-flex align-items-center ms-lg-auto">
-                                            <a href="{%url 'website_dpu'%}" class="btn custom-btn">Show More</a>
-                                        </div>
+                                <div class="carousel-item">
+                                    <img src="{% static 'home/assets/img/products/dpu/product_dpu_2.png'%}"
+                                        class="d-block  img-fluid animated" alt="SCC">
+                                    <div class="carousel-caption d-none d-md-block">
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="row custom-block mb-3 custom-block-bg">
-                            <div class="col-lg-2 col-md-4 col-12 order-1 order-md-0 order-lg-0">
-                                <div
-                                    class="custom-block-date-wrap d-lg-block d-md-block align-items-center mt-3 mt-lg-0 mt-md-0">
-                                    <h6 class=" mb-lg-1 mb-0 me-3 me-lg-0 me-md-0 text-white">STIRRET</h6>
-                                    <strong class="text-white"></strong>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-4 col-md-8 col-12 order-2 order-lg-0">
-                                <div class="custom-block-image-wrap">
-                                    <a href="website_ultrasonic_digital_stirrer">
-                                        <img src="{% static 'home/images/Product_2.png'%}"
-                                            class="custom-block-image block-2 img-fluid" alt="PRODUCT_IMAGE"loading="lazy">
-
-                                        <i class="custom-block-icon bi-link"></i>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-6 col-12 order-3 order-lg-0">
-                                <div class="custom-block-info mt-2 mt-lg-0">
-                                    <a href="{%url 'website_ultrasonic_digital_stirrer'%}"
-                                        class="events-title mb-3">Ultrasonic Digital STIRRET </a>
-                                    <p class="mb-0">An Ultrasonic Digital STIRRET is a device utilizing ultrasonic
-                                        technology for precise and digitally controlled stirring in laboratory settings.
-                                    </p>
-                                    <div class="d-flex flex-wrap border-top mt-4 pt-3">
-
-                                        <div class="mb-4 mb-lg-0">
-                                            <div class="d-flex flex-wrap align-items-center mb-1">
-                                                <span class="custom-block-span">Disc:</span>
-
-                                                <p class="mb-0">
-                                                <ul class="list-group mx-4">
-                                                    <li>
-                                                        <i class="custom-block-icon bi-link"></i>
-                                                        Brand: RTPL
-                                                    </li>
-                                                    <li>
-                                                        Model: STIRRET
-                                                    </li>
-                                                    <li>
-                                                        Processor: 64 bit Ultra high speed Armcore Microcontroller
-                                                    </li>
-
-                                                </ul>
-                                                </p>
-                                            </div>
-
-
-                                        </div>
-
-                                        <div class="d-flex align-items-center ms-lg-auto">
-                                            <a href="{%url 'website_ultrasonic_digital_stirrer'%}"
-                                                class="btn custom-btn">Show More</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row custom-block mb-3 custom-block-bg">
-                            <div class="col-lg-2 col-md-4 col-12 order-1 order-md-0 order-lg-0">
-                                <div
-                                    class="custom-block-date-wrap  d-lg-block d-md-block align-items-center mt-3 mt-lg-0 mt-md-0">
-                                    <h6 class=" mb-lg-1 mb-0 me-3 me-lg-0 me-md-0 text-white"> SCC</h6>
-
-                                    <strong class="text-white"></strong>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-4 col-md-8 col-12 order-2 order-lg-0">
-                                <div class="custom-block-image-wrap">
-                                    <a href="{%url 'website_solar_charger'%}">
-                                        <img src="{% static 'home/images/Product_3.png'%}"
-                                            class="custom-block-image block-2 img-fluid" alt="PRODUCT_IMAGE"loading="lazy">
-
-                                        <i class="custom-block-icon bi-link"></i>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-6 col-12 order-3 order-lg-0 ">
-                                <div class="custom-block-info mt-2 mt-lg-0">
-                                    <a href="{%url 'website_solar_charger'%}" class="events-title mb-3"> Solar Charger
-                                        Controller</a>
-
-                                    <p class="mb-0">
-                                        A solar charger controller is a crucial component in photovoltaic systems,
-                                        regulating the charging and discharging of batteries by managing the flow of
-                                        solar-generated power.
-                                    </p>
-
-                                    <div class="d-flex flex-wrap border-top mt-4 pt-3">
-
-                                        <div class="mb-4 mb-lg-0">
-                                            <div class="d-flex flex-wrap align-items-center mb-1">
-                                                <span class="custom-block-span">Disc:</span>
-
-                                                <p class="mb-0">
-                                                <ul class="list-group mx-4">
-                                                    <li>
-                                                        <i class="custom-block-icon bi-link"></i>
-                                                        Brand: RTPL
-                                                    </li>
-                                                    <li>
-                                                        Model: SCC
-                                                    </li>
-                                                    <li>
-                                                        Model: SCC
-                                                    </li>
-
-                                                </ul>
-                                                </p>
-                                            </div>
-
-
-                                        </div>
-
-                                        <div class="d-flex align-items-center ms-lg-auto">
-                                            <a href="{%url 'website_solar_charger'%}" class="btn custom-btn">Show
-                                                More</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-12 col-12 text-center">
-                            <h5 class="mb-lg-3"><a href="{%url 'website_products'%}">Show All Products</a></h5>
+                            <!-- <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+              </button> -->
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
-
-        <section class="about-section section-padding" id="section_4">
-            <div class="container">
-                <div class="row">
-
-                    <div class="col-lg-12 col-12 text-center" data-aos="fade-down" data-aos-offset="400"
-                        data-aos-easing="ease-in-sine">
-                        <h2 class="mb-lg-5 mb-4">Why Choose RaptureTech?
-
-                        </h2>
-                    </div>
-
-                    <div class="col-lg-6 col-12 me-auto mb-4 mb-lg-0" data-aos="fade-right" data-aos-offset="300"
-                        data-aos-easing="ease-in-sine">
-                        <h3 class="mb-3">RaptureTech History</h3>
-
-                        <p> <strong>Innovation: </strong>We are at the forefront of dairy technology, constantly
-                            innovating to meet the
-                            evolving needs of the industry.
-                            <br>
-                            <br>
-                            <strong>Quality:</strong> Our products are built to the highest quality standards, ensuring
-                            reliability and
-                            precision in every use.
-                            <br><br>
-                            <strong>Customer-Centric:</strong> Your success is our priority. We provide excellent
-                            customer support and
-                            resources to help you make the most of our products.
-                            <br><br>
-                            <strong>Experience:</strong> With years of experience in the dairy industry, we bring
-                            expertise you can rely
-                            on.
-                        </p>
-
-                    </div>
-                    <div class="col-lg-4 col-md-6 col-12" data-aos="fade-left" data-aos-offset="300"
-                        data-aos-easing="ease-in-sine">
-                        <div class="member-block">
-                            <div class="member-block-image-wrap">
-                                <img src="{% static 'home/images/8357605.jpg'%}" class="member-block-image img-fluid"
-                                    alt="IMAGE"loading="lazy">
-
-
-                            </div>
-
-
+        </section><!-- /Hero Section -->
+        <!-- About Section -->
+        <section id="about" class="about section">
+            <div class="container" data-aos="fade-up">
+                <div class="row gx-0">
+                    <div class="col-lg-6 d-flex flex-column justify-content-center" data-aos="fade-up"
+                        data-aos-delay="200">
+                        <div class="content">
+                            <h3>About RaptureTech</h3>
+                            <h2>RaptureTech History
+                            </h2>
+                            <p>
+                                Have Experience of 25 years At RaptureTech, we are passionate about dairy technology. We
+                                understand the
+                                importance of quality, precision, and innovation in the dairy industry. That's why we're
+                                dedicated to
+                                providing state-of-the-art solutions for milk analysis, sterilization, and processing.
+                            </p>
+                            <!-- <div class="text-center text-lg-start">
+                <a href="#"
+                  class="btn-read-more d-inline-flex align-items-center justify-content-center align-self-center">
+                  <span>Read More</span>
+                  <i class="bi bi-arrow-right"></i>
+                </a>
+              </div> -->
                         </div>
                     </div>
-
+                    <div class="col-lg-6 d-flex align-items-center" data-aos="zoom-out" data-aos-delay="200">
+                        <img src="{% static 'home/assets/img/rapturetech_logo.jpeg'%}" class="img-fluid" alt="">
+                    </div>
                 </div>
             </div>
-        </section>
-
-        <section class="contact-section section-padding" id="section_5">
+        </section><!-- /About Section -->
+        <!-- Values Section -->
+        <section id="whyus" class="values section">
+            <!-- Section Title -->
+            <div class="container section-title" data-aos="fade-up">
+                <h2>Why Us?</h2>
+                <p>Why Choose RaptureTech?<br></p>
+            </div><!-- End Section Title -->
             <div class="container">
-                <div class="row">
-                    <div class="col-lg-6 col-12" data-aos="fade-right" data-aos-offset="300"
-                        data-aos-easing="ease-in-sine">
+                <div class="row gy-4">
+                    <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                        <div class="card">
+                            <img src="{% static 'home/assets/img/innovation.png'%}" class="img-fluid" alt="Innovation">
+                            <h3 class="auto_change">Innovation</h3>
+                            <p>We are at the forefront of dairy technology, constantly innovating to meet the evolving
+                                needs of the
+                                industry.</p>
+                        </div>
+                    </div><!-- End Card Item -->
+                    <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                        <div class="card">
+                            <img src="{% static 'home/assets/img/values-2.png'%}" class="img-fluid" alt="Quality">
+                            <h3 class="auto_change">Quality</h3>
+                            <p>Our products are built to the highest quality standards, ensuring reliability and
+                                precision in every
+                                use.</p>
+                        </div>
+                    </div><!-- End Card Item -->
+                    <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                        <div class="card">
+                            <img src="{% static 'home/assets/img/values-3.png'%}" class="img-fluid"
+                                alt="Customer-Centric">
+                            <h3 class="auto_change">Customer-Centric</h3>
+                            <p>Your success is our priority. We provide excellent customer support and resources to help
+                                you make the
+                                most of our products.</p>
+                        </div>
+                    </div><!-- End Card Item -->
+                    <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                        <div class="card">
+                            <img src="{% static 'home/assets/img/values-3.png'%}" class="img-fluid" alt="Experience">
+                            <h3 class="auto_change">Experience</h3>
+                            <p>With years of experience in the dairy industry, we bring expertise you can rely on.</p>
+                        </div>
+                    </div><!-- End Card Item -->
+                </div>
+            </div>
+        </section><!-- /Values Section -->
+        <!-- Products Section -->
+        <section id="Products" class="portfolio section">
+            <!-- Section Title -->
+            <div class="container section-title" data-aos="fade-up">
+                <h2>Products</h2>
+                <p>Check our latest Products</p>
+            </div><!-- End Section Title -->
+            <div class="container">
+                <div class="isotope-layout" data-default-filter="*" data-layout="masonry" data-sort="original-order">
+                    <ul class="portfolio-filters isotope-filters" data-aos="fade-up" data-aos-delay="100">
+                        <li data-filter="*" class="filter-active">All</li>
+                        <li data-filter=".filter-app">Combo</li>
+                        <li data-filter=".filter-product">Stirrer</li>
+                        <li data-filter=".filter-branding">Analyzer</li>
+                        <li data-filter=".filter-books">DPU</li>
+                        <li data-filter=".filter-scc">Solar Charger Controller</li>
+                    </ul><!-- End Portfolio Filters -->
+                    <div class="row gy-4 isotope-container" data-aos="fade-up" data-aos-delay="200">
+                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-app">
+                            <div class="portfolio-content h-100">
+                                <img src="{% static 'home/assets/img/products/all_in_one/all_in_one_1.png'%}"
+                                    class="img-fluid" alt="">
+                                <div class="portfolio-info">
+                                    <h4>Combo 1</h4>
+                                    <p>All in one smart combo RTPL DPMCU
+                                    </p>
+                                    <a href="{% static 'home/assets/img/products/all_in_one/all_in_one_1.png'%}" title="All in one smart combo RTPL DPMCU
+                  " data-gallery="portfolio-gallery-app" class="glightbox preview-link"><i
+                                            class="bi bi-zoom-in"></i></a>
+                                    <a href="{% url 'website_all_in_1_smart_combo'%}" title="More Details"
+                                        class="details-link"><i class="bi bi-link-45deg"></i></a>
+                                </div>
+                            </div>
+                        </div><!-- All in one smart combo RTPL DPMCU -->
+                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-product">
+                            <div class="portfolio-content h-100">
+                                <img src="{% static 'home/assets/img/products/uds_v2/str_2.png'%}" class="img-fluid"
+                                    alt="">
+                                <div class="portfolio-info">
+                                    <h4>Stirrer 1</h4>
+                                    <p>Ultrasonic Digital Stirrer</p>
+                                    <a href="{% static 'home/assets/img/products/uds_v2/str_2.png'%}"
+                                        title="Ultrasonic Digital Stirrer" data-gallery="portfolio-gallery-product"
+                                        class="glightbox preview-link"><i class="bi bi-zoom-in"></i></a>
+                                    <a href="{% url 'website_ultrasonic_digital_stirrer_v2'%}" title="More Details"
+                                        class="details-link"><i class="bi bi-link-45deg"></i></a>
+                                </div>
+                            </div>
+                        </div><!-- Ultrasonic Digital Stirrer -->
+                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-branding">
+                            <div class="portfolio-content h-100">
+                                <img src="{% static 'home/assets/img/products/analyzer/analyzer_1.png'%}"
+                                    class="img-fluid" alt="">
+                                <div class="portfolio-info">
+                                    <h4>Analyzer 1</h4>
+                                    <p>Ultrasonic Milk Analyzer
+                                    </p>
+                                    <a href="{% static 'home/assets/img/products/analyzer/analyzer_1.png'%}"
+                                        title="Ultrasonic Milk Analyzer" data-gallery="portfolio-gallery-branding"
+                                        class="glightbox preview-link"><i class="bi bi-zoom-in"></i></a>
+                                    <a href="{% url 'website_ultrasonic_milk_analyzer'%}" title="More Details"
+                                        class="details-link"><i class="bi bi-link-45deg"></i></a>
+                                </div>
+                            </div>
+                        </div><!-- End Portfolio Item -->
+                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-books">
+                            <div class="portfolio-content h-100">
+                                <img src="{% static 'home/assets/img/products/dpu/product_dpu_1.png'%}"
+                                    class="img-fluid" alt="">
+                                <div class="portfolio-info">
+                                    <h4>DPU 1</h4>
+                                    <p>Data Processor Unit (DPU) Milk Collection
+                                    </p>
+                                    <a href="{% static 'home/assets/img/products/dpu/product_dpu_1.png'%}"
+                                        title="Data Processor Unit (DPU) Milk Collection"
+                                        data-gallery="portfolio-gallery-book" class="glightbox preview-link"><i
+                                            class="bi bi-zoom-in"></i></a>
+                                    <a href="{%url 'website_dpu'%}" title="More Details" class="details-link"><i
+                                            class="bi bi-link-45deg"></i></a>
+                                </div>
+                            </div>
+                        </div><!-- End Portfolio Item -->
+                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-app">
+                            <div class="portfolio-content h-100">
+                                <img src="{% static 'home/assets/img/products/Mini_Combo/mini_combo_1.png'%}"
+                                    class="img-fluid" alt="">
+                                <div class="portfolio-info">
+                                    <h4>Combo 2
+                                    </h4>
+                                    <p>Two in one smart mini combo RTPL</p>
+                                    <a href="{% static 'home/assets/img/products/Mini_Combo/mini_combo_1.png'%}"
+                                        title="Two in one smart mini combo RTPL" data-gallery="portfolio-gallery-app"
+                                        class="glightbox preview-link"><i class="bi bi-zoom-in"></i></a>
+                                    <a href="{% url 'website_2_in_1_smart_mini_combo'%}" title="More Details"
+                                        class="details-link"><i class="bi bi-link-45deg"></i></a>
+                                </div>
+                            </div>
+                        </div><!-- Two in one smart mini combo RTPL -->
+                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-product">
+                            <div class="portfolio-content h-100">
+                                <img src="{% static 'home/assets/img/products/uds_ss/ss_str_2.jpeg'%}" class="img-fluid"
+                                    alt="">
+                                <div class="portfolio-info">
+                                    <h4>Stirrer 2</h4>
+                                    <p>Ultrasonic Digital Stirrer SS
+                                    </p>
+                                    <a href="{% static 'home/assets/img/products/uds_ss/ss_str_2.jpeg'%}"
+                                        title="Ultrasonic Digital Stirrer SS" data-gallery="portfolio-gallery-product"
+                                        class="glightbox preview-link"><i class="bi bi-zoom-in"></i></a>
+                                    <a href="{% url 'website_ultrasonic_digital_stirrer_ss'%}" title="More Details"
+                                        class="details-link"><i class="bi bi-link-45deg"></i></a>
+                                </div>
+                            </div>
+                        </div><!-- End Portfolio Item -->
+                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-product">
+                            <div class="portfolio-content h-100">
+                                <img src="{% static 'home/assets/img/products/ultrasonic_digital_STIRRET/UDS1.png'%}"
+                                    class="img-fluid" alt="Ultrasonic Digital Stirrer">
+                                <div class="portfolio-info">
+                                    <h4>Stirrer 3</h4>
+                                    <p>Ultrasonic Digital Stirrer
+                                    </p>
+                                    <a href="{% static 'home/assets/img/products/ultrasonic_digital_STIRRET/UDS1.png'%}"
+                                        title="Ultrasonic Digital Stirrer" data-gallery="portfolio-gallery-product"
+                                        class="glightbox preview-link"><i class="bi bi-zoom-in"></i></a>
+                                    <a href="{% url 'website_ultrasonic_digital_stirrer'%}" title="More Details"
+                                        class="details-link"><i class="bi bi-link-45deg"></i></a>
+                                </div>
+                            </div>
+                        </div><!-- End Portfolio Item -->
+                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-scc">
+                            <div class="portfolio-content h-100">
+                                <img src="{% static 'home/assets/img/products/SOLAR_CHARGE_CONTROLLER/SOLAR_CHARGE_CONTROLLER.png'%}"
+                                    class="img-fluid" alt="SOLAR_CHARGE_CONTROLLER">
+                                <div class="portfolio-info">
+                                    <h4>SCC 1</h4>
+                                    <p>Solar Charger Controller
+                                    </p>
+                                    <a href="{% static 'home/assets/img/products/SOLAR_CHARGE_CONTROLLER/SOLAR_CHARGE_CONTROLLER.png'%}"
+                                        title="Solar Charger Controller
+                  " data-gallery="portfolio-gallery-scc" class="glightbox preview-link"><i
+                                            class="bi bi-zoom-in"></i></a>
+                                    <a href="{% url 'website_solar_charger'%}" title="More Details"
+                                        class="details-link"><i class="bi bi-link-45deg"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Portfolio Item -->
+                    </div><!-- End Portfolio Container -->
+                </div>
+            </div>
+        </section><!-- /Portfolio Section -->
+        <!-- Contact Section -->
+        <section id="contact" class="contact section">
+
+            <!-- Section Title -->
+            <div class="container section-title" data-aos="fade-up">
+                <h2>Contact</h2>
+                <p>Contact Us</p>
+            </div><!-- End Section Title -->
+
+            <div class="container" data-aos="fade-up">
+
+                <div class="row gy-4">
+
+                    <div class="col-lg-6">
+
                         <iframe
                             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3670.432962899906!2d72.58949727607936!3d23.081241314134807!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e83199597af57%3A0xb807cc6e8a489d6e!2sKothari%20Tower.!5e0!3m2!1sen!2sin!4v1698745320815!5m2!1sen!2sin"
-                            width="100%" height="110%" style="border:0;" allowfullscreen="" loading="lazy"
-                            referrerpolicy="no-referrer-when-downgrade"></iframe>
+                            width="100%" height="100%" style="border:0;border-radius: 30px;" allowfullscreen=""
+                            loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                     </div>
-                    <div class="col-lg-6 col-12" data-aos="fade-left" data-aos-offset="300"
-                        data-aos-easing="ease-in-sine">
-                        <div class="contact-info mt-5">
-                            <div class="contact-info-item">
-                                <div class="contact-info-body">
-                                    <strong>Keshavbaug Colony, Sabarmati, Ahmedabad</strong>
 
-                                    <p class="mt-2 mb-1">
-                                        <a href="tel: 9374672571" class="contact-link">
-                                            +91 9374672571
-                                        </a>
-                                    </p>
+                    <div class="col-lg-6">
+                        <form action="forms/contact.php" method="post" class="php-email-form" data-aos="fade-up"
+                            data-aos-delay="200">
+                            <div class="row gy-4">
 
-                                    <p class="mb-0">
-                                        <a href="mailto:paras@rapturetech.co.in" class="contact-link">
-                                            paras@rapturetech.co.in
-                                        </a>
-                                    </p>
+                                <div class="col-md-6">
+                                    <input type="text" name="name" class="form-control" placeholder="Your Name"
+                                        required="">
                                 </div>
 
+                                <div class="col-md-6 ">
+                                    <input type="email" class="form-control" name="email" placeholder="Your Email"
+                                        required="">
+                                </div>
+
+                                <div class="col-md-12">
+                                    <input type="text" class="form-control" name="subject" placeholder="Subject"
+                                        required="">
+                                </div>
+
+                                <div class="col-md-12">
+                                    <textarea class="form-control" name="message" rows="6" placeholder="Message"
+                                        required=""></textarea>
+                                </div>
+
+                                <div class="col-md-12 text-center">
+                                    <div class="loading">Loading</div>
+                                    <div class="error-message"></div>
+                                    <div class="sent-message">Your message has been sent. Thank you!</div>
+
+                                    <button type="submit" class="custom-btn">Send</button>
+                                </div>
 
                             </div>
-
-                            <img src="{% static 'home/images/WorldMap.svg'%}" class="img-fluid" alt="WORLDMAP"loading="lazy">
-                        </div>
-                    </div>
+                        </form>
+                    </div><!-- End Contact Form -->
 
                 </div>
+
             </div>
-        </section>
 
-
+        </section><!-- /Contact Section -->
     </main>
 
-
-
-    <footer class="site-footer" data-aos="fade-down" data-aos-offset="300" data-aos-easing="ease-in-sine">
-        <div class="container">
-            <div class="row">
-
-                <div class="col-lg-6 col-12 me-auto mb-5 mb-lg-0">
-                    <a class="navbar-brand d-flex align-items-center" href="{%url 'home'%}">
-                        <img src="{% static 'home/images/logo1.png'%}" class="navbar-brand-image " alt="LOGO"loading="lazy">
-
+    <footer id="footer" class="footer">
+        <div class="container footer-top">
+            <div class="row gy-4">
+                <div class="col-lg-4 col-md-8 footer-about">
+                    <a href="{%url 'home'%}" class="d-flex align-items-center">
+                        <img src="{%static 'home/assets/img/logo1.png'%}" class="w-50" alt="RaptureTech Pvt. Ltd.">
                     </a>
+                    <div class="footer-contact pt-3">
+                        <p>Keshavbaug Colony, </p>
+                        <p>Sabarmati, Ahmedabad</p>
+                        <p class="mt-3"><strong>Phone:</strong> <span>+91 9374672571</span></p>
+                        <p><strong>Email:</strong> <span>paras@rapturetech.co.in</span></p>
+                    </div>
                 </div>
 
-                <div class="col-lg-3 col-12">
-                    <h5 class="site-footer-title mb-4">Join Us</h5>
-
-                    <p class="d-flex border-bottom pb-3 mb-3 me-lg-3">
-                        <span>Mon-Fri</span>
-                        6:00 AM - 6:00 PM
-                    </p>
-
-                    <p class="d-flex me-lg-3">
-                        <span>Sat-Sun</span>
-                        6:30 AM - 8:30 PM
-                    </p>
-                    <br>
-                    <p class="copyright-text">©
-                        <script>document.write(new Date().getFullYear())</script>
-                        RaptureTech Pvt. Ltd.
-                    </p>
-                </div>
-
-                <div class="col-lg-2 col-12 ms-auto">
-                    <ul class="social-icon mt-lg-5 mt-3 mb-4">
-                        <li class="social-icon-item">
-                            <a href="#" class="social-icon-link bi-instagram"></a>
-                        </li>
-
-                        <li class="social-icon-item">
-                            <a href="#" class="social-icon-link bi-twitter"></a>
-                        </li>
-
-                        <li class="social-icon-item">
-                            <a href="#" class="social-icon-link bi-whatsapp"></a>
-                        </li>
+                <div class="col-lg-3 col-md-2 footer-links">
+                    <h4>Useful Links</h4>
+                    <ul>
+                        <li><i class="bi bi-chevron-right"></i> <a href="#">Home</a></li>
+                        <li><i class="bi bi-chevron-right"></i> <a href="#">About us</a></li>
+                        <li><i class="bi bi-chevron-right"></i> <a href="#">Products</a></li>
+                        <li><i class="bi bi-chevron-right"></i> <a href="#">Terms of service</a></li>
                     </ul>
-                    <p class="copyright-text">Developed By: <a rel="nofollow" href="" target="_blank">CloudStack
-                            Dynamics</a></p>
+                </div>
 
+
+                <div class="col-lg-4 col-md-12 mx-2">
+                    <h4>Follow Us</h4>
+                    <p>Follow Us on our Social media links</p>
+                    <div class="social-links d-flex">
+                        <a href=""><i class="bi bi-twitter-x"></i></a>
+                        <a href=""><i class="bi bi-facebook"></i></a>
+                        <a href=""><i class="bi bi-instagram"></i></a>
+                        <a href=""><i class="bi bi-linkedin"></i></a>
+                    </div>
                 </div>
 
             </div>
         </div>
 
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
-            <path fill="#063974" fill-opacity="1"
-                d="M0,224L34.3,192C68.6,160,137,96,206,90.7C274.3,85,343,139,411,144C480,149,549,107,617,122.7C685.7,139,754,213,823,240C891.4,267,960,245,1029,224C1097.1,203,1166,181,1234,160C1302.9,139,1371,117,1406,106.7L1440,96L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z">
-            </path>
-        </svg>
+        <div class="container copyright text-center mt-4">
+            <p>© <span>Copyright</span>
+                <script>document.write(new Date().getFullYear())</script>
+                <strong class="px-1 sitename">RaptureTech Pvt. Ltd.</strong> <span>All Rights Reserved</span>
+            </p>
+            <div class="credits">
+                <p class="copyright-text">Developed By: <a rel="nofollow" href="" target="_blank">CloudStack
+                        Dynamics</a></p>
+
+            </div>
+        </div>
+
     </footer>
 
-    <!-- JAVASCRIPT FILES -->
-    <script src="{% static 'home/js/jquery.min.js'%}"></script>
-    <script src="{% static 'home/js/bootstrap.bundle.min.js'%}"></script>
-    <script src="{% static 'home/js/jquery.sticky.js'%}"></script>
-    <script src="{% static 'home/js/click-scroll.js'%}"></script>
-    <script src="{% static 'home/js/animated-headline.js'%}"></script>
-    <script src="{% static 'home/js/modernizr.js'%}"></script>
-    <script src="{% static 'home/js/custom.js'%}"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Scroll Top -->
+    <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+            class="bi bi-arrow-up-short"></i></a>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.3/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
+    <!-- AOS JS (Animate On Scroll) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <!-- Custom JS -->
     <script>
         AOS.init();
+
+        // Carousel text change logic
+        const carouselItems = [
+            { text: 'All In One' },
+            { text: 'Sterrer' },
+            { text: 'DPU' },
+        ];
+
+        document.getElementById('carouselExampleAutoplaying').addEventListener('slide.bs.carousel', function (event) {
+            const nextItem = carouselItems[event.to];
+            document.getElementById('changing-text').innerHTML = `We make <strong class="auto_change">${nextItem.text}</strong>`;
+        });
     </script>
+    <script src="{% static 'home/assets/vendor/bootstrap/js/bootstrap.bundle.min.js'%}"></script>
+    <script src="{% static 'home/assets/vendor/php-email-form/validate.js'%}"></script>
+    <script src="{% static 'home/assets/vendor/aos/aos.js'%}"></script>
+    <script src="{% static 'home/assets/vendor/glightbox/js/glightbox.min.js'%}"></script>
+    <script src="{% static 'home/assets/vendor/purecounter/purecounter_vanilla.js'%}"></script>
+    <script src="{% static 'home/assets/vendor/imagesloaded/imagesloaded.pkgd.min.js'%}"></script>
+    <script src="{% static 'home/assets/vendor/isotope-layout/isotope.pkgd.min.js'%}"></script>
+    <script src="{% static 'home/assets/vendor/swiper/swiper-bundle.min.js'%}"></script>
+
+    <!-- Main JS File -->
+    <script src="{% static 'home/assets/js/main.js'%}"></script>
+
 </body>
+
 </html>
