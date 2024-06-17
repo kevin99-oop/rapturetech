@@ -218,30 +218,30 @@
                                             {% for drec in drec_data %}
                                             <tr style="color: {{ drec.get_text_color }};">
                                                 <td>{{ drec.ST_ID.st_id }}</td>
-                                                    <td>{{ drec.ST_ID.location }}</td>
-                                                    <td>{{ drec.ST_ID.society }}</td>
-                                                    <td>{{ drec.RecordingDate|date:"d-m-Y" }}</td>
-                                                    <td>{{ drec.RecordingTime }}</td>
-                                                    <td>{{ drec.SHIFT }}</td>
-                                                    <td>{{ drec.CUST_ID }}</td>
-                                                    <td>
-                                                        {% for customer in customer_list %}
-                                                            {% if customer.cust_id == drec.CUST_ID and customer.st_id == drec.ST_ID.st_id %}
-                                                                {{ customer.name }}
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                    </td>
-                                                    <td>{{ drec.FAT }}</td>
-                                                    <td>{{ drec.SNF }}</td>
-                                                    <td>{{ drec.CLR }}</td>
-                                                    <td>{{ drec.WATER }}</td>
-                                                    <td>{{ drec.QT }} </td>
-                                                    <td> {{ drec.Amount }}</td>
-                                                    <td>{{ drec.CAmount }}</td>
-                                                </tr>
+                                                <td>{{ drec.ST_ID.location }}</td>
+                                                <td>{{ drec.ST_ID.society }}</td>
+                                                <td>{{ drec.RecordingDate|date:"d-m-Y" }}</td>
+                                                <td>{{ drec.RecordingTime }}</td>
+                                                <td>{{ drec.SHIFT }}</td>
+                                                <td>{{ drec.CUST_ID }}</td>
+                                                <td>
+                                                    {% for customer in customer_list %}
+                                                        {% if customer.cust_id == drec.CUST_ID and customer.st_id == drec.ST_ID.st_id %}
+                                                            {{ customer.name }}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </td>
+                                                <td>{{ drec.FAT }}</td>
+                                                <td>{{ drec.SNF }}</td>
+                                                <td>{{ drec.CLR }}</td>
+                                                <td>{{ drec.WATER }}</td>
+                                                <td>{{ drec.QT }} </td>
+                                                <td>{{ drec.Amount }}</td>
+                                                <td>{{ drec.CAmount }}</td>
+                                            </tr>
                                             {% endfor %}
                                         </tbody>
-                                                                                </table>
+                                                                                                                        </table>
                                         <!-- Pagination -->
                                        <!-- Pagination -->
                                         <nav aria-label="Page navigation example " class="mt-3">
@@ -663,6 +663,8 @@
             // Set color to red
         }
 </script>
+
+
 <script src="{% static 'new/vendor/js/select2.js' %}"></script>
 
 <script src="{% static 'register/js/jquery-3.3.1.min.js' %}" ></script>

@@ -60,11 +60,6 @@
 </head>
 <style>
   /* Original styles */
- /* .navbar .navbar-brand-wrapper .navbar-brand img {
-  height: 5em;
-  width: 23rem;
-  margin-left: -20px;
-} */
 
 .table-title {
   padding-bottom: 1px;
@@ -133,15 +128,15 @@ body {
 
 .main-panel {
   flex: 1;
-  margin-left: 250px;
+  /* margin-left: 250px; */
   overflow-y: auto;
-  padding: 20px;
+  /* padding: 20px; */
   transition: margin-left 0.3s ease;
 }
 
-.main-panel.collapsed {
+/* .main-panel.collapsed {
   margin-left: 80px;
-}
+} */
 
 .sidebar .nav-link.active {
   background-color: #002d86;
@@ -162,71 +157,36 @@ body {
 
 /* Responsive styles */
 @media (max-width: 1200px) {
-  .navbar .navbar-brand-wrapper .navbar-brand img {
-    height: 4em;
-    width: 18rem;
-    margin-left: -15px;
-  }
 
   .sidebar {
     flex: 0 0 200px;
   }
 
-  .main-panel {
-    margin-left: 200px;
-  }
-
-  .main-panel.collapsed {
-    margin-left: 70px;
-  }
+ 
 }
 
 @media (max-width: 992px) {
-  .navbar .navbar-brand-wrapper .navbar-brand img {
-    height: 3.5em;
-    width: 16rem;
-    margin-left: -10px;
-  }
 
   .sidebar {
     flex: 0 0 180px;
   }
 
-  .main-panel {
-    margin-left: 180px;
-  }
-
-  .main-panel.collapsed {
-    margin-left: 60px;
-  }
 }
 
 @media (max-width: 768px) {
-  .navbar .navbar-brand-wrapper .navbar-brand img {
+  /* .navbar .navbar-brand-wrapper .navbar-brand img {
     height: 3em;
     width: 14rem;
     margin-left: -5px;
   }
-
+ */
   .sidebar {
     flex: 0 0 150px;
   }
 
-  .main-panel {
-    margin-left: 150px;
-  }
-
-  .main-panel.collapsed {
-    margin-left: 50px;
-  }
 }
 
 @media (max-width: 576px) {
-  .navbar .navbar-brand-wrapper .navbar-brand img {
-    height: 2.5em;
-    width: 12rem;
-    margin-left: 0;
-  }
 
   .table-title {
     padding: 12px 20px;
@@ -245,32 +205,14 @@ body {
     flex: 0 0 120px;
   }
 
-  .main-panel {
-    margin-left: 0px;
-  }
-
-  .main-panel.collapsed {
-    margin-left: 40px;
-  }
 }
 
 @media (max-width: 400px) {
-  .navbar .navbar-brand-wrapper .navbar-brand img {
-    height: 2em;
-    width: 10rem;
-  }
-
   .sidebar {
     flex: 0 0 100px;
   }
 
-  .main-panel {
-    margin-left: 100px;
-  }
 
-  .main-panel.collapsed {
-    margin-left: 30px;
-  }
 }
 
 </style>

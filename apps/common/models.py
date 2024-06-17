@@ -190,15 +190,18 @@ class DREC(models.Model):
         ordering = ['-created_at']
     
     def get_text_color(self):
-        if self.FlagEdited == '1' and self.SLIP_TYPE == 2:
-            if self.created_at + timezone.timedelta(minutes=10) > timezone.now():
+        if self.FlagEdited == '1':
+            if self.SLIP_TYPE == 2 and self.created_at + timedelta(minutes=10) > timezone.now():
                 return 'green'
-            else:
-                return ''
-        elif self.FlagEdited == 'red':
+            elif self.SLIP_TYPE == 3 and self.created_at + timedelta(minutes=10) > timezone.now():
+                return 'blue'
+            elif self.SLIP_TYPE == 5 and self.created_at + timedelta(minutes=10) > timezone.now():
+                return 'purple'
+            elif self.SLIP_TYPE == 7 and self.created_at + timedelta(minutes=10) > timezone.now():
+                return 'orange'
+        if self.FlagEdited == 'red':
             return 'red'
-        else:
-            return ''
+        return ''
 
     def save(self, *args, **kwargs):
         skip_duplicate_check = kwargs.pop('skip_duplicate_check', False)

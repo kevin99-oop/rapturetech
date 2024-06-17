@@ -1,5 +1,5 @@
 
-{% extends 'base.html' %}
+    {% extends 'base.html' %}
 {% load static %}
 
 {% load crispy_forms_tags %}-
@@ -74,7 +74,7 @@
                 <div class="table-title border rounded">
                     <div class="row">
                         <div class="col-sm-6">
-                            <h5 class="text-white mt-2">Edited Records</h5>
+                            <h5 class="text-white mt-2">Recent Deleted Records</h5>
                         </div>
                 
                     </div>
@@ -88,6 +88,7 @@
                     <tr>
                         <th>ST ID</th>
                         <th>CUST ID</th>
+                        <th>Cust Name</th>
                         <th>MType</th>
                         <th>Recording Date</th>
                         <th>Recording Time</th>
@@ -103,11 +104,13 @@
                         <th>RID</th>
                     </tr>
                 </thead>
-                <tbody class="fw-bold">
-                    {% for record in records %}
-                    <tr>
+                <tbody >
+                    {% for record in records reversed%}
+                    <tr class="text-danger fw-bold">
                         <td>{{ record.ST_ID }}</td>
                         <td>{{ record.CUST_ID }}</td>
+                        <td>{{ record.CustomerName }}</td>  {# Display CustomerName here #}
+
                         <td>{{ record.MType }}</td>
                         <td>{{ record.RecordingDate|date:"d-m-Y"  }}</td>
                         <td>{{ record.RecordingTime }}</td>
@@ -134,5 +137,3 @@
 
 
 {% endblock content %}
-
-

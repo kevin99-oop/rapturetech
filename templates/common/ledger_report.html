@@ -227,8 +227,12 @@
                                 <h6 class="mb-2 fw-bold">Ledger Table</h6>
                                 <div class="float-end mb-2">
 <!-- Ledger report export buttons -->
-<button class="btn btn-primary rounded btn-sm me-2 fw-bold" onclick="exportToCsvAndPdf(['ledger_summary_data', 'ledger_detail_data'], 'ledger_report', 'csv', 'ledger')"><i class="icon-download me-2 mb-1"></i>CSV</button>
-<button class="btn btn-primary rounded btn-sm fw-bold" onclick="exportToCsvAndPdf(['ledger_summary_data', 'ledger_detail_data'], 'ledger_report', 'pdf', 'ledger')"><i class="icon-download me-2 mb-1"></i>PDF</button>
+<button class="btn btn-primary rounded btn-sm me-2 fw-bold" onclick="exportToCsvAndPdf(['ledger_summary_data', 'ledger_detail_data'], 'ledger_report', 'csv', 'ledger')">
+    Export Ledger CSV
+</button>
+<button class="btn btn-primary rounded btn-sm fw-bold" onclick="exportToCsvAndPdf(['ledger_summary_data', 'ledger_detail_data'], 'ledger_report', 'pdf', 'ledger')">
+    Export Ledger PDF
+</button>
 
                                 </div>
                             </div>
@@ -334,8 +338,13 @@
                                 <h6 class="mb-2 fw-bold">Payment Summary Table</h6>
                                 <div class="float-end mb-2">
 <!-- Payment report export buttons -->
-<button class="btn btn-primary rounded btn-sm me-2 fw-bold" onclick="exportToCsvAndPdf(['payment_table_info', 'payment_table_data'], 'ledger_report_payment', 'csv', 'payment')"><i class="icon-download me-2 mb-1"></i>CSV</button>
-<button class="btn btn-primary rounded btn-sm fw-bold" onclick="exportToCsvAndPdf(['payment_table_info', 'payment_table_data'], 'ledger_report_payment', 'pdf', 'payment')"><i class="icon-download me-2 mb-1"></i>PDF</button>
+<button class="btn btn-primary rounded btn-sm me-2 fw-bold" onclick="exportToCsvAndPdf(['payment_table_info', 'payment_table_data'], 'ledger_report_payment', 'csv', 'payment')">
+    Export Ledger CSV
+</button>
+<button class="btn btn-primary rounded btn-sm fw-bold" onclick="exportToCsvAndPdf(['payment_table_info', 'payment_table_data'], 'ledger_report_payment', 'pdf', 'payment')">
+    Export Ledger PDF
+</button>
+
                                 </div>
                             </div>
                         </div>
@@ -467,14 +476,15 @@
 //         pdf.save(`${username}_${fileNamePrefix}.pdf`);
 //     }
 // }
-function exportToCsvAndPdf(tableIds, fileNamePrefix, format, reportType) {
+function exportToCsvAndPdf(tableIds, fileNamePrefix, format, reportType, startDate, endDate) {
     var username = '{{ user.username }}';
-    var pdf = new jsPDF('landscape'); // Portrait orientation for tables
+    var pdf = new jsPDF('landscape'); // Landscape orientation for tables
     let csvData = [];
     var tables = document.querySelectorAll("table");
 
     // Set the initial vertical offset for the PDF export
     let verticalOffset = 20;
+    let isFirstPage = true; // Flag to track if it's the first page
 
     // Define styles for PDF
     const styles = {
@@ -518,13 +528,17 @@ function exportToCsvAndPdf(tableIds, fileNamePrefix, format, reportType) {
     // Iterate over each table
     tables.forEach(function (table, index) {
         // Check if the current table id is included in the list of tableIds
-        if (tableIds.includes(table.id) && table.id.includes(reportType)) {
+        if (tableIds.includes(table.id)) {
             // Add label for the table
             let label = '';
-            if (table.id.includes('ledger_summary')) {
-                label = 'Summary'; // Label for summary table
-            } else if (table.id.includes('ledger_detail')) {
-                label = 'Detail Data'; // Label for detail data table
+            if (table.id === 'ledger_summary_data') {
+                label = 'Ledger Summary'; // Label for ledger summary table
+            } else if (table.id === 'ledger_detail_data') {
+                label = 'Ledger Detail Data'; // Label for ledger detail data table
+            } else if (table.id === 'payment_table_info') {
+                label = 'Payment Summary'; // Label for payment summary table
+            } else if (table.id === 'payment_table_data') {
+                label = 'Payment Detail Data'; // Label for payment detail data table
             }
 
             // Generate CSV data
@@ -542,6 +556,22 @@ function exportToCsvAndPdf(tableIds, fileNamePrefix, format, reportType) {
 
             // Generate PDF
             if (format === 'pdf') {
+                // Add header only on the first page
+                if (isFirstPage) {
+                    let mainHeader = '';
+                    if (reportType === 'ledger') {
+                        mainHeader = `Ledger Report`; // Header with start_date and end_date for ledger
+                    } else if (reportType === 'payment') {
+                        mainHeader = `Payment Ledger Report`; // Header with start_date and end_date for payment
+                    }
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(styles.header.fontSize);
+                    pdf.setTextColor(styles.header.color);
+                    pdf.text(mainHeader, pdf.internal.pageSize.width / 2, verticalOffset, { align: 'center' });
+                    verticalOffset += 20; // Adjust vertical offset after adding header
+                    isFirstPage = false; // Set flag to false after adding header
+                }
+
                 // Add label for the table
                 pdf.setFont('helvetica', 'bold');
                 pdf.setFontSize(styles.header.fontSize);
@@ -566,6 +596,7 @@ function exportToCsvAndPdf(tableIds, fileNamePrefix, format, reportType) {
                 if (index % 2 === 1 && index !== tables.length - 1) {
                     pdf.addPage();
                     verticalOffset = 20; // Reset vertical offset for the new page
+                    isFirstPage = true; // Reset flag for the new page
                 } else {
                     verticalOffset = pdf.autoTable.previous.finalY + 30; // Update vertical offset for the next table
                 }
