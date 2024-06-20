@@ -96,6 +96,7 @@
                             <th data-sortable="true">Society</th>
                             <th data-sortable="true">Mobile Number</th>
                             <th data-sortable="true">Owner</th>
+                            <th data-sortable="true">DPU</th>
                             <th data-sortable="true">Status</th>
                             {% if request.user.is_staff or request.user.is_superuser %}
                             <th>Edit</th>
@@ -111,6 +112,7 @@
                             <td>{{ dpu.society }}</td>
                             <td>{{ dpu.mobile_number }}</td>
                             <td>{{ dpu.owner }}</td>
+                            <td>{{ dpu.check_options }}</td>
                             <td class="{% if dpu.status == 'active' %}text-success{% else %}text-danger{% endif %} fw-bold">
                                 {{ dpu.status }}
                             </td>

@@ -191,7 +191,7 @@ class DREC(models.Model):
     
     def get_text_color(self):
         if self.FlagEdited == '1':
-            if self.SLIP_TYPE == 2 and self.created_at + timedelta(minutes=10) > timezone.now():
+            if self.SLIP_TYPE in [2, 4, 6] and self.created_at + timedelta(minutes=10) > timezone.now():
                 return 'green'
             elif self.SLIP_TYPE == 3 and self.created_at + timedelta(minutes=10) > timezone.now():
                 return 'blue'
