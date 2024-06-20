@@ -64,95 +64,10 @@
         text-align: center;
     }
 </style>
-<!--
-<nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl " id="navbarBlur"
-    data-scroll="false">
-    <div class="container-fluid py-1 px-3">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
-                <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="javascript:;">Home</a>
-                </li>
-                <li class="breadcrumb-item text-sm text-white active" aria-current="page">Rate Table Upload List</li>
-            </ol>
 
-        </nav>
-        <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
-            <div class="ms-md-auto pe-md-3 d-flex align-items-center">
-                <div class="input-group">
-                    <span class="input-group-text text-body"><i class="fas fa-search" aria-hidden="true"></i></span>
-                    <input type="text" class="form-control" placeholder="Type here...">
-                </div>
-            </div>
-            <ul class="navbar-nav  justify-content-end">
-                <li class="nav-item d-flex align-items-center">
-                    <a href="{% url 'logout' %}" class="nav-link text-white font-weight-bold px-0">
-                        <i class="fa fa-sign-out me-sm-1"></i>
-                        <span class="d-sm-inline d-none">Logout</span>
-                    </a>
-                </li>
-                <li class="nav-item d-xl-none ps-3 d-flex align-items-center ">
-                    <a href="javascript:;" class="nav-link text-white p-0" id="iconNavbarSidenav">
-                        <div class="sidenav-toggler-inner">
-                            <i class="sidenav-toggler-line bg-white"></i>
-                            <i class="sidenav-toggler-line bg-white"></i>
-                            <i class="sidenav-toggler-line bg-white"></i>
-                        </div>
-                    </a>
-                </li>
-
-                <li class="nav-item dropdown pe-2 px-3 d-flex align-items-center">
-                    <a href="javascript:;" class="nav-link text-white p-0" id="dropdownMenuButton"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa fa-user cursor-pointer"><span class="mx-2 ">{{user.username}}</span></i>
-                    </a>
-                    <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4"
-                        aria-labelledby="dropdownMenuButton">
-                        <li class="mb-2">
-                            <a class="dropdown-item border-radius-md" href="{% url 'profile' %}">
-                                <div class="d-flex py-1">
-                                    <div class="my-auto">
-                                        <i class="fa fa-user cursor-pointer pe-3" class="avatar avatar-sm  me-3 "></i>
-                                    </div>
-                                    <div class="d-flex flex-column justify-content-center">
-                                        <h6 class="text-sm font-weight-normal mb-1">
-                                            <span class="font-weight-bold">Profile</span>
-                                        </h6>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a class="dropdown-item border-radius-md" href="{% url 'change-password'%}">
-                                <div class="d-flex py-1">
-                                    <div class="my-auto">
-                                        <i class="fa fa-key cursor-pointer pe-3" class="avatar avatar-sm  me-3 "></i>
-                                    </div>
-                                    <div class="d-flex flex-column justify-content-center">
-                                        <h6 class="text-sm font-weight-normal mb-1">
-                                            <span class="font-weight-bold">Change Password</span>
-                                        </h6>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-
-
-                </li>
-            </ul>
-            </li>
-            </ul>
-        </div>
-    </div>
-</nav>
-<!-- Begin Page Content -->
 <div class="container-fluid mt-5">
-
-
-
     <!-- Main Content Here -->
-
     <div class="card o-hidden border-0 shadow-lg mt-5 ">
-
         <div class="container mb-3">
             <div class="table-wrapper table-responsive ">
                 <div class="table-title border rounded">
@@ -161,7 +76,7 @@
                             <h5 class="text-white mt-2">Rate Table List</h5>
                         </div>
                         <div class="col-md-6">
-                            {% if request.user.is_staff or request.user.is_superuser  %}
+                            {% if request.user.is_staff or request.user.is_superuser %}
 
                             <a href="{% url 'upload_rate_table' %}" class="btn btn-success rounded fw-bold">
                                 <span>Upload Rate Table</span>
@@ -180,9 +95,8 @@
                 {% if no_records %}
                 <p>No records available.</p>
                 {% else %}
-                <table class="table table-striped table-hover rounded table-responsive mb-5 border-2 border-dark mb-3"data-toggle="table"
-                data-pagination="true"
-                data-auto-refresh="true">
+                <table class="table table-striped table-hover rounded table-responsive mb-5 border-2 border-dark mb-3"
+                    data-toggle="table" data-pagination="true" data-auto-refresh="true">
                     <thead>
                         <tr class="border-2 border-dark">
                             <th>User</th>
@@ -190,7 +104,7 @@
                             <th>Animal</th>
                             <th>Rate Type</th>
                             <th>Start Date</th>
-                            
+
                             <th>Download</th>
                         </tr>
                     </thead>
@@ -211,10 +125,7 @@
 
             </div>
         </div>
-
-
     </div>
-
     <!-- /.container-fluid -->
 </div>
 

@@ -1,3 +1,4 @@
+{% load static %}
 <!-- partial:partials/_sidebar.html -->
 <nav class="sidebar sidebar-offcanvas rounded" id="sidebar">
     <ul class="nav">
@@ -20,10 +21,13 @@
                         <a class="nav-link" href="{% url 'shift_report' %}">Shift Report</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'old_drec_data_edited_list' %}">Recent Edited Record</a>
+                        <a class="nav-link" href="{% url 'ledger_report' %}">Ledger</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'ledger_report' %}">Ledger</a>
+                        <a class="nav-link" href="{% url 'old_drec_data_edited_list' %}">Edited Record</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'old_drec_data_deleted_list' %}">Deleted Record</a>
                     </li>
                 </ul>
             </div>

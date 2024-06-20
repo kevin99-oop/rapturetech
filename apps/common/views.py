@@ -73,6 +73,8 @@ from django.contrib.auth.decorators import login_required
 from . import models
 from django.shortcuts import render
 from . import models
+from decimal import Decimal, ROUND_HALF_UP
+
 # Common Views
 
 def render_website_page(request, page_name):
@@ -143,39 +145,31 @@ def super_dashboard(request):
 class DashboardView(TemplateView):
     template_name = 'example.html'
     paginate_by = 10
-    refresh_interval = 5  # Refresh interval in seconds
     max_records_to_fetch = 300  # Maximum number of records to fetch
 
-    @method_decorator([login_required, ensure_csrf_cookie])
+    @method_decorator([login_required])
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        context = cache.get('dashboard_data')
-        if not context:
-            context = self.compute_data(request)
-            cache.set('dashboard_data', context, timeout=self.refresh_interval)
+        context = self.compute_data(request)
         return self.render_to_response(context)
 
     def compute_data(self, request):
-        active_dpu_list = self.get_active_dpu_list(request.user) if request else None
-        drec_data = self.get_all_drec_data(request.user) if request else None
+        active_dpu_list = self.get_active_dpu_list(request.user)
+        drec_data = self.get_all_drec_data(request.user)
 
-        if drec_data is not None:
+        if drec_data:
             drec_data = drec_data[:self.max_records_to_fetch]
-            drec_data_cust_ids = set(record.CUST_ID for record in drec_data)
             summary_data = self.prepare_summary_data(drec_data, active_dpu_list)
-            customer_list = self.get_customer_list(drec_data_cust_ids)
+            customer_list = self.get_customer_list(drec_data)
             avg_fat, avg_snf, avg_clr = self.calculate_global_averages(request.user)
             drec_data_page = self.paginate_drec_data(request, drec_data)
-
             total_customer_count = self.calculate_total_customer_count(active_dpu_list)
             total_dpus = active_dpu_list.count()
 
+            # Top 10 latest records
             top_10_latest_records = self.get_top_10_latest_records(request.user, summary_data[0]['ST_ID__st_id']) if summary_data else None
-            recording_dates = self.get_recording_dates(request.user.id)
-            cow_summary_data, avg_fat_cow, avg_snf_cow, avg_clr_cow, avg_water_cow, total_ltr_cow, total_amt_cow, total_cust_cow = self.prepare_and_calculate_summary_data(drec_data, active_dpu_list, 'C')
-            buffalo_summary_data, avg_fat_buffalo, avg_snf_buffalo, avg_clr_buffalo, avg_water_buffalo, total_ltr_buffalo, total_amt_buffalo, total_cust_buffalo = self.prepare_and_calculate_summary_data(drec_data, active_dpu_list, 'B')
 
             live_data = {
                 'active_dpu_list': active_dpu_list,
@@ -187,34 +181,28 @@ class DashboardView(TemplateView):
                 'avg_clr': avg_clr,
                 'total_customer_count': total_customer_count,
                 'total_dpus': total_dpus,
-                'dpu_list': ', '.join(dpu.st_id for dpu in active_dpu_list),
-                'recording_dates': recording_dates,
                 'top_10_latest_records': top_10_latest_records,
-                'cow_summary_data': cow_summary_data,
-                'avg_fat_cow': avg_fat_cow,
-                'avg_snf_cow': avg_snf_cow,
-                'avg_clr_cow': avg_clr_cow,
-                'avg_water_cow': avg_water_cow,
-                'total_ltr_cow': total_ltr_cow,
-                'total_amt_cow': total_amt_cow,
-                'total_cust_cow': total_cust_cow,
-                'buffalo_summary_data': buffalo_summary_data,
-                'avg_fat_buffalo': avg_fat_buffalo,
-                'avg_snf_buffalo': avg_snf_buffalo,
-                'avg_clr_buffalo': avg_clr_buffalo,
-                'avg_water_buffalo': avg_water_buffalo,
-                'total_ltr_buffalo': total_ltr_buffalo,
-                'total_amt_buffalo': total_amt_buffalo,
-                'total_cust_buffalo': total_cust_buffalo,
             }
-            return live_data
+        else:
+            # Default values when no data is available
+            live_data = {
+                'active_dpu_list': active_dpu_list,
+                'drec_data': [],
+                'customer_list': [],
+                'summary_data': [],
+                'avg_fat': 0,
+                'avg_snf': 0,
+                'avg_clr': 0,
+                'total_customer_count': 0,
+                'total_dpus': active_dpu_list.count(),
+                'top_10_latest_records': [],
+            }
+        return live_data
 
-    @lru_cache(maxsize=None)
     def get_active_dpu_list(self, user):
         queryset = DPU.objects.filter(user=user) if (user.is_staff or user.is_superuser) else DPU.objects.filter(dpu_user=user.id)
         return queryset.select_related('user')
 
-    @lru_cache(maxsize=None)
     def get_all_drec_data(self, user):
         drec_filter = {'ST_ID__user': user} if (user.is_staff or user.is_superuser) else {'ST_ID__dpu_user': user.id}
         return DREC.objects.filter(**drec_filter).order_by('-created_at').select_related('ST_ID__user')
@@ -224,7 +212,8 @@ class DashboardView(TemplateView):
         page_number = request.GET.get('page')
         return paginator.get_page(page_number)
 
-    def get_customer_list(self, drec_data_cust_ids):
+    def get_customer_list(self, drec_data):
+        drec_data_cust_ids = set(record.CUST_ID for record in drec_data)
         return CustomerList.objects.filter(cust_id__in=drec_data_cust_ids)
 
     def calculate_global_averages(self, user):
@@ -233,29 +222,20 @@ class DashboardView(TemplateView):
         avg_snf = DREC.objects.filter(**drec_filter).aggregate(avg_snf=Avg('SNF'))['avg_snf']
         avg_clr = DREC.objects.filter(**drec_filter).aggregate(avg_clr=Avg('CLR'))['avg_clr']
         return (
-            round(avg_fat, 1) if avg_fat is not None else None,
-            round(avg_snf, 1) if avg_snf is not None else None,
-            round(avg_clr, 1) if avg_clr is not None else None
+            round(avg_fat, 1) if avg_fat is not None else 0,
+            round(avg_snf, 1) if avg_snf is not None else 0,
+            round(avg_clr, 1) if avg_clr is not None else 0
         )
 
     def calculate_total_customer_count(self, active_dpu_list):
         if not active_dpu_list.exists():
             return 0
         queryset = CustomerList.objects.filter(st_id__in=active_dpu_list.values_list('st_id', flat=True).distinct())
-        return queryset.count() if (active_dpu_list.first().user.is_staff or active_dpu_list.first().user.is_superuser) else queryset.filter(st_id=active_dpu_list.first().st_id).count()
+        return queryset.count()
 
     def get_top_10_latest_records(self, user, st_id):
-        queryset = DREC.objects.filter(ST_ID__user=user) if (user.is_staff or user.is_superuser) else DREC.objects.filter(ST_ID__dpu_user=user.id)
-        return queryset.order_by('-RecordingDate', '-SHIFT')[:10]
-
-    def get_recording_dates(self, user_id):
-        return DREC.objects.filter(ST_ID__user=user_id).values_list('RecordingDate', flat=True).distinct()
-
-    def prepare_and_calculate_summary_data(self, drec_data, active_dpu_list, m_type):
-        filtered_records = [record for record in drec_data if record.MType == m_type]
-        summary_data = self.prepare_summary_data(filtered_records, active_dpu_list)
-        averages = self.calculate_averages(filtered_records)
-        return summary_data, *averages
+        drec_filter = {'ST_ID__user': user} if (user.is_staff or user.is_superuser) else {'ST_ID__dpu_user': user.id}
+        return DREC.objects.filter(**drec_filter).order_by('-RecordingDate', '-SHIFT')[:10]
 
     def prepare_summary_data(self, drec_data, active_dpu_list):
         grouped_data = defaultdict(list)
@@ -313,6 +293,7 @@ class DashboardView(TemplateView):
         total_amt = round(total_amt, 2)
 
         return avg_fat, avg_snf, avg_clr, avg_water, total_ltr, total_amt, total_cust
+
 
 class FetchDRECDataView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
@@ -575,25 +556,23 @@ class DRECViewSet(viewsets.ModelViewSet):
         print("create")
         if isinstance(request.data, list):  # Check if the request data is a list
             serializer = self.get_serializer(data=request.data, many=True)
-        else:# single data
-            print("Single data recived")
-            # check if edited data
+        else:  # Single data
+            print("Single data received")
             print(request.data)
-            if request.data.get("SLIP_TYPE") in ["2","4","6"] and request.data.get("FlagEdited") == '1':
+
+            slip_type = request.data.get("SLIP_TYPE")
+
+            if slip_type in ["2", "4", "6"] :
                 print("###############\n\n\nFound Edited Data")
-                # find old original data
-                print( request.data.get("ST_ID"),  request.data.get("CUST_ID"), "1" )
                 linked_records = DREC.objects.filter(
                     ST_ID=request.data.get("ST_ID"),
                     CUST_ID=request.data.get("CUST_ID"),
                     CSR_NO=request.data.get("CSR_NO")
                 )
                 print(linked_records.count())
-                # check if we have only one record filterd
                 if linked_records.count() == 1:
-                    # save data into OldDrec
-                    Old_drec_obj = OldDrecDataEdited(
-                        new_drec = linked_records[0].id, 
+                    old_drec_obj = OldDrecDataEdited(
+                        new_drec=linked_records[0].id,
                         ST_ID=linked_records[0].ST_ID.st_id,
                         REC_TYPE=linked_records[0].REC_TYPE,
                         SLIP_TYPE=linked_records[0].SLIP_TYPE,
@@ -620,48 +599,95 @@ class DRECViewSet(viewsets.ModelViewSet):
                         CREV=linked_records[0].CREV,
                         END_TAG=linked_records[0].END_TAG,
                         dpuid=linked_records[0].dpuid,
-                        RID=linked_records[0].RID                        
+                        RID=linked_records[0].RID
                     )
-                    Old_drec_obj.save()
+                    old_drec_obj.save()
 
-                    # delete Old data from Drec
                     linked_records.delete()
 
-                    # create new edited obj into Drec
-                    serializer = self.get_serializer(data=request.data)      
+                    serializer = self.get_serializer(data=request.data)
                     if serializer.is_valid():
                         serializer.save()
-                        # Return 200 OK instead of 201 Created
-                        print("saved obj id: ",serializer.data)
-                    Old_drec_obj.new_drec = serializer.data.get('id')
-                    Old_drec_obj.save()    
-                    # Return 200 OK instead of 201 Created
-                    print("#######################\n\n Edited Data saved")
-                    return Response(serializer.data, status=status.HTTP_200_OK)
+                        print("saved obj id: ", serializer.data)
+                        old_drec_obj.new_drec = serializer.data.get('id')
+                        old_drec_obj.save()
+                        print("#######################\n\n Edited Data saved")
+                        return Response(serializer.data, status=status.HTTP_200_OK)
+                    else:
+                        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
                 else:
-                    print("Duplicate data found, total matched rows: ", linked_records.count() )
-            # save data
-            serializer = self.get_serializer(data=request.data)                                   
+                    print("Duplicate data found, total matched rows: ", linked_records.count())
+
+            elif slip_type == "9":
+                linked_records = DREC.objects.filter(
+                    ST_ID=request.data.get("ST_ID"),
+                    CUST_ID=request.data.get("CUST_ID"),
+                    RecordingTime=request.data.get("RecordingTime"),
+                    RecordingDate=request.data.get("RecordingDate"),
+                    RID=request.data.get("RID")
+                )
+                if linked_records.count() == 1:
+                    old_drec_obj = OldDrecDataDeleted(
+                        new_drec=linked_records[0].id,
+                        ST_ID=linked_records[0].ST_ID.st_id,
+                        REC_TYPE=linked_records[0].REC_TYPE,
+                        SLIP_TYPE=linked_records[0].SLIP_TYPE,
+                        CUST_ID=linked_records[0].CUST_ID,
+                        TotalFileRecord=linked_records[0].TotalFileRecord,
+                        MType=linked_records[0].MType,
+                        RecordingDate=linked_records[0].RecordingDate,
+                        RecordingTime=linked_records[0].RecordingTime,
+                        SHIFT=linked_records[0].SHIFT,
+                        FAT=linked_records[0].FAT,
+                        FAT_UNIT=linked_records[0].FAT_UNIT,
+                        SNF=linked_records[0].SNF,
+                        SNF_UNIT=linked_records[0].SNF_UNIT,
+                        CLR=linked_records[0].CLR,
+                        CLR_UNIT=linked_records[0].CLR_UNIT,
+                        WATER=linked_records[0].WATER,
+                        WATER_UNIT=linked_records[0].WATER_UNIT,
+                        QT=linked_records[0].QT,
+                        QT_UNIT=linked_records[0].QT_UNIT,
+                        RATE=linked_records[0].RATE,
+                        Amount=linked_records[0].Amount,
+                        CAmount=linked_records[0].CAmount,
+                        CSR_NO=linked_records[0].CSR_NO,
+                        CREV=linked_records[0].CREV,
+                        END_TAG=linked_records[0].END_TAG,
+                        dpuid=linked_records[0].dpuid,
+                        RID=linked_records[0].RID
+                    )
+                    old_drec_obj.save()
+
+                    linked_records.delete()
+                    print("#######################\n\n Deleted Data saved")
+                    return Response({"detail": "Record deleted and saved to OldDrecDataDeleted"}, status=status.HTTP_200_OK)
+                else:
+                    print("Duplicate data found, total matched rows: ", linked_records.count())
+
+            serializer = self.get_serializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                print("saved obj id: ", serializer.data.get("id"))
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         if serializer.is_valid():
             serializer.save()
-            # Return 200 OK instead of 201 Created
-            print("saved obj id: ",serializer.data.get("id"))
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def save(self, *args, **kwargs):
-        # Replace None values with "null"
         for field in self._meta.fields:
             value = getattr(self, field.name)
             if value is None:
                 setattr(self, field.name, "null")
 
-        # Assuming dpuid is a ForeignKey to DPU model
         if self.dpuid:
             self.dpuid = self.dpuid.st_id
 
         super().save(*args, **kwargs)
+
 
 class NtpDatetimeView(View):
     def get(self, request, *args, **kwargs):
@@ -1241,7 +1267,11 @@ def shift_report(request):
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else None
         selected_start_date = start_date.strftime('%d-%m-%Y') if start_date else None
 
-        summary_data = get_summary_data(location, dpu, society, shift, start_date)
+        # Provide slip_type argument here, assuming it's a numeric value (int) from your form or a default value
+        slip_type = int(request.POST.get('slip_type', 1))  # Change '1' to a default numeric value if needed
+
+        # Call get_summary_data() with all required arguments
+        summary_data = get_summary_data(location, dpu, society, shift, start_date, slip_type)
         detail_data = get_detail_data(request, location, dpu, society, shift, start_date)
 
         cow_records = [record for record in detail_data if record['MType'] == 'C']
@@ -1337,34 +1367,61 @@ def get_societies_by_dpu(request):
     return JsonResponse(list(societies), safe=False)
 
 
-def get_summary_data(location, dpu, society, shift, start_date):
-    # Replace this function with your actual data retrieval logic for summary data
-    # Example: Using aggregates to get summary data
-    summary_data = DREC.objects.filter(
+def get_summary_data(location, dpu, society, shift, start_date, slip_type):
+    # Initialize summary data
+    summary_data = {
+        'TotalCustomer': 0,
+        'TotalQT': Decimal('0.00'),
+        'TotalAmount': Decimal('0.00'),
+        'TotalCAmount': Decimal('0.00'),
+        'AvgFAT': Decimal('0.0'),
+        'AvgSNF': Decimal('0.0'),
+        'AvgCLR': Decimal('0.0'),
+        'AvgRATE': Decimal('0.00'),
+    }
+
+    # Fetch relevant DREC objects based on filters
+    drec_query = DREC.objects.filter(
         ST_ID__location=location,
         ST_ID__st_id=dpu,
         ST_ID__society=society,
         SHIFT=shift,
         RecordingDate=start_date,
-    ).aggregate(
-        TotalCustomer=Count('CUST_ID'),
-         TotalQT=Round(Sum('QT'), 2),  # Round to 2 decimal places
-            TotalAmount=Round(Sum('Amount'), 2),  # Round to 2 decimal places
-            TotalCAmount=Round(Sum('CAmount'), 2),  # Round to 2 decimal places
-
-            AvgFAT=Round(Avg('FAT'), 2),  # Round to 2 decimal places
-            AvgSNF=Round(Avg('SNF'), 2),  # Round to 2 decimal places
-            AvgCLR=Round(Avg('CLR'), 2),  # Round to 2 decimal places
-            AvgRATE=Round(Avg('RATE'), 2), # Round to 2 decimal places
     )
 
-    # Round the TotalQT to two decimal places
-    summary_data['TotalQT'] = round(summary_data['TotalQT'], 2) if summary_data['TotalQT'] is not None else Decimal('0.00')
+    # Filter by slip_type if provided
+    if slip_type:
+        drec_query = drec_query.filter(SLIP_TYPE=slip_type)
 
-    # Round the averages to one decimal place
-    summary_data['AvgFAT'] = round(summary_data['AvgFAT'], 1) if summary_data['AvgFAT'] is not None else Decimal('0.0')
-    summary_data['AvgSNF'] = round(summary_data['AvgSNF'], 1) if summary_data['AvgSNF'] is not None else Decimal('0.0')
-    summary_data['AvgCLR'] = round(summary_data['AvgCLR'], 1) if summary_data['AvgCLR'] is not None else Decimal('0.0')
+    # Aggregate functions to calculate sums and averages
+    summary_data.update(drec_query.aggregate(
+        TotalCustomer=Count('CUST_ID'),
+        TotalQT=Sum('QT'),
+        TotalAmount=Sum('Amount'),
+        TotalCAmount=Sum('CAmount'),
+        AvgFAT=Avg('FAT'),
+        AvgSNF=Avg('SNF'),
+        AvgCLR=Avg('CLR'),
+        AvgRATE=Avg('RATE'),
+    ))
+
+    # Calculate the totals and averages
+    if summary_data['TotalQT']:
+        summary_data['TotalQT'] = Decimal(summary_data['TotalQT']).quantize(Decimal('0.00'), rounding=ROUND_HALF_UP)
+    else:
+        summary_data['TotalQT'] = Decimal('0.00')
+
+    # Calculate averages, rounding to one decimal place
+    summary_data['AvgFAT'] = Decimal(summary_data['AvgFAT']).quantize(Decimal('0.0'), rounding=ROUND_HALF_UP) if summary_data['AvgFAT'] else Decimal('0.0')
+    summary_data['AvgSNF'] = Decimal(summary_data['AvgSNF']).quantize(Decimal('0.0'), rounding=ROUND_HALF_UP) if summary_data['AvgSNF'] else Decimal('0.0')
+    summary_data['AvgCLR'] = Decimal(summary_data['AvgCLR']).quantize(Decimal('0.0'), rounding=ROUND_HALF_UP) if summary_data['AvgCLR'] else Decimal('0.0')
+    summary_data['AvgRATE'] = Decimal(summary_data['AvgRATE']).quantize(Decimal('0.00'), rounding=ROUND_HALF_UP) if summary_data['AvgRATE'] else Decimal('0.00')
+
+    # Subtract values if slip_type is 3 or 4
+    if slip_type in ['3', '4']:
+        summary_data['TotalQT'] = -summary_data['TotalQT']
+        summary_data['TotalAmount'] = -summary_data['TotalAmount']
+        summary_data['TotalCAmount'] = -summary_data['TotalCAmount']
 
     return summary_data
 
@@ -1485,14 +1542,20 @@ def ledger_report(request):
 
     return render(request, 'common/ledger_report.html', context)
 
-def get_ledger_summary_data(location, dpu, society, start_id, end_id, start_date, end_date):
+def get_ledger_summary_data(location, dpu, society, start_id, end_id, start_date, end_date, slip_type=None):
     distinct_cust_ids = DREC.objects.filter(
         ST_ID__location=location,
         ST_ID__st_id=dpu,
         ST_ID__society=society,
         CUST_ID__range=[start_id, end_id],
-        RecordingDate__range=[start_date, end_date]
-    ).values_list('CUST_ID', flat=True).distinct()
+        RecordingDate__range=[start_date, end_date],
+    )
+
+    # Filter by slip_type if provided
+    if slip_type:
+        distinct_cust_ids = distinct_cust_ids.filter(SLIP_TYPE=slip_type)
+
+    distinct_cust_ids = distinct_cust_ids.values_list('CUST_ID', flat=True).distinct()
 
     summary_data_list = []
 
@@ -1502,8 +1565,14 @@ def get_ledger_summary_data(location, dpu, society, start_id, end_id, start_date
             ST_ID__st_id=dpu,
             ST_ID__society=society,
             CUST_ID=cust_id,
-            RecordingDate__range=[start_date, end_date]
-        ).values(
+            RecordingDate__range=[start_date, end_date],
+        )
+
+        # Filter by slip_type if provided
+        if slip_type:
+            summary_data = summary_data.filter(SLIP_TYPE=slip_type)
+
+        summary_data = summary_data.values(
             'CUST_ID',
             'ST_ID__location',
             'ST_ID__society',
@@ -1515,7 +1584,7 @@ def get_ledger_summary_data(location, dpu, society, start_id, end_id, start_date
             AvgFAT=Round(Avg('FAT'), 2),
             AvgSNF=Round(Avg('SNF'), 2),
             AvgCLR=Round(Avg('CLR'), 2),
-            AvgRATE=Round(Avg('RATE'), 2)
+            AvgRATE=Round(Avg('RATE'), 2),
         ).order_by('CUST_ID').first()
 
         if summary_data:
@@ -1537,17 +1606,21 @@ def get_ledger_detail_data(location, dpu, society, start_id, end_id, start_date,
 
     return detail_data
 
-def get_payment_summary_data(location, dpu, start_date, end_date, start_id, end_id):
+def get_payment_summary_data(location, dpu, start_date, end_date, start_id, end_id, slip_type=None):
     payment_data = DREC.objects.filter(
         ST_ID__location=location,
         ST_ID__st_id=dpu,
         RecordingDate__range=[start_date, end_date],
-        CUST_ID__range=[start_id, end_id]
+        CUST_ID__range=[start_id, end_id],
     )
+
+    # Filter by slip_type if provided
+    if slip_type:
+        payment_data = payment_data.filter(SLIP_TYPE=slip_type)
 
     payment_summary_data = payment_data.aggregate(
         GrandTotalQT=Sum('QT'),
-        GrandTotalAmount=Sum('Amount')
+        GrandTotalAmount=Sum('Amount'),
     )
 
     grand_total_qt = Decimal(payment_summary_data['GrandTotalQT'] or 0).quantize(Decimal('0.00'))
@@ -1562,13 +1635,13 @@ def get_payment_summary_data(location, dpu, start_date, end_date, start_id, end_
         AvgSNF=Round(Avg('SNF'), 2),
         AvgCLR=Round(Avg('CLR'), 2),
         AvgRATE=Round(Avg('RATE'), 2),
-        CustomerName=Subquery(CustomerList.objects.filter(cust_id=OuterRef('CUST_ID'), st_id=dpu).values('name')[:1])
+        CustomerName=Subquery(CustomerList.objects.filter(cust_id=OuterRef('CUST_ID'), st_id=dpu).values('name')[:1]),
     ).order_by('CUST_ID')
 
     payment_summary_data = {
         'GrandTotalQT': grand_total_qt,
         'GrandTotalAmount': grand_total_amount,
-        'CustomerData': list(customer_data)
+        'CustomerData': list(customer_data),
     }
 
     return payment_summary_data
@@ -1663,9 +1736,41 @@ def update_question_view(request, pk):
             return HttpResponse("Question does not exist")
     else:
         return redirect('question-history')
-
 @login_required
 def old_drec_data_edited_list(request):
-    records = OldDrecDataEdited.objects.all()
+    user = request.user
+    if user.is_staff or user.is_superuser:
+        records = OldDrecDataEdited.objects.all()  # Fetch all records for staff/superuser
+    else:
+        records = OldDrecDataEdited.objects.filter(user=user)  # Filter records based on user
+
     return render(request, 'common/old_drec_data_edited_list.html', {'records': records})
 
+
+logger = logging.getLogger(__name__)
+
+@login_required
+def old_drec_data_deleted_list(request):
+    user = request.user
+    if user.is_staff or user.is_superuser:
+        records = OldDrecDataDeleted.objects.all()  # Fetch all records for staff/superuser
+    else:
+        records = OldDrecDataDeleted.objects.filter(user=user)  # Filter records based on user
+
+    # Fetching customer names based on CUST_ID
+    cust_ids = list(records.values_list('CUST_ID', flat=True).distinct())
+    logger.debug(f"CUST_IDs: {cust_ids}")
+
+    # Fetch customers that match the cust_ids
+    customers = CustomerList.objects.filter(cust_id__in=cust_ids).values('cust_id', 'name')
+    logger.debug(f"Customers: {customers}")
+
+    # Create a dictionary to map cust_id to name for quick lookup
+    customer_map = {customer['cust_id']: customer['name'] for customer in customers}
+
+    # Iterate through records and add CustomerName field
+    for record in records:
+        # Retrieve customer name from the map, default to 'Unknown Customer' if not found
+        record.CustomerName = customer_map.get(record.CUST_ID, 'Unknown Customer')
+
+    return render(request, 'common/old_drec_data_deleted_list.html', {'records': records})

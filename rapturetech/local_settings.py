@@ -37,7 +37,7 @@ else:
 #        'NAME': 'rapturedb',
 #        'USER': 'sgnonsuser',
 #        'PASSWORD': 'SgnRapDbPas01',
-#        'HOST': '13.235.128.158',
+#        'HOST': '13.234.226.230',
 #        'PORT': '5432'
 #    }
 # }
