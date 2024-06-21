@@ -74,77 +74,6 @@ class DPU(models.Model):
             return latest_customer.csv_file.path
         except Customer.DoesNotExist:
             return None
-
-class OldDrecDataDeleted(models.Model):
-    new_drec = models.IntegerField(null=True)
-    REC_TYPE = models.CharField(max_length=255)
-    SLIP_TYPE = models.IntegerField(null=True, default=None)
-    ST_ID = models.CharField(max_length=255)
-    CUST_ID = models.IntegerField(null=True, default=None)
-    TotalFileRecord = models.IntegerField(null=True, default=None)
-    FlagEdited = models.CharField(max_length=10, default="", blank=True)
-    MType = models.CharField(max_length=255, null=True, default=None)
-    RecordingDate = models.DateField(null=True, default=None)
-    RecordingTime = models.CharField(max_length=255, default="0000")
-    SHIFT = models.CharField(max_length=255, null=True, default=None)
-    FAT = models.FloatField(null=True, default=None)
-    FAT_UNIT = models.CharField(max_length=255, default="", blank=True)
-    SNF = models.FloatField(null=True, default=None)
-    SNF_UNIT = models.CharField(max_length=255, default="", blank=True)
-    CLR = models.FloatField(null=True, default=None)
-    CLR_UNIT = models.CharField(max_length=255, default="", blank=True)
-    WATER = models.FloatField(null=True, default=None)
-    WATER_UNIT = models.CharField(max_length=255, default="", blank=True)
-    QT = models.FloatField(null=True, default=None)
-    QT_UNIT = models.CharField(max_length=255, default="", blank=True)
-    RATE = models.FloatField(null=True, default=None)
-    Amount = models.FloatField(null=True, default=None)
-    CAmount = models.FloatField(null=True, default=None)
-    CSR_NO = models.IntegerField(null=True, default=None)
-    CREV = models.IntegerField(null=True, default=None)
-    END_TAG = models.CharField(max_length=255, default="", blank=True)
-    dpuid = models.CharField(max_length=255, default="", blank=True)
-    RID = models.CharField(max_length=255, null=True, default=None)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"OldDrecDataDeleted for DREC ID: {self.id}"
-
-class OldDrecDataEdited(models.Model):
-    new_drec = models.IntegerField(null=True)
-    REC_TYPE = models.CharField(max_length=255)
-    SLIP_TYPE = models.IntegerField(null=True, default=None)
-    ST_ID = models.CharField(max_length=255)
-    CUST_ID = models.IntegerField(null=True, default=None)
-    TotalFileRecord = models.IntegerField(null=True, default=None)
-    FlagEdited = models.CharField(max_length=10, default="", blank=True)
-    MType = models.CharField(max_length=255, null=True, default=None)
-    RecordingDate = models.DateField(null=True, default=None)
-    RecordingTime = models.CharField(max_length=255, default="0000")
-    SHIFT = models.CharField(max_length=255, null=True, default=None)
-    FAT = models.FloatField(null=True, default=None)
-    FAT_UNIT = models.CharField(max_length=255, default="", blank=True)
-    SNF = models.FloatField(null=True, default=None)
-    SNF_UNIT = models.CharField(max_length=255, default="", blank=True)
-    CLR = models.FloatField(null=True, default=None)
-    CLR_UNIT = models.CharField(max_length=255, default="", blank=True)
-    WATER = models.FloatField(null=True, default=None)
-    WATER_UNIT = models.CharField(max_length=255, default="", blank=True)
-    QT = models.FloatField(null=True, default=None)
-    QT_UNIT = models.CharField(max_length=255, default="", blank=True)
-    RATE = models.FloatField(null=True, default=None)
-    Amount = models.FloatField(null=True, default=None)
-    CAmount = models.FloatField(null=True, default=None)
-    CSR_NO = models.IntegerField(null=True, default=None)
-    CREV = models.IntegerField(null=True, default=None)
-    END_TAG = models.CharField(max_length=255, default="", blank=True)
-    dpuid = models.CharField(max_length=255, default="", blank=True)
-    RID = models.CharField(max_length=255, null=True, default=None)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"OldDrecDataEdited for DREC ID: {self.id}"
-
 class DREC(models.Model):
     SLIP_TYPE_CHOICES = [
         (1, 'FAT/SNF/CLR Record'),
@@ -243,12 +172,158 @@ class DREC(models.Model):
 
         super().save(*args, **kwargs)
 
+        if self.CUST_ID == 1001 and self.SLIP_TYPE == 3:
+            self.move_to_localsell()
+
+    def move_to_localsell(self):
+        try:
+            with transaction.atomic():
+                # Create a new record in LocalSell table
+                LocalSell.objects.create(
+                    REC_TYPE=self.REC_TYPE,
+                    SLIP_TYPE=self.SLIP_TYPE,
+                    ST_ID=self.ST_ID,
+                    CUST_ID=self.CUST_ID,
+                    TotalFileRecord=self.TotalFileRecord,
+                    FlagEdited=self.FlagEdited,
+                    MType=self.MType,
+                    RecordingDate=self.RecordingDate,
+                    RecordingTime=self.RecordingTime,
+                    SHIFT=self.SHIFT,
+                    FAT=self.FAT,
+                    FAT_UNIT=self.FAT_UNIT,
+                    SNF=self.SNF,
+                    SNF_UNIT=self.SNF_UNIT,
+                    CLR=self.CLR,
+                    CLR_UNIT=self.CLR_UNIT,
+                    WATER=self.WATER,
+                    WATER_UNIT=self.WATER_UNIT,
+                    QT=self.QT,
+                    QT_UNIT=self.QT_UNIT,
+                    RATE=self.RATE,
+                    Amount=self.Amount,
+                    CAmount=self.CAmount,
+                    CSR_NO=self.CSR_NO,
+                    CREV=self.CREV,
+                    END_TAG=self.END_TAG,
+                    dpuid=self.dpuid,
+                    RID=self.RID,
+                    created_at=timezone.now()
+                )
+                
+                # Delete the current DREC record immediately
+                self.delete()
+
+        except Exception as e:
+            print(f"Error moving to LocalSell and deleting DREC: {str(e)}")
 
     def convert_to_hhmm_format(self, time_str):
         if len(time_str) == 4:
             return f"{time_str[:2]}:{time_str[2:]}"
         return time_str
 
+
+    
+class OldDrecDataDeleted(models.Model):
+    new_drec = models.IntegerField(null=True)
+    REC_TYPE = models.CharField(max_length=255)
+    SLIP_TYPE = models.IntegerField(null=True, default=None)
+    ST_ID = models.CharField(max_length=255)
+    CUST_ID = models.IntegerField(null=True, default=None)
+    TotalFileRecord = models.IntegerField(null=True, default=None)
+    FlagEdited = models.CharField(max_length=10, default="", blank=True)
+    MType = models.CharField(max_length=255, null=True, default=None)
+    RecordingDate = models.DateField(null=True, default=None)
+    RecordingTime = models.CharField(max_length=255, default="0000")
+    SHIFT = models.CharField(max_length=255, null=True, default=None)
+    FAT = models.FloatField(null=True, default=None)
+    FAT_UNIT = models.CharField(max_length=255, default="", blank=True)
+    SNF = models.FloatField(null=True, default=None)
+    SNF_UNIT = models.CharField(max_length=255, default="", blank=True)
+    CLR = models.FloatField(null=True, default=None)
+    CLR_UNIT = models.CharField(max_length=255, default="", blank=True)
+    WATER = models.FloatField(null=True, default=None)
+    WATER_UNIT = models.CharField(max_length=255, default="", blank=True)
+    QT = models.FloatField(null=True, default=None)
+    QT_UNIT = models.CharField(max_length=255, default="", blank=True)
+    RATE = models.FloatField(null=True, default=None)
+    Amount = models.FloatField(null=True, default=None)
+    CAmount = models.FloatField(null=True, default=None)
+    CSR_NO = models.IntegerField(null=True, default=None)
+    CREV = models.IntegerField(null=True, default=None)
+    END_TAG = models.CharField(max_length=255, default="", blank=True)
+    dpuid = models.CharField(max_length=255, default="", blank=True)
+    RID = models.CharField(max_length=255, null=True, default=None)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"OldDrecDataDeleted for DREC ID: {self.id}"
+
+class OldDrecDataEdited(models.Model):
+    new_drec = models.IntegerField(null=True)
+    REC_TYPE = models.CharField(max_length=255)
+    SLIP_TYPE = models.IntegerField(null=True, default=None)
+    ST_ID = models.CharField(max_length=255)
+    CUST_ID = models.IntegerField(null=True, default=None)
+    TotalFileRecord = models.IntegerField(null=True, default=None)
+    FlagEdited = models.CharField(max_length=10, default="", blank=True)
+    MType = models.CharField(max_length=255, null=True, default=None)
+    RecordingDate = models.DateField(null=True, default=None)
+    RecordingTime = models.CharField(max_length=255, default="0000")
+    SHIFT = models.CharField(max_length=255, null=True, default=None)
+    FAT = models.FloatField(null=True, default=None)
+    FAT_UNIT = models.CharField(max_length=255, default="", blank=True)
+    SNF = models.FloatField(null=True, default=None)
+    SNF_UNIT = models.CharField(max_length=255, default="", blank=True)
+    CLR = models.FloatField(null=True, default=None)
+    CLR_UNIT = models.CharField(max_length=255, default="", blank=True)
+    WATER = models.FloatField(null=True, default=None)
+    WATER_UNIT = models.CharField(max_length=255, default="", blank=True)
+    QT = models.FloatField(null=True, default=None)
+    QT_UNIT = models.CharField(max_length=255, default="", blank=True)
+    RATE = models.FloatField(null=True, default=None)
+    Amount = models.FloatField(null=True, default=None)
+    CAmount = models.FloatField(null=True, default=None)
+    CSR_NO = models.IntegerField(null=True, default=None)
+    CREV = models.IntegerField(null=True, default=None)
+    END_TAG = models.CharField(max_length=255, default="", blank=True)
+    dpuid = models.CharField(max_length=255, default="", blank=True)
+    RID = models.CharField(max_length=255, null=True, default=None)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"OldDrecDataEdited for DREC ID: {self.id}"
+
+class LocalSell(models.Model):
+    REC_TYPE = models.CharField(max_length=255, null=True, default=None)
+    SLIP_TYPE = models.IntegerField(choices=DREC.SLIP_TYPE_CHOICES, default=1)
+    ST_ID = models.ForeignKey('DPU', on_delete=models.CASCADE, related_name='local_sells')
+    CUST_ID = models.IntegerField(null=True, default=None)
+    TotalFileRecord = models.IntegerField(null=True, default=None)
+    FlagEdited = models.CharField(max_length=10, default="", blank=True)
+    MType = models.CharField(max_length=255, null=True, default=None)
+    RecordingDate = models.DateField(null=True, default=None)
+    RecordingTime = models.CharField(max_length=255, default="0000")
+    SHIFT = models.CharField(max_length=255, null=True, default=None)
+    FAT = models.FloatField(null=True, default=None)
+    FAT_UNIT = models.CharField(max_length=255, default="", blank=True)
+    SNF = models.FloatField(null=True, default=None)
+    SNF_UNIT = models.CharField(max_length=255, default="", blank=True)
+    CLR = models.FloatField(null=True, default=None)
+    CLR_UNIT = models.CharField(max_length=255, default="", blank=True)
+    WATER = models.FloatField(null=True, default=None)
+    WATER_UNIT = models.CharField(max_length=255, default="", blank=True)
+    QT = models.FloatField(null=True, default=None)
+    QT_UNIT = models.CharField(max_length=255, default="", blank=True)
+    RATE = models.FloatField(null=True, default=None)
+    Amount = models.FloatField(null=True, default=None)
+    CAmount = models.FloatField(null=True, default=None)
+    CSR_NO = models.IntegerField(null=True, default=None)
+    CREV = models.IntegerField(null=True, default=None)
+    END_TAG = models.CharField(max_length=255, default="", blank=True)
+    dpuid = models.CharField(max_length=255, default="", blank=True)
+    RID = models.CharField(max_length=255, null=True, default=None)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class Customer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

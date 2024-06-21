@@ -228,10 +228,10 @@
                                 <div class="float-end mb-2">
 <!-- Ledger report export buttons -->
 <button class="btn btn-primary rounded btn-sm me-2 fw-bold" onclick="exportToCsvAndPdf(['ledger_summary_data', 'ledger_detail_data'], 'ledger_report', 'csv', 'ledger')">
-    Export Ledger CSV
+    <i class="icon-download me-2 mb-1"></i>CSV
 </button>
 <button class="btn btn-primary rounded btn-sm fw-bold" onclick="exportToCsvAndPdf(['ledger_summary_data', 'ledger_detail_data'], 'ledger_report', 'pdf', 'ledger')">
-    Export Ledger PDF
+    <i class="icon-download me-2 mb-1"></i>PDF
 </button>
 
                                 </div>
@@ -288,9 +288,21 @@
                                                     <th>Date</th>
                                                     <th>SHIFT</th>
                                                     <th>MType</th>
+                                                    {% if 'FAT' in st_id.check_options and 'SNF' in st_id.check_options %}
+                                                    <th>CLR</th>
+                                                    {% endif %}
+                                                    {% if 'FAT' in st_id.check_options and 'CLR' in st_id.check_options %}
+                                                    <th>SNF</th>
+                                                    {% endif %}
+                                                    {% if 'FAT' in st_id.check_options and 'SNF' in st_id.check_options and 'CLR' in st_id.check_options %}
                                                     <th>FAT</th>
                                                     <th>SNF</th>
                                                     <th>CLR</th>
+                                                    {% else %}
+                                                    <th>FAT</th>
+                                                    <th>SNF</th>
+                                                    <th>CLR</th>
+                                                    {% endif %}
                                                     <th>WATER</th>
                                                     <th>Quantity</th>
                                                     <th>RATE</th>
@@ -305,9 +317,10 @@
                                                             <td>{{ entry.RecordingDate|date:"d-m-Y" }}</td>
                                                             <td>{{ entry.SHIFT }}</td>
                                                             <td>{{ entry.MType }}</td>
-                                                            <td>{{ entry.FAT }}</td>
-                                                            <td>{{ entry.SNF }}</td>
-                                                            <td>{{ entry.CLR }}</td>
+                                                            <td>{% if entry.FAT == 0.0 %}-{% else %}{{ entry.FAT }}{% endif %}</td>
+                                                            <td>{% if entry.SNF == 0.0 %}-{% else %}{{ entry.SNF }}{% endif %}</td>
+                                                            <td>{% if entry.CLR == 0.0 %}-{% else %}{{ entry.CLR }}{% endif %}</td>
+        
                                                             <td>{{ entry.WATER }}</td>
                                                             <td>{{ entry.QT }}</td>
                                                             <td>{{ entry.RATE }}</td>
@@ -339,10 +352,10 @@
                                 <div class="float-end mb-2">
 <!-- Payment report export buttons -->
 <button class="btn btn-primary rounded btn-sm me-2 fw-bold" onclick="exportToCsvAndPdf(['payment_table_info', 'payment_table_data'], 'ledger_report_payment', 'csv', 'payment')">
-    Export Ledger CSV
+    <i class="icon-download me-2 mb-1"></i>CSV
 </button>
 <button class="btn btn-primary rounded btn-sm fw-bold" onclick="exportToCsvAndPdf(['payment_table_info', 'payment_table_data'], 'ledger_report_payment', 'pdf', 'payment')">
-    Export Ledger PDF
+    <i class="icon-download me-2 mb-1"></i>PDF
 </button>
 
                                 </div>

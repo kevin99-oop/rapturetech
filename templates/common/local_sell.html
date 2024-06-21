@@ -1,5 +1,5 @@
 
-    {% extends 'base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% load crispy_forms_tags %}-
@@ -74,7 +74,7 @@
                 <div class="table-title border rounded">
                     <div class="row">
                         <div class="col-sm-6">
-                            <h5 class="text-white mt-2">Recent Deleted Records</h5>
+                            <h5 class="text-white mt-2">Local Sell Records</h5>
                         </div>
                 
                     </div>
@@ -87,57 +87,31 @@
                 <thead class="table-title">
                     <tr>
                         <th>ST ID</th>
-                        <th>CUST ID</th>
-                        <th>Cust Name</th>
                         <th>MType</th>
                         <th>Recording Date</th>
                         <th>Recording Time</th>
                         <th>SHIFT</th>
-                        {% if 'FAT' in st_id.check_options and 'SNF' in st_id.check_options %}
-                        <th>CLR</th>
-                        {% endif %}
-                        {% if 'FAT' in st_id.check_options and 'CLR' in st_id.check_options %}
-                        <th>SNF</th>
-                        {% endif %}
-                        {% if 'FAT' in st_id.check_options and 'SNF' in st_id.check_options and 'CLR' in st_id.check_options %}
-                        <th>FAT</th>
-                        <th>SNF</th>
-                        <th>CLR</th>
-                        {% else %}
-                        <th>FAT</th>
-                        <th>SNF</th>
-                        <th>CLR</th>
-                        {% endif %}
-                        <th>WATER</th>
                         <th>QT</th>
                         <th>RATE</th>
                         <th>Amount</th>
                         <th>CAmount</th>
-                        <th>RID</th>
                     </tr>
                 </thead>
                 <tbody >
-                    {% for record in records reversed%}
-                    <tr class="text-danger fw-bold">
-                        <td>{{ record.ST_ID }}</td>
-                        <td>{{ record.CUST_ID }}</td>
-                        <td>{{ record.CustomerName }}</td>  
-                        <td>{{ record.MType }}</td>
-                        <td>{{ record.RecordingDate|date:"d-m-Y"  }}</td>
-                        <td>{{ record.RecordingTime }}</td>
-                        <td>{{ record.SHIFT }}</td>
-                        <td>{% if record.FAT == 0.0 %}-{% else %}{{ record.FAT }}{% endif %}</td>
-                        <td>{% if record.SNF == 0.0 %}-{% else %}{{ record.SNF }}{% endif %}</td>
-                        <td>{% if record.CLR == 0.0 %}-{% else %}{{ record.CLR }}{% endif %}</td>
-                        <td>{{ record.WATER }}</td>
-                        <td>{{ record.QT }}</td>
-                        <td>{{ record.RATE }}</td>
-                        <td>{{ record.Amount }}</td>
-                        <td>{{ record.CAmount }}</td>
-                        <td>{{ record.RID }}</td>
+                    {% for localsell in localsells %}
+                    <tr class="text-primary fw-bold">
+                        <td>{{ localsell.ST_ID }}</td>
+                        <td>{{ localsell.MType }}</td>
+                        <td>{{ localsell.RecordingDate|date:"d-m-Y" }}</td>
+                        <td>{{ localsell.RecordingTime }}</td>
+                        <td>{{ localsell.SHIFT }}</td>                        
+                        <td>{{ localsell.QT }}</td>
+                        <td>{{ localsell.RATE }}</td>
+                        <td>{{ localsell.Amount }}</td>
+                        <td>{{ localsell.CAmount }}</td>
                     </tr>
                     {% endfor %}
-                </tbody>
+                        </tbody>
             </table>
 
             </div>
