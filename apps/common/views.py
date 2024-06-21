@@ -640,11 +640,10 @@ class DRECViewSet(viewsets.ModelViewSet):
                 else:
                     print("Duplicate data found, total matched rows: ", linked_records.count())
 
-            elif request.data.get("SLIP_TYPE") == "9" and request.data.get("FlagEdited") == '2':
+            elif request.data.get("SLIP_TYPE") == "9" and request.data.get("FlagEdited") == '3':
                 linked_records = DREC.objects.filter(
                     ST_ID=request.data.get("ST_ID"),
                     CUST_ID=request.data.get("CUST_ID"),
-                    RecordingTime=request.data.get("RecordingTime"),
                     RecordingDate=request.data.get("RecordingDate"),
                     CSR_NO=request.data.get("CSR_NO")
                 )
