@@ -145,31 +145,39 @@ def super_dashboard(request):
 class DashboardView(TemplateView):
     template_name = 'example.html'
     paginate_by = 10
+    refresh_interval = 5  # Refresh interval in seconds
     max_records_to_fetch = 300  # Maximum number of records to fetch
 
-    @method_decorator([login_required])
+    @method_decorator([login_required, ensure_csrf_cookie])
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        context = self.compute_data(request)
+        context = cache.get('dashboard_data')
+        if not context:
+            context = self.compute_data(request)
+            cache.set('dashboard_data', context, timeout=self.refresh_interval)
         return self.render_to_response(context)
 
     def compute_data(self, request):
-        active_dpu_list = self.get_active_dpu_list(request.user)
-        drec_data = self.get_all_drec_data(request.user)
+        active_dpu_list = self.get_active_dpu_list(request.user) if request else None
+        drec_data = self.get_all_drec_data(request.user) if request else None
 
-        if drec_data:
+        if drec_data is not None:
             drec_data = drec_data[:self.max_records_to_fetch]
+            drec_data_cust_ids = set(record.CUST_ID for record in drec_data)
             summary_data = self.prepare_summary_data(drec_data, active_dpu_list)
-            customer_list = self.get_customer_list(drec_data)
+            customer_list = self.get_customer_list(drec_data_cust_ids)
             avg_fat, avg_snf, avg_clr = self.calculate_global_averages(request.user)
             drec_data_page = self.paginate_drec_data(request, drec_data)
+
             total_customer_count = self.calculate_total_customer_count(active_dpu_list)
             total_dpus = active_dpu_list.count()
 
-            # Top 10 latest records
             top_10_latest_records = self.get_top_10_latest_records(request.user, summary_data[0]['ST_ID__st_id']) if summary_data else None
+            recording_dates = self.get_recording_dates(request.user.id)
+            cow_summary_data, avg_fat_cow, avg_snf_cow, avg_clr_cow, avg_water_cow, total_ltr_cow, total_amt_cow, total_cust_cow = self.prepare_and_calculate_summary_data(drec_data, active_dpu_list, 'C')
+            buffalo_summary_data, avg_fat_buffalo, avg_snf_buffalo, avg_clr_buffalo, avg_water_buffalo, total_ltr_buffalo, total_amt_buffalo, total_cust_buffalo = self.prepare_and_calculate_summary_data(drec_data, active_dpu_list, 'B')
 
             live_data = {
                 'active_dpu_list': active_dpu_list,
@@ -181,28 +189,34 @@ class DashboardView(TemplateView):
                 'avg_clr': avg_clr,
                 'total_customer_count': total_customer_count,
                 'total_dpus': total_dpus,
+                'dpu_list': ', '.join(dpu.st_id for dpu in active_dpu_list),
+                'recording_dates': recording_dates,
                 'top_10_latest_records': top_10_latest_records,
+                'cow_summary_data': cow_summary_data,
+                'avg_fat_cow': avg_fat_cow,
+                'avg_snf_cow': avg_snf_cow,
+                'avg_clr_cow': avg_clr_cow,
+                'avg_water_cow': avg_water_cow,
+                'total_ltr_cow': total_ltr_cow,
+                'total_amt_cow': total_amt_cow,
+                'total_cust_cow': total_cust_cow,
+                'buffalo_summary_data': buffalo_summary_data,
+                'avg_fat_buffalo': avg_fat_buffalo,
+                'avg_snf_buffalo': avg_snf_buffalo,
+                'avg_clr_buffalo': avg_clr_buffalo,
+                'avg_water_buffalo': avg_water_buffalo,
+                'total_ltr_buffalo': total_ltr_buffalo,
+                'total_amt_buffalo': total_amt_buffalo,
+                'total_cust_buffalo': total_cust_buffalo,
             }
-        else:
-            # Default values when no data is available
-            live_data = {
-                'active_dpu_list': active_dpu_list,
-                'drec_data': [],
-                'customer_list': [],
-                'summary_data': [],
-                'avg_fat': 0,
-                'avg_snf': 0,
-                'avg_clr': 0,
-                'total_customer_count': 0,
-                'total_dpus': active_dpu_list.count(),
-                'top_10_latest_records': [],
-            }
-        return live_data
+            return live_data
 
+    @lru_cache(maxsize=None)
     def get_active_dpu_list(self, user):
         queryset = DPU.objects.filter(user=user) if (user.is_staff or user.is_superuser) else DPU.objects.filter(dpu_user=user.id)
         return queryset.select_related('user')
 
+    @lru_cache(maxsize=None)
     def get_all_drec_data(self, user):
         drec_filter = {'ST_ID__user': user} if (user.is_staff or user.is_superuser) else {'ST_ID__dpu_user': user.id}
         return DREC.objects.filter(**drec_filter).order_by('-created_at').select_related('ST_ID__user')
@@ -212,8 +226,7 @@ class DashboardView(TemplateView):
         page_number = request.GET.get('page')
         return paginator.get_page(page_number)
 
-    def get_customer_list(self, drec_data):
-        drec_data_cust_ids = set(record.CUST_ID for record in drec_data)
+    def get_customer_list(self, drec_data_cust_ids):
         return CustomerList.objects.filter(cust_id__in=drec_data_cust_ids)
 
     def calculate_global_averages(self, user):
@@ -222,20 +235,29 @@ class DashboardView(TemplateView):
         avg_snf = DREC.objects.filter(**drec_filter).aggregate(avg_snf=Avg('SNF'))['avg_snf']
         avg_clr = DREC.objects.filter(**drec_filter).aggregate(avg_clr=Avg('CLR'))['avg_clr']
         return (
-            round(avg_fat, 1) if avg_fat is not None else 0,
-            round(avg_snf, 1) if avg_snf is not None else 0,
-            round(avg_clr, 1) if avg_clr is not None else 0
+            round(avg_fat, 1) if avg_fat is not None else None,
+            round(avg_snf, 1) if avg_snf is not None else None,
+            round(avg_clr, 1) if avg_clr is not None else None
         )
 
     def calculate_total_customer_count(self, active_dpu_list):
         if not active_dpu_list.exists():
             return 0
         queryset = CustomerList.objects.filter(st_id__in=active_dpu_list.values_list('st_id', flat=True).distinct())
-        return queryset.count()
+        return queryset.count() if (active_dpu_list.first().user.is_staff or active_dpu_list.first().user.is_superuser) else queryset.filter(st_id=active_dpu_list.first().st_id).count()
 
     def get_top_10_latest_records(self, user, st_id):
-        drec_filter = {'ST_ID__user': user} if (user.is_staff or user.is_superuser) else {'ST_ID__dpu_user': user.id}
-        return DREC.objects.filter(**drec_filter).order_by('-RecordingDate', '-SHIFT')[:10]
+        queryset = DREC.objects.filter(ST_ID__user=user) if (user.is_staff or user.is_superuser) else DREC.objects.filter(ST_ID__dpu_user=user.id)
+        return queryset.order_by('-RecordingDate', '-SHIFT')[:10]
+
+    def get_recording_dates(self, user_id):
+        return DREC.objects.filter(ST_ID__user=user_id).values_list('RecordingDate', flat=True).distinct()
+
+    def prepare_and_calculate_summary_data(self, drec_data, active_dpu_list, m_type):
+        filtered_records = [record for record in drec_data if record.MType == m_type]
+        summary_data = self.prepare_summary_data(filtered_records, active_dpu_list)
+        averages = self.calculate_averages(filtered_records)
+        return summary_data, *averages
 
     def prepare_summary_data(self, drec_data, active_dpu_list):
         grouped_data = defaultdict(list)
@@ -560,13 +582,13 @@ class DRECViewSet(viewsets.ModelViewSet):
             print("Single data received")
             print(request.data)
 
-            slip_type = request.data.get("SLIP_TYPE")
 
-            if slip_type in ["2", "4", "6"] :
+            if request.data.get("SLIP_TYPE") in ["2", "4", "6", "9"] and request.data.get("FlagEdited") == '1':
                 print("###############\n\n\nFound Edited Data")
                 linked_records = DREC.objects.filter(
                     ST_ID=request.data.get("ST_ID"),
-                    CUST_ID=request.data.get("CUST_ID"),
+                    RecordingDate=request.data.get("RecordingDate"),
+                    SHIFT=request.data.get("SHIFT"),
                     CSR_NO=request.data.get("CSR_NO")
                 )
                 print(linked_records.count())
@@ -618,13 +640,13 @@ class DRECViewSet(viewsets.ModelViewSet):
                 else:
                     print("Duplicate data found, total matched rows: ", linked_records.count())
 
-            elif slip_type == "9":
+            elif request.data.get("SLIP_TYPE") == "9" and request.data.get("FlagEdited") == '2':
                 linked_records = DREC.objects.filter(
                     ST_ID=request.data.get("ST_ID"),
                     CUST_ID=request.data.get("CUST_ID"),
                     RecordingTime=request.data.get("RecordingTime"),
                     RecordingDate=request.data.get("RecordingDate"),
-                    RID=request.data.get("RID")
+                    CSR_NO=request.data.get("CSR_NO")
                 )
                 if linked_records.count() == 1:
                     old_drec_obj = OldDrecDataDeleted(
@@ -1774,3 +1796,22 @@ def old_drec_data_deleted_list(request):
         record.CustomerName = customer_map.get(record.CUST_ID, 'Unknown Customer')
 
     return render(request, 'common/old_drec_data_deleted_list.html', {'records': records})
+
+
+@login_required
+def localsells(request):
+    user = request.user
+    if user.is_staff or user.is_superuser:
+        localsells = LocalSell.objects.all()
+    else:
+        localsells = localsells.objects.filter(user=user)  # Filter records based on user
+
+    return render(request, 'common/local_sell.html', {'localsells': localsells})
+
+@login_required
+def customer_list_all(request):
+    user = request.user
+    customers_all = CustomerList.objects.filter(user=user)
+    customers_all = customers_all.order_by('-id')  # Order by ID or another field that makes sense
+
+    return render(request, 'common/customer_list_all.html', {'customers_all': customers_all})

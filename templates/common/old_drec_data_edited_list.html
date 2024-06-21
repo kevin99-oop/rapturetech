@@ -92,9 +92,21 @@
                         <th>Recording Date</th>
                         <th>Recording Time</th>
                         <th>SHIFT</th>
+                        {% if 'FAT' in st_id.check_options and 'SNF' in st_id.check_options %}
+                        <th>CLR</th>
+                        {% endif %}
+                        {% if 'FAT' in st_id.check_options and 'CLR' in st_id.check_options %}
+                        <th>SNF</th>
+                        {% endif %}
+                        {% if 'FAT' in st_id.check_options and 'SNF' in st_id.check_options and 'CLR' in st_id.check_options %}
                         <th>FAT</th>
                         <th>SNF</th>
                         <th>CLR</th>
+                        {% else %}
+                        <th>FAT</th>
+                        <th>SNF</th>
+                        <th>CLR</th>
+                        {% endif %}
                         <th>WATER</th>
                         <th>QT</th>
                         <th>RATE</th>
@@ -104,7 +116,7 @@
                     </tr>
                 </thead>
                 <tbody class="fw-bold">
-                    {% for record in records %}
+                    {% for record in records reversed%}
                     <tr>
                         <td>{{ record.ST_ID }}</td>
                         <td>{{ record.CUST_ID }}</td>
@@ -112,9 +124,9 @@
                         <td>{{ record.RecordingDate|date:"d-m-Y"  }}</td>
                         <td>{{ record.RecordingTime }}</td>
                         <td>{{ record.SHIFT }}</td>
-                        <td>{{ record.FAT }}</td>
-                        <td>{{ record.SNF }}</td>
-                        <td>{{ record.CLR }}</td>
+                        <td>{% if record.FAT == 0.0 %}-{% else %}{{ record.FAT }}{% endif %}</td>
+                        <td>{% if record.SNF == 0.0 %}-{% else %}{{ record.SNF }}{% endif %}</td>
+                        <td>{% if record.CLR == 0.0 %}-{% else %}{{ record.CLR }}{% endif %}</td>
                         <td>{{ record.WATER }}</td>
                         <td>{{ record.QT }}</td>
                         <td>{{ record.RATE }}</td>

@@ -142,9 +142,15 @@
                         <div class="d-flex justify-content-between">
                             <h6 class="me-2 mt-2 fw-bold">Summary Table</h6>
                             <div class="float-end  mb-2 ">
-                                <button class="btn btn-primary rounded btn-sm me-2 fw-bold" onclick="exportToCsvAndPdf(['summaryTable_report', 'detailTable_report'], 'shift_report', 'csv')"><i class="icon-download me-2 mb-1"></i>CSV</button>
-                                <button class="btn btn-primary rounded btn-sm fw-bold " onclick="exportToCsvAndPdf(['summaryTable_report', 'detailTable_report'], 'shift_report', 'pdf')"><i class="icon-download me-2 mb-1"></i>PDF</button>
-    
+                                <button class="btn btn-primary rounded btn-sm me-2 fw-bold" 
+                                onclick="exportToCsvAndPdf(['summaryTable_report', 'detailTable_report'], 'shift_report', 'csv', 'ledger', '2024-01-01', '2024-01-31')">
+                            <i class="icon-download me-2 mb-1"></i>CSV
+                        </button>
+                        <button class="btn btn-primary rounded btn-sm fw-bold" 
+                                onclick="exportToCsvAndPdf(['summaryTable_report', 'detailTable_report'], 'shift_report', 'pdf', 'ledger', '2024-01-01', '2024-01-31')">
+                            <i class="icon-download me-2 mb-1"></i>PDF
+                        </button>
+                            
                             </div>                    </div>
                     <div class="table-responsive card-body">
                         {% if summary_data %}
@@ -161,9 +167,21 @@
                                     <th>Society</th>
                                     <th>Date</th>
                                     <th>Shift</th>
-                                    <th>Avg.FAT</th>
-                                    <th>Avg.SNF</th>
-                                    <th>Avg.CLR</th>  
+                                    {% if 'FAT' in st_id.check_options and 'SNF' in st_id.check_options %}
+                                    <th>Avg. CLR</th>
+                                    {% endif %}
+                                    {% if 'FAT' in st_id.check_options and 'CLR' in st_id.check_options %}
+                                    <th>Avg. SNF</th>
+                                    {% endif %}
+                                    {% if 'FAT' in st_id.check_options and 'SNF' in st_id.check_options and 'CLR' in st_id.check_options %}
+                                    <th>Avg. FAT</th>
+                                    <th>Avg. SNF</th>
+                                    <th>Avg. CLR</th>
+                                    {% else %}
+                                    <th>Avg. FAT</th>
+                                    <th>Avg. SNF</th>
+                                    <th>Avg. CLR</th>
+                                    {% endif %}      
                                     <th>Total Qty.</th>
                                     <th>Total Amount</th>
                                     <th>Total Customer</th>
@@ -176,18 +194,20 @@
                                     <td>{{ selected_society }}</td>
                                     <td>{{ selected_start_date}}</td>
                                     <td>{{ selected_shift }}</td>
-                                    <td>{{ summary_data.AvgFAT }}</td>
-                                    <td>{{ summary_data.AvgSNF }}</td>
-                                    <td>{{ summary_data.AvgCLR }}</td>  
+                                    <td>{% if summary_data.AvgFAT == 0.0 %}-{% else %}{{ summary_data.AvgFAT }}{% endif %}</td>
+                                    <td>{% if summary_data.AvgSNF == 0.0 %}-{% else %}{{ summary_data.AvgSNF }}{% endif %}</td>
+                                    <td>{% if summary_data.AvgCLR == 0.0 %}-{% else %}{{ summary_data.AvgCLR }}{% endif %}</td>                                    
                                     <td>{{ summary_data.TotalQT }} </td>
                                     <td> {{ summary_data.TotalAmount }}</td>
                                     <td>{{ summary_data.TotalCustomer }}</td>
                                 </tr>  
                                 <tr class="align-items-center text-center">
                                     <td colspan="5"> Cow Summary</td>
+                                    
                                     <td>{{ cow_summary_data.AvgFAT }}</td>
                                     <td>{{ cow_summary_data.AvgSNF }}</td>
                                     <td>{{ cow_summary_data.AvgCLR }}</td>
+
                                     <td>{{ cow_summary_data.TotalLtr }} </td>
                                     <td> {{ cow_summary_data.TotalAmt }}</td>
                                     <td>{{ cow_summary_data.TotalCust }}</td>
@@ -220,11 +240,11 @@
                 <div class="card-header pb-0 p-3">
                     <div class="d-flex justify-content-between">
                         <h6 class="me-2 mt-2 fw-bold">Detail Table</h6>
-                        <div class="float-end  mb-2 ">
+                        <!-- <div class="float-end  mb-2 ">
                             <button class="btn btn-primary rounded btn-sm me-2 fw-bold" onclick="exportToCsvAndPdf(['summaryTable_report', 'detailTable_report'], 'shift_report', 'csv')"><i class="icon-download me-2 mb-1"></i>CSV</button>
                             <button class="btn btn-primary rounded btn-sm fw-bold " onclick="exportToCsvAndPdf(['summaryTable_report', 'detailTable_report'], 'shift_report', 'pdf')"><i class="icon-download me-2 mb-1"></i>PDF</button>
 
-                        </div>
+                        </div> -->
                     </div>
                 </div>
                 <div class="table-responsive card-body">
@@ -238,9 +258,21 @@
                                 <th>CUST_ID</th>
                                 <th>Customer Name</th>  <!-- Add the header for Customer Name -->
                                 <th>MType</th>
-                                <th>FAT</th>
-                                <th>SNF</th>
-                                <th>CLR</th>
+                                {% if 'FAT' in st_id.check_options and 'SNF' in st_id.check_options %}
+                                <th>Avg. CLR</th>
+                                {% endif %}
+                                {% if 'FAT' in st_id.check_options and 'CLR' in st_id.check_options %}
+                                <th>Avg. SNF</th>
+                                {% endif %}
+                                {% if 'FAT' in st_id.check_options and 'SNF' in st_id.check_options and 'CLR' in st_id.check_options %}
+                                <th>Avg. FAT</th>
+                                <th>Avg. SNF</th>
+                                <th>Avg. CLR</th>
+                                {% else %}
+                                <th>Avg. FAT</th>
+                                <th>Avg. SNF</th>
+                                <th>Avg. CLR</th>
+                                {% endif %}      
                                 <th>WATER</th>
                                 <th>Quantity</th>
                                 <th>RATE</th>
@@ -254,11 +286,12 @@
                                     <td>{{ record.CUST_ID }}</td>
                                     <td>{{ record.CustomerName }}</td> <!-- Use the CustomerName here -->
                                     <td>{{ record.MType }}</td>
-                                    <td>{{ record.FAT }}</td>
-                                    <td>{{ record.SNF }}</td>
-                                    <td>{{ record.CLR }}</td>
+                                    <td>{% if record.FAT == 0.0 %}-{% else %}{{ record.FAT }}{% endif %}</td>
+                                    <td>{% if record.SNF == 0.0 %}-{% else %}{{ record.SNF }}{% endif %}</td>
+                                    <td>{% if record.CLR == 0.0 %}-{% else %}{{ record.CLR }}{% endif %}</td>
+
                                     <td>{{ record.WATER }}</td>
-                                    <td>{{ record.QT }} ltr</td>
+                                    <td>{{ record.QT }}</td>
                                     <td>{{ record.RATE }}</td>
                                     <td>{{ record.Amount }}</td>
                                     <td>{{ record.CAmount }}</td>
@@ -281,20 +314,70 @@
 
 <!-- Existing JavaScript for exporting and DataTable initialization -->
 <script>
-    function exportToCsvAndPdf(tableIds, fileNamePrefix, format) {
-        const username = '{{ user.username }}';
-        
-        const csvData = [];
-        const pdf = new jsPDF({
-                    orientation: 'landscape',
-                    format: 'a4',
-                });
+function exportToCsvAndPdf(tableIds, fileNamePrefix, format, reportType = '', startDate = '', endDate = '') {
+    var username = '{{ user.username }}';
+    var pdf = new jsPDF('landscape'); // Landscape orientation for tables
+    let csvData = [];
+    var tables = document.querySelectorAll("table");
 
-        tableIds.forEach((tableId, index) => {
-            const table = document.getElementById(tableId);
+    // Set the initial vertical offset for the PDF export
+    let verticalOffset = 20;
+    let isFirstPage = true; // Flag to track if it's the first page
+
+    // Define styles for PDF
+    const styles = {
+        header: {
+            fontSize: 18,
+            bold: true,
+            color: '#333',
+            marginBottom: 10,
+            alignment: 'center'
+        },
+        tableHeader: {
+            bold: true,
+            fontSize: 12,
+            textColor: '#333',
+            fillColor: '#f2f2f2'
+        },
+        tableBody: {
+            fontSize: 12,
+            textColor: '#333'
+        },
+        pageNumber: {
+            fontSize: 10,
+            textColor: '#333',
+            alignment: 'center'
+        },
+        alternateRow: {
+            fillColor: '#f9f9f9'
+        }
+    };
+
+    // Function to add page numbers
+    function addPageNumbers(pdf) {
+        const pageCount = pdf.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            pdf.setPage(i);
+            pdf.setFontSize(styles.pageNumber.fontSize);
+            pdf.text(`Page ${i} of ${pageCount}`, pdf.internal.pageSize.width / 2, pdf.internal.pageSize.height - 10, { align: 'center' });
+        }
+    }
+
+    // Iterate over each table
+    tables.forEach(function (table, index) {
+        // Check if the current table id is included in the list of tableIds
+        if (tableIds.includes(table.id)) {
+            // Add label for the table
+            let label = '';
+            if (table.id === 'summaryTable_report') {
+                label = 'Summary Table'; // Label for summary table
+            } else if (table.id === 'detailTable_report') {
+                label = 'Detail Table'; // Label for detail table
+            }
+
+            // Generate CSV data
             const rows = table.querySelectorAll('tr');
             const tableData = [];
-
             rows.forEach((row) => {
                 const rowData = [];
                 const cells = row.querySelectorAll('td, th');
@@ -303,28 +386,79 @@
                 });
                 tableData.push(rowData.join(','));
             });
-
             csvData.push(tableData.join('\n'));
 
-          
+            // Generate PDF
+            if (format === 'pdf') {
+                // Add header only on the first page
+                if (isFirstPage) {
+                    let mainHeader = '';
+                    if (reportType === 'ledger') {
+                        mainHeader = `Ledger Report from ${startDate} to ${endDate}`; // Header with start_date and end_date for ledger
+                    } else if (reportType === 'payment') {
+                        mainHeader = `Payment Ledger Report from ${startDate} to ${endDate}`; // Header with start_date and end_date for payment
+                    } else {
+                        mainHeader = `Report from ${startDate} to ${endDate}`; // Generic header
+                    }
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(styles.header.fontSize);
+                    pdf.setTextColor(styles.header.color);
+                    pdf.text(mainHeader, pdf.internal.pageSize.width / 2, verticalOffset, { align: 'center' });
+                    verticalOffset += 20; // Adjust vertical offset after adding header
+                    isFirstPage = false; // Set flag to false after adding header
+                }
 
-            pdf.autoTable({ html: `#${tableId}` });
-        });
+                // Add label for the table
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(styles.header.fontSize);
+                pdf.setTextColor(styles.header.color);
+                pdf.text(label, pdf.internal.pageSize.width / 2, verticalOffset, { align: 'center' });
 
-        const fullFileName = `${username}_${fileNamePrefix}`;
+                // Add table content
+                const tableElement = table.cloneNode(true); // Clone the table element to avoid modifying the original
 
-        if (format === 'csv') {
-            const csvBlob = new Blob([csvData.join('\n')], { type: 'text/csv' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(csvBlob);
-            link.download = `${fullFileName}.csv`;
-            link.click();
-        } else if (format === 'pdf') {
-            pdf.save(`${fullFileName}.pdf`);
+                pdf.autoTable({
+                    html: tableElement,
+                    startY: verticalOffset + 10,
+                    theme: 'grid',
+                    headStyles: styles.tableHeader,
+                    bodyStyles: styles.tableBody,
+                    alternateRowStyles: styles.alternateRow,
+                    styles: { overflow: 'linebreak', cellPadding: 2, halign: 'center' },
+                    columnStyles: { 0: { cellWidth: 'auto' } }
+                });
+
+                // Check if we need to add a new page after two tables
+                if (index % 2 === 1 && index !== tables.length - 1) {
+                    pdf.addPage();
+                    verticalOffset = 20; // Reset vertical offset for the new page
+                    isFirstPage = true; // Reset flag for the new page
+                } else {
+                    verticalOffset = pdf.autoTable.previous.finalY + 30; // Update vertical offset for the next table
+                }
+            }
         }
+    });
+
+    // Add page numbers at the end
+    if (format === 'pdf') {
+        addPageNumbers(pdf);
     }
 
+    // Generate and download CSV
+    if (format === 'csv') {
+        const csvBlob = new Blob([csvData.join('\n')], { type: 'text/csv' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(csvBlob);
+        link.download = `${username}_${fileNamePrefix}.csv`;
+        link.click();
+    }
 
+    // Save PDF
+    if (format === 'pdf') {
+        pdf.save(`${username}_${fileNamePrefix}.pdf`);
+    }
+}
     </script>
 <!-- AJAX script to update dependent dropdowns -->
 <script>
