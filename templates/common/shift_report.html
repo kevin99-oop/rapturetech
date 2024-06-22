@@ -30,7 +30,7 @@
                     <div class="card-body p-3">
                         <div class="numbers">
                            
-                            <form method="post" action="{% url 'shift_report' %}" >
+                            <form method="post" action="{% url 'shift_report' %}"  >
                                 {% csrf_token %}                            
                                                 <!-- Dropdowns for selecting filters -->
                                         <label for="location" class="text-sm mb-0 text-uppercase fw-bold">Root</label>
@@ -140,7 +140,7 @@
                 <div class="card rounded">
                     <div class="card-header pb-0 p-3">
                         <div class="d-flex justify-content-between">
-                            <h6 class="me-2 mt-2 fw-bold">Summary Table</h6>
+                            <h6 class="me-2 mt-2 fw-bold">Summary</h6>
                             <div class="float-end  mb-2 ">
                                 <button class="btn btn-primary rounded btn-sm me-2 fw-bold" 
                                 onclick="exportToCsvAndPdf(['summaryTable_report', 'detailTable_report'], 'shift_report', 'csv', 'ledger', '2024-01-01', '2024-01-31')">
@@ -155,7 +155,7 @@
                     <div class="table-responsive card-body">
                         {% if summary_data %}
                         <!-- Table 1: Summary Data -->
-                        <table id="summaryTable_report" class="table align-items-center  table-rwd text-center table table-striped table-hover rounded table-responsive w-100 "    
+                        <table id="summaryTable_report" class="table align-items-center text-center  table-hover rounded table-responsive table-responsive-stack border-2 border-dark"    
                         data-toggle="table"
                         data-pagination="true"
                         data-auto-refresh="true"
@@ -250,7 +250,7 @@
                 <div class="table-responsive card-body">
                     {% if detail_data %}                
                     <!-- Table 1: Summary Data -->
-                    <table id="detailTable_report" class="table align-items-center text-center table table-striped table-hover rounded table-responsive w-100"data-toggle="table"
+                    <table id="detailTable_report" class="table align-items-center text-center  table-hover rounded table-responsive table-responsive-stack border-2 border-dark"data-toggle="table"
                     data-pagination="false"
                     data-auto-refresh="true">
                         <thead class="text-white text-center rounded table-title">
@@ -370,9 +370,9 @@ function exportToCsvAndPdf(tableIds, fileNamePrefix, format, reportType = '', st
             // Add label for the table
             let label = '';
             if (table.id === 'summaryTable_report') {
-                label = 'Summary Table'; // Label for summary table
+                label = 'Summary '; // Label for summary table
             } else if (table.id === 'detailTable_report') {
-                label = 'Detail Table'; // Label for detail table
+                label = 'Detail'; // Label for detail table
             }
 
             // Generate CSV data
@@ -394,11 +394,11 @@ function exportToCsvAndPdf(tableIds, fileNamePrefix, format, reportType = '', st
                 if (isFirstPage) {
                     let mainHeader = '';
                     if (reportType === 'ledger') {
-                        mainHeader = `Ledger Report from ${startDate} to ${endDate}`; // Header with start_date and end_date for ledger
+                        mainHeader = `Shift Report `; // Header with start_date and end_date for ledger
                     } else if (reportType === 'payment') {
-                        mainHeader = `Payment Ledger Report from ${startDate} to ${endDate}`; // Header with start_date and end_date for payment
+                        mainHeader = ``; // Header with start_date and end_date for payment
                     } else {
-                        mainHeader = `Report from ${startDate} to ${endDate}`; // Generic header
+                        mainHeader = `Shift Report`; // Generic header
                     }
                     pdf.setFont('helvetica', 'bold');
                     pdf.setFontSize(styles.header.fontSize);

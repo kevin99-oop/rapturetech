@@ -118,6 +118,7 @@ def custom_login(request):
     if request.method == "POST":
         username = request.POST.get('username')
         password = request.POST.get('password')
+        
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
@@ -321,14 +322,13 @@ class FetchDRECDataView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         try:
             selected_date_str = request.GET.get('selectedDate')
-            selected_shift = request.GET.get('selectedShift')  # Get selected shift
-            selected_st_id = request.GET.get('selectedStId')  # Get selected st_id
-            selected_location = request.GET.get('selectedLocation')  # Get selected location
-            selected_society = request.GET.get('selectedSociety')  # Get selected society
+            selected_shift = request.GET.get('selectedShift')
+            selected_st_ids = request.GET.get('selectedStId')
+            selected_location = request.GET.get('selectedLocation')
+            selected_society = request.GET.get('selectedSociety')
             
             selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d').date() if selected_date_str else None
             
-            # Initial filter for user
             drec_data = DREC.objects.filter(ST_ID__user=request.user)
             
             if selected_date:
@@ -340,8 +340,9 @@ class FetchDRECDataView(LoginRequiredMixin, View):
                 else:
                     drec_data = drec_data.filter(SHIFT=selected_shift)
             
-            if selected_st_id:
-                drec_data = drec_data.filter(ST_ID=selected_st_id)
+            if selected_st_ids:
+                selected_st_ids_list = selected_st_ids.split(',')
+                drec_data = drec_data.filter(ST_ID__st_id__in=selected_st_ids_list)
             
             if selected_location:
                 drec_data = drec_data.filter(ST_ID__location=selected_location)
@@ -349,22 +350,18 @@ class FetchDRECDataView(LoginRequiredMixin, View):
             if selected_society:
                 drec_data = drec_data.filter(ST_ID__society=selected_society)
 
-            # Prefetch related CustomerList objects to reduce database hits
             drec_data = drec_data.select_related('ST_ID')
 
-            # Fetch customer names using values queryset to reduce data fetched from CustomerList
             customer_names = CustomerList.objects.filter(
                 st_id__in=drec_data.values_list('ST_ID__st_id', flat=True),
                 cust_id__in=drec_data.values_list('CUST_ID', flat=True)
             ).values('st_id', 'name')
 
-            # Create a dictionary to map customer names to ST_IDs
             customer_name_map = {item['st_id']: item['name'] for item in customer_names}
 
             drec_data_list = []
 
             for drec in drec_data:
-                # Get customer name from the pre-fetched map
                 customer_name = customer_name_map.get(drec.ST_ID.st_id, 'N/A')
                 
                 drec_data_list.append({
@@ -393,7 +390,6 @@ class FetchDRECDataView(LoginRequiredMixin, View):
                     'created_at': drec.created_at.strftime('%Y-%m-%d %H:%M:%S')
                 })
 
-            # Get distinct st_id, location, and society for the dropdown filters from DPU model
             dpu_filter = {'user': request.user}
             st_ids = DPU.objects.filter(**dpu_filter).values_list('st_id', flat=True).distinct()
             locations = DPU.objects.filter(**dpu_filter).values_list('location', flat=True).distinct()
@@ -405,9 +401,9 @@ class FetchDRECDataView(LoginRequiredMixin, View):
                 'locations': list(locations),
                 'societies': list(societies)
             })
+
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
-
 
 # User Authentication Views
 class SignUpView(CreateView):
@@ -571,7 +567,6 @@ class DRECViewSet(viewsets.ModelViewSet):
     serializer_class = DRECSerializer
 
     def perform_create(self, serializer):
-        # Customize the save process here before calling the super method
         instance = serializer.save()
 
     def create(self, request, *args, **kwargs):
@@ -582,8 +577,7 @@ class DRECViewSet(viewsets.ModelViewSet):
             print("Single data received")
             print(request.data)
 
-
-            if request.data.get("SLIP_TYPE") in ["2", "4", "6", "9"] and request.data.get("FlagEdited") == '1':
+            if request.data.get("SLIP_TYPE") in ["2", "4", "6"]:
                 print("###############\n\n\nFound Edited Data")
                 linked_records = DREC.objects.filter(
                     ST_ID=request.data.get("ST_ID"),
@@ -599,6 +593,7 @@ class DRECViewSet(viewsets.ModelViewSet):
                         REC_TYPE=linked_records[0].REC_TYPE,
                         SLIP_TYPE=linked_records[0].SLIP_TYPE,
                         CUST_ID=linked_records[0].CUST_ID,
+                        FlagEdited=linked_records[0].FlagEdited,
                         TotalFileRecord=linked_records[0].TotalFileRecord,
                         MType=linked_records[0].MType,
                         RecordingDate=linked_records[0].RecordingDate,
@@ -639,76 +634,71 @@ class DRECViewSet(viewsets.ModelViewSet):
                         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     print("Duplicate data found, total matched rows: ", linked_records.count())
+                    return Response({"detail": "Duplicate data found, total matched rows: " + str(linked_records.count())}, status=status.HTTP_400_BAD_REQUEST)
 
-            elif request.data.get("SLIP_TYPE") == "9" and request.data.get("FlagEdited") == '2':
-                linked_records = DREC.objects.filter(
-                    ST_ID=request.data.get("ST_ID"),
-                    CUST_ID=request.data.get("CUST_ID"),
-                    RecordingTime=request.data.get("RecordingTime"),
-                    RecordingDate=request.data.get("RecordingDate"),
-                    CSR_NO=request.data.get("CSR_NO")
-                )
-                if linked_records.count() == 1:
-                    old_drec_obj = OldDrecDataDeleted(
-                        new_drec=linked_records[0].id,
-                        ST_ID=linked_records[0].ST_ID.st_id,
-                        REC_TYPE=linked_records[0].REC_TYPE,
-                        SLIP_TYPE=linked_records[0].SLIP_TYPE,
-                        CUST_ID=linked_records[0].CUST_ID,
-                        TotalFileRecord=linked_records[0].TotalFileRecord,
-                        MType=linked_records[0].MType,
-                        RecordingDate=linked_records[0].RecordingDate,
-                        RecordingTime=linked_records[0].RecordingTime,
-                        SHIFT=linked_records[0].SHIFT,
-                        FAT=linked_records[0].FAT,
-                        FAT_UNIT=linked_records[0].FAT_UNIT,
-                        SNF=linked_records[0].SNF,
-                        SNF_UNIT=linked_records[0].SNF_UNIT,
-                        CLR=linked_records[0].CLR,
-                        CLR_UNIT=linked_records[0].CLR_UNIT,
-                        WATER=linked_records[0].WATER,
-                        WATER_UNIT=linked_records[0].WATER_UNIT,
-                        QT=linked_records[0].QT,
-                        QT_UNIT=linked_records[0].QT_UNIT,
-                        RATE=linked_records[0].RATE,
-                        Amount=linked_records[0].Amount,
-                        CAmount=linked_records[0].CAmount,
-                        CSR_NO=linked_records[0].CSR_NO,
-                        CREV=linked_records[0].CREV,
-                        END_TAG=linked_records[0].END_TAG,
-                        dpuid=linked_records[0].dpuid,
-                        RID=linked_records[0].RID
+            elif request.data.get("SLIP_TYPE") == "9":
+                try:
+                    linked_records = DREC.objects.filter(
+                        ST_ID=request.data.get("ST_ID"),
+                        CUST_ID=request.data.get("CUST_ID"),
+                        RecordingTime=request.data.get("RecordingTime"),
+                        RecordingDate=request.data.get("RecordingDate"),
+                        CSR_NO=request.data.get("CSR_NO")
                     )
-                    old_drec_obj.save()
+                    if linked_records.count() == 1:
+                        linked_record = linked_records.first()
+                        old_drec_obj = OldDrecDataDeleted(
+                            new_drec=linked_record.id,
+                            ST_ID=linked_record.ST_ID.st_id,
+                            REC_TYPE=linked_record.REC_TYPE,
+                            SLIP_TYPE=linked_record.SLIP_TYPE,
+                            CUST_ID=linked_record.CUST_ID,
+                            FlagEdited=linked_record.FlagEdited,
+                            TotalFileRecord=linked_record.TotalFileRecord,
+                            MType=linked_record.MType,
+                            RecordingDate=linked_record.RecordingDate,
+                            RecordingTime=linked_record.RecordingTime,
+                            SHIFT=linked_record.SHIFT,
+                            FAT=linked_record.FAT,
+                            FAT_UNIT=linked_record.FAT_UNIT,
+                            SNF=linked_record.SNF,
+                            SNF_UNIT=linked_record.SNF_UNIT,
+                            CLR=linked_record.CLR,
+                            CLR_UNIT=linked_record.CLR_UNIT,
+                            WATER=linked_record.WATER,
+                            WATER_UNIT=linked_record.WATER_UNIT,
+                            QT=linked_record.QT,
+                            QT_UNIT=linked_record.QT_UNIT,
+                            RATE=linked_record.RATE,
+                            Amount=linked_record.Amount,
+                            CAmount=linked_record.CAmount,
+                            CSR_NO=linked_record.CSR_NO,
+                            CREV=linked_record.CREV,
+                            END_TAG=linked_record.END_TAG,
+                            dpuid=linked_record.dpuid,
+                            RID=linked_record.RID
+                        )
+                        old_drec_obj.save()
 
-                    linked_records.delete()
-                    print("#######################\n\n Deleted Data saved")
-                    return Response({"detail": "Record deleted and saved to OldDrecDataDeleted"}, status=status.HTTP_200_OK)
-                else:
-                    print("Duplicate data found, total matched rows: ", linked_records.count())
+                        linked_record.delete()
+                        print("#######################\n\n Deleted Data saved")
+                        return Response({"detail": "Record deleted and saved to OldDrecDataDeleted"}, status=status.HTTP_200_OK)
+                    else:
+                        print("Duplicate data found, total matched rows: ", linked_records.count())
+                        return Response({"detail": "Unable to Delete Drec, match not found"}, status=status.HTTP_400_BAD_REQUEST)
+                except Exception as e:
+                    print(str(e))
+                    return Response({"detail": "Error occurred while processing the request"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            serializer = self.get_serializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                print("saved obj id: ", serializer.data.get("id"))
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            print("saved obj id: ", serializer.data.get("id"))
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def save(self, *args, **kwargs):
-        for field in self._meta.fields:
-            value = getattr(self, field.name)
-            if value is None:
-                setattr(self, field.name, "null")
 
-        if self.dpuid:
-            self.dpuid = self.dpuid.st_id
 
-        super().save(*args, **kwargs)
 
 
 class NtpDatetimeView(View):
