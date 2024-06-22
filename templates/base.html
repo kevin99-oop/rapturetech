@@ -22,9 +22,8 @@
   <link rel="stylesheet" href="{% static 'assets/new/vendors/css/vendor.bundle.base.css'%}" as="style">
   <!-- End preload -->
 <!-- Bootstrap CSS -->
+<!-- Bootstrap CSS -->
 
-<!-- Bootstrap Bundle with Popper -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0/js/bootstrap.bundle.min.js"></script>
 
   <!-- Plugin css for this page -->
   <link rel="stylesheet" href="{% static 'assets/new/js/select.dataTables.min.css'%}">
@@ -223,11 +222,199 @@ body {
 <body>
   <div class="container-scroller">
     <!-- Include the navbar -->
-    {% include 'partials/_navbar.html' %}
-    <div class="container-fluid page-body-wrapper rounded">
+    <nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex align-items-top flex-row rounded">
+      <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
+        <div class="me-3">
+          <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-bs-toggle="minimize">
+            <span class="icon-menu"></span>
+          </button>
+        </div>
+        <div>
+          <a class="navbar-brand brand-logo" href="{% url 'dashboard' %}">
+            <img src="{% static 'home/assets/img/logo1.png'%}" alt="logo" />
+          </a>
+          <a class="navbar-brand brand-logo-mini" href="{% url 'dashboard' %}">
+            <img src="{% static 'home/assets/img/logo1.png'%}" alt="logo" />
+          </a>
+        </div>
+      </div>
+      <div class="navbar-menu-wrapper d-flex align-items-top">
+        <ul class="navbar-nav">
+          <li class="nav-item font-weight-semibold d-none d-lg-block ms-0">
+            <h3 class="welcome">Hello, {{ user.username }} </h3>
+          </li>
+        </ul>
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item dropdown d-none d-lg-block">
+            Time:- <span id="clock" class="fw-bold text-danger"></span>
+          </li>
+          <li class="nav-item d-none d-lg-block">
+            <div class="input-group date datepicker navbar-date-picker">
+              <span class="input-group-addon input-group-prepend border-right">
+                <span class="icon-calendar input-group-text calendar-icon"></span>
+              </span>
+              <input type="text" id="dateInput" class="form-control fw-bold text-danger" readonly>
+            </div>
+          </li>
+          <li class="nav-item">
+            <div class="nav-link text-dark" id="google_translate_element">
+              <div class="icon icon-shape icon-sm border-radius-md text-center me-2 mb-3 d-flex align-items-center justify-content-center"></div>
+            </div>
+          </li>
+          <li class="nav-item dropdown user-dropdown">
+            <a class="nav-link" id="UserDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="mdi mdi-account cursor-pointer"></i><i class="mdi mdi-chevron-down"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown">
+              <div class="dropdown-header text-">
+                <p class="mb-1 font-weight-semibold">Username: {{ user.username }}</p>
+              </div>
+              <a class="dropdown-item fw-6" href="{% url 'profile' %}">
+                <i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2 "></i> My Profile
+              </a>
+              {% if request.user.is_staff or request.user.is_superuser %}
+              <a class="dropdown-item fw-6" href="{% url 'change-password' %}">
+                <i class="dropdown-item-icon mdi mdi-lock-open text-primary me-2"></i> Change Password
+              </a>
+              {% endif %}
+              <a class="dropdown-item fw-6" href="{% url 'logout' %}">
+                <i class="dropdown-item-icon mdi mdi-power text-primary me-2"></i> Sign Out
+              </a>
+            </div>
+          </li>
+        </ul>
+        <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-bs-toggle="offcanvas">
+          <span class="mdi mdi-menu"></span>
+        </button>
+      </div>
+    </nav>
+        <div class="container-fluid page-body-wrapper rounded">
       <!-- Include the sidebar -->
-      {% include 'partials/_sidebar.html' %}
-      <div class="container-fluid main-panel rounded">
+<!-- partial:partials/_sidebar.html -->
+<nav class="sidebar sidebar-offcanvas rounded" id="sidebar">
+  <ul class="nav">
+      <li class="nav-item">
+          <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}" href="{% url 'dashboard' %}">
+              <i class="mdi mdi-view-dashboard mdi-grid-large menu-icon"></i>
+              <span class="menu-title fw-bold">Dashboard</span>
+          </a>
+      </li>
+      <li class="nav-item nav-category">Reports</li>
+      <li class="nav-item">
+          <a class="nav-link {% if request.path == '/shift_report/' or request.path == '/ledger/' %}active{% endif %}" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false">
+              <i class="menu-icon mdi mdi-file-check"></i>
+              <span class="menu-title fw-bold">Reports</span>
+              <i class="menu-arrow"></i>
+          </a>
+          <div class="collapse" id="ui-basic">
+              <ul class="nav flex-column sub-menu">
+                  <li class="nav-item">
+                      <a class="nav-link fw-bold" href="{% url 'shift_report' %}">Shift Report</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link fw-bold" href="{% url 'ledger_report' %}">Ledger</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link fw-bold text-success" href="{% url 'old_drec_data_edited_list' %}">Edited Record</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link fw-bold text-danger" href="{% url 'old_drec_data_deleted_list' %}">Deleted Record</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link fw-bold text-primary" href="{% url 'localsells' %}">Local Sell</a>
+                  </li>
+
+              </ul>
+          </div>
+      </li>
+      <li class="nav-item nav-category">Service</li>
+      <li class="nav-item">
+          <a class="nav-link {% if request.path == '/add_dpu/' or request.path == '/active_dpu/' %}active{% endif %}" data-bs-toggle="collapse" href="#form-elements" aria-expanded="false" aria-controls="form-elements">
+              <i class="menu-icon mdi mdi-memory"></i>
+              <span class="menu-title fw-bold">DPU</span>
+              <i class="menu-arrow"></i>
+          </a>
+          <div class="collapse" id="form-elements">
+              <ul class="nav flex-column sub-menu">
+                  {% if request.user.is_staff or request.user.is_superuser %}
+                  <li class="nav-item">
+                      <a class="nav-link fw-bold" href="{% url 'add_dpu' %}">Add DPU</a>
+                  </li>
+                  {% endif %}
+                  <li class="nav-item">
+                      <a class="nav-link fw-bold" href="{% url 'active_dpu' %}">DPU List</a>
+                  </li>
+              </ul>
+          </div>
+      </li>
+      <li class="nav-item">
+          <a class="nav-link {% if request.path == '/upload_rate_table/' or request.path == '/rate_table_list/' %}active{% endif %}" data-bs-toggle="collapse" href="#charts" aria-expanded="false" aria-controls="charts">
+              <i class="menu-icon mdi mdi-currency-inr"></i>
+              <span class="menu-title fw-bold">Rate Table</span>
+              <i class="menu-arrow"></i>
+          </a>
+          <div class="collapse" id="charts">
+              <ul class="nav flex-column sub-menu">
+                  {% if request.user.is_staff or request.user.is_superuser %}
+                  <li class="nav-item">
+                      <a class="nav-link fw-bold" href="{% url 'upload_rate_table' %}">Rate Table Upload</a>
+                  </li>
+                  {% endif %}
+                  <li class="nav-item">
+                      <a class="nav-link fw-bold" href="{% url 'rate_table_list' %}">Rate Table List</a>
+                  </li>
+              </ul>
+          </div>
+      </li>
+      <li class="nav-item">
+          <a class="nav-link {% if request.path == '/upload_customer_csv/' %}active{% endif %}" data-bs-toggle="collapse" href="#tables" aria-expanded="false" aria-controls="tables">
+              <i class="menu-icon mdi mdi-account-multiple"></i>
+              <span class="menu-title fw-bold">Customer</span>
+              <i class="menu-arrow"></i>
+          </a>
+          <div class="collapse" id="tables">
+              <ul class="nav flex-column sub-menu">
+                  {% if request.user.is_staff or request.user.is_superuser %}
+                  <li class="nav-item">
+                      <a class="nav-link fw-bold" href="{% url 'upload_customer_csv' %}">Add Customer</a>
+                  </li>
+                  {% endif %}
+                  <li class="nav-item">
+                      <a class="nav-link fw-bold" href="{% url 'customer_list_all' %}">Customer List</a>
+                  </li>
+              </ul>
+          </div>
+      </li>
+      <li class="nav-item nav-category ">Help</li>
+      {% if request.user.is_staff or request.user.is_superuser %}
+      <li class="nav-item">
+          <a class="nav-link {% if request.path == '/admin-question/' %}active{% endif %}" href="{% url 'admin-question' %}">
+              <i class="menu-icon mdi mdi-message-text"></i>
+              <span class="menu-title fw-bold">Chat</span>
+          </a>
+      </li>
+      {% endif %}
+      {% if not request.user.is_staff and not request.user.is_superuser %}
+      <li class="nav-item">
+          <a class="nav-link {% if request.path == '/ask-question/' %}active{% endif %}" href="{% url 'ask-question' %}">
+              <i class="menu-icon mdi mdi-message-text"></i>
+              <span class="menu-title fw-bold">Support</span>
+          </a>
+      </li>
+      <li class="nav-item">
+          <a class="nav-link {% if request.path == '/question-history/' %}active{% endif %}" href="{% url 'question-history' %}">
+              <i class="menu-icon mdi mdi-message-text"></i>
+              <span class="menu-title">Chat History</span>
+              {% if has_unread_messages %}
+              <span class="badge badge-danger">New</span>
+              {% endif %}
+          </a>
+      </li>
+      {% endif %}
+  </ul>
+</nav>
+<!-- partial -->
+    <div class="container-fluid main-panel rounded">
         <main class="main-content position-relative border-radius-lg rounded">
           {% block content %} {% endblock content %}
         </main>

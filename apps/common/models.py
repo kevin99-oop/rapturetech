@@ -83,6 +83,8 @@ class DREC(models.Model):
         (5, 'Dan'),
         (6, 'Edited Dan'),
         (7, 'Deduction'),
+        (9, 'Delete'),  # Add '9' to the choices
+
     ]
 
     REC_TYPE = models.CharField(max_length=255, null=True, default=None)
@@ -119,16 +121,16 @@ class DREC(models.Model):
         ordering = ['-created_at']
     
     def get_text_color(self):
-        if self.FlagEdited == '1':
-            if self.SLIP_TYPE in [2, 4, 6] and self.created_at + timedelta(minutes=10) > timezone.now():
+        if self.created_at + timedelta(minutes=10) > timezone.now():
+            if self.SLIP_TYPE in [2, 4, 6]:
                 return 'green'
-            elif self.SLIP_TYPE == 3 and self.created_at + timedelta(minutes=10) > timezone.now():
+            elif self.SLIP_TYPE == 3:
                 return 'blue'
-            elif self.SLIP_TYPE == 5 and self.created_at + timedelta(minutes=10) > timezone.now():
+            elif self.SLIP_TYPE == 5:
                 return 'purple'
-            elif self.SLIP_TYPE == 7 and self.created_at + timedelta(minutes=10) > timezone.now():
+            elif self.SLIP_TYPE == 7:
                 return 'orange'
-        if self.FlagEdited == 'red':
+        if self.SLIP_TYPE == 9:
             return 'red'
         return ''
 
