@@ -576,7 +576,6 @@ class DRECViewSet(viewsets.ModelViewSet):
         else:  # Single data
             print("Single data received")
             print(request.data)
-
             slip_type = request.data.get("SLIP_TYPE")
             st_id = request.data.get("ST_ID")
             recording_date = request.data.get("RecordingDate")
