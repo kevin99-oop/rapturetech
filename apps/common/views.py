@@ -571,30 +571,100 @@ class DRECViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         print("create")
-        if isinstance(request.data, list):  # Check if the request data is a list
+        
+        # Handle list data
+        if isinstance(request.data, list):
             serializer = self.get_serializer(data=request.data, many=True)
-        else:  # Single data
-            print("Single data received")
-            print(request.data)
-            slip_type = request.data.get("SLIP_TYPE")
-            st_id = request.data.get("ST_ID")
-            recording_date = request.data.get("RecordingDate")
-            shift = request.data.get("SHIFT")
-            csr_no = request.data.get("CSR_NO")
-            cust_id = request.data.get("CUST_ID")
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Handle single data
+        print("Single data received")
+        print(request.data)
 
-            if slip_type in ["2", "4", "6"]:
-                print("###############\n\n\nFound Edited Data")
+        slip_type = request.data.get("SLIP_TYPE")
+        st_id = request.data.get("ST_ID")
+        recording_date = request.data.get("RecordingDate")
+        shift = request.data.get("SHIFT")
+        csr_no = request.data.get("CSR_NO")
+        cust_id = request.data.get("CUST_ID")
+
+        if slip_type in ["2", "4", "6"]:
+            print("###############\n\n\nFound Edited Data")
+            linked_records = DREC.objects.filter(
+                ST_ID=st_id,
+                RecordingDate=recording_date,
+                SHIFT=shift,
+                CSR_NO=csr_no
+            )
+            print("Linked records count:", linked_records.count())
+            if linked_records.count() == 1:
+                linked_record = linked_records.first()
+                old_drec_obj = OldDrecDataEdited(
+                    new_drec=linked_record.id,
+                    ST_ID=linked_record.ST_ID.st_id,
+                    REC_TYPE=linked_record.REC_TYPE,
+                    SLIP_TYPE=linked_record.SLIP_TYPE,
+                    CUST_ID=linked_record.CUST_ID,
+                    FlagEdited=linked_record.FlagEdited,
+                    TotalFileRecord=linked_record.TotalFileRecord,
+                    MType=linked_record.MType,
+                    RecordingDate=linked_record.RecordingDate,
+                    RecordingTime=linked_record.RecordingTime,
+                    SHIFT=linked_record.SHIFT,
+                    FAT=linked_record.FAT,
+                    FAT_UNIT=linked_record.FAT_UNIT,
+                    SNF=linked_record.SNF,
+                    SNF_UNIT=linked_record.SNF_UNIT,
+                    CLR=linked_record.CLR,
+                    CLR_UNIT=linked_record.CLR_UNIT,
+                    WATER=linked_record.WATER,
+                    WATER_UNIT=linked_record.WATER_UNIT,
+                    QT=linked_record.QT,
+                    QT_UNIT=linked_record.QT_UNIT,
+                    RATE=linked_record.RATE,
+                    Amount=linked_record.Amount,
+                    CAmount=linked_record.CAmount,
+                    CSR_NO=linked_record.CSR_NO,
+                    CREV=linked_record.CREV,
+                    END_TAG=linked_record.END_TAG,
+                    dpuid=linked_record.dpuid,
+                    RID=linked_record.RID
+                )
+                old_drec_obj.save()
+
+                linked_records.delete()
+
+                serializer = self.get_serializer(data=request.data)
+                if serializer.is_valid():
+                    instance = serializer.save()
+                    print("saved obj id: ", instance.id)
+                    old_drec_obj.new_drec = instance.id
+                    old_drec_obj.save()
+                    print("#######################\n\n Edited Data saved")
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                else:
+                    print("Validation errors:", serializer.errors)
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                print("Duplicate data found, total matched rows: ", linked_records.count())
+                return Response({"detail": "Duplicate data found, total matched rows: " + str(linked_records.count())}, status=status.HTTP_400_BAD_REQUEST)
+
+        elif slip_type == "9":
+            try:
                 linked_records = DREC.objects.filter(
                     ST_ID=st_id,
+                    CUST_ID=cust_id,
                     RecordingDate=recording_date,
-                    SHIFT=shift,
                     CSR_NO=csr_no
                 )
-                print("Linked records count:", linked_records.count())
+                print("Linked records for deletion count:", linked_records.count())
                 if linked_records.count() == 1:
                     linked_record = linked_records.first()
-                    old_drec_obj = OldDrecDataEdited(
+                    old_drec_obj = OldDrecDataDeleted(
                         new_drec=linked_record.id,
                         ST_ID=linked_record.ST_ID.st_id,
                         REC_TYPE=linked_record.REC_TYPE,
@@ -627,82 +697,24 @@ class DRECViewSet(viewsets.ModelViewSet):
                     )
                     old_drec_obj.save()
 
-                    linked_records.delete()
-
-                    serializer = self.get_serializer(data=request.data)
-                    if serializer.is_valid():
-                        serializer.save()
-                        print("saved obj id: ", serializer.data)
-                        old_drec_obj.new_drec = serializer.data.get('id')
-                        old_drec_obj.save()
-                        print("#######################\n\n Edited Data saved")
-                        return Response(serializer.data, status=status.HTTP_200_OK)
-                    else:
-                        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                    linked_record.delete()
+                    print("#######################\n\n Deleted Data saved")
+                    return Response({"detail": "Record deleted and saved to OldDrecDataDeleted"}, status=status.HTTP_200_OK)
                 else:
-                    print("Duplicate data found, total matched rows: ", linked_records.count())
-                    return Response({"detail": "Duplicate data found, total matched rows: " + str(linked_records.count())}, status=status.HTTP_400_BAD_REQUEST)
-
-            elif slip_type == "9":
-                try:
-                    linked_records = DREC.objects.filter(
-                        ST_ID=st_id,
-                        CUST_ID=cust_id,
-                        RecordingDate=recording_date,
-                        CSR_NO=csr_no
-                    )
-                    if linked_records.count() == 1:
-                        linked_record = linked_records.first()
-                        old_drec_obj = OldDrecDataDeleted(
-                            new_drec=linked_record.id,
-                            ST_ID=linked_record.ST_ID.st_id,
-                            REC_TYPE=linked_record.REC_TYPE,
-                            SLIP_TYPE=linked_record.SLIP_TYPE,
-                            CUST_ID=linked_record.CUST_ID,
-                            FlagEdited=linked_record.FlagEdited,
-                            TotalFileRecord=linked_record.TotalFileRecord,
-                            MType=linked_record.MType,
-                            RecordingDate=linked_record.RecordingDate,
-                            RecordingTime=linked_record.RecordingTime,
-                            SHIFT=linked_record.SHIFT,
-                            FAT=linked_record.FAT,
-                            FAT_UNIT=linked_record.FAT_UNIT,
-                            SNF=linked_record.SNF,
-                            SNF_UNIT=linked_record.SNF_UNIT,
-                            CLR=linked_record.CLR,
-                            CLR_UNIT=linked_record.CLR_UNIT,
-                            WATER=linked_record.WATER,
-                            WATER_UNIT=linked_record.WATER_UNIT,
-                            QT=linked_record.QT,
-                            QT_UNIT=linked_record.QT_UNIT,
-                            RATE=linked_record.RATE,
-                            Amount=linked_record.Amount,
-                            CAmount=linked_record.CAmount,
-                            CSR_NO=linked_record.CSR_NO,
-                            CREV=linked_record.CREV,
-                            END_TAG=linked_record.END_TAG,
-                            dpuid=linked_record.dpuid,
-                            RID=linked_record.RID
-                        )
-                        old_drec_obj.save()
-
-                        linked_record.delete()
-                        print("#######################\n\n Deleted Data saved")
-                        return Response({"detail": "Record deleted and saved to OldDrecDataDeleted"}, status=status.HTTP_200_OK)
-                    else:
-                        print("Unable to delete Drec, match not found, total matched rows: ", linked_records.count())
-                        return Response({"detail": "Unable to Delete Drec, match not found"}, status=status.HTTP_400_BAD_REQUEST)
-                except Exception as e:
-                    print("Exception occurred:", str(e))
-                    return Response({"detail": "Error occurred while processing the request"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    print("Unable to delete Drec, match not found, total matched rows: ", linked_records.count())
+                    return Response({"detail": "Unable to Delete Drec, match not found"}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                print("Exception occurred:", str(e))
+                return Response({"detail": "Error occurred while processing the request"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            print("saved obj id: ", serializer.data.get("id"))
+            instance = serializer.save()
+            print("saved obj id: ", instance.id)
             return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            print("Validation errors:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 
