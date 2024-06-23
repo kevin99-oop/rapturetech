@@ -576,47 +576,54 @@ class DRECViewSet(viewsets.ModelViewSet):
         else:  # Single data
             print("Single data received")
             print(request.data)
+            slip_type = request.data.get("SLIP_TYPE")
+            st_id = request.data.get("ST_ID")
+            recording_date = request.data.get("RecordingDate")
+            shift = request.data.get("SHIFT")
+            csr_no = request.data.get("CSR_NO")
+            cust_id = request.data.get("CUST_ID")
 
-            if request.data.get("SLIP_TYPE") in ["2", "4", "6"]:
+            if slip_type in ["2", "4", "6"]:
                 print("###############\n\n\nFound Edited Data")
                 linked_records = DREC.objects.filter(
-                    ST_ID=request.data.get("ST_ID"),
-                    RecordingDate=request.data.get("RecordingDate"),
-                    SHIFT=request.data.get("SHIFT"),
-                    CSR_NO=request.data.get("CSR_NO")
+                    ST_ID=st_id,
+                    RecordingDate=recording_date,
+                    SHIFT=shift,
+                    CSR_NO=csr_no
                 )
-                print(linked_records.count())
+                print("Linked records count:", linked_records.count())
                 if linked_records.count() == 1:
+                    linked_record = linked_records.first()
                     old_drec_obj = OldDrecDataEdited(
-                        new_drec=linked_records[0].id,
-                        ST_ID=linked_records[0].ST_ID.st_id,
-                        REC_TYPE=linked_records[0].REC_TYPE,
-                        SLIP_TYPE=linked_records[0].SLIP_TYPE,
-                        CUST_ID=linked_records[0].CUST_ID,
-                        FlagEdited=linked_records[0].FlagEdited,
-                        TotalFileRecord=linked_records[0].TotalFileRecord,
-                        MType=linked_records[0].MType,
-                        RecordingDate=linked_records[0].RecordingDate,
-                        RecordingTime=linked_records[0].RecordingTime,
-                        SHIFT=linked_records[0].SHIFT,
-                        FAT=linked_records[0].FAT,
-                        FAT_UNIT=linked_records[0].FAT_UNIT,
-                        SNF=linked_records[0].SNF,
-                        SNF_UNIT=linked_records[0].SNF_UNIT,
-                        CLR=linked_records[0].CLR,
-                        CLR_UNIT=linked_records[0].CLR_UNIT,
-                        WATER=linked_records[0].WATER,
-                        WATER_UNIT=linked_records[0].WATER_UNIT,
-                        QT=linked_records[0].QT,
-                        QT_UNIT=linked_records[0].QT_UNIT,
-                        RATE=linked_records[0].RATE,
-                        Amount=linked_records[0].Amount,
-                        CAmount=linked_records[0].CAmount,
-                        CSR_NO=linked_records[0].CSR_NO,
-                        CREV=linked_records[0].CREV,
-                        END_TAG=linked_records[0].END_TAG,
-                        dpuid=linked_records[0].dpuid,
-                        RID=linked_records[0].RID
+                        new_drec=linked_record.id,
+                        ST_ID=linked_record.ST_ID.st_id,
+                        REC_TYPE=linked_record.REC_TYPE,
+                        SLIP_TYPE=linked_record.SLIP_TYPE,
+                        CUST_ID=linked_record.CUST_ID,
+                        FlagEdited=linked_record.FlagEdited,
+                        TotalFileRecord=linked_record.TotalFileRecord,
+                        MType=linked_record.MType,
+                        RecordingDate=linked_record.RecordingDate,
+                        RecordingTime=linked_record.RecordingTime,
+                        SHIFT=linked_record.SHIFT,
+                        FAT=linked_record.FAT,
+                        FAT_UNIT=linked_record.FAT_UNIT,
+                        SNF=linked_record.SNF,
+                        SNF_UNIT=linked_record.SNF_UNIT,
+                        CLR=linked_record.CLR,
+                        CLR_UNIT=linked_record.CLR_UNIT,
+                        WATER=linked_record.WATER,
+                        WATER_UNIT=linked_record.WATER_UNIT,
+                        QT=linked_record.QT,
+                        QT_UNIT=linked_record.QT_UNIT,
+                        RATE=linked_record.RATE,
+                        Amount=linked_record.Amount,
+                        CAmount=linked_record.CAmount,
+                        CSR_NO=linked_record.CSR_NO,
+                        CREV=linked_record.CREV,
+                        END_TAG=linked_record.END_TAG,
+                        dpuid=linked_record.dpuid,
+                        RID=linked_record.RID
                     )
                     old_drec_obj.save()
 
@@ -636,14 +643,13 @@ class DRECViewSet(viewsets.ModelViewSet):
                     print("Duplicate data found, total matched rows: ", linked_records.count())
                     return Response({"detail": "Duplicate data found, total matched rows: " + str(linked_records.count())}, status=status.HTTP_400_BAD_REQUEST)
 
-            elif request.data.get("SLIP_TYPE") == "9":
+            elif slip_type == "9":
                 try:
                     linked_records = DREC.objects.filter(
-                        ST_ID=request.data.get("ST_ID"),
-                        CUST_ID=request.data.get("CUST_ID"),
-                        RecordingTime=request.data.get("RecordingTime"),
-                        RecordingDate=request.data.get("RecordingDate"),
-                        CSR_NO=request.data.get("CSR_NO")
+                        ST_ID=st_id,
+                        CUST_ID=cust_id,
+                        RecordingDate=recording_date,
+                        CSR_NO=csr_no
                     )
                     if linked_records.count() == 1:
                         linked_record = linked_records.first()
@@ -684,10 +690,10 @@ class DRECViewSet(viewsets.ModelViewSet):
                         print("#######################\n\n Deleted Data saved")
                         return Response({"detail": "Record deleted and saved to OldDrecDataDeleted"}, status=status.HTTP_200_OK)
                     else:
-                        print("Duplicate data found, total matched rows: ", linked_records.count())
+                        print("Unable to delete Drec, match not found, total matched rows: ", linked_records.count())
                         return Response({"detail": "Unable to Delete Drec, match not found"}, status=status.HTTP_400_BAD_REQUEST)
                 except Exception as e:
-                    print(str(e))
+                    print("Exception occurred:", str(e))
                     return Response({"detail": "Error occurred while processing the request"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         serializer = self.get_serializer(data=request.data)
@@ -696,7 +702,6 @@ class DRECViewSet(viewsets.ModelViewSet):
             print("saved obj id: ", serializer.data.get("id"))
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 
