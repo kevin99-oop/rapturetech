@@ -19,12 +19,10 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView, CreateView, View
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.utils.decorators import method_decorator
-from django.db.models import Count, Sum, Avg
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import connection
 from django.db.models.functions import Round
 
-from django.contrib.auth.views import LoginView
 # Django Imports
 from apps.common.models import DREC, DPU, Customer, Config, RateTable, CustomerList
 from apps.common.forms import (
@@ -43,36 +41,28 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
-from apps.common.serializers import UserSerializer, LoginSerializer, DRECSerializer
+from apps.common.serializers import *
 # Views Imports
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login
-from apps.common.forms import CustomLoginForm
-from django.views.generic import FormView
 # ledger code
-from django.contrib.admin.views.decorators import staff_member_required
 from django.core.paginator import Paginator
 from decimal import Decimal
 from functools import lru_cache
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from collections import defaultdict, Counter
 from django.core.cache import cache
-from django.views.decorators.cache import cache_page
-
 from django.db.models import Count, Avg, Sum, OuterRef, Subquery
 from django.utils.timezone import make_aware
 
 from . import models
 from . import forms
-from django.core.mail import send_mail
-from django.conf import settings
-
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from . import models
 from django.shortcuts import render
 from . import models
+from django.db import connection
 # Common Views
 
 def render_website_page(request, page_name):
@@ -139,6 +129,8 @@ def custom_logout(request):
 def super_dashboard(request):
     # Logic for user dashboard
     return render(request, 'common/super_admin/super_dashboard.html')
+
+
 class DashboardView(TemplateView):
     template_name = 'example.html'
     paginate_by = 10
@@ -341,6 +333,86 @@ class DashboardView(TemplateView):
 
         return avg_fat, avg_snf, avg_clr, avg_water, total_ltr, total_amt, total_cust
 
+def dictfetchall(cursor):
+    """
+    Return all rows from a cursor as a dict.
+    Assume the column names are unique.
+    """
+    columns = [col[0] for col in cursor.description]
+    return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+
+def sgn_dashboard(request):
+    print("sgnons")
+    # Apply the custom Round function
+    if request.user.is_superuser:
+        user_col = "dpu.user_id"
+        user_val = request.user.id
+    else:
+        user_col = "dpu.st_id"
+        user_val = request.user.username            
+    query = """
+    SELECT  dpu.st_id, 
+        dpu.location, 
+        dpu.society, 
+        max(drec."RecordingDate"),
+        drec."SHIFT",
+        round(avg(drec."FAT"),1) as fat,
+        round(avg(drec."SNF"),1) as snf,
+        round(avg(drec."CLR"),1) as clr,
+        round(avg(drec."WATER"),1) as water,
+        round(sum(drec."QT"),1) as quantity,
+        round(sum(drec."Amount"),1) as amount,
+        count(DISTINCT drec."CUST_ID") as customers
+from 
+    common_dpu as dpu cross JOIN common_drec as drec
+WHERE
+    drec.ST_ID_id = dpu.st_id and 
+    """ + user_col + " = '" + str(user_val) +  """' GROUP BY dpu.st_id;"""
+    queryset = dict()
+    with connection.cursor() as cursor:
+        cursor.execute(query)
+        querset = dictfetchall( cursor )
+        
+    return JsonResponse( querset , safe=False)
+    
+def get_summary(request):
+    print("sgnons")
+    # Apply the custom Round function
+    MType = request.GET.get("mtype","C")
+    if request.user.is_superuser:
+        user_col = "dpu.user_id"
+        user_val = request.user.id
+    else:
+        user_col = "dpu.st_id"
+        user_val = request.user.username            
+    query = """
+    SELECT  dpu.st_id, 
+        dpu.location, 
+        dpu.society, 
+        max(drec."RecordingDate"),
+        drec."SHIFT",
+        round(avg(drec."FAT"),1) as fat,
+        round(avg(drec."SNF"),1) as snf,
+        round(avg(drec."CLR"),1) as clr,
+        round(avg(drec."WATER"),1) as water,
+        round(sum(drec."QT"),1) as quantity,
+        round(sum(drec."Amount"),1) as amount,
+        count(DISTINCT drec."CUST_ID") as customers
+from 
+    common_dpu as dpu cross JOIN common_drec as drec
+WHERE
+    drec.ST_ID_id = dpu.st_id and 
+    drec.MType = '""" + MType + """' and """ + user_col + " = '" + str(user_val) +  """' GROUP BY dpu.st_id;"""
+    queryset = dict()
+    with connection.cursor() as cursor:
+        cursor.execute(query)
+        querset = dictfetchall( cursor )
+        
+    return JsonResponse( querset , safe=False)
+
+    
+    
 
 class FetchDRECDataView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):

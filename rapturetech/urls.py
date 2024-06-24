@@ -1,8 +1,10 @@
-from django.urls import path
+from django.urls import path, include
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+from rest_framework import routers
+from apps.common.views import sgn_dashboard, get_summary
 
 from apps.common.views import (
     # Importing views
@@ -19,11 +21,14 @@ from apps.common.views import (
     ask_question_view, question_history_view
 )
 
+
+
 # URL patterns
 urlpatterns = [
     # Admin URL
     path('admin/', admin.site.urls),
-
+    path('sgn-dashboard/', sgn_dashboard, name='sgn-dashboard'),
+    path('sgn-summary/', get_summary, name="get_summary" ),
     # Website Pages
     path('', render_website_page, {'page_name': 'index'}, name='home'),
     path('website_products/', render_website_page, {'page_name': 'products'}, name='website_products'),
